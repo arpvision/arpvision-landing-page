@@ -1,6 +1,6 @@
 /**
  * Única fonte dos dados comerciais, mídia, links e conteúdo configurável.
- * Os planos definidos em PLANOS-ARPVISION.md são a referência comercial.
+ * Os planos seguem as regras comerciais aprovadas, num documento interno fora deste repositório.
  * Campos ainda não decididos permanecem sem oferta na interface.
  */
 export interface Plan {
