@@ -1,6 +1,6 @@
 # ARP Vision — site de marketing
 
-Landing page em português do Brasil, implementada a partir de `PROMPT-LANDING-ARPVISION.md`. Astro gera HTML estático para `/`, `/planos`, `/termos-de-uso` e `/politica-de-privacidade`. Sem framework JavaScript no cliente: interações pequenas em TypeScript e CSS com os tokens da marca.
+Landing page em português do Brasil. Astro gera HTML estático para `/`, `/planos`, `/termos-de-uso` e `/politica-de-privacidade`. Sem framework JavaScript no cliente: interações pequenas em TypeScript e CSS com os tokens da marca.
 
 ## Executar
 
@@ -22,7 +22,7 @@ Hospede o conteúdo de `dist/` em um servidor estático que resolva `/planos` pa
 
 ## Configuração
 
-Edite **`src/config/site.ts`**. Ele concentra links, contatos, mídias, tours, condições dos planos, tabela de recursos, comparativo, programa Fundadores, documentos legais e analytics. As regras comerciais aprovadas estão em [`PLANOS-ARPVISION.md`](PLANOS-ARPVISION.md); a tabela de custos e margens desse documento é de uso interno e não deve aparecer no site.
+Edite **`src/config/site.ts`**. Ele concentra links, contatos, mídias, tours, condições dos planos, tabela de recursos, comparativo, programa Fundadores, documentos legais e analytics. As regras comerciais aprovadas ficam num documento interno, fora deste repositório.
 
 - `pricing.isExample` está desativado para os valores definidos: teste grátis com 1 crédito; Individual por R$ 279 em pagamento único, com 8 ambientes, 1 tour por 1 ano, R$ 20 por ambiente extra e renovação de R$ 79; Professional por R$ 249/mês, com 20 ambientes/mês e até 30 tours no ar; Business por R$ 599/mês, com 80 ambientes/mês e até 120 tours no ar; Enterprise sob consulta.
 - O Individual não é uma assinatura. Professional e Business são mensais. Ainda não há plano anual ou desconto anual definido, e não há preço aprovado para ambientes extras nessas duas assinaturas.
@@ -82,4 +82,4 @@ Relatórios e capturas são salvos em `.artifacts/` (ignorado pelo Git). Lightho
 
 Os WebPs podem ser gerados com `node scripts/prepare-images.mjs`. O script já traz a nova redação para o cartão Open Graph da Home; o PNG atual foi preservado nesta atualização de texto. Não há upload, pagamento, envio de e-mail nem publicação automática.
 
-Veja **[PENDENCIAS.md](PENDENCIAS.md)** para todos os dados que ainda precisam ser confirmados antes do lançamento.
+Os dados que ainda precisam ser confirmados antes do lançamento estão listados num documento interno, fora deste repositório.
