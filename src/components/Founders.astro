@@ -1,0 +1,117 @@
+---
+import { site } from '../config/site';
+import Icon from './Icon.astro';
+const phonePattern = String.raw`[+0-9\(\)\s\-]{10,20}`;
+---
+
+<section class="section founders-section" id="fundadores">
+  <div class="container founders-grid">
+    <div>
+      <span class="eyebrow">PROGRAMA FUNDADORES</span>
+      <h2>
+        O começo de uma
+        <br />
+        nova forma de
+        <br />
+        <span>mostrar espaços.</span>
+      </h2>
+      <h3>Seja uma das {site.founders.spots ?? '[vagas a definir]'} empresas fundadoras.</h3>
+      <p>
+        {site.founders.discount
+          ? `${site.founders.discount} de desconto nas condições do Programa Fundadores.`
+          : 'Condições de desconto para fundadores [a definir].'}{' '}
+        Um canal direto com quem constrói o produto. Em troca, queremos ouvir você e, se gostar,
+        contar a sua história aqui.
+      </p>
+      <div class="founder-benefit">
+        <Icon name="message" size={21} />
+        <span>Sua experiência ajuda a construir os próximos passos.</span>
+      </div>
+      {site.founders.remainingSpots !== null && (
+        <p class="remaining-spots">{site.founders.remainingSpots} vagas disponíveis</p>
+      )}
+    </div>
+    <form
+      class="founders-form"
+      data-founders-form
+      data-endpoint={site.founders.formEndpoint}
+      data-phone={site.contact.whatsapp}
+    >
+      <h3>Vamos construir isso juntos?</h3>
+      <p>Conte um pouco sobre a sua empresa.</p>
+      <label for="founder-name">Seu nome</label>
+      <input
+        id="founder-name"
+        name="name"
+        autocomplete="name"
+        placeholder="Como podemos chamar você?"
+        maxlength="100"
+        required
+      />
+      <label for="founder-company">Empresa</label>
+      <input
+        id="founder-company"
+        name="company"
+        autocomplete="organization"
+        placeholder="Nome da empresa ou do seu negócio"
+        maxlength="140"
+        required
+      />
+      <div class="form-row">
+        <div>
+          <label for="founder-city">Cidade / UF</label>
+          <input
+            id="founder-city"
+            name="city"
+            autocomplete="address-level2"
+            placeholder="Ex.: São Paulo / SP"
+            maxlength="100"
+            required
+          />
+        </div>
+        <div>
+          <label for="founder-agents">Tamanho da equipe</label>
+          <input
+            id="founder-agents"
+            name="agents"
+            type="number"
+            min="1"
+            max="10000"
+            placeholder="Ex.: 5"
+            required
+          />
+        </div>
+      </div>
+      <label for="founder-phone">WhatsApp com DDD</label>
+      <input
+        id="founder-phone"
+        name="phone"
+        type="tel"
+        inputmode="tel"
+        autocomplete="tel"
+        placeholder="(11) 99999-9999"
+        pattern={phonePattern}
+        maxlength="20"
+        required
+      />
+      <label class="consent">
+        <input type="checkbox" name="consent" required />
+        <span>
+          Concordo em receber contato sobre o Programa Fundadores e li a{' '}
+          <a href="/politica-de-privacidade">Política de Privacidade</a>.
+        </span>
+      </label>
+      <button type="submit" class="button button-primary">
+        Quero ser uma empresa fundadora <Icon name="arrow" size={18} />
+      </button>
+      <p class="form-status" role="status" aria-live="polite" data-form-status>
+        {!site.founders.formEndpoint && !site.contact.whatsapp
+          ? 'Inscrições em preparação. Canal de envio a definir; seus dados não serão enviados por enquanto.'
+          : 'Sem compromisso. Vamos conversar primeiro.'}
+      </p>
+    </form>
+  </div>
+</section>
+<script>
+  import '../scripts/founders';
+</script>

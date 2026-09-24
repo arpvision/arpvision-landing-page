@@ -1,0 +1,18 @@
+---
+import { site } from '../config/site';
+const { white = false } = Astro.props;
+const source = white ? site.brand.logoWhite : site.brand.logoBlue;
+---
+
+<a href="/" class:list={['brand', { 'brand-white': white }]} aria-label="ARP Vision — início">
+  {source ? (
+    <img src={source} alt="ARP Vision" width="162" height="36" />
+  ) : (
+    <span class="brand-wordmark">
+      arp<span>vision</span>
+      <span class="brand-orbit" aria-hidden="true">
+        °
+      </span>
+    </span>
+  )}
+</a>

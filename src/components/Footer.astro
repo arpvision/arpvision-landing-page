@@ -1,0 +1,73 @@
+---
+import Brand from './Brand.astro';
+import ContactLink from './ContactLink.astro';
+import Icon from './Icon.astro';
+import { site } from '../config/site';
+import { appLink } from '../lib/business';
+---
+
+<footer class="site-footer" id="contato">
+  <div class="container footer-grid">
+    <div class="footer-brand">
+      <Brand />
+      <p>
+        O espaço por inteiro.
+        <br />O celular é só o começo.
+      </p>
+    </div>
+    <div>
+      <h2>Conheça</h2>
+      <a href="/#como-funciona">Como funciona</a>
+      <a href="/#tour-real">Tour real</a>
+      <a href="/planos">Planos</a>
+      <a href="/#duvidas">Dúvidas frequentes</a>
+    </div>
+    <div>
+      <h2>Comece por aqui</h2>
+      <a href={appLink('rodape')} data-cta="rodape">
+        Criar conta grátis
+      </a>
+      <a href={appLink('rodape', 'login')}>Entrar na minha conta</a>
+      <a href="/#fundadores">Programa Fundadores</a>
+    </div>
+    <div>
+      <h2>Vamos conversar</h2>
+      {site.contact.email ? (
+        <a href={`mailto:${site.contact.email}`}>{site.contact.email}</a>
+      ) : (
+        <p class="contact-pending">E-mail: [a definir]</p>
+      )}
+      <ContactLink>WhatsApp {site.contact.whatsapp || '[a definir]'}</ContactLink>
+      <span class="footer-note">Feito para quem tem espaços para mostrar.</span>
+    </div>
+  </div>
+  <div class="container footer-bottom">
+    <p>
+      © {site.company.year} ARP Vision{site.company.legalName ? ` · ${site.company.legalName}` : ''}
+      {site.company.cnpj ? ` · CNPJ ${site.company.cnpj}` : ''}
+    </p>
+    <div>
+      <a href="/termos-de-uso">Termos de Uso</a>
+      <a href="/politica-de-privacidade">Política de Privacidade</a>
+    </div>
+  </div>
+</footer>
+<ContactLink class="floating-whatsapp" label="Falar com a ARP Vision no WhatsApp">
+  <Icon name="message" size={25} />
+</ContactLink>
+<dialog id="contact-dialog" class="contact-dialog" aria-labelledby="contact-title">
+  <button class="dialog-close icon-button" data-close-dialog aria-label="Fechar">
+    <Icon name="close" />
+  </button>
+  <span class="icon-tile">
+    <Icon name="message" />
+  </span>
+  <h2 id="contact-title">Vamos conversar em breve.</h2>
+  <p>
+    O WhatsApp comercial ainda está [a definir]. Por enquanto, você pode conhecer a ARP Vision
+    criando sua conta grátis.
+  </p>
+  <a class="button button-primary" href={appLink('contato')} data-cta="contato">
+    Criar conta grátis <Icon name="arrow" size={18} />
+  </a>
+</dialog>

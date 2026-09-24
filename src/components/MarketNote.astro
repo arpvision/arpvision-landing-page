@@ -1,0 +1,25 @@
+---
+import { site } from '../config/site';
+import { money } from '../lib/business';
+const { id } = Astro.props;
+---
+
+<p class="footnote" id={id}>
+  ¹{' '}
+  {site.market.researchDate
+    ? `Valores de referência de mercado, pesquisados em ${site.market.researchDate}.`
+    : `${money(site.market.cameraPrice)} é a referência de câmera fornecida no briefing. Preço de fotógrafo e pesquisa de mercado com data: [a definir]. Não são cotações verificadas.`}
+  {site.market.sourceUrl && (
+    <>
+      {' '}
+      <a
+        class="market-source"
+        href={site.market.sourceUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Consultar referência.
+      </a>
+    </>
+  )}
+</p>

@@ -1,0 +1,135 @@
+---
+import { site } from '../config/site';
+import Icon from './Icon.astro';
+const pairs = site.comparisonPairs.length
+  ? site.comparisonPairs
+  : [
+      {
+        name: 'Prévia do comparador',
+        before: '/images/interior-1600.webp',
+        after: '/images/interior-1600.webp',
+        illustrative: true,
+        markers: [],
+      },
+    ];
+const pair = pairs[0];
+---
+
+<section class="section comparison-section">
+  <div class="container">
+    <div class="section-heading center">
+      <span class="eyebrow">AS SUAS FOTOS. UM ACABAMENTO MELHOR.</span>
+      <h2>
+        A IA conserta o que o<br class="desktop-break" /> celular sozinho não resolve.
+      </h2>
+      <p>
+        Quando várias fotos viram uma só, aparecem emendas, objetos duplicados e degraus de luz. A
+        IA da ARP Vision corrige isso usando as suas próprias fotos como referência.
+      </p>
+    </div>
+    <div class="comparison" data-comparison data-pairs={JSON.stringify(pairs)}>
+      {pairs.length > 1 && (
+        <div class="tabs" role="tablist" aria-label="Ambientes antes e depois">
+          {pairs.map((item, index) => (
+            <button
+              role="tab"
+              id={`comparison-tab-${index}`}
+              aria-controls="comparison-panel"
+              aria-selected={index === 0 ? 'true' : 'false'}
+              tabindex={index === 0 ? 0 : -1}
+              data-pair-index={index}
+            >
+              {item.name}
+            </button>
+          ))}
+        </div>
+      )}
+      <div
+        class="comparison-frame"
+        id="comparison-panel"
+        role={pairs.length > 1 ? 'tabpanel' : undefined}
+        aria-labelledby={pairs.length > 1 ? 'comparison-tab-0' : undefined}
+        style="--position: 50%"
+      >
+        <img
+          class="comparison-after"
+          src={pair.after}
+          alt="Com a IA da ARP Vision — imagens reais pendentes"
+          width="1600"
+          height="1000"
+          loading="lazy"
+          data-after
+        />
+        <div class="comparison-before" data-before-layer>
+          <img
+            src={pair.before}
+            alt="Montagem automática — imagens reais pendentes"
+            width="1600"
+            height="1000"
+            loading="lazy"
+            data-before
+          />
+          <div data-markers>
+            {pair.markers.map((marker, index) => (
+              <span
+                class="defect-marker"
+                style={`left:${marker.x}%;top:${marker.y}%`}
+                title={marker.label}
+              >
+                {index + 1}
+              </span>
+            ))}
+          </div>
+        </div>
+        <span class="comparison-label label-before">Montagem automática</span>
+        <span class="comparison-label label-after">Com a IA da ARP Vision</span>
+        <div class="comparison-handle" aria-hidden="true">
+          <span>
+            <Icon name="move" size={24} />
+          </span>
+        </div>
+        <input
+          class="comparison-range"
+          type="range"
+          min="0"
+          max="100"
+          value="50"
+          step="1"
+          role="slider"
+          aria-label="Comparar montagem automática com aprimoramento da IA"
+          aria-valuetext="50% da montagem automática visível"
+        />
+      </div>
+      <div class="comparison-caption">
+        <span>
+          <Icon name="move" size={16} /> Arraste a divisória ou use as setas do teclado.
+        </span>
+        <span data-comparison-disclaimer>
+          {pair.illustrative
+            ? 'Prévia da interação · mesma foto ilustrativa nos dois lados. Pares reais a definir.'
+            : 'Recortes do mesmo ambiente e enquadramento.'}
+        </span>
+      </div>
+      <ol class="defect-legend" data-legend>
+        {pair.markers.map((marker) => (
+          <li>{marker.label}</li>
+        ))}
+      </ol>
+    </div>
+    <div class="trust-strip">
+      <span class="trust-icon">
+        <Icon name="shield" size={29} />
+      </span>
+      <div>
+        <strong>A IA corrige, não inventa.</strong>
+        <p>
+          Ela não cria móveis nem troca acabamentos, e a sua foto original fica guardada. Quem vê o
+          tour vai conhecer o espaço de verdade, então o tour precisa ser fiel a ele.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+<script>
+  import '../scripts/comparison';
+</script>

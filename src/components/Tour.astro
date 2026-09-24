@@ -1,0 +1,144 @@
+---
+import QRCode from 'qrcode';
+import { site } from '../config/site';
+import { appLink } from '../lib/business';
+import Icon from './Icon.astro';
+const demo = site.tours[0];
+const qrCodes = await Promise.all(
+  site.tours.map((tour) => QRCode.toDataURL(tour.publicUrl, { width: 112, margin: 1 })),
+);
+const qr = qrCodes[0] ?? '';
+---
+
+<section class="section tour-section" id="tour-real">
+  <div class="container">
+    <div class="section-heading tour-heading">
+      <div>
+        <span class="eyebrow">ENTRE. OLHE EM VOLTA. EXPLORE.</span>
+        <h2>
+          Isto foi fotografado
+          <br />
+          com um celular.
+        </h2>
+        <p>Arraste para olhar em volta. Toque nas passagens para ir de um cômodo a outro.</p>
+      </div>
+      <span class="outline-badge">
+        <Icon name="phone" size={18} /> Um novo jeito de visitar.
+      </span>
+    </div>
+    <div data-tour data-tours={JSON.stringify(site.tours)} data-qrs={JSON.stringify(qrCodes)}>
+      {site.tours.length > 1 && (
+        <div class="tabs" role="tablist" aria-label="Espaços de demonstração">
+          {site.tours.map((tour, index) => (
+            <button
+              role="tab"
+              id={`tour-tab-${index}`}
+              aria-controls="tour-panel"
+              aria-selected={index === 0 ? 'true' : 'false'}
+              tabindex={index === 0 ? 0 : -1}
+              data-tour-index={index}
+            >
+              {tour.label}
+            </button>
+          ))}
+        </div>
+      )}
+      <div
+        class="tour-viewer"
+        id="tour-panel"
+        role={site.tours.length > 1 ? 'tabpanel' : undefined}
+        aria-labelledby={site.tours.length > 1 ? 'tour-tab-0' : undefined}
+      >
+        <div class="tour-cover" data-tour-cover>
+          <img
+            src={demo?.cover ?? '/images/interior-1600.webp'}
+            srcset={
+              !demo
+                ? '/images/interior-640.webp 640w, /images/interior-960.webp 960w, /images/interior-1600.webp 1600w'
+                : undefined
+            }
+            sizes="(max-width: 768px) 100vw, 1100px"
+            width="1600"
+            height="900"
+            loading="lazy"
+            alt={
+              demo
+                ? `Vista do espaço ${demo.name}`
+                : 'Sala de estar ilustrativa com sofá, luz natural e mobiliário de madeira'
+            }
+            data-tour-image
+          />
+          <div class="tour-topline">
+            <span>
+              <Icon name="home" size={16} />
+              <span data-tour-name>{demo?.name ?? 'Um espaço, todos os ângulos'}</span>
+            </span>
+            <span>360°</span>
+          </div>
+          <div class="tour-cover-center">
+            <button
+              class="tour-play"
+              data-tour-open
+              aria-label={
+                demo
+                  ? 'Entrar no espaço: abrir tour 360 graus'
+                  : 'Ver disponibilidade do tour de demonstração'
+              }
+            >
+              <Icon name="play" size={30} />
+            </button>
+            <strong>{demo ? 'Entrar no espaço' : 'Tour de demonstração'}</strong>
+            <span>
+              {demo ? 'A visita começa com um toque.' : 'A demonstração real está em preparação.'}
+            </span>
+          </div>
+          <div class="tour-bottomline">
+            <span>
+              <Icon name="move" size={18} /> Explore cada ambiente
+            </span>
+            <span>
+              {demo
+                ? 'Capturado com ARP Vision'
+                : 'Foto ilustrativa · não é uma captura da ARP Vision'}
+            </span>
+          </div>
+        </div>
+        <div class="tour-frame-host" data-tour-host hidden></div>
+        <div class="tour-status" data-tour-status role="status" hidden></div>
+      </div>
+      <div class="tour-details">
+        <div>
+          <div class="technical-chips">
+            <span data-tour-phone>Celular: {demo?.phone ?? '[a definir]'}</span>
+            <span data-tour-photos>{demo?.photosPerRoom ?? '[a definir]'} fotos por ambiente</span>
+            <span>Sem tripé</span>
+            <span data-tour-time>Captura: {demo?.captureTime ?? '[a definir]'} por ambiente</span>
+            <span>IA: ~1 min por ambiente</span>
+          </div>
+          <a class="text-link" href={appLink('tour-real')} data-cta="tour-real">
+            Quero um tour assim do meu espaço <Icon name="arrow" size={18} />
+          </a>
+        </div>
+        {demo && (
+          <a href={demo.publicUrl} target="_blank" rel="noopener noreferrer" class="tour-qr">
+            <img
+              src={qr}
+              width="80"
+              height="80"
+              alt="QR code para abrir o tour no celular"
+              data-tour-qr
+            />
+            <span>
+              Veja no
+              <br />
+              <strong>seu celular</strong>
+            </span>
+          </a>
+        )}
+      </div>
+    </div>
+  </div>
+</section>
+<script>
+  import '../scripts/tour';
+</script>

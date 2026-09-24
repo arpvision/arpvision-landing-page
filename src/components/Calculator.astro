@@ -1,0 +1,124 @@
+---
+import Icon from './Icon.astro';
+import MarketNote from './MarketNote.astro';
+import { site } from '../config/site';
+import { calculateUsage, appLink, money, whatsappLink } from '../lib/business';
+const initial = calculateUsage(5, site.pricing.averageRooms, 5);
+const inputs = [
+  { id: 'agents', name: 'Pessoas na equipe', min: 1, max: 50, value: 5 },
+  { id: 'properties', name: 'Espaços por mês', min: 1, max: 200, value: 5 },
+  { id: 'rooms', name: 'Ambientes por espaço', min: 3, max: 15, value: site.pricing.averageRooms },
+];
+---
+
+<section class="section calculator-section" id="calculadora">
+  <div class="container">
+    <div class="section-heading center">
+      <span class="eyebrow">DO TAMANHO DA SUA OPERAÇÃO</span>
+      <h2>
+        De quanto a sua
+        <br class="desktop-break" /> empresa precisa?
+      </h2>
+      <p>Ajuste os números. Encontre o seu ponto de partida.</p>
+    </div>
+    <div class="calculator" data-calculator>
+      <div class="calculator-inputs">
+        {inputs.map((input) => (
+          <div class="calculator-field">
+            <div>
+              <label for={`${input.id}-number`}>{input.name}</label>
+              <input
+                type="number"
+                id={`${input.id}-number`}
+                data-number={input.id}
+                min={input.min}
+                max={input.max}
+                value={input.value}
+                step="1"
+                required
+                inputmode="numeric"
+              />
+            </div>
+            <input
+              type="range"
+              aria-label={input.name}
+              data-range={input.id}
+              min={input.min}
+              max={input.max}
+              value={input.value}
+            />
+            <div class="range-labels">
+              <span>{input.min}</span>
+              <span>{input.max}</span>
+            </div>
+          </div>
+        ))}
+        <p class="calculator-note">
+          <Icon name="info" size={17} /> 1 crédito = 1 ambiente capturado e aprimorado com IA.
+        </p>
+      </div>
+      <div class="calculator-result" aria-live="polite" aria-atomic="true">
+        <span class="eyebrow">SEU CENÁRIO MENSAL</span>
+        <div class="credit-result">
+          <strong data-result="credits">{initial.credits}</strong>
+          <span>créditos / mês</span>
+        </div>
+        <div class="result-plan">
+          <span>Plano que cobre seus créditos</span>
+          <strong data-result="plan">{initial.plan?.name ?? 'Enterprise'}</strong>
+          <p data-result="per-property">
+            {initial.perProperty !== null
+              ? `${money(initial.perProperty)} por espaço no plano recomendado`
+              : 'Custo por espaço sob consulta'}
+          </p>
+          <p data-result="tour-limit">
+            {initial.plan
+              ? `Até ${initial.plan.liveTours} tours publicados no ar.`
+              : 'Limite de tours combinado em contrato.'}
+          </p>
+        </div>
+        <div class="cost-comparison">
+          <div>
+            <span>Uma câmera 360° para cada pessoa da equipe¹</span>
+            <strong data-result="camera">
+              5 × {money(site.market.cameraPrice)} = {money(initial.cameraInvestment)}
+            </strong>
+          </div>
+          <div>
+            <span data-result="annual-label">
+              12 mensalidades de ARP Vision · {initial.plan?.name ?? 'Enterprise'}
+            </span>
+            <strong data-result="year">
+              {initial.twelveMonthPrice !== null ? money(initial.twelveMonthPrice) : 'Sob consulta'}
+            </strong>
+            <small>Plano anual ainda não definido.</small>
+          </div>
+        </div>
+        <a
+          class="button button-primary"
+          data-result="cta"
+          href={initial.plan ? appLink('calculadora') : whatsappLink()}
+          data-cta={initial.plan ? 'calculadora' : undefined}
+          data-whatsapp={!initial.plan ? '' : undefined}
+          data-contact-pending={!initial.plan && !site.contact.whatsapp ? 'true' : undefined}
+        >
+          {initial.plan
+            ? `Começar com o plano ${initial.plan.name}`
+            : 'Falar sobre um plano para minha equipe'}
+          <Icon name="arrow" size={18} />
+        </a>
+        {site.pricing.isExample && (
+          <p class="calculator-example">Simulação ilustrativa. Preços e limites a definir.</p>
+        )}
+      </div>
+    </div>
+    <MarketNote />
+    <p class="footnote">
+      Equipamento e assinatura têm custos de naturezas diferentes. Esta simulação considera planos
+      mensais; o Individual é para um tour com pagamento único.
+    </p>
+  </div>
+</section>
+<script>
+  import '../scripts/calculator';
+</script>

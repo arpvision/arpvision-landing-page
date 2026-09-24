@@ -1,0 +1,22 @@
+---
+import { whatsappLink } from '../lib/business';
+import { site } from '../config/site';
+interface Props {
+  class?: string;
+  message?: string;
+  label?: string;
+}
+const { class: className = '', message, label } = Astro.props;
+---
+
+<a
+  href={whatsappLink(message)}
+  class={className}
+  data-whatsapp
+  data-contact-pending={!site.contact.whatsapp ? 'true' : undefined}
+  target={site.contact.whatsapp ? '_blank' : undefined}
+  rel={site.contact.whatsapp ? 'noopener noreferrer' : undefined}
+  aria-label={label}
+>
+  <slot />
+</a>

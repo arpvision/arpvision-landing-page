@@ -1,0 +1,441 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Icon from '../components/Icon.astro';
+import Tour from '../components/Tour.astro';
+import Comparison from '../components/Comparison.astro';
+import Calculator from '../components/Calculator.astro';
+import Pricing from '../components/Pricing.astro';
+import Founders from '../components/Founders.astro';
+import Faq from '../components/Faq.astro';
+import FinalCta from '../components/FinalCta.astro';
+import MarketNote from '../components/MarketNote.astro';
+import { site, faq, alternatives, alternativeLabels } from '../config/site';
+import { appLink } from '../lib/business';
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faq.map((item) => ({
+    '@type': 'Question',
+    name: item.question,
+    acceptedAnswer: { '@type': 'Answer', text: item.answer },
+  })),
+};
+const facts = [
+  { icon: 'phone', title: 'Só o celular.', text: 'Sem câmera 360°, sem tripé.' },
+  {
+    icon: 'clock',
+    title: '~1 minuto por ambiente.',
+    text: 'A IA trabalha. Você segue capturando.',
+  },
+  { icon: 'link', title: 'O cliente abre sem conta.', text: 'É só mandar o link no WhatsApp.' },
+  {
+    icon: 'users',
+    title: 'A equipe inteira usa.',
+    text: 'Os créditos são da empresa, não de uma pessoa.',
+  },
+];
+const uses = [
+  {
+    icon: 'home',
+    number: '01',
+    title: 'Antes da visita.',
+    text: 'Mande o tour antes de a pessoa ir até você. Quem chega já conhece o espaço e vem decidido.',
+    tag: 'A experiência começa antes da visita',
+  },
+  {
+    icon: 'message',
+    number: '02',
+    title: 'No WhatsApp.',
+    text: 'O cliente abre o link sem criar conta e vê o espaço inteiro em um minuto.',
+    tag: 'Uma visita começa com um link',
+  },
+  {
+    icon: 'globe',
+    number: '03',
+    title: 'No seu site.',
+    text: 'Cole o código na página e mostre por dentro o que uma foto sozinha não mostra.',
+    tag: 'Seu espaço, em todos os ângulos',
+  },
+];
+const teams = [
+  {
+    icon: 'credits',
+    title: 'Créditos da empresa.',
+    text: 'Um saldo só, da empresa. Você contrata uma vez e toda a equipe usa.',
+  },
+  {
+    icon: 'users',
+    title: 'Equipe.',
+    text: 'Cadastre quem vai capturar, e cada pessoa entra com o próprio acesso.',
+  },
+  {
+    icon: 'audit',
+    title: 'Auditoria.',
+    text: 'Veja quem criou e quem editou cada tour, com data e hora.',
+  },
+  {
+    icon: 'target',
+    title: 'Mesmo padrão para todos.',
+    text: 'A captura guiada faz quem nunca fotografou e quem já é experiente entregarem o mesmo resultado.',
+  },
+];
+---
+
+<Layout title="Tour virtual 360° com o celular | ARP Vision" schema={[faqSchema]}>
+  <section class="hero">
+    <div class="container hero-grid">
+      <div class="hero-copy">
+        <span class="eyebrow">
+          <span class="eyebrow-line"></span> TOUR VIRTUAL 360° PARA O SEU NEGÓCIO
+        </span>
+        <h1>
+          O tour 360° de uma câmera de R$ 3.000.
+          <sup>
+            <a
+              href="#referencia-camera"
+              aria-label="1: ver nota sobre referência de preço da câmera"
+            >
+              1
+            </a>
+          </sup>
+          <br />
+          <span>
+            Feito com o<br class="hero-break" /> seu celular.
+          </span>
+        </h1>
+        <p class="hero-description">
+          Gire o celular seguindo as bolinhas na tela. A IA da ARP Vision junta as fotos, corrige
+          emendas e luz, e entrega um tour 360° pronto para mandar no WhatsApp e colocar no seu
+          site.
+        </p>
+        <div class="hero-actions">
+          <a class="button button-primary" href={appLink('hero')} data-cta="hero">
+            Criar conta grátis <Icon name="arrow" size={19} />
+          </a>
+          <a class="button button-secondary" href="#tour-real">
+            <Icon name="play" size={18} /> Ver um tour de verdade
+          </a>
+        </div>
+        <p class="hero-micro">
+          <Icon name="check" size={16} /> Sem cartão. Sem baixar app.
+          <br class="mobile-break" /> Funciona no navegador do celular.
+        </p>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-room">
+          <img
+            src="/images/interior-960.webp"
+            srcset="/images/interior-640.webp 640w, /images/interior-960.webp 960w, /images/interior-1600.webp 1600w"
+            sizes="(max-width: 640px) 90vw, (max-width: 1024px) 600px, 520px"
+            width="960"
+            height="1100"
+            fetchpriority="high"
+            alt="Interior residencial claro, com sofá e detalhes em madeira — foto ilustrativa"
+          />
+          <span class="image-note">Ambiente ilustrativo</span>
+          <div class="hero-room-label">
+            <span>O espaço por inteiro.</span>
+            <strong>Sem equipamento extra.</strong>
+          </div>
+        </div>
+        <div class="hero-floating-label">
+          <span class="floating-label-icon">
+            <Icon name="sparkle" size={22} />
+          </span>
+          <div>
+            <strong>Seu celular. Um tour 360°.</strong>
+            <span>Captura guiada + aprimoramento com IA</span>
+          </div>
+        </div>
+        <div class="phone-mockup">
+          <div class="phone-speaker" aria-hidden="true"></div>
+          <video
+            id="hero-video"
+            src={site.media.tutorial}
+            poster={site.media.tutorialPoster}
+            width="720"
+            height="1280"
+            muted
+            loop
+            playsinline
+            preload="none"
+            data-autoplay
+            aria-label="Tutorial real da captura guiada no celular"
+          ></video>
+          <button class="video-toggle" data-video-toggle="hero-video" aria-pressed="false">
+            Reproduzir vídeo
+          </button>
+        </div>
+        <div class="hero-capture-caption">
+          <Icon name="phone" size={19} />
+          <span>
+            É só seguir
+            <br />
+            <strong>as bolinhas.</strong>
+          </span>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="facts-strip" aria-label="A ARP Vision em quatro fatos">
+    <div class="container facts-grid">
+      {facts.map((fact) => (
+        <div class="fact">
+          <span class="fact-icon">
+            <Icon name={fact.icon} size={23} />
+          </span>
+          <div>
+            <strong>{fact.title}</strong>
+            <p>{fact.text}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+  <Tour />
+  <Comparison />
+  <section class="section how-section" id="como-funciona">
+    <div class="container how-grid">
+      <div>
+        <span class="eyebrow">TRÊS PASSOS. NENHUM EQUIPAMENTO EXTRA.</span>
+        <h2>Do celular ao tour publicado, no mesmo dia.</h2>
+        <div class="steps">
+          <article>
+            <span class="step-number">01</span>
+            <div>
+              <h3>Capture.</h3>
+              <p>
+                Abra a ARP Vision no navegador do celular e gire devagar seguindo as bolinhas. Cada
+                ambiente leva de 8 a 12 fotos, numa volta só.
+              </p>
+            </div>
+          </article>
+          <article>
+            <span class="step-number">02</span>
+            <div>
+              <h3>A IA monta.</h3>
+              <p>
+                Em cerca de 1 minuto por ambiente, as fotos viram um 360° sem emendas. Enquanto
+                isso, você já captura o próximo cômodo.
+              </p>
+            </div>
+          </article>
+          <article>
+            <span class="step-number">03</span>
+            <div>
+              <h3>Publique.</h3>
+              <p>
+                Marque as passagens entre os ambientes e publique. Mande o link no WhatsApp ou cole
+                o código no seu site.
+              </p>
+            </div>
+          </article>
+        </div>
+      </div>
+      <div class="tutorial-panel">
+        <span class="tutorial-label">
+          <Icon name="phone" size={18} /> VEJA A CAPTURA NA PRÁTICA
+        </span>
+        <video
+          src={site.media.tutorial}
+          poster={site.media.tutorialPoster}
+          width="720"
+          height="1280"
+          controls
+          muted
+          playsinline
+          preload="none"
+          aria-label="Tutorial da captura 360 graus da ARP Vision"
+        ></video>
+        <p>Sem app. Sem tripé. Com orientação em cada foto.</p>
+      </div>
+    </div>
+  </section>
+  <section class="section uses-section">
+    <div class="container">
+      <div class="section-heading">
+        <span class="eyebrow">MAIS DO QUE UM LINK BONITO</span>
+        <h2>Onde o tour trabalha por você.</h2>
+        <p>Da primeira conversa à próxima visita.</p>
+      </div>
+      <div class="uses-grid">
+        {uses.map((use) => (
+          <article class="use-card">
+            <div class="use-card-top">
+              <span class="icon-tile">
+                <Icon name={use.icon} size={26} />
+              </span>
+              <span>{use.number}</span>
+            </div>
+            <h3>{use.title}</h3>
+            <p>{use.text}</p>
+            <div class="use-tag">
+              <span></span>
+              {use.tag}
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+  <section class="section alternatives-section">
+    <div class="container">
+      <div class="section-heading center">
+        <span class="eyebrow">COLOQUE NA PONTA DO LÁPIS</span>
+        <h2>
+          Quanto custa mostrar
+          <br />
+          um espaço por dentro?
+        </h2>
+        <p>Compare o equipamento, o tempo e o jeito de trabalhar.</p>
+      </div>
+      <div class="alternatives-desktop">
+        <table class="alternatives-table">
+          <thead>
+            <tr>
+              <th scope="col">O que faz diferença</th>
+              {alternatives.map((alternative, i) => (
+                <th scope="col" class:list={{ 'arp-column': i === 3 }}>
+                  <Icon name={alternative.icon} size={22} />
+                  <span>{alternative.name}</span>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {alternativeLabels.map((label, index) => (
+              <tr>
+                <th scope="row">{label}</th>
+                {alternatives.map((alternative, i) => (
+                  <td class:list={{ 'arp-column': i === 3 }}>{alternative.values[index]}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div class="alternatives-mobile">
+        {alternatives.map((alternative, i) => (
+          <article class:list={['alternative-card', { 'arp-alternative': i === 3 }]}>
+            <h3>
+              <Icon name={alternative.icon} />
+              {alternative.name}
+            </h3>
+            <dl>
+              {alternativeLabels.map((label, index) => (
+                <div>
+                  <dt>{label}</dt>
+                  <dd>{alternative.values[index]}</dd>
+                </div>
+              ))}
+            </dl>
+          </article>
+        ))}
+      </div>
+      <MarketNote id="referencia-camera" />
+      <p class="footnote">
+        ² Custo por espaço calculado na assinatura mensal com uso integral dos créditos e
+        {site.pricing.averageRooms} ambientes por espaço.
+      </p>
+      <div class="comparison-quote">
+        <Icon name="phone" size={31} />
+        <p>
+          Uma câmera 360° para a equipe inteira vira fila.
+          <br />
+          <strong>Com a ARP Vision, cada pessoa já tem a sua no bolso.</strong>
+        </p>
+      </div>
+    </div>
+  </section>
+  <section class="section team-section">
+    <div class="container">
+      <div class="team-intro">
+        <div>
+          <span class="eyebrow">UMA FERRAMENTA. A EQUIPE TODA.</span>
+          <h2>
+            Feito para a empresa inteira,
+            <br />
+            não só para uma pessoa.
+          </h2>
+        </div>
+        <p>
+          Mais autonomia para quem captura.
+          <br />
+          Mais visibilidade para quem faz a gestão.
+        </p>
+      </div>
+      <div class="team-grid">
+        <div class="team-features">
+          {teams.map((team) => (
+            <article>
+              <span class="icon-tile">
+                <Icon name={team.icon} size={22} />
+              </span>
+              <div>
+                <h3>{team.title}</h3>
+                <p>{team.text}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+        <div class="team-visual">
+          {site.media.teamScreenshot ? (
+            <img
+              src={site.media.teamScreenshot}
+              width="900"
+              height="680"
+              loading="lazy"
+              alt="Tela de gestão da equipe na ARP Vision"
+            />
+          ) : (
+            <div class="team-diagram">
+              <div class="team-diagram-heading">
+                <Icon name="users" size={21} />
+                <strong>Sua empresa</strong>
+                <span>Exemplo de organização</span>
+              </div>
+              <div class="shared-balance">
+                <span class="icon-tile">
+                  <Icon name="credits" size={29} />
+                </span>
+                <span>
+                  Um saldo de créditos.
+                  <br />
+                  <strong>Compartilhado com todos.</strong>
+                </span>
+              </div>
+              <div class="team-members">
+                <span>
+                  <Icon name="users" size={21} />
+                  Administrador
+                </span>
+                <span>
+                  <Icon name="phone" size={21} />
+                  Usuários
+                </span>
+              </div>
+              <div class="team-diagram-footer">
+                <Icon name="audit" size={18} /> Autoria e edição registradas com data e hora.
+              </div>
+              <p class="mockup-note">Esquema ilustrativo. Print real da equipe: [a definir].</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  </section>
+  <Calculator />
+  <section class="section plans-preview" id="planos">
+    <div class="container">
+      <div class="section-heading center">
+        <span class="eyebrow">COMECE PEQUENO. MOSTRE POR INTEIRO.</span>
+        <h2>Um plano para o seu próximo passo.</h2>
+        <p>1 crédito = 1 ambiente com IA. O saldo é da sua empresa.</p>
+      </div>
+      <Pricing />
+    </div>
+  </section>
+  <Founders />
+  <Faq items={faq} />
+  <FinalCta />
+</Layout>

@@ -1,0 +1,55 @@
+---
+import Brand from './Brand.astro';
+import Icon from './Icon.astro';
+import { appLink } from '../lib/business';
+const isHome = Astro.url.pathname === '/';
+const anchor = (id: string) => `${isHome ? '' : '/'}#${id}`;
+---
+
+<header class="site-header">
+  <div class="container header-inner">
+    <Brand />
+    <nav class="desktop-nav" aria-label="Navegação principal">
+      <a href={anchor('como-funciona')}>Como funciona</a>
+      <a href={anchor('tour-real')}>Tour real</a>
+      <a
+        href="/planos"
+        aria-current={Astro.url.pathname.startsWith('/planos') ? 'page' : undefined}
+      >
+        Planos
+      </a>
+      <a href={anchor('duvidas')}>Dúvidas</a>
+    </nav>
+    <div class="header-actions">
+      <a class="login-link" href={appLink('cabecalho', 'login')}>
+        Entrar
+      </a>
+      <a
+        class="button button-primary button-small"
+        href={appLink('cabecalho')}
+        data-cta="cabecalho"
+      >
+        <span class="desktop-label">Criar conta grátis</span>
+        <span class="mobile-label">Criar conta</span>
+        <Icon name="arrow" size={16} />
+      </a>
+      <button
+        class="menu-toggle icon-button"
+        aria-controls="mobile-nav"
+        aria-expanded="false"
+        aria-label="Abrir menu"
+      >
+        <Icon name="menu" />
+      </button>
+    </div>
+  </div>
+  <nav id="mobile-nav" class="mobile-nav" aria-label="Navegação no celular" hidden>
+    <a href={anchor('como-funciona')}>Como funciona</a>
+    <a href={anchor('tour-real')}>Tour real</a>
+    <a href="/planos">Planos</a>
+    <a href={anchor('duvidas')}>Dúvidas</a>
+    <a href={appLink('cabecalho', 'login')}>
+      Entrar na minha conta <Icon name="arrow" size={18} />
+    </a>
+  </nav>
+</header>

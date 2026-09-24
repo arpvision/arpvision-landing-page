@@ -1,0 +1,41 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { site } from '../config/site';
+---
+
+<Layout
+  title="Termos de Uso | ARP Vision"
+  description="Termos de Uso da ARP Vision. Consulte as condições de uso da plataforma."
+>
+  <section class="section legal-page container">
+    <a class="breadcrumb" href="/">
+      Início / Termos de Uso
+    </a>
+    <span class="eyebrow">INFORMAÇÕES LEGAIS</span>
+    <h1>Termos de Uso</h1>
+    {site.policies.terms ? (
+      <div class="legal-text">
+        {site.policies.terms.split('\n\n').map((paragraph) => (
+          <p>{paragraph}</p>
+        ))}
+      </div>
+    ) : (
+      <div class="legal-notice">
+        <span class="outline-badge">Documento em preparação</span>
+        <h2>Estamos preparando nossos Termos de Uso.</h2>
+        <p>O documento completo será disponibilizado nesta página.</p>
+        <p>
+          Contato:{' '}
+          {site.contact.email ? (
+            <a href={`mailto:${site.contact.email}`}>{site.contact.email}</a>
+          ) : (
+            '[e-mail a definir]'
+          )}
+        </p>
+      </div>
+    )}
+    <a href="/politica-de-privacidade" class="text-link">
+      Política de Privacidade →
+    </a>
+  </section>
+</Layout>

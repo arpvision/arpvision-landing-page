@@ -1,0 +1,32 @@
+{
+  "name": "arpvision-landing-page",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev --host 127.0.0.1",
+    "build": "astro check && astro build",
+    "preview": "astro preview --host 127.0.0.1",
+    "test": "tsx --test tests/*.test.ts",
+    "check:site": "node scripts/check-site.mjs",
+    "test:browser": "node scripts/browser-check.mjs && node scripts/tour-check.mjs",
+    "audit": "node scripts/lighthouse.mjs",
+    "format": "prettier --write src scripts tests astro.config.mjs tsconfig.json package.json"
+  },
+  "dependencies": {
+    "@fontsource-variable/inter": "^5.2.6",
+    "astro": "^5.13.8",
+    "qrcode": "^1.5.4",
+    "sharp": "^0.34.3"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.4",
+    "@playwright/test": "^1.55.0",
+    "@types/qrcode": "^1.5.5",
+    "lighthouse": "^12.8.2",
+    "prettier": "^3.9.9",
+    "prettier-plugin-astro": "^1.0.1",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2"
+  }
+}

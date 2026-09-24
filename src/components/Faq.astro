@@ -1,0 +1,38 @@
+---
+import Icon from './Icon.astro';
+interface Props {
+  items: { question: string; answer: string }[];
+  title?: string;
+  billing?: boolean;
+}
+const { items, title = 'Você pergunta. A gente explica.', billing = false } = Astro.props;
+---
+
+<section
+  class="section faq-section"
+  id={billing ? 'duvidas-cobranca' : 'duvidas'}
+  aria-labelledby={billing ? 'faq-billing-title' : 'faq-title'}
+>
+  <div class="container faq-layout">
+    <div>
+      <span class="eyebrow">DÚVIDAS FREQUENTES</span>
+      <h2 id={billing ? 'faq-billing-title' : 'faq-title'}>{title}</h2>
+      <p>
+        Sem letras miúdas.
+        <br />
+        Entenda cada parte do seu tour.
+      </p>
+    </div>
+    <div class="faq-list">
+      {items.map((item) => (
+        <details class="faq-item">
+          <summary>
+            {item.question}
+            <Icon name="plus" size={20} />
+          </summary>
+          <p>{item.answer}</p>
+        </details>
+      ))}
+    </div>
+  </div>
+</section>

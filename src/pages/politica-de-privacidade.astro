@@ -1,0 +1,41 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { site } from '../config/site';
+---
+
+<Layout
+  title="Política de Privacidade | ARP Vision"
+  description="Política de Privacidade da ARP Vision. Informações sobre privacidade e tratamento de dados."
+>
+  <section class="section legal-page container">
+    <a class="breadcrumb" href="/">
+      Início / Política de Privacidade
+    </a>
+    <span class="eyebrow">INFORMAÇÕES LEGAIS</span>
+    <h1>Política de Privacidade</h1>
+    {site.policies.privacy ? (
+      <div class="legal-text">
+        {site.policies.privacy.split('\n\n').map((paragraph) => (
+          <p>{paragraph}</p>
+        ))}
+      </div>
+    ) : (
+      <div class="legal-notice">
+        <span class="outline-badge">Documento em preparação</span>
+        <h2>Estamos preparando nossa Política de Privacidade.</h2>
+        <p>O documento completo será disponibilizado nesta página.</p>
+        <p>
+          Contato:{' '}
+          {site.contact.email ? (
+            <a href={`mailto:${site.contact.email}`}>{site.contact.email}</a>
+          ) : (
+            '[e-mail a definir]'
+          )}
+        </p>
+      </div>
+    )}
+    <a href="/termos-de-uso" class="text-link">
+      Termos de Uso →
+    </a>
+  </section>
+</Layout>

@@ -1,0 +1,142 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Pricing from '../components/Pricing.astro';
+import Faq from '../components/Faq.astro';
+import FinalCta from '../components/FinalCta.astro';
+import Icon from '../components/Icon.astro';
+import { site, featureGroups, billingFaq } from '../config/site';
+const schema = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: site.name,
+    applicationCategory: 'BusinessApplication',
+    operatingSystem: 'Web',
+    description:
+      'Tour virtual 360° de espaços usando o celular, com captura guiada e aprimoramento por IA.',
+    offers: site.pricing.plans
+      .filter((plan) => plan.billing !== 'custom')
+      .map((plan) => ({
+        '@type': 'Offer',
+        name: plan.name,
+        price:
+          plan.billing === 'free'
+            ? 0
+            : plan.billing === 'once'
+              ? plan.oneTimePrice
+              : plan.monthlyPrice,
+        priceCurrency: 'BRL',
+        description:
+          plan.billing === 'free'
+            ? 'Teste grátis com 1 crédito, uma única vez.'
+            : plan.billing === 'once'
+              ? 'Pagamento único por 1 tour no ar por 1 ano. Renovação anual à parte.'
+              : 'Assinatura mensal; tours no ar enquanto a assinatura estiver ativa, dentro do limite do plano.',
+        url: `${site.appUrl}/register?utm_source=site&utm_medium=planos&utm_campaign=landing`,
+      })),
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: billingFaq.map((item) => ({
+      '@type': 'Question',
+      name: item.question,
+      acceptedAnswer: { '@type': 'Answer', text: item.answer },
+    })),
+  },
+];
+---
+
+<Layout
+  title="Planos e preços | ARP Vision"
+  description="Conheça os cinco planos ARP Vision: Teste grátis, Individual com pagamento único, Professional e Business mensais e Enterprise sob consulta. Compare créditos e tours no ar."
+  ogImage={site.media.ogPlans}
+  schema={schema}
+>
+  <section class="section plans-page">
+    <div class="container">
+      <div class="section-heading center">
+        <a class="breadcrumb" href="/">
+          Início / Planos
+        </a>
+        <span class="eyebrow">O PRÓXIMO PASSO DO SEU NEGÓCIO</span>
+        <h1>
+          Planos para todo
+          <br />
+          tamanho de negócio
+        </h1>
+        <p>
+          1 crédito = 1 ambiente com IA.
+          <br />
+          Um espaço costuma ter de 6 a 10 ambientes.
+        </p>
+      </div>
+      <Pricing full />
+    </div>
+  </section>
+  <section class="section feature-comparison" id="comparar">
+    <div class="container">
+      <div class="section-heading center">
+        <span class="eyebrow">CADA DETALHE, LADO A LADO</span>
+        <h2>Compare todos os recursos.</h2>
+        <p>Compare o que cada plano inclui para capturar e publicar seus espaços.</p>
+      </div>
+      <p class="table-scroll-hint">Deslize a tabela para comparar os cinco planos.</p>
+      <div
+        class="feature-table-wrap"
+        tabindex="0"
+        role="region"
+        aria-label="Tabela comparativa dos planos, com rolagem horizontal"
+      >
+        <table class="feature-table">
+          <thead>
+            <tr>
+              <th scope="col">Recursos</th>
+              {site.pricing.plans.map((plan) => (
+                <th scope="col" class:list={{ 'recommended-cell': plan.recommended }}>
+                  {plan.name}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {featureGroups.map((group) => (
+              <>
+                <tr class="feature-group">
+                  <th colspan="6" scope="colgroup">
+                    {group.title}
+                  </th>
+                </tr>
+                {group.rows.map((row) => (
+                  <tr>
+                    <th scope="row">{row.name}</th>
+                    {row.values.map((value, index) => (
+                      <td
+                        class:list={{ 'recommended-cell': site.pricing.plans[index].recommended }}
+                      >
+                        {value === true ? (
+                          <span class="included">
+                            <Icon name="check" size={19} />
+                            <span class="sr-only">Incluído</span>
+                          </span>
+                        ) : value === false ? (
+                          <span aria-label="Não incluído">—</span>
+                        ) : value === 'Em breve' ? (
+                          <span class="coming-soon">Em breve</span>
+                        ) : (
+                          value
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+  <Faq items={billingFaq} title="Tudo claro antes de começar." billing />
+  <FinalCta />
+</Layout>
