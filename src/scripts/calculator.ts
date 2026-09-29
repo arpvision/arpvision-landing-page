@@ -13,6 +13,14 @@ if (root) {
     const result = calculateUsage(value('properties'), value('rooms'), agents);
     set('credits', result.credits.toLocaleString('pt-BR'));
     set('plan', result.plan?.name ?? 'Enterprise');
+    root.querySelector('[data-summary="credits"]')!.textContent =
+      result.credits.toLocaleString('pt-BR');
+    root.querySelector('[data-summary="plan"]')!.textContent = result.plan?.name ?? 'Enterprise';
+    root.querySelectorAll<HTMLInputElement>('[data-range]').forEach((range) => {
+      const min = Number(range.min);
+      const fill = ((Number(range.value) - min) / (Number(range.max) - min)) * 100;
+      range.style.setProperty('--fill', `${fill}%`);
+    });
     set(
       'per-property',
       result.perProperty !== null
@@ -38,7 +46,8 @@ if (root) {
     set('year', result.twelveMonthPrice !== null ? money(result.twelveMonthPrice) : 'Sob consulta');
     const cta = root.querySelector<HTMLAnchorElement>('[data-result="cta"]')!;
     const contact = !result.plan;
-    cta.textContent = contact
+    // Troca só o texto: o ícone de seta continua no botão.
+    cta.querySelector('[data-cta-label]')!.textContent = contact
       ? 'Falar sobre um plano para minha equipe'
       : `Começar com o plano ${result.plan!.name}`;
     cta.href = contact

@@ -2,16 +2,24 @@ import { track } from './analytics';
 
 const menuButton = document.querySelector<HTMLButtonElement>('.menu-toggle');
 const menu = document.querySelector<HTMLElement>('#mobile-nav');
+const menuLabel = menuButton?.querySelector<HTMLElement>('[data-menu-label]');
 const setMenu = (open: boolean) => {
   if (!menu || !menuButton) return;
   menu.hidden = !open;
   menuButton.setAttribute('aria-expanded', String(open));
-  menuButton.setAttribute('aria-label', open ? 'Fechar menu' : 'Abrir menu');
+  if (menuLabel) menuLabel.textContent = open ? 'Fechar' : 'Menu';
+  // Com o menu aberto, a página por trás não rola.
+  document.body.classList.toggle('menu-is-open', open);
 };
 menuButton?.addEventListener('click', () =>
   setMenu(menuButton.getAttribute('aria-expanded') !== 'true'),
 );
 menu?.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => setMenu(false)));
+// Tocar fora do menu (e fora do cabeçalho) fecha o menu.
+document.addEventListener('click', (event) => {
+  if (!menu || menu.hidden) return;
+  if (!(event.target as Element).closest('.site-header')) setMenu(false);
+});
 document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape' && menu && !menu.hidden) {
     setMenu(false);
@@ -48,6 +56,45 @@ contactDialog?.addEventListener('click', (event) => {
       contactDialog.close();
   }
 });
+
+// Menu do desktop: destaca a seção que está na tela. Só atua em links cuja seção existe
+// na página atual (na Home); o aria-current="page" de /planos não é tocado.
+const spyLinks = [...document.querySelectorAll<HTMLAnchorElement>('.desktop-nav [data-spy]')]
+  .map((link) => ({ link, section: document.getElementById(link.dataset.spy!) }))
+  .filter((item): item is { link: HTMLAnchorElement; section: HTMLElement } => !!item.section);
+if (spyLinks.length) {
+  const spy = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        const item = spyLinks.find(({ section }) => section === entry.target)!;
+        if (entry.isIntersecting) {
+          spyLinks.forEach(({ link }) => link.removeAttribute('aria-current'));
+          item.link.setAttribute('aria-current', 'location');
+        } else if (item.link.getAttribute('aria-current') === 'location') {
+          item.link.removeAttribute('aria-current');
+        }
+      });
+    },
+    // Uma faixa estreita logo abaixo do cabeçalho define a seção "atual".
+    { rootMargin: '-30% 0px -65% 0px' },
+  );
+  spyLinks.forEach(({ section }) => spy.observe(section));
+}
+
+// O botão flutuante sai de cena quando cobriria botões, formulário ou rodapé.
+const floating = document.querySelector<HTMLElement>('.floating-whatsapp');
+if (floating) {
+  const visible = new Set<Element>();
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) =>
+      entry.isIntersecting ? visible.add(entry.target) : visible.delete(entry.target),
+    );
+    floating.classList.toggle('is-hidden', visible.size > 0);
+  });
+  document
+    .querySelectorAll('.hero-actions, .founders-form, .final-cta, .site-footer')
+    .forEach((element) => observer.observe(element));
+}
 
 const motion = matchMedia('(prefers-reduced-motion: reduce)');
 const updateVideos = () =>

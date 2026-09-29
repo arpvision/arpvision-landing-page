@@ -33,6 +33,8 @@ try {
   await page.evaluate(() => document.fonts.ready);
   await page.screenshot({ path: '.artifacts/home-desktop.png' });
   assert.equal(await page.locator('#hero-video').evaluate((video) => video.paused), true);
+  // Sem pares reais o comparador fica oculto; ele é exibido só para testar a interação.
+  await page.locator('[data-comparison]').evaluate((element) => (element.hidden = false));
   const range = page.locator('.comparison-range');
   await range.focus();
   await range.press('ArrowRight');
@@ -53,37 +55,70 @@ try {
   await page.locator('#rooms-number').fill('15');
   assert.equal(await page.locator('[data-result="credits"]').textContent(), '3.000');
   assert.equal(await page.locator('[data-result="plan"]').textContent(), 'Enterprise');
+  assert.equal(await page.locator('[data-result="cta"] svg').count(), 1, 'seta mantida no botão');
   await page.locator('[data-result="cta"]').click();
   assert.equal(await page.locator('#contact-dialog').evaluate((dialog) => dialog.open), true);
   await page.keyboard.press('Escape');
   assert.equal(await page.locator('#contact-dialog').evaluate((dialog) => dialog.open), false);
-  await page.locator('[data-tour-open]').click();
-  assert.match(await page.locator('[data-tour-status]').textContent(), /em preparação/);
+  // Sem tour configurado, a seção e os links para ela ficam fora da página.
+  assert.equal(await page.locator('#tour-real').isVisible(), false);
+  assert.equal(await page.locator('a[href$="#tour-real"]:visible').count(), 0);
   assert.equal(await page.locator('iframe').count(), 0);
   results.push(
-    'Comparador por teclado, calculadora, contato pendente, reduced motion e demo pendente OK',
+    'Comparador por teclado, calculadora, contato pendente, reduced motion e demo oculta OK',
   );
 
-  const consent = page.locator('[name="consent"]');
-  assert.equal(await consent.isChecked(), false);
-  await page.locator('#founder-name').fill('Teste de validação');
-  await page.locator('#founder-company').fill('Empresa de teste');
-  await page.locator('#founder-city').fill('São Paulo / SP');
-  await page.locator('#founder-agents').fill('5');
-  await page.locator('#founder-phone').fill('(11) 99999-1234');
-  await consent.check();
-  assert.equal(
-    await page.locator('[data-founders-form]').evaluate((form) => form.checkValidity()),
-    true,
-  );
-  await page.locator('[data-founders-form] button[type="submit"]').click();
-  assert.match(await page.locator('[data-form-status]').textContent(), /Nenhum dado foi enviado/);
-  await page.locator('#founder-phone').fill('abc11999991234');
-  assert.equal(
-    await page.locator('#founder-phone').evaluate((input) => input.checkValidity()),
-    false,
-  );
-  results.push('Formulário: consentimento, telefone e ausência de envio fictício OK');
+  // Menu do desktop acompanha a seção visível.
+  for (const [id, label] of [
+    ['como-funciona', 'Como funciona'],
+    ['planos', 'Planos'],
+    ['duvidas', 'Dúvidas'],
+  ]) {
+    await page.evaluate((section) => {
+      const top = document.getElementById(section).getBoundingClientRect().top + scrollY;
+      scrollTo({ top: top - 120, behavior: 'instant' });
+    }, id);
+    await page.waitForFunction(
+      (text) =>
+        document.querySelector('.desktop-nav [aria-current="location"]')?.textContent.trim() ===
+        text,
+      label,
+    );
+  }
+  results.push('Menu do desktop destaca a seção visível OK');
+
+  for (const route of ['/', '/planos']) {
+    await page.goto(base + route);
+    const text = await page.locator('body').innerText();
+    assert.ok(!/\[[^\]]*a definir[^\]]*\]/i.test(text), `${route}: sem "[a definir]" visível`);
+    assert.equal(await page.locator('.floating-whatsapp').count(), 0, `${route}: sem WhatsApp`);
+  }
+  await page.goto(base);
+  if (await page.locator('[data-founders-form]').count()) {
+    const consent = page.locator('[name="consent"]');
+    assert.equal(await consent.isChecked(), false);
+    await page.locator('#founder-name').fill('Teste de validação');
+    await page.locator('#founder-company').fill('Empresa de teste');
+    await page.locator('#founder-city').fill('São Paulo / SP');
+    await page.locator('#founder-agents').fill('5');
+    await page.locator('#founder-phone').fill('(11) 99999-1234');
+    await consent.check();
+    assert.equal(
+      await page.locator('[data-founders-form]').evaluate((form) => form.checkValidity()),
+      true,
+    );
+    await page.locator('#founder-phone').fill('abc11999991234');
+    assert.equal(
+      await page.locator('#founder-phone').evaluate((input) => input.checkValidity()),
+      false,
+    );
+    results.push('Formulário: consentimento e telefone OK');
+  } else {
+    const soon = page.locator('[data-founders-soon]');
+    assert.equal(await soon.isVisible(), true);
+    assert.match(await soon.locator('a').getAttribute('href'), /arpvision\.app\/register/);
+    results.push('Fundadores sem canal: aviso com criação de conta, sem formulário OK');
+  }
   await page.goto(base + '/planos');
   assert.equal(await page.locator('.plan-card').count(), 5);
   assert.equal(await page.locator('.feature-table thead th').count(), 6);
@@ -131,38 +166,84 @@ try {
   phone.on('pageerror', (error) => errors.push(error.message));
   for (const route of ['/', '/planos', '/termos-de-uso', '/politica-de-privacidade']) {
     await phone.goto(base + route);
+    // Em emulação de celular, innerWidth cresce junto com o conteúdo largo; a largura visível
+    // é clientWidth, então é com ela que o scrollWidth deve ser comparado.
     const dimensions = await phone.evaluate(() => ({
-      width: innerWidth,
+      width: document.documentElement.clientWidth,
+      layout: innerWidth,
       scroll: document.documentElement.scrollWidth,
     }));
     assert.ok(
-      dimensions.scroll <= dimensions.width,
+      dimensions.scroll <= dimensions.width && dimensions.layout <= dimensions.width,
       `${route}: sem overflow em 360px: ${JSON.stringify(dimensions)}`,
     );
+    const tiny = await phone.evaluate(() => {
+      const found = [];
+      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+      for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+        const element = node.parentElement;
+        if (!node.textContent.trim() || !element.checkVisibility() || element.closest('.sr-only'))
+          continue;
+        const size = parseFloat(getComputedStyle(element).fontSize);
+        if (size < 12) found.push(`${size}px "${node.textContent.trim().slice(0, 40)}"`);
+      }
+      return found;
+    });
+    assert.deepEqual(tiny, [], `${route}: nenhum texto visível abaixo de 12px`);
+    // Alvos de toque: 44px de altura; links dentro de parágrafos e a nota "¹" precisam de 24px.
+    const smallTargets = await phone.evaluate(() =>
+      [...document.querySelectorAll('a, button, input, summary, select, textarea')]
+        .filter((element) => element.checkVisibility() && element.type !== 'checkbox')
+        .filter((element) => {
+          const box = element.getBoundingClientRect();
+          const inline = element.closest('p, sup, .consent');
+          return inline ? box.width < 24 || box.height < 24 : box.height < 44 || box.width < 24;
+        })
+        .map((element) => {
+          const box = element.getBoundingClientRect();
+          const label = (element.getAttribute('aria-label') || element.textContent || '').trim();
+          return `${element.tagName} "${label.slice(0, 30)}" ${Math.round(box.width)}x${Math.round(box.height)}`;
+        }),
+    );
+    assert.deepEqual(smallTargets, [], `${route}: alvos de toque abaixo do mínimo`);
   }
   await phone.goto(base);
   await phone.screenshot({ path: '.artifacts/home-mobile.png' });
   await phone.locator('.menu-toggle').click();
   assert.equal(await phone.locator('#mobile-nav').isVisible(), true);
+  assert.equal(await phone.evaluate(() => getComputedStyle(document.body).overflow), 'hidden');
+  await phone.mouse.click(180, 760);
+  assert.equal(await phone.locator('#mobile-nav').isVisible(), false, 'toque fora fecha o menu');
+  await phone.locator('.menu-toggle').click();
   await phone.locator('#mobile-nav a').first().click();
   assert.equal(await phone.locator('#mobile-nav').isVisible(), false);
+  assert.equal(await phone.evaluate(() => getComputedStyle(document.body).overflow), 'visible');
+  const status = phone.locator('#planos [data-carousel-status]');
+  await status.scrollIntoViewIfNeeded();
+  assert.match(await status.textContent(), /Business · plano 4 de 5/);
+  await phone.locator('#planos [data-carousel-next]').click();
+  await phone.waitForFunction(() =>
+    /plano 5 de 5/.test(document.querySelector('#planos [data-carousel-status]').textContent),
+  );
+  await phone.locator('#planos [data-carousel-prev]').click();
+  await phone.waitForFunction(() =>
+    /plano 4 de 5/.test(document.querySelector('#planos [data-carousel-status]').textContent),
+  );
   await phone.locator('.faq-item').first().locator('summary').click();
   assert.equal(await phone.locator('.faq-item').first().getAttribute('open'), '');
   await phone.goto(base + '/planos');
-  const table = phone.locator('.feature-table-wrap');
-  assert.ok(await table.evaluate((element) => element.scrollWidth > element.clientWidth));
-  await table.evaluate((element) => {
-    element.scrollLeft = 250;
-  });
-  const stickyPosition = await phone
-    .locator('.feature-table tbody tr:not(.feature-group) th')
-    .first()
-    .evaluate((element) => ({
-      left: element.getBoundingClientRect().left,
-      box: element.closest('.feature-table-wrap').getBoundingClientRect().left,
-    }));
-  assert.ok(Math.abs(stickyPosition.left - stickyPosition.box) < 3);
-  results.push('360px: quatro rotas sem overflow, menu, FAQ e tabela com coluna fixa OK');
+  assert.equal(await phone.locator('.feature-table-wrap').isVisible(), false);
+  const plans = phone.locator('.feature-plan');
+  assert.equal(await plans.count(), 5);
+  assert.equal(await phone.locator('[data-feature-plan="imobiliaria"]').getAttribute('open'), '');
+  await phone.locator('[data-feature-plan="individual"] summary').click();
+  assert.match(
+    await phone.locator('[data-feature-plan="individual"]').innerText(),
+    /279,00 uma vez/,
+  );
+  results.push(
+    '360px: quatro rotas sem overflow, texto < 12px ou alvo pequeno; menu, carrossel, FAQ e recursos por plano OK',
+  );
   assert.deepEqual(errors, []);
   console.log(results.join('\n'));
   await writeFile('.artifacts/browser-results.json', JSON.stringify({ results, errors }, null, 2));

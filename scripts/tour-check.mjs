@@ -25,6 +25,7 @@ const fixture = async (page) => {
     const response = await route.fetch();
     let html = await response.text();
     html = html
+      .replace(/(<section[^>]*id="tour-real"[^>]*?)\s+hidden(?=[\s>])/, '$1')
       .replace(/data-tours="[^"]*"/, `data-tours="${attribute(tours)}"`)
       .replace(/data-qrs="[^"]*"/, `data-qrs="${attribute(qrCodes)}"`);
     const tabs = `<div role="tablist">${tours.map((tour, index) => `<button role="tab" id="test-tab-${index}" aria-controls="tour-panel" aria-selected="${index === 0}" tabindex="${index === 0 ? 0 : -1}" data-tour-index="${index}">${tour.label}</button>`).join('')}</div><a class="tour-qr" href="${tours[0].publicUrl}"><img src="${qrCodes[0]}" width="80" height="80" alt="QR de teste" /></a>`;

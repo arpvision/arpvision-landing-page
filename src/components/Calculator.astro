@@ -56,6 +56,15 @@ const inputs = [
         <p class="calculator-note">
           <Icon name="info" size={17} /> 1 crédito = 1 ambiente capturado e aprimorado com IA.
         </p>
+        <!-- Só no celular: mostra o resultado enquanto os controles estão na tela. -->
+        <div class="calculator-summary" aria-hidden="true">
+          <span>
+            <strong data-summary="credits">{initial.credits}</strong> créditos / mês
+          </span>
+          <span>
+            Plano <strong data-summary="plan">{initial.plan?.name ?? 'Enterprise'}</strong>
+          </span>
+        </div>
       </div>
       <div class="calculator-result" aria-live="polite" aria-atomic="true">
         <span class="eyebrow">SEU CENÁRIO MENSAL</span>
@@ -102,9 +111,11 @@ const inputs = [
           data-whatsapp={!initial.plan ? '' : undefined}
           data-contact-pending={!initial.plan && !site.contact.whatsapp ? 'true' : undefined}
         >
-          {initial.plan
-            ? `Começar com o plano ${initial.plan.name}`
-            : 'Falar sobre um plano para minha equipe'}
+          <span data-cta-label>
+            {initial.plan
+              ? `Começar com o plano ${initial.plan.name}`
+              : 'Falar sobre um plano para minha equipe'}
+          </span>
           <Icon name="arrow" size={18} />
         </a>
         {site.pricing.isExample && (

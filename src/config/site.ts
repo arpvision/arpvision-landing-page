@@ -210,6 +210,14 @@ export const site = {
   analytics: { provider: 'plausible' as const, scriptUrl: '', domain: '' },
 };
 
+// O que ainda não foi configurado fica fora da interface, em vez de aparecer como "[a definir]".
+export const available = {
+  whatsapp: Boolean(site.contact.whatsapp),
+  email: Boolean(site.contact.email),
+  tour: site.tours.length > 0,
+  foundersChannel: Boolean(site.founders.formEndpoint || site.contact.whatsapp),
+};
+
 const currency = (value: number) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 const perPropertyPrices = site.pricing.plans
@@ -241,7 +249,9 @@ export const alternatives = [
     icon: 'camera',
     values: [
       'Nenhum',
-      `${site.market.photographerPrice === null ? '[Preço a definir]' : currency(site.market.photographerPrice)} por sessão¹`,
+      site.market.photographerPrice === null
+        ? 'Cobrado por sessão'
+        : `${currency(site.market.photographerPrice)} por sessão¹`,
       'Depende da agenda',
       'Em alguns dias',
       'Depende do pacote',

@@ -37,7 +37,7 @@ if (root) {
       legend.append(li);
     });
     root.querySelector('[data-comparison-disclaimer]')!.textContent = pair.illustrative
-      ? 'Prévia da interação · mesma foto ilustrativa nos dois lados. Pares reais a definir.'
+      ? 'Prévia da interação · a mesma foto ilustrativa aparece nos dois lados.'
       : 'Recortes do mesmo ambiente e enquadramento.';
     range.value = '50';
     update();

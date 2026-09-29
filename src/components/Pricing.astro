@@ -1,5 +1,5 @@
 ---
-import { site, type Plan } from '../config/site';
+import { site, available, type Plan } from '../config/site';
 import { appLink, money } from '../lib/business';
 import Icon from './Icon.astro';
 import ContactLink from './ContactLink.astro';
@@ -26,7 +26,19 @@ const iconFor = (plan: Plan) => {
       <Icon name="info" size={17} /> {site.pricing.exampleNotice}
     </p>
   )}
-  <div class="pricing-grid">
+  <!-- Só no celular: controles do carrossel de planos. -->
+  <div class="pricing-carousel-hint">
+    <button class="carousel-button carousel-prev" data-carousel-prev aria-label="Plano anterior">
+      <Icon name="arrow" size={20} />
+    </button>
+    <span data-carousel-status aria-live="polite">
+      Deslize para ver os planos
+    </span>
+    <button class="carousel-button" data-carousel-next aria-label="Próximo plano">
+      <Icon name="arrow" size={20} />
+    </button>
+  </div>
+  <div class="pricing-grid" tabindex="0" role="region" aria-label="Planos" data-pricing-grid>
     {site.pricing.plans.map((plan) => (
       <article class:list={['plan-card', { recommended: plan.recommended }]} data-plan={plan.id}>
         {plan.recommended && <span class="plan-ribbon">Recomendado para equipes</span>}
@@ -117,7 +129,7 @@ const iconFor = (plan: Plan) => {
             <Icon name="arrow" size={17} />
           </a>
         )}
-        {(plan.billing === 'once' || plan.billing === 'monthly') && (
+        {available.whatsapp && (plan.billing === 'once' || plan.billing === 'monthly') && (
           <ContactLink
             class="plan-sales"
             message={`Olá! Quero conhecer o plano ${plan.name} da ARP Vision.`}
@@ -139,3 +151,6 @@ const iconFor = (plan: Plan) => {
     </div>
   )}
 </div>
+<script>
+  import '../scripts/pricing';
+</script>

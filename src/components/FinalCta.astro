@@ -3,6 +3,7 @@ import Brand from './Brand.astro';
 import Icon from './Icon.astro';
 import ContactLink from './ContactLink.astro';
 import { appLink } from '../lib/business';
+import { available } from '../config/site';
 ---
 
 <section class="final-cta">
@@ -16,9 +17,11 @@ import { appLink } from '../lib/business';
       <a href={appLink('chamada-final')} class="button button-white" data-cta="chamada-final">
         Criar conta grátis <Icon name="arrow" size={18} />
       </a>
-      <ContactLink class="button button-on-blue">
-        <Icon name="message" size={19} /> Falar no WhatsApp
-      </ContactLink>
+      {available.whatsapp && (
+        <ContactLink class="button button-on-blue">
+          <Icon name="message" size={19} /> Falar no WhatsApp
+        </ContactLink>
+      )}
       <span>Sem cartão. Sem baixar app.</span>
     </div>
   </div>
