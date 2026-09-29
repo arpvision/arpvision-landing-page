@@ -1,6 +1,6 @@
 ---
 import QRCode from 'qrcode';
-import { site } from '../config/site';
+import { site, available } from '../config/site';
 import { appLink } from '../lib/business';
 import Icon from './Icon.astro';
 const demo = site.tours[0];
@@ -10,7 +10,8 @@ const qrCodes = await Promise.all(
 const qr = qrCodes[0] ?? '';
 ---
 
-<section class="section tour-section" id="tour-real">
+<!-- Sem tour publicado, a seção não aparece; os testes injetam tours e removem o hidden. -->
+<section class="section tour-section" id="tour-real" hidden={!available.tour}>
   <div class="container">
     <div class="section-heading tour-heading">
       <div>

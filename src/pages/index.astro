@@ -9,7 +9,7 @@ import Founders from '../components/Founders.astro';
 import Faq from '../components/Faq.astro';
 import FinalCta from '../components/FinalCta.astro';
 import MarketNote from '../components/MarketNote.astro';
-import { site, faq, alternatives, alternativeLabels } from '../config/site';
+import { site, available, faq, alternatives, alternativeLabels } from '../config/site';
 import { appLink } from '../lib/business';
 const faqSchema = {
   '@context': 'https://schema.org',
@@ -20,6 +20,8 @@ const faqSchema = {
     acceptedAnswer: { '@type': 'Answer', text: item.answer },
   })),
 };
+const arpAlternative = alternatives[3];
+const otherAlternatives = alternatives.slice(0, 3);
 const facts = [
   { icon: 'phone', title: 'Só o celular.', text: 'Sem câmera 360°, sem tripé.' },
   {
@@ -89,15 +91,18 @@ const teams = [
           <span class="eyebrow-line"></span> TOUR VIRTUAL 360° PARA O SEU NEGÓCIO
         </span>
         <h1>
-          O tour 360° de uma câmera de R$ 3.000.
-          <sup>
-            <a
-              href="#referencia-camera"
-              aria-label="1: ver nota sobre referência de preço da câmera"
-            >
-              1
-            </a>
-          </sup>
+          O tour 360° de uma câmera de{' '}
+          <span class="nowrap">
+            R$ 3.000.
+            <sup>
+              <a
+                href="#referencia-camera"
+                aria-label="1: ver nota sobre referência de preço da câmera"
+              >
+                1
+              </a>
+            </sup>
+          </span>
           <br />
           <span>
             Feito com o<br class="hero-break" /> seu celular.
@@ -112,9 +117,15 @@ const teams = [
           <a class="button button-primary" href={appLink('hero')} data-cta="hero">
             Criar conta grátis <Icon name="arrow" size={19} />
           </a>
-          <a class="button button-secondary" href="#tour-real">
-            <Icon name="play" size={18} /> Ver um tour de verdade
-          </a>
+          {available.tour ? (
+            <a class="button button-secondary" href="#tour-real">
+              <Icon name="play" size={18} /> Ver um tour de verdade
+            </a>
+          ) : (
+            <a class="button button-secondary" href="#como-funciona">
+              <Icon name="play" size={18} /> Ver como funciona
+            </a>
+          )}
         </div>
         <p class="hero-micro">
           <Icon name="check" size={16} /> Sem cartão. Sem baixar app.
@@ -314,13 +325,20 @@ const teams = [
           </tbody>
         </table>
       </div>
+      <!-- No celular: ARP Vision primeiro e aberta; as alternativas ficam recolhidas. -->
       <div class="alternatives-mobile">
-        {alternatives.map((alternative, i) => (
-          <article class:list={['alternative-card', { 'arp-alternative': i === 3 }]}>
-            <h3>
-              <Icon name={alternative.icon} />
-              {alternative.name}
-            </h3>
+        {[arpAlternative, ...otherAlternatives].map((alternative) => (
+          <details
+            class:list={['alternative-card', { 'arp-alternative': alternative === arpAlternative }]}
+            open={alternative === arpAlternative}
+          >
+            <summary>
+              <h3>
+                <Icon name={alternative.icon} />
+                {alternative.name}
+              </h3>
+              <Icon name="plus" size={20} />
+            </summary>
             <dl>
               {alternativeLabels.map((label, index) => (
                 <div>
@@ -329,7 +347,7 @@ const teams = [
                 </div>
               ))}
             </dl>
-          </article>
+          </details>
         ))}
       </div>
       <MarketNote id="referencia-camera" />
@@ -417,7 +435,7 @@ const teams = [
               <div class="team-diagram-footer">
                 <Icon name="audit" size={18} /> Autoria e edição registradas com data e hora.
               </div>
-              <p class="mockup-note">Esquema ilustrativo. Print real da equipe: [a definir].</p>
+              <p class="mockup-note">Esquema ilustrativo.</p>
             </div>
           )}
         </div>

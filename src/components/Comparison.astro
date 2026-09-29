@@ -27,7 +27,13 @@ const pair = pairs[0];
         IA da ARP Vision corrige isso usando as suas próprias fotos como referência.
       </p>
     </div>
-    <div class="comparison" data-comparison data-pairs={JSON.stringify(pairs)}>
+    <!-- Sem pares reais, o comparador (mesma foto dos dois lados) fica oculto. -->
+    <div
+      class="comparison"
+      data-comparison
+      data-pairs={JSON.stringify(pairs)}
+      hidden={!site.comparisonPairs.length}
+    >
       {pairs.length > 1 && (
         <div class="tabs" role="tablist" aria-label="Ambientes antes e depois">
           {pairs.map((item, index) => (
@@ -106,7 +112,7 @@ const pair = pairs[0];
         </span>
         <span data-comparison-disclaimer>
           {pair.illustrative
-            ? 'Prévia da interação · mesma foto ilustrativa nos dois lados. Pares reais a definir.'
+            ? 'Prévia da interação · a mesma foto ilustrativa aparece nos dois lados.'
             : 'Recortes do mesmo ambiente e enquadramento.'}
         </span>
       </div>

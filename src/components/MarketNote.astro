@@ -8,7 +8,7 @@ const { id } = Astro.props;
   ¹{' '}
   {site.market.researchDate
     ? `Valores de referência de mercado, pesquisados em ${site.market.researchDate}.`
-    : `${money(site.market.cameraPrice)} é a referência de câmera fornecida no briefing. Preço de fotógrafo e pesquisa de mercado com data: [a definir]. Não são cotações verificadas.`}
+    : `${money(site.market.cameraPrice)} é um valor de referência para uma câmera 360°, não uma cotação verificada.`}
   {site.market.sourceUrl && (
     <>
       {' '}

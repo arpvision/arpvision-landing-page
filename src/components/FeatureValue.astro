@@ -1,0 +1,21 @@
+---
+import Icon from './Icon.astro';
+import type { FeatureValue } from '../config/site';
+interface Props {
+  value: FeatureValue;
+}
+const { value } = Astro.props;
+---
+
+{value === true ? (
+  <span class="included">
+    <Icon name="check" size={19} />
+    <span class="sr-only">Incluído</span>
+  </span>
+) : value === false ? (
+  <span aria-label="Não incluído">—</span>
+) : value === 'Em breve' ? (
+  <span class="coming-soon">Em breve</span>
+) : (
+  value
+)}
