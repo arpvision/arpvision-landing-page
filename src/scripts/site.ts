@@ -128,9 +128,12 @@ motion.addEventListener('change', updateVideos);
 document.querySelectorAll<HTMLButtonElement>('[data-video-toggle]').forEach((button) => {
   const video = document.getElementById(button.dataset.videoToggle!) as HTMLVideoElement | null;
   if (!video) return;
+  // Botão só com ícone: o nome acessível acompanha a ação e o CSS troca play/pausa.
   const update = () => {
-    button.textContent = video.paused ? 'Reproduzir vídeo' : 'Pausar vídeo';
-    button.setAttribute('aria-pressed', String(!video.paused));
+    const label = video.paused ? 'Reproduzir vídeo' : 'Pausar vídeo';
+    button.setAttribute('aria-label', label);
+    button.title = label;
+    button.dataset.playing = String(!video.paused);
   };
   button.addEventListener('click', () => {
     if (video.paused) void video.play();

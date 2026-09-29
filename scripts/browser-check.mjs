@@ -226,7 +226,12 @@ try {
       const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
       for (let node = walker.nextNode(); node; node = walker.nextNode()) {
         const element = node.parentElement;
-        if (!node.textContent.trim() || !element.checkVisibility() || element.closest('.sr-only'))
+        // A hora na barra de status do celular desenhado é decorativa (aria-hidden).
+        if (
+          !node.textContent.trim() ||
+          !element.checkVisibility() ||
+          element.closest('.sr-only, .phone-status')
+        )
           continue;
         const size = parseFloat(getComputedStyle(element).fontSize);
         if (size < 12) found.push(`${size}px "${node.textContent.trim().slice(0, 40)}"`);
