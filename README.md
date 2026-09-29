@@ -37,7 +37,7 @@ Edite **`src/config/site.ts`**. Ele concentra links, contatos, mídias, tours, c
 
 Logos e tutorial são oficiais e estão hospedados localmente. Fontes Inter e imagens WebP também são locais. Consulte `public/ASSETS.md` para fontes e licença da fotografia ilustrativa.
 
-A fotografia de interior **não é uma captura ARP Vision**. O comparador mostra a mesma imagem nos dois lados como prévia da interação e avisa isso. Para usar os resultados reais, configure de dois a três pares em `comparisonPairs`, com recortes em perspectiva do mesmo ângulo. Os marcadores usam coordenadas percentuais relativas à imagem inteira.
+A fotografia de interior **não é uma captura ARP Vision**.
 
 Exemplo de configuração de um tour real (substitua todos os dados antes de usar):
 

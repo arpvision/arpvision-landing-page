@@ -33,19 +33,6 @@ try {
   await page.evaluate(() => document.fonts.ready);
   await page.screenshot({ path: '.artifacts/home-desktop.png' });
   assert.equal(await page.locator('#hero-video').evaluate((video) => video.paused), true);
-  // Sem pares reais o comparador fica oculto; ele é exibido só para testar a interação.
-  await page.locator('[data-comparison]').evaluate((element) => (element.hidden = false));
-  const range = page.locator('.comparison-range');
-  await range.focus();
-  await range.press('ArrowRight');
-  assert.equal(await range.inputValue(), '51');
-  assert.match(await range.getAttribute('aria-valuetext'), /51%/);
-  await range.press('Home');
-  assert.equal(await range.inputValue(), '0');
-  await range.press('End');
-  assert.equal(await range.inputValue(), '100');
-  await range.fill('50');
-  await range.dispatchEvent('input');
   assert.match(await page.locator('[data-result="plan"]').textContent(), /Business/);
   await page.locator('#properties-number').fill('2');
   assert.equal(await page.locator('[data-range="properties"]').inputValue(), '2');
@@ -64,9 +51,7 @@ try {
   assert.equal(await page.locator('#tour-real').isVisible(), false);
   assert.equal(await page.locator('a[href$="#tour-real"]:visible').count(), 0);
   assert.equal(await page.locator('iframe').count(), 0);
-  results.push(
-    'Comparador por teclado, calculadora, contato pendente, reduced motion e demo oculta OK',
-  );
+  results.push('Calculadora, contato pendente, reduced motion e demo oculta OK');
 
   // Menu do desktop acompanha a seção visível.
   for (const [id, label] of [
@@ -261,7 +246,8 @@ try {
   await phone.locator('.menu-toggle').click();
   assert.equal(await phone.locator('#mobile-nav').isVisible(), true);
   assert.equal(await phone.evaluate(() => getComputedStyle(document.body).overflow), 'hidden');
-  await phone.mouse.click(180, 760);
+  // Toque fora do menu num ponto sem link (o título da hero), para não navegar.
+  await phone.locator('.hero h1').click({ position: { x: 10, y: 10 } });
   assert.equal(await phone.locator('#mobile-nav').isVisible(), false, 'toque fora fecha o menu');
   await phone.locator('.menu-toggle').click();
   await phone.locator('#mobile-nav a').first().click();

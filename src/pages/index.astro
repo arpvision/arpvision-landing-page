@@ -2,7 +2,6 @@
 import Layout from '../layouts/Layout.astro';
 import Icon from '../components/Icon.astro';
 import Tour from '../components/Tour.astro';
-import Comparison from '../components/Comparison.astro';
 import Calculator from '../components/Calculator.astro';
 import Pricing from '../components/Pricing.astro';
 import Founders from '../components/Founders.astro';
@@ -22,20 +21,6 @@ const faqSchema = {
 };
 const arpAlternative = alternatives[3];
 const otherAlternatives = alternatives.slice(0, 3);
-const facts = [
-  { icon: 'phone', title: 'Só o celular.', text: 'Sem câmera 360°, sem tripé.' },
-  {
-    icon: 'clock',
-    title: '~1 minuto por ambiente.',
-    text: 'A IA trabalha. Você segue capturando.',
-  },
-  { icon: 'link', title: 'O cliente abre sem conta.', text: 'É só mandar o link no WhatsApp.' },
-  {
-    icon: 'users',
-    title: 'A equipe inteira usa.',
-    text: 'Os créditos são da empresa, não de uma pessoa.',
-  },
-];
 const uses = [
   {
     icon: 'home',
@@ -108,11 +93,6 @@ const teams = [
             Feito com o<br class="hero-break" /> seu celular.
           </span>
         </h1>
-        <p class="hero-description">
-          Gire o celular seguindo as bolinhas na tela. A IA da ARP Vision junta as fotos, corrige
-          emendas e luz, e entrega um tour 360° pronto para mandar no WhatsApp e colocar no seu
-          site.
-        </p>
         <div class="hero-actions">
           <a class="button button-primary" href={appLink('hero')} data-cta="hero">
             Criar conta grátis <Icon name="arrow" size={19} />
@@ -127,10 +107,6 @@ const teams = [
             </a>
           )}
         </div>
-        <p class="hero-micro">
-          <Icon name="check" size={16} /> Sem cartão. Sem baixar app.
-          <br class="mobile-break" /> Funciona no navegador do celular.
-        </p>
       </div>
       <div class="hero-visual">
         <div class="hero-room">
@@ -214,23 +190,18 @@ const teams = [
       </div>
     </div>
   </section>
-  <section class="facts-strip" aria-label="A ARP Vision em quatro fatos">
-    <div class="container facts-grid">
-      {facts.map((fact) => (
-        <div class="fact">
-          <span class="fact-icon">
-            <Icon name={fact.icon} size={23} />
-          </span>
-          <div>
-            <strong>{fact.title}</strong>
-            <p>{fact.text}</p>
-          </div>
-        </div>
-      ))}
+  <section class="facts-strip" aria-label="Destaque">
+    <div class="container fact">
+      <span class="fact-icon">
+        <Icon name="phone" size={23} />
+      </span>
+      <div>
+        <strong>Só o celular.</strong>
+        <p>Sem câmera 360°, sem tripé.</p>
+      </div>
     </div>
   </section>
   <Tour />
-  <Comparison />
   <section class="section how-section" id="como-funciona">
     <div class="container how-grid">
       <div>
