@@ -6,7 +6,21 @@ const source = white ? site.brand.logoWhite : site.brand.logoBlue;
 
 <a href="/" class:list={['brand', { 'brand-white': white }]} aria-label="ARP Vision — início">
   {source ? (
-    <img src={source} alt="ARP Vision" width="162" height="36" />
+    white ? (
+      <img src={source} alt="ARP Vision" width="162" height="36" />
+    ) : (
+      <>
+        {/* Logo azul no tema claro e branco no escuro; o CSS mostra só um. */}
+        <img class="brand-logo-light" src={source} alt="ARP Vision" width="162" height="36" />
+        <img
+          class="brand-logo-dark"
+          src={site.brand.logoWhite}
+          alt="ARP Vision"
+          width="162"
+          height="36"
+        />
+      </>
+    )
   ) : (
     <span class="brand-wordmark">
       arp<span>vision</span>

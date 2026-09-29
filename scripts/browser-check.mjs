@@ -1,6 +1,6 @@
 import { chromium, devices } from '@playwright/test';
 import assert from 'node:assert/strict';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 
 await mkdir('.artifacts', { recursive: true });
 const base = process.env.SITE_URL || 'http://127.0.0.1:4321';
@@ -156,6 +156,50 @@ try {
   );
   await page.screenshot({ path: '.artifacts/planos-desktop.png' });
   results.push('Cinco planos, preço único/mensal, limites e ofertas estruturadas consistentes OK');
+
+  // Temas: contraste AA nos dois, logo certo e escolha salva entre recarregamentos.
+  const axeSource = await readFile('node_modules/axe-core/axe.min.js', 'utf8');
+  for (const colorScheme of ['light', 'dark']) {
+    const context = await browser.newContext({
+      viewport: { width: 1440, height: 1000 },
+      colorScheme,
+      reducedMotion: 'reduce',
+    });
+    const themed = await context.newPage();
+    themed.on('pageerror', (error) => errors.push(error.message));
+    for (const route of ['/', '/planos']) {
+      await themed.goto(base + route);
+      await themed.addScriptTag({ content: axeSource });
+      const contrast = await themed.evaluate(async () =>
+        (await window.axe.run(document, { runOnly: ['color-contrast'] })).violations.flatMap(
+          (violation) => violation.nodes.map((node) => node.target.join(' ')),
+        ),
+      );
+      assert.deepEqual(contrast, [], `${colorScheme} ${route}: contraste insuficiente`);
+    }
+    const visibleLogo = await themed
+      .locator('.site-header .brand img')
+      .evaluateAll((images) => images.find((image) => image.checkVisibility())?.src);
+    assert.match(visibleLogo, colorScheme === 'dark' ? /white/ : /blue/);
+    await themed.screenshot({ path: `.artifacts/home-${colorScheme}.png` });
+    await context.close();
+  }
+  const toggleContext = await browser.newContext({
+    viewport: { width: 1440, height: 1000 },
+    colorScheme: 'light',
+  });
+  const toggle = await toggleContext.newPage();
+  await toggle.goto(base);
+  const themeButton = toggle.locator('.desktop-theme-toggle');
+  assert.equal(await themeButton.getAttribute('aria-pressed'), 'false');
+  await themeButton.click();
+  assert.equal(await toggle.evaluate(() => document.documentElement.dataset.theme), 'dark');
+  assert.equal(await themeButton.getAttribute('aria-pressed'), 'true');
+  await toggle.reload();
+  assert.equal(await toggle.evaluate(() => document.documentElement.dataset.theme), 'dark');
+  assert.equal(await themeButton.getAttribute('aria-pressed'), 'true');
+  await toggleContext.close();
+  results.push('Temas claro e escuro: contraste AA, logo por tema e escolha salva OK');
 
   const mobile = await browser.newContext({
     ...devices['Pixel 7'],
