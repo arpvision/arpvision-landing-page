@@ -158,23 +158,49 @@ const teams = [
             <span>Captura guiada + aprimoramento com IA</span>
           </div>
         </div>
+        <!-- Celular desenhado em CSS no formato de um iPhone Pro atual (tela 19,5:9). -->
         <div class="phone-mockup">
-          <div class="phone-speaker" aria-hidden="true"></div>
-          <video
-            id="hero-video"
-            src={site.media.tutorial}
-            poster={site.media.tutorialPoster}
-            width="720"
-            height="1280"
-            muted
-            loop
-            playsinline
-            preload="none"
-            data-autoplay
-            aria-label="Tutorial real da captura guiada no celular"
-          ></video>
-          <button class="video-toggle" data-video-toggle="hero-video" aria-pressed="false">
-            Reproduzir vídeo
+          <span class="phone-side-button phone-action" aria-hidden="true"></span>
+          <span class="phone-side-button phone-volume-up" aria-hidden="true"></span>
+          <span class="phone-side-button phone-volume-down" aria-hidden="true"></span>
+          <span class="phone-side-button phone-power" aria-hidden="true"></span>
+          <span class="phone-side-button phone-camera-control" aria-hidden="true"></span>
+          <div class="phone-display">
+            <div class="phone-status" aria-hidden="true">
+              <span class="phone-time">9:41</span>
+              <span class="phone-island"></span>
+              <span class="phone-indicators">
+                <span class="phone-signal">
+                  <i></i>
+                  <i></i>
+                  <i></i>
+                  <i></i>
+                </span>
+                <span class="phone-battery"></span>
+              </span>
+            </div>
+            <video
+              id="hero-video"
+              src={site.media.tutorial}
+              poster={site.media.tutorialPoster}
+              width="720"
+              height="1280"
+              muted
+              loop
+              playsinline
+              preload="none"
+              data-autoplay
+              aria-label="Tutorial real da captura guiada no celular"
+            ></video>
+            <span class="phone-home-indicator" aria-hidden="true"></span>
+          </div>
+          <button class="video-toggle" data-video-toggle="hero-video" aria-label="Reproduzir vídeo">
+            <span class="video-toggle-play">
+              <Icon name="play" size={18} />
+            </span>
+            <span class="video-toggle-pause">
+              <Icon name="pause" size={18} />
+            </span>
           </button>
         </div>
         <div class="hero-capture-caption">
