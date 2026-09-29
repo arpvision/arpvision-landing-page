@@ -1,5 +1,26 @@
 import { track } from './analytics';
 
+// Tema: segue o sistema até a pessoa escolher; a escolha fica salva (aplicada no <head>).
+const root = document.documentElement;
+const systemDark = matchMedia('(prefers-color-scheme: dark)');
+const themeButtons = document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]');
+const isDark = () => (root.dataset.theme ? root.dataset.theme === 'dark' : systemDark.matches);
+const syncThemeButtons = () =>
+  themeButtons.forEach((button) => button.setAttribute('aria-pressed', String(isDark())));
+themeButtons.forEach((button) =>
+  button.addEventListener('click', () => {
+    const theme = isDark() ? 'light' : 'dark';
+    root.dataset.theme = theme;
+    try {
+      localStorage.setItem('theme', theme);
+    } catch {}
+    syncThemeButtons();
+    track('tema_alterado', { tema: theme });
+  }),
+);
+systemDark.addEventListener('change', syncThemeButtons);
+syncThemeButtons();
+
 const menuButton = document.querySelector<HTMLButtonElement>('.menu-toggle');
 const menu = document.querySelector<HTMLElement>('#mobile-nav');
 const menuLabel = menuButton?.querySelector<HTMLElement>('[data-menu-label]');
