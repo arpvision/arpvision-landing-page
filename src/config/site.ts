@@ -31,14 +31,6 @@ export interface DemoTour {
   captureTime: string;
 }
 
-export interface ComparisonPair {
-  name: string;
-  before: string;
-  after: string;
-  illustrative?: boolean;
-  markers: { x: number; y: number; label: string }[];
-}
-
 export const site = {
   name: 'ARP Vision',
   themeColor: '#0454ED',
@@ -61,7 +53,6 @@ export const site = {
   },
   // Adicione somente tours públicos aprovados para demonstração.
   tours: [] as DemoTour[],
-  comparisonPairs: [] as ComparisonPair[],
   pricing: {
     isExample: false,
     exampleNotice: '',
