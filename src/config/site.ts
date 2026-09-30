@@ -75,8 +75,8 @@ export const site = {
         users: null,
         features: [
           'Captura guiada pelo celular',
-          'Aprimoramento com IA',
-          'Crédito devolvido se a IA falhar',
+          'Aprimoramento automático das imagens',
+          'Crédito devolvido se o aprimoramento falhar',
           'Fotos 360° da galeria sem gastar crédito',
         ],
       },
@@ -95,7 +95,7 @@ export const site = {
         users: null,
         features: [
           'Captura guiada pelo celular',
-          'Aprimoramento com IA',
+          'Aprimoramento automático das imagens',
           'Link público para compartilhar',
           'Créditos da empresa',
         ],
@@ -115,7 +115,7 @@ export const site = {
         users: null,
         features: [
           'Captura guiada pelo celular',
-          'Aprimoramento com IA',
+          'Aprimoramento automático das imagens',
           'Link público para compartilhar',
           'Créditos da empresa',
         ],
@@ -136,7 +136,7 @@ export const site = {
         recommended: true,
         features: [
           'Captura guiada pelo celular',
-          'Aprimoramento com IA',
+          'Aprimoramento automático das imagens',
           'Link público para compartilhar',
           'Créditos da empresa',
         ],
@@ -156,7 +156,7 @@ export const site = {
         users: null,
         features: [
           'Captura guiada pelo celular',
-          'Aprimoramento com IA',
+          'Aprimoramento automático das imagens',
           'Link público para compartilhar',
           'Converse sobre a sua operação',
         ],
@@ -265,7 +265,7 @@ export const alternatives = [
       'Todos',
       'No mesmo dia',
       'Sim',
-      'Sim, com IA',
+      'Sim, automaticamente',
     ],
   },
 ];
@@ -297,7 +297,7 @@ export const featureGroups: FeatureGroup[] = [
         ),
       },
       {
-        name: 'Ambientes com IA',
+        name: 'Ambientes',
         values: site.pricing.plans.map((p) =>
           p.credits === null
             ? 'Sob medida'
@@ -342,11 +342,11 @@ export const featureGroups: FeatureGroup[] = [
     ],
   },
   {
-    title: 'Captura e IA',
+    title: 'Captura e aprimoramento',
     rows: [
       { name: 'Captura guiada 360° pelo celular', values: all },
-      { name: 'IA corrige emendas, objetos duplicados e luz', values: all },
-      { name: 'Crédito devolvido se a IA falhar', values: all },
+      { name: 'Emendas e luz corrigidas automaticamente', values: all },
+      { name: 'Crédito devolvido se o aprimoramento falhar', values: all },
       { name: 'Fotos 360° da galeria sem gastar crédito', values: all },
     ],
   },
@@ -382,21 +382,21 @@ export const faq = [
   { question: 'Funciona no meu celular?', answer: site.policies.phoneRequirements },
   {
     question: 'Quanto tempo leva para fazer um tour?',
-    answer: `O tempo de captura por ambiente está ${site.policies.captureTime}. A IA leva cerca de 1 minuto por ambiente, em segundo plano, e você captura o próximo cômodo enquanto ela trabalha.`,
+    answer: `O tempo de captura por ambiente está ${site.policies.captureTime}. Cada ambiente fica pronto em cerca de 1 minuto, em segundo plano, e você captura o próximo cômodo enquanto isso.`,
   },
   {
     question: 'O que é um crédito?',
     answer:
-      'Cada ambiente capturado pela câmera e aprimorado pela IA usa 1 crédito. Os créditos são da empresa, e toda a equipe usa o mesmo saldo.',
+      'Cada ambiente fotografado com o celular usa 1 crédito. Os créditos são da empresa, e toda a equipe usa o mesmo saldo.',
   },
   {
-    question: 'E se a IA não conseguir montar um ambiente?',
+    question: 'E se um ambiente não ficar pronto?',
     answer: 'O crédito volta para o saldo, e você pode fotografar o ambiente de novo.',
   },
   {
-    question: 'A IA muda o espaço?',
+    question: 'O aprimoramento muda o espaço?',
     answer:
-      'Não. Ela corrige os defeitos da montagem: emendas, objetos duplicados e diferenças de luz entre as fotos. Não cria móveis nem troca acabamentos, e a foto original fica guardada. O único trecho completado é o que nenhuma foto alcança: o chão logo abaixo do celular e o centro do teto, seguindo o piso e o teto que aparecem ao redor.',
+      'Ele deixa uniformes as emendas e a luz entre as fotos, sem criar móveis nem trocar acabamentos. O único trecho completado é o que nenhuma foto alcança: o chão logo abaixo do celular e o centro do teto, seguindo o piso e o teto que aparecem ao redor. A foto original fica guardada, e você compara as duas antes de publicar.',
   },
   {
     question: 'Já tenho uma câmera 360°. Ela serve?',
