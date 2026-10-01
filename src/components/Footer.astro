@@ -66,8 +66,9 @@ import { appLink } from '../lib/business';
   <h2 id="contact-title">Vamos conversar em breve.</h2>
   <p>
     Nosso atendimento comercial abre em breve. Enquanto isso, crie sua conta grátis e teste a
-    captura com {site.pricing.freeTrialCredits} crédito, por {site.pricing.freeTrialDays} dias, sem
-    cartão.
+    captura com {site.pricing.freeTrialCredits}{' '}
+    {site.pricing.freeTrialCredits === 1 ? 'crédito' : 'créditos'}, por {site.pricing.freeTrialDays}{' '}
+    dias, sem cartão.
   </p>
   <a class="button button-primary" href={appLink('contato')} data-cta="contato">
     Criar conta grátis <Icon name="arrow" size={18} />
