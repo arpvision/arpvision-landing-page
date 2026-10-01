@@ -64,6 +64,8 @@ export const site = {
     averageRooms: 8,
     // Conta nova ganha créditos para testar; fica fora do grid de planos, como no app.
     freeTrialCredits: 1,
+    // Quanto tempo o teste vale no app (desde 01/10/2026): depois o tour sai do ar.
+    freeTrialDays: 7,
     plans: [
       {
         id: 'individual',

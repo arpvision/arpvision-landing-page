@@ -15,6 +15,8 @@ test('configuração publica os quatro planos do app sem oferta anual ou pacotes
     ],
   );
   assert.equal(site.pricing.freeTrialCredits, 1);
+  // O teste grátis vale 7 dias no app desde 01/10/2026.
+  assert.equal(site.pricing.freeTrialDays, 7);
   assert.deepEqual(
     [individual.credits, individual.pixPrice, individual.oneTimePrice, individual.installments],
     [8, 229, 279, 12],

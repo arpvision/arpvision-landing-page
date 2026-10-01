@@ -111,8 +111,9 @@ const highlightsFor = (plan: Plan) => {
     <span aria-hidden="true"></span> Pagamento seguro via Asaas · Pix ou cartão
   </p>
   <p class="pricing-trial">
-    Quer testar antes? Crie sua conta grátis e fotografe {site.pricing.freeTrialCredits}{' '}
-    {site.pricing.freeTrialCredits === 1 ? 'ambiente' : 'ambientes'} sem pagar nada.{' '}
+    Quer testar antes? Crie sua conta grátis, fotografe {site.pricing.freeTrialCredits}{' '}
+    {site.pricing.freeTrialCredits === 1 ? 'ambiente' : 'ambientes'} e deixe o tour no ar por{' '}
+    {site.pricing.freeTrialDays} dias, sem pagar nada.{' '}
     <a href={appLink(full ? 'planos-teste' : 'plano-teste')} data-cta="plano-teste">
       Criar conta grátis
     </a>
