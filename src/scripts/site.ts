@@ -113,17 +113,32 @@ if (floating) {
     floating.classList.toggle('is-hidden', visible.size > 0);
   });
   document
-    .querySelectorAll('.hero-actions, .founders-form, .final-cta, .site-footer')
+    .querySelectorAll('.hero-actions, .final-cta, .site-footer')
     .forEach((element) => observer.observe(element));
 }
 
+// Vídeos com data-autoplay tocam só enquanto estão na tela, nunca com movimento reduzido,
+// e respeitam a pausa feita pelo botão.
 const motion = matchMedia('(prefers-reduced-motion: reduce)');
+const onScreen = new Set<HTMLVideoElement>();
+const pausedByUser = new WeakSet<HTMLVideoElement>();
 const updateVideos = () =>
   document.querySelectorAll<HTMLVideoElement>('video[data-autoplay]').forEach((video) => {
-    if (motion.matches) video.pause();
-    else void video.play().catch(() => {});
+    if (!motion.matches && onScreen.has(video) && !pausedByUser.has(video))
+      void video.play().catch(() => {});
+    else video.pause();
   });
-updateVideos();
+const videoObserver = new IntersectionObserver((entries) => {
+  entries.forEach((entry) => {
+    const video = entry.target as HTMLVideoElement;
+    if (entry.isIntersecting) onScreen.add(video);
+    else onScreen.delete(video);
+  });
+  updateVideos();
+});
+document
+  .querySelectorAll<HTMLVideoElement>('video[data-autoplay]')
+  .forEach((video) => videoObserver.observe(video));
 motion.addEventListener('change', updateVideos);
 document.querySelectorAll<HTMLButtonElement>('[data-video-toggle]').forEach((button) => {
   const video = document.getElementById(button.dataset.videoToggle!) as HTMLVideoElement | null;
@@ -136,8 +151,13 @@ document.querySelectorAll<HTMLButtonElement>('[data-video-toggle]').forEach((but
     button.dataset.playing = String(!video.paused);
   };
   button.addEventListener('click', () => {
-    if (video.paused) void video.play();
-    else video.pause();
+    if (video.paused) {
+      pausedByUser.delete(video);
+      void video.play();
+    } else {
+      pausedByUser.add(video);
+      video.pause();
+    }
   });
   video.addEventListener('play', update);
   video.addEventListener('pause', update);

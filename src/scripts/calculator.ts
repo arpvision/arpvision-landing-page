@@ -9,8 +9,7 @@ if (root) {
     root.querySelector(`[data-result="${name}"]`)!.textContent = text;
   };
   const update = () => {
-    const agents = value('agents');
-    const result = calculateUsage(value('properties'), value('rooms'), agents);
+    const result = calculateUsage(value('properties'), value('rooms'));
     set('credits', result.credits.toLocaleString('pt-BR'));
     set('plan', result.plan?.name ?? 'Enterprise');
     root.querySelector('[data-summary="credits"]')!.textContent =
@@ -34,10 +33,6 @@ if (root) {
         : 'Limite de tours combinado em contrato.',
     );
     set(
-      'camera',
-      `${agents} × ${money(site.market.cameraPrice)} = ${money(result.cameraInvestment)}`,
-    );
-    set(
       'annual-label',
       result.plan
         ? `12 mensalidades de ARP Vision · ${result.plan.name}`
@@ -51,20 +46,22 @@ if (root) {
       ? 'Falar sobre um plano para minha equipe'
       : `Começar com o plano ${result.plan!.name}`;
     cta.href = contact
-      ? whatsappLink(
-          `Olá! Preciso de ${result.credits} créditos por mês para uma equipe de ${agents} pessoas.`,
-        )
+      ? whatsappLink(`Olá! Preciso de ${result.credits} créditos por mês.`)
       : appLink('calculadora');
     cta.toggleAttribute('data-whatsapp', contact);
     if (contact) {
       delete cta.dataset.cta;
       if (!site.contact.whatsapp) cta.dataset.contactPending = 'true';
+      // Como os outros links de WhatsApp: abre em nova aba.
+      else Object.assign(cta, { target: '_blank', rel: 'noopener noreferrer' });
     } else {
       cta.dataset.cta = 'calculadora';
       delete cta.dataset.contactPending;
+      cta.removeAttribute('target');
+      cta.removeAttribute('rel');
     }
   };
-  for (const id of ['agents', 'properties', 'rooms']) {
+  for (const id of ['properties', 'rooms']) {
     const number = root.querySelector<HTMLInputElement>(`[data-number="${id}"]`)!;
     const range = root.querySelector<HTMLInputElement>(`[data-range="${id}"]`)!;
     const sync = (source: HTMLInputElement, target: HTMLInputElement, commit: boolean) => {

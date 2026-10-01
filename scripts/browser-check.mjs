@@ -18,7 +18,8 @@ try {
     const response = await page.goto(base + route);
     assert.equal(response.status(), 200);
     assert.equal(await page.locator('h1').count(), 1);
-    assert.equal(await page.locator('iframe').count(), 0);
+    // Só o tour embutido na hero carrega de início; o tour da demo continua sob demanda.
+    assert.equal(await page.locator('iframe:not(.hero-embed)').count(), 0);
     assert.equal(
       await page
         .locator('img')
@@ -27,12 +28,21 @@ try {
         ),
       0,
     );
-    results.push(`Rota ${route}: HTML, imagens e carregamento inicial sem iframe OK`);
+    results.push(`Rota ${route}: HTML, imagens e carregamento inicial sem iframe extra OK`);
   }
   await page.goto(base);
   await page.evaluate(() => document.fonts.ready);
   await page.screenshot({ path: '.artifacts/home-desktop.png' });
-  assert.equal(await page.locator('#hero-video').evaluate((video) => video.paused), true);
+  assert.equal(
+    await page.locator('.hero-embed').getAttribute('src'),
+    'https://arpvision.app/embed/511a5654-29f2-4798-87ff-5b479210dbf0',
+  );
+  // Com movimento reduzido, o vídeo da captura não toca sozinho.
+  assert.equal(await page.locator('#tutorial-video').evaluate((video) => video.paused), true);
+  assert.equal(await page.locator('#fundadores').count(), 0, 'sem seção Fundadores');
+  assert.equal(await page.locator('.team-visual').count(), 0, 'sem card ilustrativo da equipe');
+  assert.equal(await page.locator('#creditos').isVisible(), true, 'seção sobre créditos');
+  assert.equal(await page.locator('[data-number="agents"]').count(), 0, 'sem pessoas na equipe');
   assert.match(await page.locator('[data-result="plan"]').textContent(), /Business/);
   await page.locator('#properties-number').fill('2');
   assert.equal(await page.locator('[data-range="properties"]').inputValue(), '2');
@@ -43,15 +53,17 @@ try {
   assert.equal(await page.locator('[data-result="credits"]').textContent(), '3.000');
   assert.equal(await page.locator('[data-result="plan"]').textContent(), 'Enterprise');
   assert.equal(await page.locator('[data-result="cta"] svg').count(), 1, 'seta mantida no botão');
-  await page.locator('[data-result="cta"]').click();
-  assert.equal(await page.locator('#contact-dialog').evaluate((dialog) => dialog.open), true);
-  await page.keyboard.press('Escape');
-  assert.equal(await page.locator('#contact-dialog').evaluate((dialog) => dialog.open), false);
+  // Acima do maior plano, o botão abre o WhatsApp comercial em nova aba.
+  assert.match(
+    await page.locator('[data-result="cta"]').getAttribute('href'),
+    /^https:\/\/wa\.me\/5551995273661\?text=/,
+  );
+  assert.equal(await page.locator('[data-result="cta"]').getAttribute('target'), '_blank');
   // Sem tour configurado, a seção e os links para ela ficam fora da página.
   assert.equal(await page.locator('#tour-real').isVisible(), false);
   assert.equal(await page.locator('a[href$="#tour-real"]:visible').count(), 0);
-  assert.equal(await page.locator('iframe').count(), 0);
-  results.push('Calculadora, contato pendente, reduced motion e demo oculta OK');
+  assert.equal(await page.locator('[data-tour-host] iframe').count(), 0);
+  results.push('Calculadora, WhatsApp, reduced motion, seções removidas e demo oculta OK');
 
   // Menu do desktop acompanha a seção visível.
   for (const [id, label] of [
@@ -76,54 +88,36 @@ try {
     await page.goto(base + route);
     const text = await page.locator('body').innerText();
     assert.ok(!/\[[^\]]*a definir[^\]]*\]/i.test(text), `${route}: sem "[a definir]" visível`);
-    assert.equal(await page.locator('.floating-whatsapp').count(), 0, `${route}: sem WhatsApp`);
-  }
-  await page.goto(base);
-  if (await page.locator('[data-founders-form]').count()) {
-    const consent = page.locator('[name="consent"]');
-    assert.equal(await consent.isChecked(), false);
-    await page.locator('#founder-name').fill('Teste de validação');
-    await page.locator('#founder-company').fill('Empresa de teste');
-    await page.locator('#founder-city').fill('São Paulo / SP');
-    await page.locator('#founder-agents').fill('5');
-    await page.locator('#founder-phone').fill('(11) 99999-1234');
-    await consent.check();
-    assert.equal(
-      await page.locator('[data-founders-form]').evaluate((form) => form.checkValidity()),
-      true,
+    assert.match(
+      await page.locator('.floating-whatsapp').getAttribute('href'),
+      /^https:\/\/wa\.me\/5551995273661/,
+      `${route}: WhatsApp flutuante`,
     );
-    await page.locator('#founder-phone').fill('abc11999991234');
-    assert.equal(
-      await page.locator('#founder-phone').evaluate((input) => input.checkValidity()),
-      false,
-    );
-    results.push('Formulário: consentimento e telefone OK');
-  } else {
-    const soon = page.locator('[data-founders-soon]');
-    assert.equal(await soon.isVisible(), true);
-    assert.match(await soon.locator('a').getAttribute('href'), /arpvision\.app\/register/);
-    results.push('Fundadores sem canal: aviso com criação de conta, sem formulário OK');
+    assert.equal(await page.locator('#duvidas').count(), 1, `${route}: um FAQ só`);
   }
   await page.goto(base + '/planos');
-  assert.equal(await page.locator('.plan-card').count(), 5);
-  assert.equal(await page.locator('.feature-table thead th').count(), 6);
+  // Mesmos quatro cards da tela de planos do app; o teste grátis vira uma nota.
+  assert.equal(await page.locator('.plan-card').count(), 4);
+  assert.equal(await page.locator('.feature-table thead th').count(), 5);
   assert.equal(await page.locator('[data-billing]').count(), 0);
-  assert.match(await page.locator('[data-plan="teste"]').textContent(), /1 crédito para testar/);
-  assert.match(await page.locator('[data-plan="individual"]').textContent(), /279,00/);
+  const individual = await page.locator('[data-plan="individual"]').innerText();
+  assert.match(individual, /12x\s*R\$\s*23,25/);
+  assert.match(individual, /ou R\$\s*229 à vista no Pix/);
+  assert.match(individual, /8 ambientes/);
+  assert.match(individual, /1 tour no ar por 1 ano/);
+  assert.match(individual, /Renovação R\$\s*79\/ano/);
   assert.match(
-    await page.locator('[data-plan="individual"]').textContent(),
-    /20,00 por ambiente extra/,
+    await page.locator('[data-plan="corretor"] [data-price]').textContent(),
+    /R\$\s*249$/,
   );
-  assert.match(
-    await page.locator('[data-plan="individual"]').textContent(),
-    /79,00\s+por mais 1 ano/,
-  );
-  assert.match(await page.locator('[data-plan="corretor"] [data-price]').textContent(), /249,00/);
+  assert.match(await page.locator('[data-plan="corretor"]').textContent(), /20 ambientes por mês/);
   assert.match(await page.locator('[data-plan="corretor"]').textContent(), /Até 30 tours no ar/);
   assert.match(
     await page.locator('[data-plan="imobiliaria"] [data-price]').textContent(),
-    /599,00/,
+    /R\$\s*599$/,
   );
+  assert.match(await page.locator('[data-plan="rede"]').textContent(), /Falar no WhatsApp/);
+  assert.match(await page.locator('.pricing-trial').textContent(), /1\s+ambiente sem pagar/);
   assert.match(
     await page.locator('[data-plan="imobiliaria"]').textContent(),
     /Até 120 tours no ar/,
@@ -133,14 +127,13 @@ try {
   assert.deepEqual(
     offers.map((offer) => [offer.name, offer.price]),
     [
-      ['Teste grátis', 0],
-      ['Individual', 279],
+      ['Individual', 229],
       ['Professional', 249],
       ['Business', 599],
     ],
   );
   await page.screenshot({ path: '.artifacts/planos-desktop.png' });
-  results.push('Cinco planos, preço único/mensal, limites e ofertas estruturadas consistentes OK');
+  results.push('Quatro planos como no app, Pix/parcelas, limites e ofertas estruturadas OK');
 
   // Temas: contraste AA nos dois, logo certo e escolha salva entre recarregamentos.
   const axeSource = await readFile('node_modules/axe-core/axe.min.js', 'utf8');
@@ -211,12 +204,7 @@ try {
       const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
       for (let node = walker.nextNode(); node; node = walker.nextNode()) {
         const element = node.parentElement;
-        // A hora na barra de status do celular desenhado é decorativa (aria-hidden).
-        if (
-          !node.textContent.trim() ||
-          !element.checkVisibility() ||
-          element.closest('.sr-only, .phone-status')
-        )
+        if (!node.textContent.trim() || !element.checkVisibility() || element.closest('.sr-only'))
           continue;
         const size = parseFloat(getComputedStyle(element).fontSize);
         if (size < 12) found.push(`${size}px "${node.textContent.trim().slice(0, 40)}"`);
@@ -255,26 +243,26 @@ try {
   assert.equal(await phone.evaluate(() => getComputedStyle(document.body).overflow), 'visible');
   const status = phone.locator('#planos [data-carousel-status]');
   await status.scrollIntoViewIfNeeded();
-  assert.match(await status.textContent(), /Business · plano 4 de 5/);
+  assert.match(await status.textContent(), /Business · plano 3 de 4/);
   await phone.locator('#planos [data-carousel-next]').click();
   await phone.waitForFunction(() =>
-    /plano 5 de 5/.test(document.querySelector('#planos [data-carousel-status]').textContent),
+    /plano 4 de 4/.test(document.querySelector('#planos [data-carousel-status]').textContent),
   );
   await phone.locator('#planos [data-carousel-prev]').click();
   await phone.waitForFunction(() =>
-    /plano 4 de 5/.test(document.querySelector('#planos [data-carousel-status]').textContent),
+    /plano 3 de 4/.test(document.querySelector('#planos [data-carousel-status]').textContent),
   );
   await phone.locator('.faq-item').first().locator('summary').click();
   assert.equal(await phone.locator('.faq-item').first().getAttribute('open'), '');
   await phone.goto(base + '/planos');
   assert.equal(await phone.locator('.feature-table-wrap').isVisible(), false);
   const plans = phone.locator('.feature-plan');
-  assert.equal(await plans.count(), 5);
+  assert.equal(await plans.count(), 4);
   assert.equal(await phone.locator('[data-feature-plan="imobiliaria"]').getAttribute('open'), '');
   await phone.locator('[data-feature-plan="individual"] summary').click();
   assert.match(
     await phone.locator('[data-feature-plan="individual"]').innerText(),
-    /279,00 uma vez/,
+    /229 no Pix ou 12x de R\$\s*23,25/,
   );
   results.push(
     '360px: quatro rotas sem overflow, texto < 12px ou alvo pequeno; menu, carrossel, FAQ e recursos por plano OK',

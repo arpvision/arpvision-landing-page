@@ -7,9 +7,12 @@ export interface Plan {
   id: string;
   name: string;
   audience: string;
-  billing: 'free' | 'once' | 'monthly' | 'custom';
+  billing: 'once' | 'monthly' | 'custom';
   monthlyPrice: number | null;
+  /** Total parcelado no cartão; `pixPrice` é o valor à vista no Pix. */
   oneTimePrice: number | null;
+  pixPrice: number | null;
+  installments: number | null;
   credits: number | null;
   liveTours: number | null;
   duration: string;
@@ -17,7 +20,6 @@ export interface Plan {
   renewalPrice: number | null;
   users: null;
   recommended?: boolean;
-  features: string[];
 }
 
 export interface DemoTour {
@@ -37,7 +39,7 @@ export const site = {
   domain: 'https://arpvision.com.br', // Domínio sugerido no briefing; confirmar antes de publicar.
   readyToIndex: true,
   appUrl: 'https://arpvision.app',
-  contact: { whatsapp: '', email: '' },
+  contact: { whatsapp: '+55 (51) 99527-3661', email: 'arpvision@outlook.com.br' },
   company: { legalName: '', cnpj: '', year: new Date().getFullYear() },
   brand: {
     logoBlue: '/brand/arp-vision-horizontal-blue.svg',
@@ -47,7 +49,8 @@ export const site = {
   media: {
     tutorial: '/video/tutorial-captura-360-v3.mp4',
     tutorialPoster: '/images/tutorial-720.webp',
-    teamScreenshot: '',
+    // Tour 360° embutido no lado direito da hero.
+    heroEmbed: 'https://arpvision.app/embed/511a5654-29f2-4798-87ff-5b479210dbf0',
     ogHome: '/images/og-home.png',
     ogPlans: '/images/og-planos.png',
   },
@@ -59,27 +62,9 @@ export const site = {
     annualDiscount: null as number | null,
     annualLabel: '',
     averageRooms: 8,
+    // Conta nova ganha créditos para testar; fica fora do grid de planos, como no app.
+    freeTrialCredits: 1,
     plans: [
-      {
-        id: 'teste',
-        name: 'Teste grátis',
-        audience: 'Um ambiente para experimentar.',
-        billing: 'free',
-        monthlyPrice: 0,
-        oneTimePrice: null,
-        credits: 1,
-        liveTours: null,
-        duration: 'A definir',
-        extraRoomPrice: null,
-        renewalPrice: null,
-        users: null,
-        features: [
-          'Captura guiada pelo celular',
-          'Aprimoramento automático das imagens',
-          'Crédito devolvido se o aprimoramento falhar',
-          'Fotos 360° da galeria sem gastar crédito',
-        ],
-      },
       {
         id: 'individual',
         name: 'Individual',
@@ -87,18 +72,14 @@ export const site = {
         billing: 'once',
         monthlyPrice: null,
         oneTimePrice: 279,
+        pixPrice: 229,
+        installments: 12,
         credits: 8,
         liveTours: 1,
         duration: '1 ano no ar',
         extraRoomPrice: 20,
         renewalPrice: 79,
         users: null,
-        features: [
-          'Captura guiada pelo celular',
-          'Aprimoramento automático das imagens',
-          'Link público para compartilhar',
-          'Créditos da empresa',
-        ],
       },
       {
         id: 'corretor',
@@ -107,18 +88,14 @@ export const site = {
         billing: 'monthly',
         monthlyPrice: 249,
         oneTimePrice: null,
+        pixPrice: null,
+        installments: null,
         credits: 20,
         liveTours: 30,
         duration: 'Enquanto a assinatura estiver ativa',
         extraRoomPrice: null,
         renewalPrice: 79,
         users: null,
-        features: [
-          'Captura guiada pelo celular',
-          'Aprimoramento automático das imagens',
-          'Link público para compartilhar',
-          'Créditos da empresa',
-        ],
       },
       {
         id: 'imobiliaria',
@@ -127,6 +104,8 @@ export const site = {
         billing: 'monthly',
         monthlyPrice: 599,
         oneTimePrice: null,
+        pixPrice: null,
+        installments: null,
         credits: 80,
         liveTours: 120,
         duration: 'Enquanto a assinatura estiver ativa',
@@ -134,12 +113,6 @@ export const site = {
         renewalPrice: 79,
         users: null,
         recommended: true,
-        features: [
-          'Captura guiada pelo celular',
-          'Aprimoramento automático das imagens',
-          'Link público para compartilhar',
-          'Créditos da empresa',
-        ],
       },
       {
         id: 'rede',
@@ -148,18 +121,14 @@ export const site = {
         billing: 'custom',
         monthlyPrice: null,
         oneTimePrice: null,
+        pixPrice: null,
+        installments: null,
         credits: null,
         liveTours: null,
         duration: 'Conforme contrato',
         extraRoomPrice: null,
         renewalPrice: null,
         users: null,
-        features: [
-          'Captura guiada pelo celular',
-          'Aprimoramento automático das imagens',
-          'Link público para compartilhar',
-          'Converse sobre a sua operação',
-        ],
       },
     ] as Plan[],
     extraCredits: [] as { credits: number; price: number | null }[],
@@ -170,31 +139,19 @@ export const site = {
     researchDate: '',
     sourceUrl: '',
   },
-  founders: {
-    spots: null as number | null,
-    discount: '',
-    remainingSpots: null as number | null,
-    formEndpoint: '',
-  },
   policies: {
     phoneRequirements:
       'Requisitos de compatibilidade a definir. A captura funciona no navegador do celular; a lista de aparelhos e versões compatíveis está em validação.',
-    captureTime: '[a definir]',
     billing:
-      'Individual: R$ 279 em pagamento único. Professional: R$ 249 por mês. Business: R$ 599 por mês. O meio de pagamento ainda está a definir; este site não realiza cobranças.',
+      'O pagamento é feito no app, com segurança, pelo Asaas. Individual: R$ 229 à vista no Pix ou 12x de R$ 23,25 no cartão. Professional: R$ 249 por mês, no cartão. Business: R$ 599 por mês, no cartão. Enterprise: condições em contrato.',
     cancellation:
       'Ao cancelar uma assinatura, os tours permanecem no ar até o fim do mês já pago. Está previsto um aviso por e-mail 7 dias antes de saírem do ar. Depois, você pode manter cada tour por R$ 79 ao ano.',
     liveTourLimit:
       'Só contam tours publicados e não ocultos. Rascunhos e tours ocultos ficam fora do limite. Ao atingir o limite, é preciso ocultar um tour ou mudar de plano antes de publicar outro. O limite não tira tours do ar automaticamente.',
-    creditRollover: 'Ainda não foi definido se os ambientes não usados passam para o mês seguinte.',
-    annualPlan: 'Ainda não foi definido se haverá plano anual ou desconto anual.',
     monthlyExtras:
       'No Individual, cada ambiente além dos 8 incluídos custa R$ 20. Ambientes extras no Professional e no Business ainda não têm preço definido.',
     individualTerm:
       'O tour do Individual fica no ar por 1 ano e pode ser renovado por R$ 79 por mais 1 ano. O marco inicial desse prazo ainda está a definir.',
-    paymentFailure: 'O tratamento de falhas no pagamento ainda está a definir.',
-    changePlan: 'Condições para troca de plano a definir.',
-    invoice: 'Informações sobre emissão de nota fiscal a definir.',
     terms: '',
     privacy: '',
   },
@@ -206,11 +163,16 @@ export const available = {
   whatsapp: Boolean(site.contact.whatsapp),
   email: Boolean(site.contact.email),
   tour: site.tours.length > 0,
-  foundersChannel: Boolean(site.founders.formEndpoint || site.contact.whatsapp),
 };
 
-const currency = (value: number) =>
-  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+// Preço como no app: sem centavos quando o valor é inteiro (R$ 249, R$ 23,25).
+export const price = (value: number) =>
+  new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+    minimumFractionDigits: Number.isInteger(value) ? 0 : 2,
+  }).format(value);
+const currency = price;
 const perPropertyPrices = site.pricing.plans
   .filter((p) => p.monthlyPrice && p.credits && p.credits >= site.pricing.averageRooms)
   .map((p) => p.monthlyPrice! / Math.floor(p.credits! / site.pricing.averageRooms));
@@ -277,9 +239,6 @@ export interface FeatureGroup {
 }
 
 const all = site.pricing.plans.map(() => true);
-const publishedTourFeatures = site.pricing.plans.map((p) =>
-  p.billing === 'free' ? 'A definir' : true,
-);
 export const featureGroups: FeatureGroup[] = [
   {
     title: 'Plano e publicação',
@@ -287,13 +246,11 @@ export const featureGroups: FeatureGroup[] = [
       {
         name: 'Preço',
         values: site.pricing.plans.map((p) =>
-          p.billing === 'free'
-            ? 'Grátis'
-            : p.billing === 'once'
-              ? `${currency(p.oneTimePrice!)} uma vez`
-              : p.billing === 'monthly'
-                ? `${currency(p.monthlyPrice!)} / mês`
-                : 'Sob consulta',
+          p.billing === 'once'
+            ? `${currency(p.pixPrice!)} no Pix ou ${p.installments}x de ${currency(p.oneTimePrice! / p.installments!)}`
+            : p.billing === 'monthly'
+              ? `${currency(p.monthlyPrice!)} / mês`
+              : 'Sob consulta',
         ),
       },
       {
@@ -308,9 +265,7 @@ export const featureGroups: FeatureGroup[] = [
         name: 'Tours publicados no ar',
         values: site.pricing.plans.map((p) =>
           p.liveTours === null
-            ? p.billing === 'free'
-              ? 'A definir'
-              : 'Conforme contrato'
+            ? 'Conforme contrato'
             : p.billing === 'monthly'
               ? `Até ${p.liveTours}`
               : String(p.liveTours),
@@ -334,9 +289,7 @@ export const featureGroups: FeatureGroup[] = [
             ? `${currency(p.renewalPrice!)} por mais 1 ano`
             : p.billing === 'monthly'
               ? `${currency(p.renewalPrice!)} por tour/ano após cancelar`
-              : p.billing === 'custom'
-                ? 'Conforme contrato'
-                : 'A definir',
+              : 'Conforme contrato',
         ),
       },
     ],
@@ -353,10 +306,10 @@ export const featureGroups: FeatureGroup[] = [
   {
     title: 'Tours e compartilhamento',
     rows: [
-      { name: 'Passagens entre os ambientes', values: publishedTourFeatures },
-      { name: 'Link público: o cliente abre sem conta', values: publishedTourFeatures },
-      { name: 'Atalho para WhatsApp e e-mail', values: publishedTourFeatures },
-      { name: 'Código para o site: responsivo, 16:9 e quadrado', values: publishedTourFeatures },
+      { name: 'Passagens entre os ambientes', values: all },
+      { name: 'Link público: o cliente abre sem conta', values: all },
+      { name: 'Atalho para WhatsApp e e-mail', values: all },
+      { name: 'Código para o site: responsivo, 16:9 e quadrado', values: all },
     ],
   },
   {
@@ -369,73 +322,71 @@ export const featureGroups: FeatureGroup[] = [
   },
 ];
 
-export const faq = [
+// Um FAQ só, em dois grupos, usado pela Home e por /planos.
+export const faqGroups = [
   {
-    question: 'Preciso comprar câmera 360° ou tripé?',
-    answer:
-      'Não. A captura é feita com o celular, na mão. A tela mostra para onde apontar e avisa quando segurar parado.',
+    title: 'Captura e tours',
+    items: [
+      {
+        question: 'Preciso comprar câmera 360° ou tripé?',
+        answer:
+          'Não. A captura é feita com o celular, na mão. A tela mostra para onde apontar e avisa quando segurar parado.',
+      },
+      {
+        question: 'Preciso instalar algum app?',
+        answer: 'Não. A ARP Vision abre no navegador do celular.',
+      },
+      { question: 'Funciona no meu celular?', answer: site.policies.phoneRequirements },
+      {
+        question: 'Quanto tempo leva para fazer um tour?',
+        answer:
+          'Cada ambiente é uma volta só, com 8 fotos. O 360° fica pronto em cerca de 1 minuto, em segundo plano, e você captura o próximo cômodo enquanto isso.',
+      },
+      {
+        question: 'O aprimoramento muda o espaço?',
+        answer:
+          'Ele deixa uniformes as emendas e a luz entre as fotos, sem criar móveis nem trocar acabamentos. O único trecho completado é o que nenhuma foto alcança: o chão logo abaixo do celular e o centro do teto, seguindo o piso e o teto que aparecem ao redor. A foto original fica guardada, e você compara as duas antes de publicar.',
+      },
+      {
+        question: 'Já tenho uma câmera 360°. Ela serve?',
+        answer:
+          'Serve. Envie as fotos 360° pela galeria e monte o tour normalmente. Fotos da galeria não gastam créditos.',
+      },
+      {
+        question: 'O meu cliente precisa criar conta para ver o tour?',
+        answer: 'Não. Ele abre o link direto, no celular ou no computador.',
+      },
+      {
+        question: 'Posso colocar o tour no meu site?',
+        answer:
+          'Pode. Cada tour tem um código para colar no site, nos formatos responsivo, 16:9 ou quadrado.',
+      },
+    ],
   },
   {
-    question: 'Preciso instalar algum app?',
-    answer: 'Não. A ARP Vision abre no navegador do celular.',
-  },
-  { question: 'Funciona no meu celular?', answer: site.policies.phoneRequirements },
-  {
-    question: 'Quanto tempo leva para fazer um tour?',
-    answer: `O tempo de captura por ambiente está ${site.policies.captureTime}. Cada ambiente fica pronto em cerca de 1 minuto, em segundo plano, e você captura o próximo cômodo enquanto isso.`,
-  },
-  {
-    question: 'O que é um crédito?',
-    answer:
-      'Cada ambiente fotografado com o celular usa 1 crédito. Os créditos são da empresa, e toda a equipe usa o mesmo saldo.',
-  },
-  {
-    question: 'E se um ambiente não ficar pronto?',
-    answer: 'O crédito volta para o saldo, e você pode fotografar o ambiente de novo.',
-  },
-  {
-    question: 'O aprimoramento muda o espaço?',
-    answer:
-      'Ele deixa uniformes as emendas e a luz entre as fotos, sem criar móveis nem trocar acabamentos. O único trecho completado é o que nenhuma foto alcança: o chão logo abaixo do celular e o centro do teto, seguindo o piso e o teto que aparecem ao redor. A foto original fica guardada, e você compara as duas antes de publicar.',
-  },
-  {
-    question: 'Já tenho uma câmera 360°. Ela serve?',
-    answer:
-      'Serve. Envie as fotos 360° pela galeria e monte o tour normalmente. Fotos da galeria não gastam créditos.',
-  },
-  {
-    question: 'O meu cliente precisa criar conta para ver o tour?',
-    answer: 'Não. Ele abre o link direto, no celular ou no computador.',
-  },
-  {
-    question: 'Posso colocar o tour no meu site?',
-    answer:
-      'Pode. Cada tour tem um código para colar no site, nos formatos responsivo, 16:9 ou quadrado.',
-  },
-  {
-    question: 'Como funcionam o pagamento e o cancelamento?',
-    answer: `${site.policies.billing} ${site.policies.cancellation}`,
+    title: 'Créditos, planos e pagamento',
+    items: [
+      {
+        question: 'O que é um crédito?',
+        answer:
+          'Cada ambiente fotografado com o celular usa 1 crédito. Os créditos são da empresa, e toda a equipe usa o mesmo saldo.',
+      },
+      {
+        question: 'E se um ambiente não ficar pronto?',
+        answer: 'O crédito volta para o saldo, e você pode fotografar o ambiente de novo.',
+      },
+      {
+        question: 'Quantos tours posso manter no ar?',
+        answer:
+          'Individual: 1 tour por 1 ano. Professional: até 30 tours enquanto a assinatura estiver ativa. Business: até 120 tours enquanto a assinatura estiver ativa. No Enterprise, o limite é combinado em contrato.',
+      },
+      { question: 'Quais tours contam no limite?', answer: site.policies.liveTourLimit },
+      { question: 'Como funciona o Individual?', answer: site.policies.individualTerm },
+      { question: 'Posso comprar ambientes extras?', answer: site.policies.monthlyExtras },
+      { question: 'Como funciona o pagamento?', answer: site.policies.billing },
+      { question: 'Como funciona o cancelamento?', answer: site.policies.cancellation },
+    ],
   },
 ];
 
-export const billingFaq = [
-  faq[4],
-  {
-    question: 'Quantos tours posso manter no ar?',
-    answer:
-      'Individual: 1 tour por 1 ano. Professional: até 30 tours enquanto a assinatura estiver ativa. Business: até 120 tours enquanto a assinatura estiver ativa. No Enterprise, o limite é combinado em contrato. O limite do Teste grátis ainda está a definir.',
-  },
-  { question: 'Quais tours contam no limite?', answer: site.policies.liveTourLimit },
-  { question: 'Como funciona o Individual?', answer: site.policies.individualTerm },
-  { question: 'Posso comprar ambientes extras?', answer: site.policies.monthlyExtras },
-  {
-    question: 'Os créditos acumulam de um mês para o outro?',
-    answer: site.policies.creditRollover,
-  },
-  { question: 'Há plano anual?', answer: site.policies.annualPlan },
-  { question: 'Posso trocar de plano?', answer: site.policies.changePlan },
-  { question: 'Como funciona o cancelamento?', answer: site.policies.cancellation },
-  { question: 'O que acontece se um pagamento falhar?', answer: site.policies.paymentFailure },
-  { question: 'Como funciona o pagamento?', answer: site.policies.billing },
-  { question: 'Vocês emitem nota fiscal?', answer: site.policies.invoice },
-];
+export const faq = faqGroups.flatMap((group) => group.items);

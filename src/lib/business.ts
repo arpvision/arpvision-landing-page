@@ -14,7 +14,7 @@ export const whatsappLink = (
   const number = site.contact.whatsapp.replace(/\D/g, '');
   return number ? `https://wa.me/${number}?text=${encodeURIComponent(message)}` : '#contato';
 };
-export function calculateUsage(properties: number, rooms: number, agents: number) {
+export function calculateUsage(properties: number, rooms: number) {
   const credits = properties * rooms;
   const plan = [...site.pricing.plans]
     .filter((p) => p.billing === 'monthly' && p.monthlyPrice !== null && p.credits !== null)
@@ -25,15 +25,5 @@ export function calculateUsage(properties: number, rooms: number, agents: number
     plan: plan ?? null,
     perProperty: plan ? plan.monthlyPrice! / properties : null,
     twelveMonthPrice: plan ? plan.monthlyPrice! * 12 : null,
-    cameraInvestment: agents * site.market.cameraPrice,
   };
-}
-export function founderMessage(data: {
-  name: string;
-  company: string;
-  city: string;
-  agents: string;
-  phone: string;
-}) {
-  return `Olá! Quero participar do Programa Fundadores da ARP Vision.\nNome: ${data.name}\nEmpresa: ${data.company}\nCidade/UF: ${data.city}\nTamanho da equipe: ${data.agents}\nWhatsApp: ${data.phone}`;
 }

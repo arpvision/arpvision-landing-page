@@ -41,26 +41,30 @@ try {
   await fixture(desktop);
   let requests = 0;
   await desktop.route('https://arpvision.app/embed/**', async (route) => {
-    requests++;
+    // O tour embutido na hero carrega com a página; aqui contam só os tours da demo.
+    if (route.request().url().includes('/embed/test-')) requests++;
     await route.fulfill({
       contentType: 'text/html',
       body: '<!doctype html><html lang="pt-BR"><body><h1>Visualizador de teste</h1></body></html>',
     });
   });
   await desktop.goto(base);
-  assert.equal(await desktop.locator('iframe').count(), 0);
+  assert.equal(await desktop.locator('[data-tour-host] iframe').count(), 0);
   assert.equal(requests, 0);
   await desktop.locator('[data-tour-open]').click();
-  await desktop.locator('iframe').waitFor();
+  await desktop.locator('[data-tour-host] iframe').waitFor();
   assert.equal(
-    await desktop.locator('iframe').getAttribute('src'),
+    await desktop.locator('[data-tour-host] iframe').getAttribute('src'),
     'https://arpvision.app/embed/test-0',
   );
-  assert.equal(await desktop.locator('iframe').getAttribute('allow'), 'fullscreen');
-  assert.equal(await desktop.locator('iframe').getAttribute('sandbox'), null);
+  assert.equal(
+    await desktop.locator('[data-tour-host] iframe').getAttribute('allow'),
+    'fullscreen',
+  );
+  assert.equal(await desktop.locator('[data-tour-host] iframe').getAttribute('sandbox'), null);
   await desktop.locator('[data-tour-index="1"]').click();
   assert.equal(
-    await desktop.locator('iframe').getAttribute('src'),
+    await desktop.locator('[data-tour-host] iframe').getAttribute('src'),
     'https://arpvision.app/embed/test-1',
   );
   assert.equal(await desktop.locator('.tour-qr img').getAttribute('src'), qrCodes[1]);
@@ -93,7 +97,7 @@ try {
     true,
   );
   await phone.locator('.tour-close').click();
-  assert.equal(await phone.locator('iframe').count(), 0);
+  assert.equal(await phone.locator('[data-tour-host] iframe').count(), 0);
   assert.equal(
     await phone.locator('[data-tour-open]').evaluate((button) => button === document.activeElement),
     true,
@@ -105,12 +109,16 @@ try {
     reducedMotion: 'reduce',
   });
   await fixture(timeoutPage);
-  await timeoutPage.route('https://arpvision.app/embed/**', () => {});
+  // Só os tours da demo ficam sem resposta; o da hero responde para a página terminar de carregar.
+  await timeoutPage.route('https://arpvision.app/embed/**', (route) => {
+    if (!route.request().url().includes('/embed/test-'))
+      return route.fulfill({ contentType: 'text/html', body: '' });
+  });
   await timeoutPage.clock.install();
   await timeoutPage.goto(base);
   await timeoutPage.locator('[data-tour-open]').click();
   await timeoutPage.clock.fastForward(15100);
-  assert.equal(await timeoutPage.locator('iframe').count(), 0);
+  assert.equal(await timeoutPage.locator('[data-tour-host] iframe').count(), 0);
   assert.match(
     await timeoutPage.locator('[data-tour-status]').textContent(),
     /Não foi possível abrir o tour agora/,

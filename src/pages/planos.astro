@@ -5,7 +5,7 @@ import Faq from '../components/Faq.astro';
 import FinalCta from '../components/FinalCta.astro';
 import Icon from '../components/Icon.astro';
 import FeatureValue from '../components/FeatureValue.astro';
-import { site, featureGroups, billingFaq } from '../config/site';
+import { site, featureGroups, faq } from '../config/site';
 const schema = [
   {
     '@context': 'https://schema.org',
@@ -20,26 +20,19 @@ const schema = [
       .map((plan) => ({
         '@type': 'Offer',
         name: plan.name,
-        price:
-          plan.billing === 'free'
-            ? 0
-            : plan.billing === 'once'
-              ? plan.oneTimePrice
-              : plan.monthlyPrice,
+        price: plan.billing === 'once' ? plan.pixPrice : plan.monthlyPrice,
         priceCurrency: 'BRL',
         description:
-          plan.billing === 'free'
-            ? 'Teste grátis com 1 crédito, uma única vez.'
-            : plan.billing === 'once'
-              ? 'Pagamento único por 1 tour no ar por 1 ano. Renovação anual à parte.'
-              : 'Assinatura mensal; tours no ar enquanto a assinatura estiver ativa, dentro do limite do plano.',
+          plan.billing === 'once'
+            ? 'Pagamento único por 1 tour no ar por 1 ano: à vista no Pix ou em 12x no cartão. Renovação anual à parte.'
+            : 'Assinatura mensal no cartão; tours no ar enquanto a assinatura estiver ativa, dentro do limite do plano.',
         url: `${site.appUrl}/register?utm_source=site&utm_medium=planos&utm_campaign=landing`,
       })),
   },
   {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
-    mainEntity: billingFaq.map((item) => ({
+    mainEntity: faq.map((item) => ({
       '@type': 'Question',
       name: item.question,
       acceptedAnswer: { '@type': 'Answer', text: item.answer },
@@ -50,7 +43,7 @@ const schema = [
 
 <Layout
   title="Planos e preços | ARP Vision"
-  description="Conheça os cinco planos ARP Vision: Teste grátis, Individual com pagamento único, Professional e Business mensais e Enterprise sob consulta. Compare créditos e tours no ar."
+  description="Conheça os planos ARP Vision: Individual com pagamento único, Professional e Business mensais e Enterprise sob consulta. Compare créditos e tours no ar e teste grátis."
   ogImage={site.media.ogPlans}
   schema={schema}
 >
@@ -103,7 +96,7 @@ const schema = [
             {featureGroups.map((group) => (
               <>
                 <tr class="feature-group">
-                  <th colspan="6" scope="colgroup">
+                  <th colspan={site.pricing.plans.length + 1} scope="colgroup">
                     {group.title}
                   </th>
                 </tr>
@@ -155,6 +148,6 @@ const schema = [
       </div>
     </div>
   </section>
-  <Faq items={billingFaq} title="Tudo claro antes de começar." billing />
+  <Faq />
   <FinalCta />
 </Layout>

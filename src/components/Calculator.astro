@@ -1,11 +1,9 @@
 ---
 import Icon from './Icon.astro';
-import MarketNote from './MarketNote.astro';
 import { site } from '../config/site';
 import { calculateUsage, appLink, money, whatsappLink } from '../lib/business';
-const initial = calculateUsage(5, site.pricing.averageRooms, 5);
+const initial = calculateUsage(5, site.pricing.averageRooms);
 const inputs = [
-  { id: 'agents', name: 'Pessoas na equipe', min: 1, max: 50, value: 5 },
   { id: 'properties', name: 'Espaços por mês', min: 1, max: 200, value: 5 },
   { id: 'rooms', name: 'Ambientes por espaço', min: 3, max: 15, value: site.pricing.averageRooms },
 ];
@@ -88,12 +86,6 @@ const inputs = [
         </div>
         <div class="cost-comparison">
           <div>
-            <span>Uma câmera 360° para cada pessoa da equipe¹</span>
-            <strong data-result="camera">
-              5 × {money(site.market.cameraPrice)} = {money(initial.cameraInvestment)}
-            </strong>
-          </div>
-          <div>
             <span data-result="annual-label">
               12 mensalidades de ARP Vision · {initial.plan?.name ?? 'Enterprise'}
             </span>
@@ -123,10 +115,8 @@ const inputs = [
         )}
       </div>
     </div>
-    <MarketNote />
     <p class="footnote">
-      Equipamento e assinatura têm custos de naturezas diferentes. Esta simulação considera planos
-      mensais; o Individual é para um tour com pagamento único.
+      Esta simulação considera planos mensais; o Individual é para um tour com pagamento único.
     </p>
   </div>
 </section>

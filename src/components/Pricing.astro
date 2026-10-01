@@ -1,21 +1,30 @@
 ---
-import { site, available, type Plan } from '../config/site';
-import { appLink, money } from '../lib/business';
+import { site, price, type Plan } from '../config/site';
+import { appLink } from '../lib/business';
 import Icon from './Icon.astro';
 import ContactLink from './ContactLink.astro';
 
+// Cards no mesmo formato da tela "Planos e créditos" do app: preço, forma de pagamento,
+// botão e dois ou três itens. O detalhe completo fica na tabela de /planos.
 const { full = false } = Astro.props;
-const priceFor = (plan: Plan) => {
-  if (plan.billing === 'free') return money(0);
-  if (plan.billing === 'once' && plan.oneTimePrice !== null) return money(plan.oneTimePrice);
-  if (plan.billing === 'monthly' && plan.monthlyPrice !== null) return money(plan.monthlyPrice);
-  return 'Sob consulta';
-};
 const iconFor = (plan: Plan) => {
-  if (plan.billing === 'free') return 'sparkle';
-  if (plan.billing === 'once') return 'target';
+  if (plan.billing === 'once') return 'user';
   if (plan.billing === 'custom') return 'globe';
-  return plan.name === 'Business' ? 'users' : 'phone';
+  return plan.recommended ? 'users' : 'phone';
+};
+// Valor de cada parcela do Individual no cartão (o total fica em `oneTimePrice`).
+const installmentFor = (plan: Plan) => (plan.oneTimePrice ?? 0) / (plan.installments ?? 1);
+const paymentFor = (plan: Plan) => {
+  if (plan.billing === 'once') return `ou ${price(plan.pixPrice!)} à vista no Pix`;
+  if (plan.billing === 'monthly') return 'no cartão';
+  return 'condições em contrato';
+};
+const highlightsFor = (plan: Plan) => {
+  if (plan.billing === 'once')
+    return [`${plan.credits} ambientes`, `${plan.liveTours} tour no ar por 1 ano`];
+  if (plan.billing === 'monthly')
+    return [`${plan.credits} ambientes por mês`, `Até ${plan.liveTours} tours no ar`];
+  return ['Ambientes sob medida', 'Volume e limite de tours combinados em contrato.'];
 };
 ---
 
@@ -44,80 +53,33 @@ const iconFor = (plan: Plan) => {
         {plan.recommended && <span class="plan-ribbon">Recomendado para equipes</span>}
         <div class="plan-title">
           <span class="plan-icon">
-            <Icon name={iconFor(plan)} size={22} />
+            <Icon name={iconFor(plan)} size={20} />
           </span>
           <h3>{plan.name}</h3>
         </div>
         <p class="plan-audience">{plan.audience}</p>
         <div class="plan-price">
-          <strong data-price>{priceFor(plan)}</strong>
-          {plan.billing !== 'custom' && (
-            <span data-period>
-              {plan.billing === 'free'
-                ? 'para começar'
-                : plan.billing === 'once'
-                  ? 'uma vez'
-                  : '/mês'}
-            </span>
-          )}
-        </div>
-        {plan.billing !== 'free' && <p class="plan-duration">{plan.duration}</p>}
-        <div class="plan-credits">
-          <strong>
-            {plan.credits === null
-              ? 'Ambientes sob medida'
-              : plan.billing === 'free'
-                ? '1 crédito para testar'
-                : plan.billing === 'once'
-                  ? `${plan.credits} ambientes incluídos`
-                  : `${plan.credits} ambientes por mês`}
-          </strong>
-          {plan.billing === 'free' ? (
-            <span>Experimente a captura e o aprimoramento em 1 ambiente.</span>
-          ) : plan.billing === 'custom' ? (
-            <span>Volume e limite de tours combinados em contrato.</span>
-          ) : (
+          {plan.billing === 'once' ? (
             <>
-              {plan.credits !== null && (
-                <span>
-                  ≈ {Math.floor(plan.credits / site.pricing.averageRooms)}{' '}
-                  {Math.floor(plan.credits / site.pricing.averageRooms) === 1
-                    ? 'espaço'
-                    : 'espaços'}
-                  {plan.billing === 'monthly' ? ' por mês' : ''}
-                </span>
-              )}
-              {plan.liveTours !== null && (
-                <span>
-                  {plan.billing === 'once' ? '1 tour no ar' : `Até ${plan.liveTours} tours no ar`}
-                </span>
-              )}
+              <span class="plan-installments">{plan.installments}x</span>
+              <strong data-price>{price(installmentFor(plan))}</strong>
             </>
-          )}
-          {plan.extraRoomPrice !== null && (
-            <span>{money(plan.extraRoomPrice)} por ambiente extra</span>
-          )}
-          {plan.renewalPrice !== null && (
-            <span>
-              {plan.billing === 'once' ? 'Renovação' : 'Após cancelar'}: {money(plan.renewalPrice)}
-              {plan.billing === 'once' ? ' por mais 1 ano' : ' por tour/ano'}
-            </span>
+          ) : plan.billing === 'monthly' ? (
+            <>
+              <strong data-price>{price(plan.monthlyPrice!)}</strong>
+              <span data-period>/mês</span>
+            </>
+          ) : (
+            <strong data-price>Sob consulta</strong>
           )}
         </div>
-        <ul class="feature-list">
-          {plan.features.map((feature) => (
-            <li>
-              <Icon name="check" size={17} />
-              {feature}
-            </li>
-          ))}
-        </ul>
+        <p class="plan-payment">{paymentFor(plan)}</p>
         {plan.billing === 'custom' ? (
           <ContactLink
             class="button button-secondary"
             message={`Olá! Quero conhecer o plano ${plan.name} da ARP Vision.`}
           >
-            Falar com vendas <Icon name="arrow" size={17} />
+            Falar no WhatsApp
           </ContactLink>
         ) : (
           <a
@@ -125,23 +87,35 @@ const iconFor = (plan: Plan) => {
             class:list={['button', plan.recommended ? 'button-primary' : 'button-secondary']}
             data-cta={`plano-${plan.id}`}
           >
-            Criar conta grátis
-            <Icon name="arrow" size={17} />
+            {plan.billing === 'once' ? 'Comprar' : 'Assinar'}
           </a>
         )}
-        {available.whatsapp && (plan.billing === 'once' || plan.billing === 'monthly') && (
-          <ContactLink
-            class="plan-sales"
-            message={`Olá! Quero conhecer o plano ${plan.name} da ARP Vision.`}
-          >
-            Falar com vendas
-          </ContactLink>
-        )}
+        <ul class="plan-checks">
+          {highlightsFor(plan).map((item) => (
+            <li>
+              <Icon name="check" size={16} />
+              {item}
+            </li>
+          ))}
+          {plan.billing === 'once' && plan.renewalPrice !== null && (
+            <li class="plan-check-muted">
+              <Icon name="refresh" size={16} />
+              Renovação {price(plan.renewalPrice)}/ano
+            </li>
+          )}
+        </ul>
       </article>
     ))}
   </div>
-  <p class="pricing-caption">
-    1 crédito = 1 ambiente fotografado com o celular. Um espaço costuma ter de 6 a 10 ambientes.
+  <p class="pricing-secure">
+    <span aria-hidden="true"></span> Pagamento seguro via Asaas · Pix ou cartão
+  </p>
+  <p class="pricing-trial">
+    Quer testar antes? Crie sua conta grátis e fotografe {site.pricing.freeTrialCredits}{' '}
+    {site.pricing.freeTrialCredits === 1 ? 'ambiente' : 'ambientes'} sem pagar nada.{' '}
+    <a href={appLink(full ? 'planos-teste' : 'plano-teste')} data-cta="plano-teste">
+      Criar conta grátis
+    </a>
   </p>
   {!full && (
     <div class="center">

@@ -26,7 +26,11 @@ for (const route of routes) {
     assert.ok(html.includes(`="${meta}"`), `${route}: ${meta}`);
   assert.match(html, /rel="canonical"/);
   assert.ok(!html.includes('{{'), `${route}: sem placeholders brutos`);
-  assert.ok(!html.includes('<iframe'), `${route}: iframe só após interação`);
+  // O tour embutido na hero carrega com a página; qualquer outro iframe só após interação.
+  assert.ok(
+    (html.match(/<iframe[^>]*>/g) || []).every((tag) => tag.includes('class="hero-embed"')),
+    `${route}: iframe só após interação (exceto o tour da hero)`,
+  );
   for (const match of html.matchAll(/(?:href|src|poster)="(\/[^"?#]*)(?:[?#][^"]*)?"/g)) {
     const destination = path.join('dist', decodeURIComponent(match[1]));
     let exists = false;
