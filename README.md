@@ -4,7 +4,7 @@ Landing page em português do Brasil. Astro gera HTML estático para `/`, `/plan
 
 ## Executar
 
-Requer Node.js 22.19+ (recomendado) e npm. O projeto também foi compilado e testado no Node 22.18 do ambiente de implementação; uma dependência transitiva do Astro emite aviso de engine nessa versão.
+Requer Node.js 22.19+ (recomendado) e npm. O Astro 7 exige 22.12+; no Node 22.18 o site compila e todos os testes passam, mas o Lighthouse 13 (usado só em `npm run audit`) emite aviso de engine.
 
 ```sh
 npm ci
