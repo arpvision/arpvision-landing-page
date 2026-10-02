@@ -1,0 +1,47 @@
+---
+import GlassSurface from './GlassSurface.astro';
+import Icon from './Icon.astro';
+interface Props {
+  src: string;
+}
+const { src } = Astro.props;
+---
+
+<div class="protected-tour" data-protected-tour data-tour-active="false">
+  <iframe
+    id="presentation-tour"
+    class="hero-embed"
+    src={src}
+    title="Tour 360° de demonstração da ARP Vision"
+    allow="fullscreen"
+    allowfullscreen
+    referrerpolicy="strict-origin-when-cross-origin"
+    tabindex="-1"
+    inert
+  ></iframe>
+  <div class="tour-shield" data-tour-shield>
+    <GlassSurface class="tour-entry-panel">
+      <span class="tour-entry-icon">
+        <Icon name="expand" size={28} />
+      </span>
+      <strong>Olhe o espaço por dentro.</strong>
+      <p>Ative o tour para explorar os ambientes. Até lá, role a página normalmente.</p>
+      <button class="button button-primary" data-tour-activate aria-controls="presentation-tour">
+        Explorar o tour <Icon name="arrow" size={18} />
+      </button>
+      <noscript>
+        <a class="button button-primary" href={src} target="_blank" rel="noopener noreferrer">
+          Abrir tour em nova aba <Icon name="arrow" size={18} />
+        </a>
+      </noscript>
+    </GlassSurface>
+  </div>
+  <GlassSurface class="tour-exit-panel">
+    <button data-tour-lock aria-controls="presentation-tour">
+      <Icon name="shield" size={18} /> Encerrar exploração
+    </button>
+  </GlassSurface>
+</div>
+<script>
+  import '../scripts/protected-tour';
+</script>

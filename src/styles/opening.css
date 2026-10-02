@@ -1,0 +1,325 @@
+/* Composição da abertura. Vidro e cores vêm dos componentes/tokens do projeto. */
+.hero.opening {
+  --opening-header-space: 94px;
+  --opening-peek: 80px;
+  position: relative;
+  padding: 0 0 34px;
+  overflow: visible;
+  isolation: isolate;
+}
+.opening > .container {
+  display: grid;
+  grid-template-rows:
+    minmax(calc(100svh - var(--opening-header-space) - var(--opening-peek)), auto)
+    auto;
+}
+.opening .fan {
+  margin-top: 0;
+}
+.opening::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: -110px 0 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse at 18% 0%,
+      color-mix(in srgb, var(--brand-blue-soft) 58%, transparent),
+      transparent 48%
+    ),
+    radial-gradient(
+      ellipse at 88% 8%,
+      color-mix(in srgb, var(--brand-teal-soft) 42%, transparent),
+      transparent 42%
+    );
+}
+.opening-copy {
+  max-width: 1080px;
+  margin-inline: auto;
+  align-self: center;
+  padding-block: 42px;
+}
+.opening-copy .eyebrow {
+  justify-content: center;
+  margin-bottom: 18px;
+}
+.opening h1 {
+  max-width: none;
+  margin: 0 auto 22px;
+  font-size: clamp(2.5rem, 3.8vw, 3.375rem);
+  line-height: 1.12;
+  font-weight: 650;
+  letter-spacing: -0.05em;
+  text-wrap: balance;
+}
+.opening h1 > span:last-child {
+  display: inline-block;
+}
+.opening-description {
+  max-width: 660px;
+  margin: 0 auto;
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  text-wrap: pretty;
+}
+.fan {
+  --fan-width: 340px;
+  --fan-height: 302px;
+  --fan-step: 280px;
+  --fan-drop: 38px;
+  --fan-angle: 9deg;
+  --fan-hover: -14px;
+  margin-top: 44px;
+}
+.fan-stage {
+  position: relative;
+  height: calc(var(--fan-height) + var(--fan-drop) + 48px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  isolation: isolate;
+}
+.fan-position {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: var(--fan-width);
+  z-index: var(--fan-layer);
+  transform-origin: 50% 85%;
+  transform: translate(
+      calc(-50% + var(--fan-offset) * var(--fan-step)),
+      calc(var(--fan-distance) * var(--fan-drop))
+    )
+    rotate(calc(var(--fan-offset) * var(--fan-angle)));
+  transition: transform 900ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.fan[data-fan-state='stacked'] .fan-position {
+  transform: translate(calc(-50% + var(--fan-offset) * 8px), calc(24px + var(--fan-distance) * 5px))
+    rotate(calc(var(--fan-offset) * -3deg));
+}
+.fan .fan-card {
+  position: relative;
+  min-height: var(--fan-height);
+  padding: 28px;
+  border-radius: 22px;
+  border-color: color-mix(in srgb, var(--border) 75%, var(--surface));
+  background: var(--surface);
+  box-shadow:
+    0 18px 36px -18px color-mix(in srgb, var(--ink) 22%, transparent),
+    0 3px 10px color-mix(in srgb, var(--ink) 4%, transparent);
+  transition:
+    transform 320ms ease-out,
+    box-shadow 320ms ease-out;
+}
+.fan .use-card-top {
+  margin-bottom: 28px;
+}
+.fan .use-card h3 {
+  font-size: 1.375rem;
+  margin-bottom: 12px;
+}
+.fan .use-card p {
+  color: var(--text-secondary);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+.fan .use-tag {
+  font-size: 0.875rem;
+  padding-top: 16px;
+}
+.fan-position:nth-child(2) .icon-tile {
+  color: var(--brand-teal-dark);
+  background: var(--brand-teal-soft);
+}
+.fan-position:focus-within,
+.fan-position[data-selected] {
+  z-index: 10;
+}
+.fan-position:focus-within .fan-card,
+.fan-position[data-selected] .fan-card {
+  transform: translateY(var(--fan-hover));
+}
+@media (hover: hover) and (pointer: fine) {
+  .fan-position:hover {
+    z-index: 20;
+  }
+  .fan-position:hover .fan-card {
+    transform: translateY(var(--fan-hover));
+    box-shadow: 0 24px 42px -14px color-mix(in srgb, var(--ink) 20%, transparent);
+  }
+}
+.glass-surface.fan-controls {
+  --glass-radius: 999px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: max-content;
+  margin: 0 auto;
+  padding: 5px;
+}
+.fan-controls button {
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.fan-controls button[aria-pressed='true'] {
+  background: var(--brand-blue);
+  color: var(--white);
+}
+.fan:not([data-fan-state]) .fan-controls {
+  display: none;
+}
+.hero.presentation {
+  padding-block: 64px 80px;
+  border-top: 1px solid var(--line);
+  background: var(--bg-base);
+}
+.presentation h2 {
+  max-width: 480px;
+  font-size: clamp(2rem, 3.3vw, 2.8rem);
+}
+.presentation .hero-copy > p {
+  font-size: 1.0625rem;
+  margin-bottom: 28px;
+}
+.presentation .hero-embed {
+  height: 480px;
+}
+@media (min-width: 768px) and (max-width: 1199px) {
+  .opening-copy {
+    max-width: 920px;
+  }
+  .opening h1 {
+    font-size: clamp(2.3rem, 4.6vw, 3.2rem);
+  }
+  .fan {
+    --fan-width: 300px;
+    --fan-height: 312px;
+    --fan-step: clamp(185px, 23vw, 255px);
+    --fan-angle: 7deg;
+    --fan-drop: 30px;
+  }
+  .fan .fan-card {
+    padding: 24px;
+  }
+}
+@media (max-width: 767px) {
+  .hero.opening {
+    --opening-header-space: 84px;
+    --opening-peek: 88px;
+    padding: 0 0 30px;
+  }
+  .opening-copy {
+    padding-block: 36px;
+  }
+  .opening-copy .eyebrow {
+    letter-spacing: 0.07em;
+    margin-bottom: 18px;
+  }
+  .opening-copy .eyebrow-line {
+    display: none;
+  }
+  .opening h1 {
+    font-size: clamp(2rem, 5.8vw, 2.75rem);
+    line-height: 1.15;
+    margin-bottom: 18px;
+  }
+  .opening h1 sup a {
+    min-width: 24px;
+    min-height: 24px;
+    padding: 6px 8px;
+    margin: -6px -8px;
+  }
+  .opening-description {
+    max-width: 510px;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+  }
+  .fan {
+    --fan-width: min(280px, calc(100vw - 92px));
+    --fan-height: 310px;
+    --fan-step: 24px;
+    --fan-angle: 4deg;
+    --fan-drop: 24px;
+    --fan-hover: -10px;
+    margin-top: 32px;
+  }
+  .fan-stage {
+    height: calc(var(--fan-height) + 56px);
+  }
+  .fan .fan-card {
+    padding: 24px 20px;
+    border-radius: 18px;
+  }
+  .fan .use-card-top {
+    margin-bottom: 22px;
+  }
+  .fan .use-card h3 {
+    font-size: 1.25rem;
+  }
+  .fan .use-card p {
+    font-size: 0.875rem;
+    margin-bottom: 20px;
+  }
+  .fan .use-tag {
+    font-size: 0.875rem;
+  }
+  .glass-surface.fan-controls {
+    display: flex;
+  }
+  /* Sem JS, todos os textos continuam visíveis e não há controles inativos. */
+  .fan:not([data-fan-state]) .fan-stage {
+    display: grid;
+    height: auto;
+    gap: 18px;
+  }
+  .fan:not([data-fan-state]) .fan-position {
+    position: static;
+    width: 100%;
+    transform: none;
+  }
+  .fan:not([data-fan-state]) .fan-card {
+    min-height: 0;
+  }
+  .hero.presentation {
+    padding-block: 48px;
+  }
+  .presentation .hero-embed {
+    height: 420px;
+  }
+}
+@media (max-width: 374px) {
+  .opening h1 {
+    font-size: 1.875rem;
+  }
+  .fan {
+    --fan-height: 348px;
+    --fan-step: 18px;
+    --fan-angle: 3deg;
+  }
+}
+@media (min-width: 768px) and (hover: none) and (pointer: coarse) {
+  .glass-surface.fan-controls {
+    display: flex;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fan-position {
+    transition: none;
+  }
+  .fan[data-fan-state='stacked'] .fan-position {
+    transform: translate(
+        calc(-50% + var(--fan-offset) * var(--fan-step)),
+        calc(var(--fan-distance) * var(--fan-drop))
+      )
+      rotate(calc(var(--fan-offset) * var(--fan-angle)));
+  }
+}

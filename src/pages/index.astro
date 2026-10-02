@@ -8,6 +8,8 @@ import Pricing from '../components/Pricing.astro';
 import Faq from '../components/Faq.astro';
 import FinalCta from '../components/FinalCta.astro';
 import MarketNote from '../components/MarketNote.astro';
+import FanCards from '../components/FanCards.astro';
+import FeatureStack from '../components/FeatureStack.astro';
 import { site, available, faq, alternatives, alternativeLabels } from '../config/site';
 import { appLink } from '../lib/business';
 const faqSchema = {
@@ -44,6 +46,27 @@ const uses = [
     tag: 'Seu espaço, em todos os ângulos',
   },
 ];
+const features = [
+  ...uses,
+  {
+    icon: 'users',
+    number: '04',
+    title: 'Capture com a equipe.',
+    text: 'Cada pessoa entra com o próprio acesso e captura com o celular. O saldo de créditos é compartilhado pela empresa.',
+    tag: 'Mais autonomia, um só saldo',
+  },
+  {
+    icon: 'audit',
+    number: '05',
+    title: 'Veja quem fez o quê.',
+    text: 'A auditoria registra quem criou e editou cada tour, com data e hora. Mais visibilidade para quem faz a gestão.',
+    tag: 'Gestão com visibilidade',
+  },
+];
+const roomCards = site.media.fanRooms.map((room, index) => ({
+  ...room,
+  number: String(index + 1).padStart(2, '0'),
+}));
 const teams = [
   {
     icon: 'credits',
@@ -69,13 +92,13 @@ const teams = [
 ---
 
 <Layout title="Tour virtual 360° com o celular | ARP Vision" schema={[faqSchema]}>
-  <section class="hero">
-    <div class="container hero-grid">
-      <div class="hero-copy">
+  <section class="hero opening" aria-labelledby="opening-title">
+    <div class="container">
+      <div class="opening-copy center">
         <span class="eyebrow">
           <span class="eyebrow-line"></span> TOUR VIRTUAL 360° PARA O SEU NEGÓCIO
         </span>
-        <h1>
+        <h1 id="opening-title">
           O tour 360° de uma câmera de{' '}
           <span class="nowrap">
             R$ 3.000.
@@ -89,10 +112,22 @@ const teams = [
             </sup>
           </span>
           <br />
-          <span>
-            Feito com o<br class="hero-break" /> seu celular.
-          </span>
+          <span>Feito com o seu celular.</span>
         </h1>
+        <p class="opening-description">
+          Faça o tour virtual 360° do seu espaço só com o celular. As emendas e a luz saem
+          corrigidas, e o cliente abre o tour pelo WhatsApp, sem criar conta.
+        </p>
+      </div>
+      <FanCards items={roomCards} />
+    </div>
+  </section>
+  <section class="hero presentation" aria-labelledby="presentation-title">
+    <div class="container presentation-heading">
+      <div class="hero-copy">
+        <span class="eyebrow">MAIS DO QUE UM LINK BONITO</span>
+        <h2 id="presentation-title">Onde o tour trabalha por você.</h2>
+        <p>Da primeira conversa à próxima visita.</p>
         <div class="hero-actions">
           <a class="button button-primary" href={appLink('hero')} data-cta="hero">
             Criar conta grátis <Icon name="arrow" size={19} />
@@ -108,17 +143,8 @@ const teams = [
           )}
         </div>
       </div>
-      <div class="hero-visual">
-        <iframe
-          class="hero-embed"
-          src={site.media.heroEmbed}
-          title="Tour 360° de demonstração da ARP Vision"
-          allow="fullscreen"
-          allowfullscreen
-          referrerpolicy="strict-origin-when-cross-origin"
-        ></iframe>
-      </div>
     </div>
+    <FeatureStack src={site.media.heroEmbed} items={features} />
   </section>
   <section class="facts-strip" aria-label="Destaque">
     <div class="container fact">
@@ -194,33 +220,6 @@ const teams = [
             <Icon name="pause" size={18} />
           </span>
         </button>
-      </div>
-    </div>
-  </section>
-  <section class="section uses-section">
-    <div class="container">
-      <div class="section-heading">
-        <span class="eyebrow">MAIS DO QUE UM LINK BONITO</span>
-        <h2>Onde o tour trabalha por você.</h2>
-        <p>Da primeira conversa à próxima visita.</p>
-      </div>
-      <div class="uses-grid">
-        {uses.map((use) => (
-          <article class="use-card">
-            <div class="use-card-top">
-              <span class="icon-tile">
-                <Icon name={use.icon} size={26} />
-              </span>
-              <span>{use.number}</span>
-            </div>
-            <h3>{use.title}</h3>
-            <p>{use.text}</p>
-            <div class="use-tag">
-              <span></span>
-              {use.tag}
-            </div>
-          </article>
-        ))}
       </div>
     </div>
   </section>

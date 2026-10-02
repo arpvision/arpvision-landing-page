@@ -1,0 +1,378 @@
+import { chromium } from '@playwright/test';
+import assert from 'node:assert/strict';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+
+const base = process.env.SITE_URL || 'http://127.0.0.1:4321';
+await mkdir('.artifacts', { recursive: true });
+const browser = await chromium.launch({ channel: 'chrome', headless: true });
+const errors = [];
+const results = [];
+const setup = async (options) => {
+  const context = await browser.newContext(options);
+  const page = await context.newPage();
+  page.on('pageerror', (error) => errors.push(error.message));
+  // A resposta remota não faz parte desta revisão de composição/interação.
+  await page.route('https://arpvision.app/embed/**', (route) =>
+    route.fulfill({
+      contentType: 'text/html',
+      body: '<!doctype html><html lang="pt-BR"><body>Tour de teste</body></html>',
+    }),
+  );
+  return { context, page };
+};
+const dimensions = (page) =>
+  page.evaluate(() => ({
+    width: document.documentElement.clientWidth,
+    scroll: document.documentElement.scrollWidth,
+    layout: innerWidth,
+  }));
+try {
+  const { context, page } = await setup({
+    viewport: { width: 1440, height: 900 },
+    colorScheme: 'light',
+  });
+  await page.addInitScript(() => {
+    const samples = [];
+    Reflect.set(window, 'fanFrames', samples);
+    const start = performance.now();
+    let openedAt;
+    const sample = () => {
+      const fan = document.querySelector('[data-fan]');
+      if (fan)
+        samples.push({
+          time: performance.now() - start,
+          state: fan.dataset.fanState,
+          transform: getComputedStyle(fan.querySelector('.fan-position')).transform,
+        });
+      if (fan?.dataset.fanState === 'open' && openedAt === undefined) openedAt = performance.now();
+      if (openedAt === undefined || performance.now() - openedAt < 1200)
+        requestAnimationFrame(sample);
+      else Reflect.set(window, 'fanSampleDone', true);
+    };
+    requestAnimationFrame(sample);
+  });
+  await page.goto(base, { waitUntil: 'domcontentloaded' });
+  await page.evaluate(() => document.fonts.ready);
+  await page.waitForTimeout(300);
+  assert.equal(
+    await page.locator('[data-fan]').getAttribute('data-fan-state'),
+    'stacked',
+    'não abre sozinho no carregamento',
+  );
+  const initial = await page.locator('.fan-card').nth(1).boundingBox();
+  assert.ok(initial.y < 900 && initial.y > 790, 'só o topo da pilha aparece na primeira tela');
+  await page.screenshot({ path: '.artifacts/opening-desktop-initial.png' });
+  await page.evaluate(() => scrollTo({ top: 420, behavior: 'instant' }));
+  await page.waitForFunction(
+    () => document.querySelector('[data-fan]')?.dataset.fanState === 'open',
+  );
+  await page.mouse.move(720, 540);
+  await page.waitForFunction(() => Reflect.get(window, 'fanSampleDone'));
+  assert.equal(await page.evaluate(() => scrollY), 420, 'abertura acionada pela rolagem');
+  const frames = await page.evaluate(() => Reflect.get(window, 'fanFrames'));
+  const stacked = frames.find((frame) => frame.state === 'stacked');
+  const open = frames.filter((frame) => frame.state === 'open');
+  assert.ok(stacked, 'primeira pintura empilhada');
+  await writeFile('.artifacts/fan-animation-frames.json', JSON.stringify(frames, null, 2));
+  assert.ok(new Set(open.map((frame) => frame.transform)).size > 3, 'posição e rotação animadas');
+  assert.equal(
+    await page
+      .locator('.fan-position')
+      .first()
+      .evaluate((el) => getComputedStyle(el).transitionDuration),
+    '0.9s',
+  );
+  const boxes = await page.locator('.fan-card').evaluateAll((cards) =>
+    cards.map((card) => {
+      const r = card.getBoundingClientRect();
+      return { x: r.x, y: r.y, width: r.width, height: r.height, right: r.right, bottom: r.bottom };
+    }),
+  );
+  assert.ok(
+    boxes.every((r) => r.bottom < 900),
+    'cartões inteiros após rolar até o conjunto',
+  );
+  assert.ok(boxes[1].y < boxes[0].y && boxes[1].y < boxes[2].y, 'centro mais alto');
+  assert.ok(boxes[0].right > boxes[1].x && boxes[1].right > boxes[2].x, 'sobreposição preservada');
+  await page.waitForTimeout(1300);
+  assert.equal(
+    await page.locator('[data-fan]').getAttribute('data-fan-state'),
+    'open',
+    'hover mantém aberto após a rolagem parar',
+  );
+  await page.screenshot({ path: '.artifacts/opening-desktop.png' });
+  const first = page.locator('.fan-card').first();
+  const resting = await first.boundingBox();
+  await first.hover({ position: { x: 20, y: 80 } });
+  await page.waitForTimeout(350);
+  assert.ok((await first.boundingBox()).y < resting.y - 8, 'hover eleva o cartão');
+  assert.equal(await first.locator('..').evaluate((el) => getComputedStyle(el).zIndex), '20');
+  await page.mouse.move(10, 120);
+  await page.waitForFunction(
+    () => document.querySelector('[data-fan]')?.dataset.fanState === 'stacked',
+  );
+  await page.waitForTimeout(350);
+  assert.ok(
+    await first.evaluate((el) => getComputedStyle(el).transform === 'none'),
+    'hover termina e a elevação individual retorna',
+  );
+  await page.waitForTimeout(650);
+  // A pilha também reabre pelo hover, sem precisar de uma nova rolagem.
+  await page.locator('.fan-card').nth(1).hover();
+  await page.waitForFunction(
+    () => document.querySelector('[data-fan]')?.dataset.fanState === 'open',
+  );
+  await page.waitForTimeout(1000);
+  await page.mouse.move(10, 120);
+  await page.waitForFunction(
+    () => document.querySelector('[data-fan]')?.dataset.fanState === 'stacked',
+  );
+  await first.focus();
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Shift+Tab');
+  await page.waitForFunction(
+    () => document.querySelector('[data-fan]')?.dataset.fanState === 'open',
+  );
+  assert.equal(
+    await first.locator('..').evaluate((el) => getComputedStyle(el).zIndex),
+    '10',
+    'teclado traz à frente',
+  );
+  await page.locator('.site-header .brand').focus();
+  await page.mouse.move(10, 120);
+  await page.evaluate(() => scrollTo({ top: 420, behavior: 'instant' }));
+  await page.waitForFunction(
+    () => document.querySelector('[data-fan]')?.dataset.fanState === 'open',
+  );
+  await page.waitForFunction(
+    () => document.querySelector('[data-fan]')?.dataset.fanState === 'stacked',
+  );
+  results.push(
+    '1440×900: pilha na borda inferior, abertura por scroll/hover/foco em 900ms, fechamento ao parar sem hover e leque preservado.',
+  );
+
+  // Compara os conteúdos/links/mídias anteriores, quando a captura local existe.
+  let baseline;
+  try {
+    baseline = JSON.parse(await readFile('.artifacts/baseline-content.json', 'utf8'));
+  } catch {}
+  if (baseline) {
+    const current = await page.evaluate(() => ({
+      texts: [
+        ...document.querySelectorAll(
+          'main h1, main h2, main h3, main p, main .eyebrow, main .use-tag',
+        ),
+      ].map((el) => el.textContent.replace(/\s+/g, ' ').trim()),
+      links: [...document.querySelectorAll('a')].map((el) => ({
+        href: el.getAttribute('href'),
+        text: el.textContent.replace(/\s+/g, ' ').trim(),
+        label: el.getAttribute('aria-label'),
+      })),
+      sections: [...document.querySelectorAll('main section[id]')].map((el) => ({
+        id: el.id,
+        hidden: el.hidden,
+      })),
+      media: [...document.querySelectorAll('img,video,iframe')].map((el) => ({
+        src: el.getAttribute('src'),
+        poster: el.getAttribute('poster'),
+      })),
+    }));
+    for (const key of ['texts', 'links', 'sections', 'media']) {
+      const remaining = current[key].map((item) => JSON.stringify(item));
+      for (const item of baseline[key]) {
+        const index = remaining.indexOf(JSON.stringify(item));
+        assert.ok(index >= 0, `conteúdo anterior preservado (${key}): ${JSON.stringify(item)}`);
+        remaining.splice(index, 1);
+      }
+    }
+    results.push(
+      'Comparação com a página anterior: textos, links, seções identificadas e mídias preservados.',
+    );
+  }
+  assert.equal(await page.locator('main h1').count(), 1);
+  assert.equal(await page.locator('.use-card').count(), 3, 'sem cartões duplicados');
+  await context.close();
+
+  const axeSource = await readFile('node_modules/axe-core/axe.min.js', 'utf8');
+  for (const [width, height] of [
+    [1280, 720],
+    [1024, 768],
+    [768, 1024],
+    [600, 900],
+    [390, 844],
+    [360, 800],
+    [320, 740],
+  ]) {
+    const { context, page } = await setup({
+      viewport: { width, height },
+      reducedMotion: 'reduce',
+      colorScheme: 'light',
+      isMobile: width < 768,
+      hasTouch: width < 768,
+    });
+    await page.goto(base, { waitUntil: 'domcontentloaded' });
+    await page.evaluate(() => document.fonts.ready);
+    const d = await dimensions(page);
+    assert.ok(
+      d.scroll <= width && d.layout <= width,
+      `${width}px: sem scroll horizontal ${JSON.stringify(d)}`,
+    );
+    const bounds = await page.locator('.fan-card').evaluateAll((cards) =>
+      cards.map((card) => {
+        const r = card.getBoundingClientRect();
+        return { left: r.left, right: r.right };
+      }),
+    );
+    assert.ok(
+      bounds.every((r) => r.left >= 0 && r.right <= width),
+      `${width}px: cartões sem cortes`,
+    );
+    if (width >= 1024) {
+      const card = await page.locator('.fan-card').nth(1).boundingBox();
+      assert.ok(
+        card.y < height && card.y > height - 110,
+        `${width}px: topo dos cartões convida a rolar`,
+      );
+    }
+    if (width < 768) {
+      for (let index = 0; index < 3; index++) {
+        await page.locator('[data-fan-select]').nth(index).click();
+        assert.equal(
+          await page.locator('[data-fan-select]').nth(index).getAttribute('aria-pressed'),
+          'true',
+        );
+        await page.locator('.fan-card').nth(index).scrollIntoViewIfNeeded();
+        const visible = await page
+          .locator('.fan-card')
+          .nth(index)
+          .evaluate((card) => {
+            const title = card.querySelector('h3').getBoundingClientRect();
+            return card.contains(
+              document.elementFromPoint(title.x + title.width / 2, title.y + title.height / 2),
+            );
+          });
+        assert.equal(visible, true, `${width}px: cartão ${index + 1} acessível ao toque`);
+      }
+      await page.locator('[data-fan-select]').nth(1).click();
+      await page.evaluate(() => scrollTo(0, 0));
+      await page.locator('.menu-toggle').click();
+      assert.equal(await page.locator('#mobile-nav').isVisible(), true);
+      await page.keyboard.press('Escape');
+      assert.equal(await page.locator('#mobile-nav').isVisible(), false);
+      assert.equal(
+        await page.locator('.menu-toggle').evaluate((el) => el === document.activeElement),
+        true,
+      );
+      await page.evaluate(() => document.activeElement?.blur());
+    }
+    await page.addScriptTag({ content: axeSource });
+    const violations = await page.evaluate(async () =>
+      (await window.axe.run(document, { runOnly: ['color-contrast'] })).violations.flatMap((v) =>
+        v.nodes.map((n) => n.target),
+      ),
+    );
+    assert.deepEqual(violations, [], `${width}px: contraste`);
+    await page.screenshot({ path: `.artifacts/opening-${width}.png` });
+    assert.ok(
+      await page
+        .locator('.fan-position')
+        .first()
+        .evaluate((el) => parseFloat(getComputedStyle(el).transitionDuration) <= 0.0001),
+      'movimento reduzido',
+    );
+    await context.close();
+  }
+  results.push(
+    '320–1440px: sem cortes/overflow; controles ao toque, menu, Escape, foco, contraste e movimento reduzido.',
+  );
+
+  const dark = await setup({
+    viewport: { width: 1440, height: 900 },
+    colorScheme: 'dark',
+    reducedMotion: 'reduce',
+  });
+  await dark.page.goto(base, { waitUntil: 'domcontentloaded' });
+  await dark.page.addScriptTag({ content: axeSource });
+  const darkViolations = await dark.page.evaluate(async () =>
+    (await window.axe.run(document, { runOnly: ['color-contrast'] })).violations.flatMap((v) =>
+      v.nodes.map((n) => n.target),
+    ),
+  );
+  assert.deepEqual(darkViolations, [], 'contraste no tema escuro');
+  await dark.page.screenshot({ path: '.artifacts/opening-dark.png' });
+  await dark.context.close();
+
+  const glass = await setup({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' });
+  await glass.page.route('**/*.css', async (route) => {
+    const response = await route.fetch();
+    // Simula a feature ausente antes de o navegador interpretar a folha de estilos.
+    const css = (await response.text()).replace(
+      /@supports[^{]*backdrop-filter[^{]*\{\s*\.glass-surface\s*\{[^}]*\}\s*\}/g,
+      '',
+    );
+    await route.fulfill({ response, body: css });
+  });
+  await glass.page.goto(base, { waitUntil: 'domcontentloaded' });
+  const glassFallback = await glass.page.evaluate(() => {
+    const style = getComputedStyle(document.querySelector('.header-capsule'));
+    return {
+      background: style.backgroundColor,
+      image: style.backgroundImage,
+      blur: style.backdropFilter,
+    };
+  });
+  assert.deepEqual(
+    glassFallback,
+    { background: 'rgb(255, 255, 255)', image: 'none', blur: 'none' },
+    'fallback de vidro sólido',
+  );
+  await glass.page.screenshot({ path: '.artifacts/opening-no-blur.png' });
+  await glass.context.close();
+
+  const tablet = await setup({
+    viewport: { width: 768, height: 1024 },
+    hasTouch: true,
+    isMobile: true,
+    reducedMotion: 'no-preference',
+  });
+  await tablet.page.goto(base, { waitUntil: 'domcontentloaded' });
+  assert.equal(
+    await tablet.page.locator('.fan-controls').isVisible(),
+    true,
+    'controles também no tablet ao toque',
+  );
+  await tablet.page.locator('[data-fan-select]').first().click();
+  assert.equal(
+    await tablet.page.locator('.fan-position').first().getAttribute('data-selected'),
+    '',
+  );
+  await tablet.page.waitForTimeout(1600);
+  assert.equal(
+    await tablet.page.locator('[data-fan]').getAttribute('data-fan-state'),
+    'open',
+    'toque mantém o cartão legível após parar',
+  );
+  await tablet.page.locator('#opening-title').tap();
+  await tablet.page.waitForFunction(
+    () => document.querySelector('[data-fan]')?.dataset.fanState === 'stacked',
+  );
+  await tablet.context.close();
+
+  const fallback = await setup({ viewport: { width: 390, height: 844 }, javaScriptEnabled: false });
+  await fallback.page.goto(base, { waitUntil: 'domcontentloaded' });
+  assert.equal(
+    await fallback.page.locator('[data-fan]').getAttribute('data-fan-state'),
+    null,
+    'sem JS, leque já aberto',
+  );
+  await fallback.page.screenshot({ path: '.artifacts/opening-no-js.png' });
+  await fallback.context.close();
+  results.push(
+    'Tema escuro, fallback sólido sem blur, tablet ao toque e conteúdo legível sem JavaScript.',
+  );
+  assert.deepEqual(errors, []);
+  await writeFile('.artifacts/opening-results.json', JSON.stringify({ results, errors }, null, 2));
+  console.log(results.join('\n'));
+} finally {
+  await browser.close();
+}

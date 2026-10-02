@@ -117,7 +117,10 @@ try {
     /R\$\s*599$/,
   );
   assert.match(await page.locator('[data-plan="rede"]').textContent(), /Falar no WhatsApp/);
-  assert.match(await page.locator('.pricing-trial').textContent(), /1\s+ambiente sem pagar/);
+  const trial = await page.locator('.pricing-trial').textContent();
+  assert.match(trial, /fotografe\s+1 ambiente/);
+  assert.match(trial, /por\s+7 dias/);
+  assert.match(trial, /sem pagar nada/);
   assert.match(
     await page.locator('[data-plan="imobiliaria"]').textContent(),
     /Até 120 tours no ar/,

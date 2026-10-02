@@ -1,0 +1,46 @@
+---
+// Um único tratamento de vidro, com fallback sólido e cores herdadas do tema.
+interface Props {
+  class?: string;
+  id?: string;
+}
+const { class: className, id } = Astro.props;
+---
+
+<div class:list={['glass-surface', className]} id={id}>
+  <slot />
+</div>
+
+<style is:global>
+  .glass-surface {
+    --glass-opacity: 78%;
+    --glass-highlight: 92%;
+    --glass-blur: 22px;
+    --glass-radius: 24px;
+    position: relative;
+    border: 1px solid color-mix(in srgb, var(--border) 68%, var(--surface));
+    border-radius: var(--glass-radius);
+    background: var(--surface);
+    box-shadow:
+      inset 0 1px 0 color-mix(in srgb, var(--white) 75%, transparent),
+      0 12px 36px color-mix(in srgb, var(--ink) 8%, transparent);
+  }
+  @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .glass-surface {
+      background: linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--surface) var(--glass-highlight), transparent),
+        color-mix(in srgb, var(--surface) var(--glass-opacity), transparent)
+      );
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+      backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+    }
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    .glass-surface {
+      background: var(--surface);
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+</style>

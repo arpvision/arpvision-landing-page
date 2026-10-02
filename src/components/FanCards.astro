@@ -1,0 +1,70 @@
+---
+import Icon from './Icon.astro';
+import GlassSurface from './GlassSurface.astro';
+interface Props {
+  items: { number: string; title: string; image: string; alt: string; previewCrop?: boolean }[];
+}
+const { items } = Astro.props;
+const center = (items.length - 1) / 2;
+---
+
+<div class="fan fan-photos" data-fan aria-label="Ambientes de um tour fotografado com o celular">
+  <ul class="fan-stage" aria-label="Miniaturas dos ambientes do tour">
+    {items.map((item, index) => (
+      <li
+        class="fan-position"
+        style={`--fan-offset: ${index - center}; --fan-distance: ${Math.abs(index - center)}; --fan-layer: ${items.length - Math.abs(index - center)}`}
+      >
+        <article
+          class="use-card fan-card"
+          id={`use-${item.number}`}
+          tabindex="0"
+          aria-labelledby={`use-title-${item.number}`}
+        >
+          <div class="fan-photo-media">
+            <img
+              class:list={{ 'fan-image-preview': item.previewCrop }}
+              src={item.image}
+              alt={item.alt}
+              width="880"
+              height="540"
+              decoding="async"
+            />
+          </div>
+          <div class="fan-photo-badge">
+            <Icon name="phone" size={15} /> Tour 360°
+          </div>
+          <div class="fan-photo-caption">
+            <h3 id={`use-title-${item.number}`}>{item.title}</h3>
+            <span>Feito com o celular</span>
+          </div>
+        </article>
+      </li>
+    ))}
+  </ul>
+  <GlassSurface class="fan-controls">
+    {items.map((item, index) => (
+      <button
+        type="button"
+        data-fan-select={index}
+        aria-controls={`use-${item.number}`}
+        aria-label={`Destacar cartão: ${item.title}`}
+        aria-pressed={index === Math.floor(center) ? 'true' : 'false'}
+      >
+        {item.number}
+      </button>
+    ))}
+  </GlassSurface>
+</div>
+<script is:inline>
+  // A pilha fica visível antes da primeira pintura e aguarda rolagem ou interação.
+  const fan = document.currentScript.previousElementSibling;
+  if (fan) {
+    fan.dataset.fanState = matchMedia('(prefers-reduced-motion: reduce)').matches
+      ? 'open'
+      : 'stacked';
+  }
+</script>
+<script>
+  import '../scripts/fan';
+</script>
