@@ -1,6 +1,6 @@
 /* Fotografias provisórias: o recorte é de layout; os arquivos originais são preservados. */
 .fan-photos {
-  --fan-height: 240px;
+  --fan-height: 264px;
 }
 .fan-photos .fan-card {
   height: var(--fan-height);
@@ -43,21 +43,32 @@
   font-size: 0.75rem;
   font-weight: 600;
 }
+/* Legenda: ambiente (rótulo) + benefício (título) + detalhe, sobre a foto. */
 .fan-photo-caption {
   position: absolute;
   inset: auto 0 0;
-  padding: 52px 22px 20px;
+  padding: 64px 22px 20px;
   color: var(--white);
-  background: linear-gradient(transparent, #0f172aeb 72%);
+  background: linear-gradient(transparent, #0f172af2 58%);
+}
+.fan-photo-room {
+  display: block;
+  margin-bottom: 4px;
+  color: color-mix(in srgb, var(--white) 82%, transparent);
+  font-size: 0.8125rem;
+  font-weight: 550;
 }
 .fan-photos .fan-photo-caption h3 {
   color: var(--white);
-  margin-bottom: 3px;
-  font-size: 1.375rem;
+  margin-bottom: 4px;
+  font-size: 1.3125rem;
+  line-height: 1.25;
 }
-.fan-photo-caption > span {
+.fan-photos .fan-photo-caption p {
+  margin: 0;
   color: var(--white);
   font-size: 0.875rem;
+  line-height: 1.45;
 }
 .presentation-heading {
   margin-bottom: 48px;
@@ -298,13 +309,26 @@
 }
 @media (max-width: 767px) {
   .fan-photos {
-    --fan-height: 210px;
+    --fan-height: 222px;
+  }
+  /* No baralho do celular, só o cartão da frente mostra a legenda; os de trás
+     não deixam pedaços de texto aparecendo por baixo. */
+  .fan-photos[data-fan-state] .fan-photo-caption {
+    opacity: 0;
+    transition: opacity 200ms ease-out;
+  }
+  .fan-photos[data-fan-state] .fan-position[data-selected] .fan-photo-caption,
+  .fan-photos[data-fan-state]
+    .fan-stage:not(:has([data-selected]))
+    .fan-position[data-fan-center]
+    .fan-photo-caption {
+    opacity: 1;
   }
   .fan-photos .fan-photo-caption {
-    padding: 42px 20px 18px;
+    padding: 52px 20px 18px;
   }
   .fan-photos .fan-photo-caption h3 {
-    font-size: 1.25rem;
+    font-size: 1.1875rem;
   }
   .presentation-heading {
     margin-bottom: 32px;

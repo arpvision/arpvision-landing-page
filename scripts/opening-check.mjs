@@ -53,22 +53,12 @@ try {
   });
   await page.goto(base, { waitUntil: 'domcontentloaded' });
   await page.evaluate(() => document.fonts.ready);
-  await page.waitForTimeout(300);
-  assert.equal(
-    await page.locator('[data-fan]').getAttribute('data-fan-state'),
-    'stacked',
-    'não abre sozinho no carregamento',
-  );
-  const initial = await page.locator('.fan-card').nth(1).boundingBox();
-  assert.ok(initial.y < 900 && initial.y > 790, 'só o topo da pilha aparece na primeira tela');
-  await page.screenshot({ path: '.artifacts/opening-desktop-initial.png' });
-  await page.evaluate(() => scrollTo({ top: 420, behavior: 'instant' }));
+  // O leque fica na primeira tela e abre sozinho, sem rolar (pedido de 02/10/2026).
   await page.waitForFunction(
     () => document.querySelector('[data-fan]')?.dataset.fanState === 'open',
   );
-  await page.mouse.move(720, 540);
   await page.waitForFunction(() => Reflect.get(window, 'fanSampleDone'));
-  assert.equal(await page.evaluate(() => scrollY), 420, 'abertura acionada pela rolagem');
+  assert.equal(await page.evaluate(() => scrollY), 0, 'abre no carregamento, sem rolagem');
   const frames = await page.evaluate(() => Reflect.get(window, 'fanFrames'));
   const stacked = frames.find((frame) => frame.state === 'stacked');
   const open = frames.filter((frame) => frame.state === 'open');
@@ -89,17 +79,25 @@ try {
     }),
   );
   assert.ok(
-    boxes.every((r) => r.bottom < 900),
-    'cartões inteiros após rolar até o conjunto',
+    boxes.every((r) => r.y > 0 && r.bottom < 900),
+    'leque inteiro na primeira tela',
   );
   assert.ok(boxes[1].y < boxes[0].y && boxes[1].y < boxes[2].y, 'centro mais alto');
-  assert.ok(boxes[0].right > boxes[1].x && boxes[1].right > boxes[2].x, 'sobreposição preservada');
-  await page.waitForTimeout(1300);
-  assert.equal(
-    await page.locator('[data-fan]').getAttribute('data-fan-state'),
-    'open',
-    'hover mantém aberto após a rolagem parar',
+  // O texto de benefício de cada cartão fica à vista (os laterais não cobrem o central).
+  const readable = await page.locator('.fan-card').evaluateAll((cards) =>
+    cards.map((card) => {
+      const range = document.createRange();
+      range.selectNodeContents(card.querySelector('h3'));
+      return [...range.getClientRects()].every((rect) =>
+        [0.1, 0.5, 0.9].every((f) =>
+          card.contains(
+            document.elementFromPoint(rect.left + rect.width * f, rect.top + rect.height / 2),
+          ),
+        ),
+      );
+    }),
   );
+  assert.deepEqual(readable, [true, true, true], 'benefícios legíveis nos três cartões');
   await page.screenshot({ path: '.artifacts/opening-desktop.png' });
   const first = page.locator('.fan-card').first();
   const resting = await first.boundingBox();
@@ -108,47 +106,35 @@ try {
   assert.ok((await first.boundingBox()).y < resting.y - 8, 'hover eleva o cartão');
   assert.equal(await first.locator('..').evaluate((el) => getComputedStyle(el).zIndex), '20');
   await page.mouse.move(10, 120);
-  await page.waitForFunction(
-    () => document.querySelector('[data-fan]')?.dataset.fanState === 'stacked',
-  );
   await page.waitForTimeout(350);
   assert.ok(
     await first.evaluate((el) => getComputedStyle(el).transform === 'none'),
     'hover termina e a elevação individual retorna',
   );
-  await page.waitForTimeout(650);
-  // A pilha também reabre pelo hover, sem precisar de uma nova rolagem.
-  await page.locator('.fan-card').nth(1).hover();
-  await page.waitForFunction(
-    () => document.querySelector('[data-fan]')?.dataset.fanState === 'open',
-  );
-  await page.waitForTimeout(1000);
-  await page.mouse.move(10, 120);
-  await page.waitForFunction(
-    () => document.querySelector('[data-fan]')?.dataset.fanState === 'stacked',
+  assert.equal(
+    await page.locator('[data-fan]').getAttribute('data-fan-state'),
+    'open',
+    'continua aberto sem hover enquanto está na tela',
   );
   await first.focus();
   await page.keyboard.press('Tab');
   await page.keyboard.press('Shift+Tab');
-  await page.waitForFunction(
-    () => document.querySelector('[data-fan]')?.dataset.fanState === 'open',
-  );
   assert.equal(
     await first.locator('..').evaluate((el) => getComputedStyle(el).zIndex),
     '10',
     'teclado traz à frente',
   );
   await page.locator('.site-header .brand').focus();
-  await page.mouse.move(10, 120);
-  await page.evaluate(() => scrollTo({ top: 420, behavior: 'instant' }));
-  await page.waitForFunction(
-    () => document.querySelector('[data-fan]')?.dataset.fanState === 'open',
-  );
+  await page.evaluate(() => scrollTo({ top: 2400, behavior: 'instant' }));
   await page.waitForFunction(
     () => document.querySelector('[data-fan]')?.dataset.fanState === 'stacked',
   );
+  await page.evaluate(() => scrollTo({ top: 0, behavior: 'instant' }));
+  await page.waitForFunction(
+    () => document.querySelector('[data-fan]')?.dataset.fanState === 'open',
+  );
   results.push(
-    '1440×900: pilha na borda inferior, abertura por scroll/hover/foco em 900ms, fechamento ao parar sem hover e leque preservado.',
+    '1440×900: leque inteiro na primeira tela, abre sozinho a partir da pilha em 900ms, benefícios legíveis, hover e foco preservados.',
   );
 
   // Compara os conteúdos/links/mídias anteriores, quando a captura local existe.
@@ -227,12 +213,11 @@ try {
       bounds.every((r) => r.left >= 0 && r.right <= width),
       `${width}px: cartões sem cortes`,
     );
-    if (width >= 1024) {
-      const card = await page.locator('.fan-card').nth(1).boundingBox();
-      assert.ok(
-        card.y < height && card.y > height - 110,
-        `${width}px: topo dos cartões convida a rolar`,
-      );
+    if (width >= 768) {
+      const bottom = await page
+        .locator('.fan-card')
+        .evaluateAll((cards) => Math.max(...cards.map((c) => c.getBoundingClientRect().bottom)));
+      assert.ok(bottom <= height, `${width}px: leque inteiro na primeira tela (${bottom})`);
     }
     if (width < 768) {
       for (let index = 0; index < 3; index++) {
@@ -353,8 +338,10 @@ try {
     'toque mantém o cartão legível após parar',
   );
   await tablet.page.locator('#opening-title').tap();
-  await tablet.page.waitForFunction(
-    () => document.querySelector('[data-fan]')?.dataset.fanState === 'stacked',
+  assert.equal(
+    await tablet.page.locator('[data-fan]').getAttribute('data-fan-state'),
+    'open',
+    'toque fora não recolhe o leque enquanto está na tela',
   );
   await tablet.context.close();
 
