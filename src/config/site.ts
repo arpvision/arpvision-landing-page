@@ -52,21 +52,28 @@ export const site = {
     // Tour 360° embutido no lado direito da hero.
     heroEmbed: 'https://arpvision.app/embed/511a5654-29f2-4798-87ff-5b479210dbf0',
     // Prints provisórios do sistema; trocar por panoramas 2:1 e remover previewCrop.
+    // Cada card do leque traz um benefício já dito em outro ponto da LP.
     fanRooms: [
       {
         title: 'Sala 1',
+        benefit: 'Só o celular.',
+        detail: 'Sem câmera 360°, sem tripé.',
         image: '/images/tours/sala-preview.png',
         alt: 'Sala com teto de madeira e escada, fotografada em 360 graus',
         previewCrop: true,
       },
       {
         title: 'Entrada',
+        benefit: 'Pronto em cerca de 1 minuto.',
+        detail: 'Por ambiente, enquanto você captura o próximo.',
         image: '/images/tours/entrada-preview.png',
         alt: 'Entrada com portas e circulação para os ambientes do tour',
         previewCrop: true,
       },
       {
         title: 'Quarto com suíte',
+        benefit: 'O cliente abre sem conta.',
+        detail: 'É só mandar o link no WhatsApp.',
         image: '/images/tours/suite-preview.png',
         alt: 'Quarto com suíte e área de estar, fotografado em 360 graus',
         previewCrop: true,

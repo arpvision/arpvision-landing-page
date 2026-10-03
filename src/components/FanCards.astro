@@ -2,7 +2,15 @@
 import Icon from './Icon.astro';
 import GlassSurface from './GlassSurface.astro';
 interface Props {
-  items: { number: string; title: string; image: string; alt: string; previewCrop?: boolean }[];
+  items: {
+    number: string;
+    title: string;
+    benefit: string;
+    detail: string;
+    image: string;
+    alt: string;
+    previewCrop?: boolean;
+  }[];
 }
 const { items } = Astro.props;
 const center = (items.length - 1) / 2;
@@ -13,6 +21,7 @@ const center = (items.length - 1) / 2;
     {items.map((item, index) => (
       <li
         class="fan-position"
+        data-fan-center={index === Math.floor(center) ? '' : undefined}
         style={`--fan-offset: ${index - center}; --fan-distance: ${Math.abs(index - center)}; --fan-layer: ${items.length - Math.abs(index - center)}`}
       >
         <article
@@ -35,8 +44,9 @@ const center = (items.length - 1) / 2;
             <Icon name="phone" size={15} /> Tour 360°
           </div>
           <div class="fan-photo-caption">
-            <h3 id={`use-title-${item.number}`}>{item.title}</h3>
-            <span>Feito com o celular</span>
+            <span class="fan-photo-room">{item.title} · feito com o celular</span>
+            <h3 id={`use-title-${item.number}`}>{item.benefit}</h3>
+            <p>{item.detail}</p>
           </div>
         </article>
       </li>

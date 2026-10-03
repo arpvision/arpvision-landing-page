@@ -34,10 +34,16 @@ try {
     colorScheme: 'light',
   });
   assert.equal(await page.locator('.fan-photo-media img').count(), 3);
+  // Cada cartão: ambiente no rótulo e um benefício da LP no título.
+  assert.deepEqual(await page.locator('.fan-card .fan-photo-room').allTextContents(), [
+    'Sala 1 · feito com o celular',
+    'Entrada · feito com o celular',
+    'Quarto com suíte · feito com o celular',
+  ]);
   assert.deepEqual(await page.locator('.fan-card h3').allTextContents(), [
-    'Sala 1',
-    'Entrada',
-    'Quarto com suíte',
+    'Só o celular.',
+    'Pronto em cerca de 1 minuto.',
+    'O cliente abre sem conta.',
   ]);
   await page.screenshot({ path: '.artifacts/photos-initial.png' });
   await scroll(page, 420);
