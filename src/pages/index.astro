@@ -11,6 +11,7 @@ import TourShowcase from '../components/TourShowcase.astro';
 import Sharing from '../components/Sharing.astro';
 import TeamBenefits from '../components/TeamBenefits.astro';
 import { site, faq } from '../config/site';
+import { softwareApplicationSchema } from '../lib/schema';
 const faqSchema = {
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
@@ -22,6 +23,9 @@ const faqSchema = {
 };
 const openingDescription =
   'Faça o tour virtual 360° do seu espaço só com o celular. E o cliente abre o tour sem criar conta.';
+// Texto do resultado de busca: entre 140 e 160 caracteres para não ser cortado pelo Google.
+const metaDescription =
+  'Crie o tour virtual 360° do seu espaço só com o celular. Emendas e luz corrigidas, link pronto para o WhatsApp e o cliente abre sem criar conta. Teste grátis.';
 const roomCards = site.media.fanRooms.map((room, index) => ({
   ...room,
   number: String(index + 1).padStart(2, '0'),
@@ -30,8 +34,8 @@ const roomCards = site.media.fanRooms.map((room, index) => ({
 
 <Layout
   title="Tour virtual 360° com o celular | ARP Vision"
-  description={openingDescription}
-  schema={[faqSchema]}
+  description={metaDescription}
+  schema={[softwareApplicationSchema('home'), faqSchema]}
 >
   <section class="hero opening" aria-labelledby="opening-title">
     <div class="container">

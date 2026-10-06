@@ -6,29 +6,9 @@ import FinalCta from '../components/FinalCta.astro';
 import Icon from '../components/Icon.astro';
 import FeatureValue from '../components/FeatureValue.astro';
 import { site, featureGroups, faq } from '../config/site';
+import { softwareApplicationSchema } from '../lib/schema';
 const schema = [
-  {
-    '@context': 'https://schema.org',
-    '@type': 'SoftwareApplication',
-    name: site.name,
-    applicationCategory: 'BusinessApplication',
-    operatingSystem: 'Web',
-    description:
-      'Tour virtual 360° de espaços usando o celular, com captura guiada e aprimoramento automático.',
-    offers: site.pricing.plans
-      .filter((plan) => plan.billing !== 'custom')
-      .map((plan) => ({
-        '@type': 'Offer',
-        name: plan.name,
-        price: plan.billing === 'once' ? plan.pixPrice : plan.monthlyPrice,
-        priceCurrency: 'BRL',
-        description:
-          plan.billing === 'once'
-            ? 'Pagamento único por 1 tour no ar por 1 ano: à vista no Pix ou em 12x no cartão. Renovação anual à parte.'
-            : 'Assinatura mensal no cartão; tours no ar enquanto a assinatura estiver ativa, dentro do limite do plano.',
-        url: `${site.appUrl}/register?utm_source=site&utm_medium=planos&utm_campaign=landing`,
-      })),
-  },
+  softwareApplicationSchema('planos'),
   {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
@@ -43,7 +23,7 @@ const schema = [
 
 <Layout
   title="Planos e preços | ARP Vision"
-  description="Conheça os planos ARP Vision: Individual com pagamento único, Professional e Business mensais e Enterprise sob consulta. Compare créditos e tours no ar e teste grátis."
+  description="Planos ARP Vision: Individual com pagamento único, Professional e Business mensais e Enterprise sob consulta. Compare créditos, tours no ar e teste grátis."
   ogImage={site.media.ogPlans}
   schema={schema}
 >

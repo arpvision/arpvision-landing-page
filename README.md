@@ -27,7 +27,7 @@ Edite **`src/config/site.ts`**. Ele concentra links, contatos, mídias, tours, c
 - `pricing.isExample` está desativado para os valores definidos, iguais aos da tela de planos do app: Individual por R$ 229 à vista no Pix ou 12x de R$ 23,25 no cartão, com 8 ambientes, 1 tour por 1 ano, R$ 20 por ambiente extra e renovação de R$ 79; Professional por R$ 249/mês, com 20 ambientes/mês e até 30 tours no ar; Business por R$ 599/mês, com 80 ambientes/mês e até 120 tours no ar; Enterprise sob consulta. O teste grátis (`pricing.freeTrialCredits`) aparece como nota abaixo dos cards, não como plano.
 - O Individual não é uma assinatura. Professional e Business são mensais. Ainda não há plano anual ou desconto anual definido, e não há preço aprovado para ambientes extras nessas duas assinaturas.
 - O limite de tours no ar considera apenas tours publicados e visíveis. Rascunhos e tours ocultos ficam fora da conta. A publicação de um novo tour exige espaço dentro do limite; atingir o limite não remove tours existentes. Após cancelar uma assinatura, os tours ficam no ar até o fim do mês já pago, com opção de manutenção por R$ 79 por tour ao ano. O aviso por e-mail sete dias antes da saída do ar está previsto nas regras comerciais, mas sua implementação pertence ao app, não a este repositório.
-- `domain` usa o domínio sugerido no briefing; confirme o endereço antes de publicar. `readyToIndex` controla a indexação em robots e meta.
+- `domain` precisa ser o domínio primário configurado na Vercel (hoje `https://www.arpvision.com.br`; o apex redireciona para o www). Canonical, `og:url`, sitemap e robots saem dele: se apontar para um endereço que redireciona, o Google não indexa a página. `readyToIndex` controla a indexação em robots e meta.
 - Os botões de conta usam `arpvision.app` com UTMs; não existe checkout local. Este repositório não concede créditos, bloqueia publicações, gerencia assinaturas nem envia e-mails.
 - `contact.whatsapp` alimenta os links de WhatsApp (o número é usado só com os dígitos). Vazio, os botões abrem um aviso de contato em preparação.
 - O FAQ é um só (`faqGroups`), exibido na Home e em `/planos`.
@@ -68,7 +68,14 @@ npm run build
 npm run check:site
 ```
 
-Os testes verificam recomendação e dados dos planos, compartilhamento dos números entre superfícies, cenários acima do limite e UTMs. A checagem de saída verifica rotas, arquivos locais, metadados, schema, nenhum iframe inicial além do tour da hero e orçamento de JavaScript.
+Os testes verificam recomendação e dados dos planos, compartilhamento dos números entre superfícies, cenários acima do limite e UTMs. A checagem de saída verifica rotas, arquivos locais, metadados, canonical apontando para a própria página, sitemap e robots no mesmo domínio, schema, nenhum iframe inicial além do tour da hero e orçamento de JavaScript.
+
+Para ler o site como o Googlebot (robots → sitemap → cada página, sem seguir redirecionamentos), com a prévia no ar ou contra a produção depois do deploy:
+
+```sh
+npm run check:seo
+npm run check:seo -- https://www.arpvision.com.br
+```
 
 Com a prévia na porta 4321 e Chrome instalado:
 

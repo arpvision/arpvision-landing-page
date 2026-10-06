@@ -9,6 +9,7 @@
     "preview": "astro preview --host 127.0.0.1",
     "test": "tsx --test tests/*.test.ts",
     "check:site": "node scripts/check-site.mjs",
+    "check:seo": "node scripts/seo-check.mjs",
     "test:browser": "node scripts/browser-check.mjs && node scripts/tour-check.mjs",
     "test:opening": "node scripts/opening-check.mjs",
     "test:showcase": "node scripts/showcase-check.mjs",

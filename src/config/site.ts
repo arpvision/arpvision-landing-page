@@ -36,7 +36,9 @@ export interface DemoTour {
 export const site = {
   name: 'ARP Vision',
   themeColor: '#0454ED',
-  domain: 'https://arpvision.com.br', // Domínio sugerido no briefing; confirmar antes de publicar.
+  // Domínio primário na Vercel: o apex (arpvision.com.br) redireciona para o www. Canonical,
+  // sitemap e robots usam este valor; se apontar para um endereço que redireciona, o Google não indexa.
+  domain: 'https://www.arpvision.com.br',
   readyToIndex: true,
   appUrl: 'https://arpvision.app',
   contact: { whatsapp: '+55 (51) 99527-3661', email: 'arpvision@outlook.com.br' },

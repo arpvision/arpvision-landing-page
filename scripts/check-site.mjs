@@ -18,13 +18,25 @@ const allFiles = async (directory) =>
     )
   ).flat();
 let verifiedLinks = 0;
+const canonicalOrigins = new Set();
 for (const route of routes) {
   const html = await readFile(path.join('dist', route), 'utf8');
   assert.match(html, /<html[^>]+lang="pt-BR"/);
   assert.equal((html.match(/<h1[ >]/g) || []).length, 1, `${route}: exatamente um h1`);
   for (const meta of ['description', 'og:title', 'og:description', 'og:image', 'twitter:card'])
     assert.ok(html.includes(`="${meta}"`), `${route}: ${meta}`);
-  assert.match(html, /rel="canonical"/);
+  const canonical = html.match(/<link rel="canonical" href="([^"]+)"/)?.[1];
+  assert.ok(canonical, `${route}: canonical`);
+  assert.equal(
+    new URL(canonical).pathname,
+    `/${route.replace(/\/?index\.html$/, '')}`,
+    `${route}: canonical aponta para a própria página`,
+  );
+  assert.ok(
+    html.includes(`property="og:url" content="${canonical}"`),
+    `${route}: og:url = canonical`,
+  );
+  canonicalOrigins.add(new URL(canonical).origin);
   assert.ok(!html.includes('{{'), `${route}: sem placeholders brutos`);
   // O tour embutido na hero carrega com a página; qualquer outro iframe só após interação.
   assert.ok(
@@ -59,8 +71,25 @@ const files = await allFiles('dist/_astro');
 let jsBytes = 0;
 for (const file of files.filter((file) => file.endsWith('.js'))) jsBytes += (await stat(file)).size;
 assert.ok(jsBytes < 100 * 1024, `JavaScript total abaixo de 100 KB: ${jsBytes}`);
-assert.ok((await readFile('dist/sitemap.xml', 'utf8')).includes('/politica-de-privacidade'));
-assert.ok((await readFile('dist/robots.txt', 'utf8')).includes('Sitemap:'));
+// Canonical, sitemap e robots no mesmo domínio: se divergirem, o Google vê um redirecionamento e não indexa.
+assert.equal(canonicalOrigins.size, 1, `um só domínio nos canonicals: ${[...canonicalOrigins]}`);
+const [canonicalOrigin] = canonicalOrigins;
+const sitemap = await readFile('dist/sitemap.xml', 'utf8');
+assert.ok(sitemap.includes('/politica-de-privacidade'));
+for (const [, loc] of sitemap.matchAll(/<loc>([^<]+)<\/loc>/g))
+  assert.equal(new URL(loc).origin, canonicalOrigin, `sitemap no domínio canônico: ${loc}`);
+assert.match(
+  sitemap,
+  new RegExp(
+    `<loc>${canonicalOrigin}/</loc>(<changefreq>[^<]+</changefreq>)?<priority>1\\.0</priority>`,
+  ),
+  'Home no sitemap com prioridade máxima',
+);
+const robots = await readFile('dist/robots.txt', 'utf8');
+assert.ok(
+  robots.includes(`Sitemap: ${canonicalOrigin}/sitemap.xml`),
+  'robots aponta o sitemap do domínio canônico',
+);
 console.log(
   `4 rotas HTML verificadas; ${verifiedLinks} referências locais válidas; ${(jsBytes / 1024).toFixed(1)} KB de JavaScript total (sem gzip). Sitemap, robots, metadados, schemas e UTMs válidos.`,
 );
