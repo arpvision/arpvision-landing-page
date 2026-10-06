@@ -152,10 +152,13 @@ try {
   );
   assert.equal(await page.locator('.fan-arrow[data-liquid]').count(), 5);
   assert.equal(await page.locator('.fan-room-link[data-liquid]').count(), 5);
-  assert.deepEqual(
-    await page.locator('.fan-room-link').allTextContents(),
-    Array(5).fill('ambiente x'),
-  );
+  assert.deepEqual(await page.locator('.fan-room-link').allTextContents(), [
+    'Suíte',
+    'Quarto',
+    'Sala',
+    'Quarto Visita',
+    'Pátio',
+  ]);
   assert.equal(await page.locator('.header-capsule[data-liquid]').count(), 1);
   assert.ok((await page.locator('.site-header').boundingBox()).width <= 1060, 'cabeçalho estreito');
   assert.equal(
@@ -220,7 +223,7 @@ try {
     () => document.querySelector('[data-fan]')?.dataset.fanState === 'open',
   );
   results.push(
-    '1440×900: apenas a ponta na abertura; rolagem revela o leque em 900ms, cinco fotos com seta e ambiente x, hover e foco preservados.',
+    '1440×900: apenas a ponta na abertura; rolagem revela o leque em 900ms, cinco fotos com seta e nomes dos ambientes, hover e foco preservados.',
   );
 
   assert.equal(await page.locator('main h1').count(), 1);

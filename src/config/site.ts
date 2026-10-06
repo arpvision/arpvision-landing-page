@@ -57,7 +57,7 @@ export const site = {
     // Panoramas do proprietário. O enquadramento das miniaturas é feito no layout.
     fanRooms: [
       {
-        title: 'Banheiro',
+        title: 'Suíte',
         image: '/images/tours/banheiro.webp',
         alt: 'Box de vidro e banheira em um banheiro fotografado em 360 graus',
         position: '28% 50%',
@@ -65,7 +65,7 @@ export const site = {
         arrowTone: 'dark' as const,
       },
       {
-        title: 'Quarto com suíte',
+        title: 'Quarto',
         image: '/images/tours/suite.webp',
         alt: 'Duas poltronas junto a uma mesa no quarto com suíte',
         position: '92% 50%',
@@ -81,7 +81,7 @@ export const site = {
         arrowTone: 'light' as const,
       },
       {
-        title: 'TV e janela',
+        title: 'Quarto Visita',
         image: '/images/tours/tv-janela.webp',
         alt: 'Televisão junto à janela e à cortina',
         position: '0% 50%',
