@@ -1,23 +1,23 @@
 ---
 import { site, price, type Plan } from '../config/site';
-import { appLink } from '../lib/business';
+import { annualPricing, appLink } from '../lib/business';
 import Icon from './Icon.astro';
 import ContactLink from './ContactLink.astro';
 
-// Cards no mesmo formato da tela "Planos e créditos" do app: preço, forma de pagamento,
-// botão e dois ou três itens. O detalhe completo fica na tabela de /planos.
+// Cards no formato do bloco de preços de referência: nome, preço, forma de cobrança,
+// recursos, botão e descrição. Com desconto anual configurado, um seletor mensal/anual
+// troca o preço das assinaturas (Professional e Business). Detalhes completos em /planos.
 const { full = false } = Astro.props;
-const iconFor = (plan: Plan) => {
-  if (plan.billing === 'once') return 'user';
-  if (plan.billing === 'custom') return 'globe';
-  return plan.recommended ? 'users' : 'phone';
-};
+const discount = site.pricing.annualDiscount;
+const hasAnnual = !!discount && site.pricing.plans.some((plan) => plan.billing === 'monthly');
 // Valor de cada parcela do Individual no cartão (o total fica em `oneTimePrice`).
 const installmentFor = (plan: Plan) => (plan.oneTimePrice ?? 0) / (plan.installments ?? 1);
+const annualFor = (plan: Plan) =>
+  hasAnnual && plan.billing === 'monthly' ? annualPricing(plan.monthlyPrice!, discount!) : null;
 const paymentFor = (plan: Plan) => {
   if (plan.billing === 'once') return `ou ${price(plan.pixPrice!)} à vista no Pix`;
-  if (plan.billing === 'monthly') return 'no cartão';
-  return 'condições em contrato';
+  if (plan.billing === 'monthly') return 'Cobrança mensal, no cartão';
+  return 'Condições em contrato';
 };
 const highlightsFor = (plan: Plan) => {
   if (plan.billing === 'once')
@@ -35,6 +35,27 @@ const highlightsFor = (plan: Plan) => {
       <Icon name="info" size={17} /> {site.pricing.exampleNotice}
     </p>
   )}
+  {hasAnnual && (
+    <div class="billing-toggle" data-billing-toggle>
+      <span class="billing-option" data-billing-option="monthly" aria-hidden="true">
+        Mensal
+      </span>
+      <button
+        type="button"
+        class="billing-switch"
+        role="switch"
+        aria-checked="false"
+        aria-label={`Plano anual, com ${Math.round(discount! * 100)}% de desconto`}
+        data-billing-switch
+      >
+        <span class="billing-switch-thumb" aria-hidden="true"></span>
+      </button>
+      <span class="billing-option" data-billing-option="annual" aria-hidden="true">
+        Anual <span class="billing-save">economize {Math.round(discount! * 100)}%</span>
+      </span>
+      <p class="sr-only" aria-live="polite" data-billing-status></p>
+    </div>
+  )}
   <!-- Só no celular: controles do carrossel de planos. -->
   <div class="pricing-carousel-hint">
     <button class="carousel-button carousel-prev" data-carousel-prev aria-label="Plano anterior">
@@ -48,65 +69,90 @@ const highlightsFor = (plan: Plan) => {
     </button>
   </div>
   <div class="pricing-grid" tabindex="0" role="region" aria-label="Planos" data-pricing-grid>
-    {site.pricing.plans.map((plan) => (
-      <article class:list={['plan-card', { recommended: plan.recommended }]} data-plan={plan.id}>
-        {plan.recommended && <span class="plan-ribbon">Recomendado para equipes</span>}
-        <div class="plan-title">
-          <span class="plan-icon">
-            <Icon name={iconFor(plan)} size={20} />
-          </span>
-          <h3>{plan.name}</h3>
-        </div>
-        <p class="plan-audience">{plan.audience}</p>
-        <div class="plan-price">
-          {plan.billing === 'once' ? (
-            <>
-              <span class="plan-installments">{plan.installments}x</span>
-              <strong data-price>{price(installmentFor(plan))}</strong>
-            </>
-          ) : plan.billing === 'monthly' ? (
-            <>
-              <strong data-price>{price(plan.monthlyPrice!)}</strong>
-              <span data-period>/mês</span>
-            </>
-          ) : (
-            <strong data-price>Sob consulta</strong>
+    {site.pricing.plans.map((plan) => {
+      const annual = annualFor(plan);
+      return (
+        <article class:list={['plan-card', { recommended: plan.recommended }]} data-plan={plan.id}>
+          {plan.recommended && (
+            <span class="plan-badge">
+              <Icon name="star" size={14} /> Recomendado
+            </span>
           )}
-        </div>
-        <p class="plan-payment">{paymentFor(plan)}</p>
-        {plan.billing === 'custom' ? (
-          <ContactLink
-            class="button button-secondary"
-            message={`Olá! Quero conhecer o plano ${plan.name} da ARP Vision.`}
+          <h3 class="plan-name">{plan.name}</h3>
+          <div class="plan-price">
+            {plan.billing === 'once' ? (
+              <>
+                <span class="plan-installments">{plan.installments}x</span>
+                <strong data-price>{price(installmentFor(plan))}</strong>
+              </>
+            ) : plan.billing === 'monthly' ? (
+              <>
+                <strong
+                  data-price
+                  data-price-monthly={plan.monthlyPrice}
+                  data-price-annual={annual?.perMonth}
+                >
+                  {price(plan.monthlyPrice!)}
+                </strong>
+                <span data-period>/mês</span>
+              </>
+            ) : (
+              <strong data-price>Sob consulta</strong>
+            )}
+          </div>
+          <p
+            class="plan-payment"
+            data-payment-monthly={annual ? paymentFor(plan) : undefined}
+            data-payment-annual={annual ? `Cobrança anual de ${price(annual.perYear)}` : undefined}
           >
-            Falar no WhatsApp
-          </ContactLink>
-        ) : (
-          <a
-            href={appLink(`plano-${plan.id}`)}
-            class:list={['button', plan.recommended ? 'button-primary' : 'button-secondary']}
-            data-cta={`plano-${plan.id}`}
-          >
-            {plan.billing === 'once' ? 'Comprar' : 'Assinar'}
-          </a>
-        )}
-        <ul class="plan-checks">
-          {highlightsFor(plan).map((item) => (
-            <li>
-              <Icon name="check" size={16} />
-              {item}
-            </li>
-          ))}
-          {plan.billing === 'once' && plan.renewalPrice !== null && (
-            <li class="plan-check-muted">
-              <Icon name="refresh" size={16} />
-              Renovação {price(plan.renewalPrice)}/ano
-            </li>
-          )}
-        </ul>
-      </article>
-    ))}
+            {paymentFor(plan)}
+          </p>
+          <ul class="plan-checks">
+            {highlightsFor(plan).map((item) => (
+              <li>
+                <Icon name="check" size={16} />
+                {item}
+              </li>
+            ))}
+            {plan.billing === 'once' && plan.renewalPrice !== null && (
+              <li class="plan-check-muted">
+                <Icon name="refresh" size={16} />
+                Renovação {price(plan.renewalPrice)}/ano
+              </li>
+            )}
+          </ul>
+          <div class="plan-footer">
+            {plan.billing === 'custom' ? (
+              <ContactLink
+                class="button button-secondary"
+                message={`Olá! Quero conhecer o plano ${plan.name} da ARP Vision.`}
+              >
+                Falar no WhatsApp
+              </ContactLink>
+            ) : (
+              <a
+                href={appLink(`plano-${plan.id}`)}
+                class:list={['button', plan.recommended ? 'button-primary' : 'button-secondary']}
+                data-cta={`plano-${plan.id}`}
+              >
+                {plan.billing === 'once' ? 'Comprar' : 'Assinar'}
+              </a>
+            )}
+            <p class="plan-audience">{plan.audience}</p>
+          </div>
+        </article>
+      );
+    })}
   </div>
+  <script is:inline>
+    // Entrada dos cards (desktop): começam 50px abaixo e se acomodam ao aparecer.
+    // Sem JS ou com movimento reduzido, já ficam na posição final.
+    (() => {
+      const grid = document.currentScript.previousElementSibling;
+      if (matchMedia('(min-width: 1024px) and (prefers-reduced-motion: no-preference)').matches)
+        grid.dataset.reveal = 'pending';
+    })();
+  </script>
   <p class="pricing-secure">
     <span aria-hidden="true"></span> Pagamento seguro via Asaas · Pix ou cartão
   </p>

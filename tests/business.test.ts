@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { calculateUsage, appLink, whatsappLink } from '../src/lib/business';
+import { calculateUsage, appLink, whatsappLink, annualPricing } from '../src/lib/business';
 import { site, featureGroups } from '../src/config/site';
 
-test('configuração publica os quatro planos do app sem oferta anual ou pacotes indefinidos', () => {
+test('configuração publica os quatro planos do app com 20% no anual e sem pacotes indefinidos', () => {
   const [individual, professional, business, enterprise] = site.pricing.plans;
   assert.deepEqual(
     site.pricing.plans.map((plan) => [plan.name, plan.billing]),
@@ -35,7 +35,7 @@ test('configuração publica os quatro planos do app sem oferta anual ou pacotes
     [null, null, null],
   );
   assert.ok(site.pricing.plans.every((plan) => plan.users === null));
-  assert.equal(site.pricing.annualDiscount, null);
+  assert.equal(site.pricing.annualDiscount, 0.2);
   assert.deepEqual(site.pricing.extraCredits, []);
   assert.ok(featureGroups.every((group) => group.rows.every((row) => row.values.length === 4)));
 });
@@ -74,4 +74,9 @@ test('WhatsApp comercial abre com o número completo e a mensagem codificada', (
   const url = new URL(whatsappLink('Olá! Quero saber mais.'));
   assert.equal(url.origin + url.pathname, 'https://wa.me/5551995273661');
   assert.equal(url.searchParams.get('text'), 'Olá! Quero saber mais.');
+});
+test('plano anual: 20% nas assinaturas mensais, em centavos exatos', () => {
+  const discount = site.pricing.annualDiscount!;
+  assert.deepEqual(annualPricing(249, discount), { perMonth: 199.2, perYear: 2390.4 });
+  assert.deepEqual(annualPricing(599, discount), { perMonth: 479.2, perYear: 5750.4 });
 });

@@ -103,7 +103,8 @@ export const site = {
   pricing: {
     isExample: false,
     exampleNotice: '',
-    annualDiscount: null as number | null,
+    // Plano anual: 20% de desconto nas assinaturas mensais (Professional e Business).
+    annualDiscount: 0.2 as number | null,
     annualLabel: '',
     averageRooms: 8,
     // Conta nova ganha créditos para testar; fica fora do grid de planos, como no app.
@@ -189,7 +190,7 @@ export const site = {
     phoneRequirements:
       'Requisitos de compatibilidade a definir. A captura funciona no navegador do celular; a lista de aparelhos e versões compatíveis está em validação.',
     billing:
-      'O pagamento é feito no app, com segurança, pelo Asaas. Individual: R$ 229 à vista no Pix ou 12x de R$ 23,25 no cartão. Professional: R$ 249 por mês, no cartão. Business: R$ 599 por mês, no cartão. Enterprise: condições em contrato.',
+      'O pagamento é feito no app, com segurança, pelo Asaas. Individual: R$ 229 à vista no Pix ou 12x de R$ 23,25 no cartão. Professional: R$ 249 por mês, no cartão. Business: R$ 599 por mês, no cartão. No plano anual, Professional e Business têm 20% de desconto. Enterprise: condições em contrato.',
     cancellation:
       'Ao cancelar uma assinatura, os tours permanecem no ar até o fim do mês já pago. Está previsto um aviso por e-mail 7 dias antes de saírem do ar. Depois, você pode manter cada tour por R$ 79 ao ano.',
     liveTourLimit:

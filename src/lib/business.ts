@@ -14,6 +14,11 @@ export const whatsappLink = (
   const number = site.contact.whatsapp.replace(/\D/g, '');
   return number ? `https://wa.me/${number}?text=${encodeURIComponent(message)}` : '#contato';
 };
+// Preço no plano anual: valor mensal com desconto (arredondado em centavos) e total do ano.
+export const annualPricing = (monthlyPrice: number, discount: number) => {
+  const perMonth = Math.round(monthlyPrice * (1 - discount) * 100) / 100;
+  return { perMonth, perYear: Math.round(perMonth * 12 * 100) / 100 };
+};
 export function calculateUsage(properties: number, rooms: number) {
   const credits = properties * rooms;
   const plan = [...site.pricing.plans]

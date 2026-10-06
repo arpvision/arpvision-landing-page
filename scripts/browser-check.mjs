@@ -100,7 +100,8 @@ try {
   // Mesmos quatro cards da tela de planos do app; o teste grátis vira uma nota.
   assert.equal(await page.locator('.plan-card').count(), 4);
   assert.equal(await page.locator('.feature-table thead th').count(), 5);
-  assert.equal(await page.locator('[data-billing]').count(), 0);
+  // Plano anual com 20%: o seletor mensal/anual aparece uma vez.
+  assert.equal(await page.locator('[data-billing-toggle]').count(), 1);
   const individual = await page.locator('[data-plan="individual"]').innerText();
   assert.match(individual, /12x\s*R\$\s*23,25/);
   assert.match(individual, /ou R\$\s*229 à vista no Pix/);
@@ -126,6 +127,41 @@ try {
     await page.locator('[data-plan="imobiliaria"]').textContent(),
     /Até 120 tours no ar/,
   );
+  // Seletor mensal/anual: 20% nas assinaturas; Individual e Enterprise não mudam.
+  const billingSwitch = page.locator('[data-billing-switch]');
+  assert.equal(await billingSwitch.getAttribute('role'), 'switch');
+  assert.equal(await billingSwitch.getAttribute('aria-checked'), 'false');
+  await billingSwitch.click();
+  assert.equal(await billingSwitch.getAttribute('aria-checked'), 'true');
+  const priceOf = (plan) => page.locator(`[data-plan="${plan}"] [data-price]`);
+  // O Intl separa "R$" do número com espaço inseparável: normaliza antes de comparar.
+  const waitForPrice = (plan, text) =>
+    page.waitForFunction(
+      ([id, expected]) =>
+        document
+          .querySelector(`[data-plan="${id}"] [data-price]`)
+          .textContent.replace(/\s+/g, ' ')
+          .trim() === expected,
+      [plan, text],
+    );
+  await waitForPrice('corretor', 'R$ 199,20');
+  assert.match(await priceOf('imobiliaria').textContent(), /R\$\s*479,20$/);
+  assert.match(
+    await page.locator('[data-plan="corretor"] .plan-payment').textContent(),
+    /Cobrança anual de R\$\s*2\.390,40/,
+  );
+  assert.match(
+    await page.locator('[data-plan="imobiliaria"] .plan-payment').textContent(),
+    /Cobrança anual de R\$\s*5\.750,40/,
+  );
+  assert.match(await priceOf('individual').textContent(), /R\$\s*23,25/);
+  assert.match(await page.locator('[data-billing-status]').textContent(), /plano anual/);
+  await page.locator('[data-billing-option="monthly"]').click();
+  await waitForPrice('corretor', 'R$ 249');
+  assert.match(
+    await page.locator('[data-plan="corretor"] .plan-payment').textContent(),
+    /Cobrança mensal, no cartão/,
+  );
   const schema = JSON.parse(await page.locator('script[type="application/ld+json"]').textContent());
   const offers = schema.find((item) => item['@type'] === 'SoftwareApplication').offers;
   assert.deepEqual(
@@ -137,7 +173,9 @@ try {
     ],
   );
   await page.screenshot({ path: '.artifacts/planos-desktop.png' });
-  results.push('Quatro planos como no app, Pix/parcelas, limites e ofertas estruturadas OK');
+  results.push(
+    'Quatro planos como no app, Pix/parcelas, seletor mensal/anual (20%), limites e ofertas estruturadas OK',
+  );
 
   // Temas: contraste AA nos dois, logo certo e escolha salva entre recarregamentos.
   const axeSource = await readFile('node_modules/axe-core/axe.min.js', 'utf8');

@@ -24,6 +24,8 @@
   --accent: var(--brand-blue);
   --only-light: inline-block;
   --only-dark: none;
+  /* Intensidade da varredura holográfica dos planos (mais forte no escuro). */
+  --plan-sweep: 22%;
   --brand-blue-dark: #0347cc;
   --brand-blue-soft: #e6eeff;
   --brand-teal-dark: #0f766e;
@@ -60,6 +62,7 @@
     color-scheme: dark;
     --only-light: none;
     --only-dark: inline-block;
+    --plan-sweep: 46%;
     --accent: #6e9bff;
     --brand-blue-dark: #8fb2ff;
     --brand-blue-soft: #16264a;
@@ -82,6 +85,7 @@
   color-scheme: dark;
   --only-light: none;
   --only-dark: inline-block;
+  --plan-sweep: 46%;
   --accent: #6e9bff;
   --brand-blue-dark: #8fb2ff;
   --brand-blue-soft: #16264a;
@@ -1437,21 +1441,23 @@ input[type='number']::-webkit-outer-spin-button {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
   align-items: stretch;
+  perspective: 1400px;
 }
 .plan-card {
   position: relative;
   min-width: 0;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 27px 17px 17px;
+  border-radius: 16px;
+  padding: 30px 20px 22px;
   display: flex;
   flex-direction: column;
+  text-align: center;
 }
 .plan-card.recommended {
   border: 2px solid var(--accent);
-  padding: 26px 16px 16px;
-  box-shadow: 0 7px 25px color-mix(in srgb, var(--brand-blue) 8%, transparent);
+  padding: 29px 19px 21px;
+  box-shadow: 0 14px 34px color-mix(in srgb, var(--brand-blue) 14%, transparent);
 }
 .pricing-carousel-hint {
   display: none;
@@ -1481,77 +1487,82 @@ input[type='number']::-webkit-outer-spin-button {
 .carousel-prev svg {
   transform: rotate(180deg);
 }
-.plan-ribbon {
+.plan-badge {
   position: absolute;
-  top: -15px;
-  left: 50%;
-  transform: translateX(-50%);
+  top: -1px;
+  right: -1px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   background: var(--brand-blue);
   color: var(--white);
   font-size: var(--fs-label);
-  letter-spacing: 0.015em;
-  font-weight: 550;
-  border-radius: 5px;
-  padding: 5px 11px;
+  font-weight: 600;
+  border-radius: 0 14px 0 12px;
+  padding: 5px 11px 6px 10px;
   white-space: nowrap;
 }
-.plan-title {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-}
-.plan-icon {
-  color: var(--accent);
-}
-.plan-title h3 {
-  font-size: 1rem;
+.plan-name {
   margin: 0;
-  letter-spacing: -0.02em;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+/* O selo fica no canto superior: o nome do recomendado desce para não ficar coberto. */
+.plan-card.recommended .plan-name {
+  margin-top: 18px;
 }
 .plan-audience {
-  font-size: var(--fs-small);
+  margin: 14px 0 0;
+  font-size: var(--fs-note);
   color: var(--text-muted);
-  line-height: 1.6;
-  /* Duas linhas reservadas: os botões ficam alinhados entre os cards. */
-  min-height: 48px;
-  margin: 11px 0 20px;
+  line-height: 1.5;
 }
 .plan-price {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   align-items: baseline;
-  gap: 5px;
+  gap: 6px;
+  margin: 22px 0 0;
 }
 .plan-price strong {
-  font-size: 1.87rem;
-  letter-spacing: -0.055em;
-  font-weight: 650;
-  line-height: 1.35;
+  font-size: 2.5rem;
+  letter-spacing: -0.045em;
+  font-weight: 700;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-strong);
 }
 .plan-price > span {
   color: var(--text-muted);
   font-size: var(--fs-small);
 }
 .plan-card:last-child .plan-price strong {
-  font-size: 1.55rem;
-  line-height: 1.63;
+  font-size: 1.75rem;
+  line-height: 1.65;
 }
 .plan-installments {
   color: var(--text-muted);
   font-size: var(--fs-small);
 }
 .plan-payment {
-  font-size: var(--fs-small);
+  font-size: var(--fs-note);
   color: var(--text-muted);
-  margin: 2px 0 20px;
+  margin: 6px 0 0;
+  min-height: 1.5em;
 }
 .plan-checks {
   list-style: none;
   display: grid;
+  align-content: start;
   gap: 10px;
-  margin: 20px 0 0;
-  padding: 18px 0 0;
-  border-top: 1px solid var(--line);
+  margin: 22px 0 0;
+  padding: 0;
+  text-align: left;
+  flex-grow: 1;
 }
 .plan-checks li {
   display: flex;
@@ -1599,12 +1610,259 @@ input[type='number']::-webkit-outer-spin-button {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
-.plan-card > .button {
+.plan-footer > .button {
   width: 100%;
   font-size: var(--fs-small);
   min-height: 44px;
   padding: 11px 8px;
   gap: 7px;
+}
+.plan-badge svg {
+  fill: currentColor;
+}
+/* Linha divisória antes do botão, como no bloco de referência. */
+.plan-footer {
+  margin-top: 22px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+.billing-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: -8px 0 34px;
+  font-weight: 600;
+}
+.billing-option {
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: color 0.2s;
+}
+.billing-toggle[data-billing-mode='monthly'] [data-billing-option='monthly'],
+.billing-toggle[data-billing-mode='annual'] [data-billing-option='annual'] {
+  color: var(--text-strong);
+}
+.billing-save {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--brand-blue-soft);
+  color: var(--brand-blue-dark);
+  font-size: var(--fs-label);
+  font-weight: 650;
+}
+/* Interruptor: área de toque de 44px, trilho desenhado no ::before. */
+.billing-switch {
+  position: relative;
+  width: 56px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.billing-switch::before {
+  content: '';
+  position: absolute;
+  inset: 9px 0;
+  border-radius: 999px;
+  background: var(--border);
+  transition: background 0.2s;
+}
+.billing-switch-thumb {
+  position: absolute;
+  top: 12px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--white);
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--ink) 30%, transparent);
+  transition: transform 0.2s ease-out;
+}
+.billing-switch[aria-checked='true']::before {
+  background: linear-gradient(90deg, var(--brand-blue), var(--brand-teal));
+  box-shadow: 0 0 18px color-mix(in srgb, var(--brand-blue) 55%, transparent);
+}
+.billing-switch[aria-checked='true'] .billing-switch-thumb {
+  transform: translateX(30px);
+  box-shadow:
+    0 1px 3px color-mix(in srgb, var(--ink) 30%, transparent),
+    0 0 10px color-mix(in srgb, var(--white) 70%, transparent);
+}
+/* Camada das lantejoulas (canvas temporário criado pelo pricing.ts). */
+.pricing-sequins {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 100;
+}
+/* Pulso ao ligar o anual: um anel sai do interruptor e se dissolve. */
+.billing-switch::after {
+  content: '';
+  position: absolute;
+  inset: 9px 0;
+  border-radius: 999px;
+  border: 2px solid var(--brand-teal);
+  opacity: 0;
+  pointer-events: none;
+}
+.billing-switch[data-pulse]::after {
+  animation: billing-pulse 0.7s ease-out;
+}
+@keyframes billing-pulse {
+  from {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.6, 2.2);
+  }
+}
+/*
+ * Preço em "painel eletrônico": cada dígito é uma fita 0–9 (no ::after) que gira até o
+ * valor. O caractere real fica transparente, para manter largura, textContent e leitores
+ * de tela; clip-path recorta a fita sem mudar a linha de base do texto.
+ */
+.odo-digit {
+  position: relative;
+  display: inline-block;
+  line-height: 1.15;
+  clip-path: inset(0 -0.1em);
+}
+.odo-digit > span {
+  color: transparent;
+}
+.odo-digit::after {
+  content: '0\A 1\A 2\A 3\A 4\A 5\A 6\A 7\A 8\A 9';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  white-space: pre;
+  line-height: 1.15;
+  transform: translateY(calc(var(--digit, 0) * -1.15em));
+  transition: transform 0.9s cubic-bezier(0.2, 0.85, 0.15, 1) calc(var(--order, 0) * 70ms);
+}
+/* Varredura holográfica e anel de energia nos cards cujo preço muda. */
+@property --plan-ring-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+.plan-card[data-boost]::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  z-index: 2;
+  padding: 2px;
+  border-radius: inherit;
+  background: conic-gradient(
+    from var(--plan-ring-angle),
+    transparent 0deg 250deg,
+    var(--brand-teal) 300deg,
+    var(--accent) 340deg,
+    transparent 360deg
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  animation: plan-ring 1.2s ease-in-out forwards;
+}
+.plan-card[data-boost]::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  background: linear-gradient(
+    105deg,
+    transparent 35%,
+    color-mix(in srgb, var(--accent) var(--plan-sweep), transparent) 46%,
+    color-mix(in srgb, var(--brand-teal) calc(var(--plan-sweep) + 8%), transparent) 50%,
+    color-mix(in srgb, var(--accent) var(--plan-sweep), transparent) 54%,
+    transparent 65%
+  );
+  background-size: 260% 100%;
+  pointer-events: none;
+  animation: plan-sweep 1s ease-out forwards;
+}
+@keyframes plan-ring {
+  0% {
+    --plan-ring-angle: 0deg;
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    --plan-ring-angle: 360deg;
+    opacity: 0;
+  }
+}
+@keyframes plan-sweep {
+  from {
+    background-position: 120% 0;
+  }
+  to {
+    background-position: -40% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .odo-digit::after,
+  .billing-switch::before,
+  .billing-switch-thumb {
+    transition: none;
+  }
+  .billing-switch[data-pulse]::after,
+  .plan-card[data-boost]::before,
+  .plan-card[data-boost]::after {
+    animation: none;
+  }
+}
+/*
+ * Desktop (4 colunas): perspectiva do bloco de referência. O recomendado sobe 20px; os
+ * demais ficam um pouco menores e as pontas giram para o centro. Com JS, os cards entram
+ * 50px abaixo e se acomodam com a curva de uma mola (data-reveal no pricing.ts).
+ */
+@media (min-width: 1024px) {
+  .plan-card {
+    --plan-rest: translateY(14px) scale(0.96);
+    transform: var(--plan-rest);
+    transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.4s;
+  }
+  .plan-card.recommended {
+    --plan-rest: translateY(-6px);
+    z-index: 1;
+  }
+  .plan-card:first-child:not(.recommended) {
+    --plan-rest: translate(10px, 14px) scale(0.96) rotateY(8deg);
+    transform-origin: right center;
+  }
+  .plan-card:last-child:not(.recommended) {
+    --plan-rest: translate(-10px, 14px) scale(0.96) rotateY(-8deg);
+    transform-origin: left center;
+  }
+  .pricing-grid[data-reveal='pending'] .plan-card {
+    transform: translateY(50px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .plan-card {
+    transition: none;
+  }
 }
 .pricing-component > .center {
   margin-top: 25px;
@@ -2114,10 +2372,10 @@ input[type='number']::-webkit-outer-spin-button {
     padding: 24px 16px 16px;
   }
   .plan-price strong {
-    font-size: 1.65rem;
+    font-size: 2.1rem;
   }
   .plan-card:last-child .plan-price strong {
-    font-size: 1.35rem;
+    font-size: 1.5rem;
   }
   .team-intro h2 {
     font-size: 2.15rem;
@@ -2304,19 +2562,19 @@ input[type='number']::-webkit-outer-spin-button {
     padding: 28px;
   }
   .plan-price strong {
-    font-size: 2.1rem;
+    font-size: 2.4rem;
   }
   .plan-audience {
     min-height: auto;
   }
-  .plan-card > .button {
+  .plan-footer > .button {
     font-size: var(--fs-small);
   }
-  .plan-title h3 {
-    font-size: 1.2rem;
+  .plan-name {
+    font-size: 0.9375rem;
   }
   .plan-card:last-child .plan-price strong {
-    font-size: 1.8rem;
+    font-size: 1.75rem;
   }
   .plan-audience {
     font-size: var(--fs-small);
@@ -2770,28 +3028,21 @@ input[type='number']::-webkit-outer-spin-button {
     padding: 25px 19px 18px;
   }
   .plan-price strong {
-    font-size: 1.75rem;
+    font-size: 2.25rem;
   }
   .plan-card:last-child .plan-price strong {
-    font-size: 1.5rem;
+    font-size: 1.6rem;
   }
-  .plan-title {
-    gap: 7px;
-  }
-  .plan-title h3 {
-    font-size: 1rem;
-  }
-  .plan-title svg {
-    width: 20px;
+  .plan-name {
+    font-size: 0.875rem;
   }
   .plan-audience {
     font-size: var(--fs-small);
-    min-height: 36px;
   }
-  .plan-card > .button {
+  .plan-footer > .button {
     font-size: var(--fs-small);
   }
-  .plan-card > .button svg {
+  .plan-footer > .button svg {
     display: none;
   }
   .faq-layout {
@@ -3023,13 +3274,11 @@ input[type='number']::-webkit-outer-spin-button {
   .plan-card.recommended {
     padding: 29px 22px 21px;
   }
-  .plan-title h3 {
-    font-size: 1.25rem;
+  .plan-name {
+    font-size: 0.875rem;
   }
   .plan-audience {
     font-size: var(--fs-small);
-    min-height: 0;
-    margin-bottom: 17px;
   }
   .plan-price strong {
     font-size: 2.35rem;
@@ -3037,14 +3286,14 @@ input[type='number']::-webkit-outer-spin-button {
   .plan-card:last-child .plan-price strong {
     font-size: 2rem;
   }
-  .plan-card > .button {
+  .plan-footer > .button {
     font-size: 0.875rem;
     min-height: 48px;
   }
-  .plan-card > .button svg {
+  .plan-footer > .button svg {
     display: inline;
   }
-  .plan-ribbon {
+  .plan-badge {
     font-size: var(--fs-label);
   }
   .plan-price > span {
