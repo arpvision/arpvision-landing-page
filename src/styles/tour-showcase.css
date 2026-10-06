@@ -194,23 +194,25 @@
 }
 .marquee-word {
   color: var(--text-strong);
-  filter: drop-shadow(0 1px 0 color-mix(in srgb, var(--white) 16%, transparent));
 }
-/* O reflexo acompanha os contornos das letras, deixando o fundo atravessar o vidro. */
+/* Vidro com interior translúcido e reflexos finos nas letras, sem preenchimento sólido. */
 @supports (background-clip: text) {
   .marquee-word {
     color: transparent;
     background: linear-gradient(
-      145deg,
-      color-mix(in srgb, var(--text-strong) 92%, transparent) 10%,
-      var(--text-strong) 32%,
-      color-mix(in srgb, var(--text-strong) 68%, transparent) 48%,
-      color-mix(in srgb, var(--text-strong) 90%, transparent) 64%,
-      var(--text-strong) 90%
+      160deg,
+      color-mix(in srgb, var(--text-strong) 28%, transparent) 12%,
+      color-mix(in srgb, var(--text-strong) 74%, transparent) 25%,
+      color-mix(in srgb, var(--text-strong) 24%, transparent) 30%,
+      color-mix(in srgb, var(--text-strong) 18%, transparent) 48%,
+      color-mix(in srgb, var(--text-strong) 48%, transparent) 58%,
+      color-mix(in srgb, var(--text-strong) 22%, transparent) 65%,
+      color-mix(in srgb, var(--text-strong) 62%, transparent) 90%
     );
     background-clip: text;
     -webkit-background-clip: text;
-    -webkit-text-stroke: 0.45px color-mix(in srgb, var(--text-strong) 28%, transparent);
+    -webkit-text-stroke: 0.6px color-mix(in srgb, var(--text-strong) 42%, transparent);
+    filter: drop-shadow(0 1px 0 color-mix(in srgb, var(--text-strong) 12%, transparent));
   }
 }
 @media (prefers-contrast: more) {
@@ -230,7 +232,7 @@
   [data-marquee-enhanced='true'] .marquee-track {
     display: flex;
     flex-direction: column;
-    animation: tour-benefits 26s linear infinite;
+    animation: tour-benefits var(--marquee-duration, 26s) linear infinite;
     animation-play-state: paused;
   }
   [data-marquee-running='true'] .marquee-track {

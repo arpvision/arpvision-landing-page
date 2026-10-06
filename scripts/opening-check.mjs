@@ -159,11 +159,17 @@ try {
   assert.equal(await page.locator('.header-capsule[data-liquid]').count(), 1);
   assert.ok((await page.locator('.site-header').boundingBox()).width <= 1060, 'cabeçalho estreito');
   assert.equal(
-    await page.locator('.opening + #como-funciona').count(),
+    await page.locator('.opening + #compartilhamento').count(),
     1,
-    'passos logo após o leque',
+    'compartilhamento logo após o leque',
   );
-  assert.equal(await page.locator('.opening + #como-funciona + #creditos').count(), 1);
+  assert.equal(
+    await page
+      .locator('.opening + #compartilhamento + #como-funciona + .presentation + #creditos')
+      .count(),
+    1,
+    'compartilhamento, captura, tour e créditos na sequência solicitada',
+  );
   assert.equal(await page.locator('.presentation .hero-actions').count(), 0);
   assert.equal(
     await page

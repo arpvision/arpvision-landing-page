@@ -7,7 +7,30 @@ const base = process.env.SITE_URL || 'http://127.0.0.1:4321';
 const browser = await chromium.launch({ channel: 'chrome', headless: true });
 const errors = [];
 const results = [];
-const words = ['Confiança', 'Exclusividade', 'Agilidade', 'Economia de tempo', 'Valor', 'Imersão'];
+const words = [
+  'Confiança',
+  'Exclusividade',
+  'Agilidade',
+  'Economia de tempo',
+  'Valor',
+  'Imersão',
+  'Conexão',
+  'Transparência',
+  'Credibilidade',
+  'Diferenciação',
+  'Destaque',
+  'Alcance',
+  'Acessibilidade',
+  'Conveniência',
+  'Autonomia',
+  'Inovação',
+  'Encantamento',
+  'Presença digital',
+  'Visita sem limites',
+  'Experiência interativa',
+  'Proximidade',
+  'Valor percebido',
+];
 const setup = async (options) => {
   const context = await browser.newContext(options);
   const page = await context.newPage();

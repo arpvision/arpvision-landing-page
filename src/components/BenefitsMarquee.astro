@@ -1,8 +1,35 @@
 ---
-const words = ['Confiança', 'Exclusividade', 'Agilidade', 'Economia de tempo', 'Valor', 'Imersão'];
+const words = [
+  'Confiança',
+  'Exclusividade',
+  'Agilidade',
+  'Economia de tempo',
+  'Valor',
+  'Imersão',
+  'Conexão',
+  'Transparência',
+  'Credibilidade',
+  'Diferenciação',
+  'Destaque',
+  'Alcance',
+  'Acessibilidade',
+  'Conveniência',
+  'Autonomia',
+  'Inovação',
+  'Encantamento',
+  'Presença digital',
+  'Visita sem limites',
+  'Experiência interativa',
+  'Proximidade',
+  'Valor percebido',
+];
 ---
 
-<div class="benefit-marquee" data-benefit-marquee>
+<div
+  class="benefit-marquee"
+  data-benefit-marquee
+  style={`--marquee-duration: ${words.length * 4.5}s`}
+>
   <div class="marquee-window">
     <div class="marquee-track">
       <ul class="marquee-list" aria-label="O que o tour entrega">

@@ -53,6 +53,7 @@ const roomCards = site.media.fanRooms.map((room, index) => ({
       <FanCards items={roomCards} />
     </div>
   </section>
+  <Sharing />
   <section
     class="section how-section"
     id="como-funciona"
@@ -110,8 +111,6 @@ const roomCards = site.media.fanRooms.map((room, index) => ({
       </div>
     </div>
   </section>
-  <Credits />
-  <Sharing />
   <section class="hero presentation" aria-labelledby="presentation-title" data-atmosphere="demo">
     <div class="container presentation-heading">
       <div class="hero-copy">
@@ -120,6 +119,7 @@ const roomCards = site.media.fanRooms.map((room, index) => ({
     </div>
     <TourShowcase src={site.media.heroEmbed} />
   </section>
+  <Credits />
   <Tour />
   <TeamBenefits />
   <section class="section plans-preview" id="planos">
