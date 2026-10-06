@@ -1,54 +1,70 @@
 ---
-import Icon from './Icon.astro';
 import GlassSurface from './GlassSurface.astro';
+import Icon from './Icon.astro';
 interface Props {
   items: {
     number: string;
     title: string;
-    benefit: string;
-    detail: string;
     image: string;
     alt: string;
-    previewCrop?: boolean;
+    position: string;
+    labelTone?: 'light' | 'dark';
+    arrowTone?: 'light' | 'dark';
   }[];
 }
 const { items } = Astro.props;
 const center = (items.length - 1) / 2;
 ---
 
-<div class="fan fan-photos" data-fan aria-label="Ambientes de um tour fotografado com o celular">
-  <ul class="fan-stage" aria-label="Miniaturas dos ambientes do tour">
+<div class="fan fan-photos" data-fan aria-label="Ambientes fotografados com o celular">
+  <ul class="fan-stage" aria-label="Miniaturas de ambientes em 360 graus">
     {items.map((item, index) => (
       <li
         class="fan-position"
         data-fan-center={index === Math.floor(center) ? '' : undefined}
+        data-label-tone={item.labelTone}
+        data-arrow-tone={item.arrowTone}
         style={`--fan-offset: ${index - center}; --fan-distance: ${Math.abs(index - center)}; --fan-layer: ${items.length - Math.abs(index - center)}`}
       >
-        <article
+        <GlassSurface
+          as="article"
           class="use-card fan-card"
           id={`use-${item.number}`}
           tabindex="0"
-          aria-labelledby={`use-title-${item.number}`}
+          label={item.title}
+          liquid
         >
           <div class="fan-photo-media">
             <img
-              class:list={{ 'fan-image-preview': item.previewCrop }}
               src={item.image}
               alt={item.alt}
-              width="880"
-              height="540"
+              style={`object-position: ${item.position}`}
+              width="1600"
+              height="800"
               decoding="async"
             />
           </div>
-          <div class="fan-photo-badge">
-            <Icon name="phone" size={15} /> Tour 360°
-          </div>
-          <div class="fan-photo-caption">
-            <span class="fan-photo-room">{item.title} · feito com o celular</span>
-            <h3 id={`use-title-${item.number}`}>{item.benefit}</h3>
-            <p>{item.detail}</p>
-          </div>
-        </article>
+          <GlassSurface
+            as="a"
+            class="fan-arrow"
+            href="#presentation-tour"
+            label={`Ver tour de demonstração: ${item.title}`}
+            liquid
+            clear
+          >
+            <Icon name="arrow" size={22} />
+          </GlassSurface>
+          <GlassSurface
+            as="a"
+            class="fan-room-link"
+            href="#presentation-tour"
+            label="ambiente x — ver tour de demonstração"
+            liquid
+            clear
+          >
+            <span>ambiente x</span>
+          </GlassSurface>
+        </GlassSurface>
       </li>
     ))}
   </ul>
@@ -61,13 +77,13 @@ const center = (items.length - 1) / 2;
         aria-label={`Destacar cartão: ${item.title}`}
         aria-pressed={index === Math.floor(center) ? 'true' : 'false'}
       >
-        {item.number}
+        <span class="fan-control-dot" aria-hidden="true"></span>
       </button>
     ))}
   </GlassSurface>
 </div>
 <script is:inline>
-  // A pilha fica visível antes da primeira pintura e aguarda rolagem ou interação.
+  // Apenas a ponta aparece na abertura; o leque se revela com a rolagem.
   const fan = document.currentScript.previousElementSibling;
   if (fan) {
     fan.dataset.fanState = matchMedia('(prefers-reduced-motion: reduce)').matches

@@ -1,0 +1,42 @@
+---
+import Icon from './Icon.astro';
+import GlassSurface from './GlassSurface.astro';
+// O terceiro benefício será acrescentado quando seu texto estiver definido.
+const benefits = [
+  {
+    icon: 'users',
+    title: 'Mais autonomia para quem captura.',
+    text: 'Mais visibilidade para quem faz a gestão.',
+  },
+  {
+    icon: 'target',
+    title: 'Mesmo padrão para todos.',
+    text: 'Feito para quem nunca fotografou e quem já é experiente entregarem o mesmo resultado.',
+  },
+];
+---
+
+<section class="section team-section" data-atmosphere="team" aria-labelledby="benefits-title">
+  <div class="container">
+    <div class="section-heading center benefits-heading">
+      <span class="eyebrow">UMA FERRAMENTA. A EQUIPE TODA.</span>
+      <h2 id="benefits-title">
+        Monte seu ecossistema de tours,
+        <br /> pensado para empresas.
+      </h2>
+    </div>
+    <div class="benefits-grid">
+      {benefits.map((benefit, index) => (
+        <article class={`team-benefit team-benefit-${index + 1}`}>
+          <div class="benefit-symbol">
+            <Icon name={benefit.icon} size={72} />
+          </div>
+          <GlassSurface class="benefit-copy" clear>
+            <h3>{benefit.title}</h3>
+            <p>{benefit.text}</p>
+          </GlassSurface>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>

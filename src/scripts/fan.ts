@@ -1,7 +1,7 @@
 const hoverPointer = matchMedia('(hover: hover) and (pointer: fine)');
 
-// O leque fica na primeira tela e abre sozinho sempre que está visível. A primeira
-// pintura sai empilhada (script inline do FanCards) e a abertura anima em seguida.
+// A primeira tela mostra a ponta da pilha. A rolagem revela o conjunto e abre
+// o leque, preservando o arco e a animação dos cartões.
 document.querySelectorAll<HTMLElement>('[data-fan]').forEach((fan) => {
   const stage = fan.querySelector<HTMLElement>('.fan-stage')!;
   const cards = [...fan.querySelectorAll<HTMLElement>('.fan-position')];
@@ -15,7 +15,7 @@ document.querySelectorAll<HTMLElement>('[data-fan]').forEach((fan) => {
   };
   const update = () => {
     const bounds = stage.getBoundingClientRect();
-    const visible = bounds.top < innerHeight && bounds.bottom > 0;
+    const visible = bounds.top < innerHeight - 160 && bounds.bottom > 0;
     fan.dataset.fanState = visible ? 'open' : 'stacked';
   };
   const scheduleUpdate = () => {
@@ -30,6 +30,8 @@ document.querySelectorAll<HTMLElement>('[data-fan]').forEach((fan) => {
   window.addEventListener('pageshow', scheduleUpdate);
   cards.forEach((card, index) =>
     card.addEventListener('focusin', () => {
+      // O teclado também revela as ações, mesmo antes do limite de rolagem.
+      fan.dataset.fanState = 'open';
       if (!hoverPointer.matches) select(index);
     }),
   );

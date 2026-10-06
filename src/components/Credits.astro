@@ -1,46 +1,25 @@
 ---
 import Icon from './Icon.astro';
-// Explica a cobrança por ambiente antes da calculadora e dos planos.
+// Explica a cobrança por ambiente antes dos planos.
 const flow = [
-  { icon: 'phone', value: '8 fotos', text: 'Uma volta só com o celular, em cada ambiente.' },
+  { icon: 'phone', value: '30 segundos', text: 'Uma volta só com o celular, em cada ambiente.' },
   {
     icon: 'sparkle',
     value: '1 imagem 360°',
-    text: 'As fotos viram uma imagem única, em alta qualidade, pronta para o tour.',
+    text: 'As fotos viram uma imagem única, em alta qualidade.',
   },
-  { icon: 'credits', value: '1 crédito', text: 'É o que cada ambiente usa do saldo da empresa.' },
-];
-const facts = [
-  {
-    icon: 'users',
-    title: 'Um saldo para a equipe toda.',
-    text: 'Os créditos são da empresa. Todo mundo que captura usa o mesmo saldo.',
-  },
-  {
-    icon: 'refresh',
-    title: 'Não ficou pronto? O crédito volta.',
-    text: 'Você fotografa o ambiente de novo sem gastar outro crédito.',
-  },
-  {
-    icon: 'camera',
-    title: 'Fotos da galeria não gastam crédito.',
-    text: 'Já tem fotos 360° de uma câmera? Envie pela galeria e monte o tour.',
-  },
+  { icon: 'credits', value: '1 crédito', text: 'É o que cada ambiente usa do saldo do plano.' },
 ];
 ---
 
-<section class="section credits-section" id="creditos">
+<section class="section credits-section" id="creditos" data-atmosphere="credits">
   <div class="container">
     <div class="section-heading center">
-      <span class="eyebrow">POR QUE COBRAMOS POR AMBIENTE</span>
       <h2>
         Cada ambiente vira uma
         <br class="desktop-break" /> imagem 360° de alta qualidade.
       </h2>
-      <p>
-        Você não paga por foto nem por tour. Paga por ambiente pronto: a volta com o celular vira
-        uma imagem 360° completa, com emendas e luz corrigidas.
-      </p>
+      <p>Você não paga por foto nem por tour. Paga por ambiente pronto.</p>
     </div>
     <ol class="credit-flow">
       {flow.map((step) => (
@@ -53,20 +32,9 @@ const facts = [
         </li>
       ))}
     </ol>
-    <div class="credit-facts">
-      {facts.map((fact) => (
-        <article>
-          <Icon name={fact.icon} size={21} />
-          <div>
-            <h3>{fact.title}</h3>
-            <p>{fact.text}</p>
-          </div>
-        </article>
-      ))}
-    </div>
     <p class="credit-example">
-      Na prática: uma casa com sala, cozinha, 3 quartos, 2 banheiros e varanda tem 8 ambientes, ou
-      seja, 8 créditos. A maioria dos espaços tem de 6 a 10.
+      Na prática: uma casa com sala, cozinha, 2 quartos, 1 banheiro tem 5 ambientes, ou seja, 5
+      créditos.
     </p>
   </div>
 </section>

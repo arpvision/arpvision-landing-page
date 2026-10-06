@@ -21,6 +21,40 @@ themeButtons.forEach((button) =>
 systemDark.addEventListener('change', syncThemeButtons);
 syncThemeButtons();
 
+// O vidro do cabeçalho deixa o fundo passar; a escrita acompanha a superfície atrás dele.
+const header = document.querySelector<HTMLElement>('.site-header');
+const opening = document.querySelector<HTMLElement>('.opening');
+if (header && opening) {
+  let pending = false;
+  const updateHeader = () => {
+    const top = parseFloat(getComputedStyle(header).top);
+    const bottom = top + header.offsetHeight;
+    // A cápsula acompanha apenas a abertura, incluindo o leque de fotos.
+    // A altura de layout evita realimentar o cálculo com o próprio transform.
+    const boundaryBottom = opening.getBoundingClientRect().bottom;
+    const shift = Math.max(-bottom - 1, Math.min(0, boundaryBottom - bottom));
+    header.dataset.headerSurface = boundaryBottom > 0 ? 'opening' : '';
+    header.dataset.headerBounded = '';
+    header.style.setProperty('--header-shift', `${shift}px`);
+    const hidden = boundaryBottom <= 0;
+    header.dataset.headerHidden = String(hidden);
+    header.inert = hidden;
+  };
+  const scheduleHeader = () => {
+    if (pending) return;
+    pending = true;
+    requestAnimationFrame(() => {
+      pending = false;
+      updateHeader();
+    });
+  };
+  window.addEventListener('scroll', scheduleHeader, { passive: true });
+  window.addEventListener('resize', scheduleHeader, { passive: true });
+  window.addEventListener('pageshow', scheduleHeader);
+  updateHeader();
+  void document.fonts.ready.then(updateHeader);
+}
+
 const menuButton = document.querySelector<HTMLButtonElement>('.menu-toggle');
 const menu = document.querySelector<HTMLElement>('#mobile-nav');
 const menuLabel = menuButton?.querySelector<HTMLElement>('[data-menu-label]');

@@ -1,0 +1,63 @@
+---
+import Icon from './Icon.astro';
+import { site } from '../config/site';
+const channels = [
+  {
+    icon: 'message',
+    title: 'No WhatsApp',
+    text: 'O cliente abre o link sem criar conta e vê o espaço inteiro.',
+  },
+  {
+    icon: 'code',
+    title: 'No seu site',
+    text: 'Cole o código na página, nos formatos responsivo, 16:9 ou quadrado.',
+  },
+  {
+    icon: 'home',
+    title: 'Antes da visita',
+    text: 'Quem chega já conhece o espaço e vem decidido.',
+  },
+];
+---
+
+<section
+  class="section sharing-section"
+  id="compartilhamento"
+  aria-labelledby="sharing-title"
+  data-atmosphere="sharing"
+>
+  <div class="container sharing-grid">
+    <div class="sharing-copy">
+      <span class="eyebrow">
+        <span class="sharing-dot"></span> COMPARTILHAMENTO
+      </span>
+      <h2 id="sharing-title">
+        Um link. O cliente
+        <br class="desktop-break" /> abre onde estiver.
+      </h2>
+      <div class="sharing-channels">
+        {channels.map((channel) => (
+          <article>
+            <span class="icon-tile">
+              <Icon name={channel.icon} size={24} />
+            </span>
+            <div>
+              <h3>{channel.title}</h3>
+              <p>{channel.text}</p>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+    <figure class="sharing-conversation">
+      <img
+        src={site.media.whatsappConversation}
+        width="1165"
+        height="1511"
+        loading="lazy"
+        decoding="async"
+        alt="Simulação de um corretor enviando um tour de 9 ambientes no WhatsApp. A mensagem explica que o cliente pode abrir no computador ou no celular, sem baixar nada nem criar conta."
+      />
+    </figure>
+  </div>
+</section>

@@ -1,0 +1,27 @@
+---
+const words = ['Confiança', 'Exclusividade', 'Agilidade', 'Economia de tempo', 'Valor', 'Imersão'];
+---
+
+<div class="benefit-marquee" data-benefit-marquee>
+  <div class="marquee-window">
+    <div class="marquee-track">
+      <ul class="marquee-list" aria-label="O que o tour entrega">
+        {words.map((word) => (
+          <li>
+            <span class="marquee-word">{word}</span>
+          </li>
+        ))}
+      </ul>
+      <ul class="marquee-list marquee-clone" aria-hidden="true">
+        {words.map((word) => (
+          <li>
+            <span class="marquee-word">{word}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</div>
+<script>
+  import '../scripts/benefits-marquee';
+</script>

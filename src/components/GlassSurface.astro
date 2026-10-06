@@ -3,13 +3,40 @@
 interface Props {
   class?: string;
   id?: string;
+  as?: 'div' | 'article' | 'a';
+  href?: string;
+  tabindex?: string;
+  label?: string;
+  labelledby?: string;
+  liquid?: boolean;
+  clear?: boolean;
 }
-const { class: className, id } = Astro.props;
+const {
+  class: className,
+  id,
+  as: Tag = 'div',
+  href,
+  tabindex,
+  label,
+  labelledby,
+  liquid = false,
+  clear = false,
+} = Astro.props;
 ---
 
-<div class:list={['glass-surface', className]} id={id}>
+<Tag
+  class:list={['glass-surface', className]}
+  id={id}
+  href={href}
+  tabindex={tabindex}
+  aria-label={label}
+  aria-labelledby={labelledby}
+  data-liquid={liquid ? '' : undefined}
+  data-glass-clear={clear ? '' : undefined}
+>
+  {liquid && <span class="glass-refraction" aria-hidden="true"></span>}
   <slot />
-</div>
+</Tag>
 
 <style is:global>
   .glass-surface {
@@ -17,7 +44,10 @@ const { class: className, id } = Astro.props;
     --glass-highlight: 92%;
     --glass-blur: 22px;
     --glass-radius: 24px;
+    --glass-tint: var(--surface);
+    --glass-glint: var(--glass-tint);
     position: relative;
+    isolation: isolate;
     border: 1px solid color-mix(in srgb, var(--border) 68%, var(--surface));
     border-radius: var(--glass-radius);
     background: var(--surface);
@@ -25,22 +55,52 @@ const { class: className, id } = Astro.props;
       inset 0 1px 0 color-mix(in srgb, var(--white) 75%, transparent),
       0 12px 36px color-mix(in srgb, var(--ink) 8%, transparent);
   }
+  .glass-surface[data-glass-clear] {
+    --glass-glint: var(--white);
+  }
+  .glass-surface::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    border-radius: inherit;
+    pointer-events: none;
+    box-shadow:
+      inset 1px 1px 0 #ffffff70,
+      inset -1px -1px 0 #ffffff24;
+  }
+  .glass-refraction {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    padding: 9px;
+    border-radius: inherit;
+    pointer-events: none;
+    mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+  }
   @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
     .glass-surface {
       background: linear-gradient(
         135deg,
-        color-mix(in srgb, var(--surface) var(--glass-highlight), transparent),
-        color-mix(in srgb, var(--surface) var(--glass-opacity), transparent)
+        color-mix(in srgb, var(--glass-glint) var(--glass-highlight), transparent),
+        color-mix(in srgb, var(--glass-tint) var(--glass-opacity), transparent)
       );
       -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
       backdrop-filter: blur(var(--glass-blur)) saturate(140%);
     }
+    .glass-refraction {
+      -webkit-backdrop-filter: blur(3px) saturate(130%);
+      backdrop-filter: blur(3px) saturate(130%);
+      filter: url(#glass-distortion);
+    }
   }
   @media (prefers-reduced-transparency: reduce) {
-    .glass-surface {
-      background: var(--surface);
-      -webkit-backdrop-filter: none;
-      backdrop-filter: none;
+    .glass-surface:where(:not([data-glass-clear])) {
+      /* Menos transparência, preservando o desfoque e a leitura das bordas. */
+      background: color-mix(in srgb, var(--glass-tint) 86%, transparent);
     }
   }
 </style>

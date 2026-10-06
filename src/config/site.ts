@@ -49,34 +49,50 @@ export const site = {
   media: {
     tutorial: '/video/tutorial-captura-360-v3.mp4',
     tutorialPoster: '/images/tutorial-720.webp',
-    // Tour 360° embutido no lado direito da hero.
+    whatsappConversation: '/images/conversa-whatsapp.webp',
+    // Tour 360° da demonstração, protegido até a pessoa ativar.
     heroEmbed: 'https://arpvision.app/embed/511a5654-29f2-4798-87ff-5b479210dbf0',
-    // Prints provisórios do sistema; trocar por panoramas 2:1 e remover previewCrop.
-    // Cada card do leque traz um benefício já dito em outro ponto da LP.
+    // Panoramas do proprietário. O enquadramento das miniaturas é feito no layout.
     fanRooms: [
       {
-        title: 'Sala 1',
-        benefit: 'Só o celular.',
-        detail: 'Sem câmera 360°, sem tripé.',
-        image: '/images/tours/sala-preview.png',
-        alt: 'Sala com teto de madeira e escada, fotografada em 360 graus',
-        previewCrop: true,
-      },
-      {
-        title: 'Entrada',
-        benefit: 'Pronto em cerca de 1 minuto.',
-        detail: 'Por ambiente, enquanto você captura o próximo.',
-        image: '/images/tours/entrada-preview.png',
-        alt: 'Entrada com portas e circulação para os ambientes do tour',
-        previewCrop: true,
+        title: 'Banheiro',
+        image: '/images/tours/banheiro.webp',
+        alt: 'Box de vidro e banheira em um banheiro fotografado em 360 graus',
+        position: '28% 50%',
+        labelTone: 'dark' as const,
+        arrowTone: 'dark' as const,
       },
       {
         title: 'Quarto com suíte',
-        benefit: 'O cliente abre sem conta.',
-        detail: 'É só mandar o link no WhatsApp.',
-        image: '/images/tours/suite-preview.png',
-        alt: 'Quarto com suíte e área de estar, fotografado em 360 graus',
-        previewCrop: true,
+        image: '/images/tours/suite.webp',
+        alt: 'Duas poltronas junto a uma mesa no quarto com suíte',
+        position: '92% 50%',
+        labelTone: 'dark' as const,
+        arrowTone: 'dark' as const,
+      },
+      {
+        title: 'Sala',
+        image: '/images/tours/sala.webp',
+        alt: 'Escada de madeira e mesa de vidro na sala fotografada em 360 graus',
+        position: '100% 50%',
+        labelTone: 'light' as const,
+        arrowTone: 'light' as const,
+      },
+      {
+        title: 'TV e janela',
+        image: '/images/tours/tv-janela.webp',
+        alt: 'Televisão junto à janela e à cortina',
+        position: '0% 50%',
+        labelTone: 'light' as const,
+        arrowTone: 'dark' as const,
+      },
+      {
+        title: 'Pátio',
+        image: '/images/tours/patio.webp',
+        alt: 'Piscina, cascata e área coberta de churrasqueira no pátio',
+        position: '84% 50%',
+        labelTone: 'dark' as const,
+        arrowTone: 'dark' as const,
       },
     ],
     ogHome: '/images/og-home.png',

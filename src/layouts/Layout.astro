@@ -2,8 +2,11 @@
 import interFontUrl from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
 import '../styles/global.css';
 import '../styles/opening.css';
-import '../styles/feature-stack.css';
+import '../styles/tour-showcase.css';
+import '../styles/atmosphere.css';
+import '../styles/landing-polish.css';
 import Header from '../components/Header.astro';
+import GlassFilter from '../components/GlassFilter.astro';
 import Footer from '../components/Footer.astro';
 import { site } from '../config/site';
 interface Props {
@@ -78,6 +81,7 @@ const organization = {
     <slot name="head" />
   </head>
   <body>
+    <GlassFilter />
     <a href="#conteudo" class="skip-link">
       Pular para o conteúdo
     </a>

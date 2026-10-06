@@ -2,16 +2,15 @@
 import Layout from '../layouts/Layout.astro';
 import Icon from '../components/Icon.astro';
 import Tour from '../components/Tour.astro';
-import Calculator from '../components/Calculator.astro';
 import Credits from '../components/Credits.astro';
 import Pricing from '../components/Pricing.astro';
 import Faq from '../components/Faq.astro';
 import FinalCta from '../components/FinalCta.astro';
-import MarketNote from '../components/MarketNote.astro';
 import FanCards from '../components/FanCards.astro';
-import FeatureStack from '../components/FeatureStack.astro';
-import { site, available, faq, alternatives, alternativeLabels } from '../config/site';
-import { appLink } from '../lib/business';
+import TourShowcase from '../components/TourShowcase.astro';
+import Sharing from '../components/Sharing.astro';
+import TeamBenefits from '../components/TeamBenefits.astro';
+import { site, faq } from '../config/site';
 const faqSchema = {
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
@@ -21,77 +20,19 @@ const faqSchema = {
     acceptedAnswer: { '@type': 'Answer', text: item.answer },
   })),
 };
-const arpAlternative = alternatives[3];
-const otherAlternatives = alternatives.slice(0, 3);
-const uses = [
-  {
-    icon: 'home',
-    number: '01',
-    title: 'Antes da visita.',
-    text: 'Mande o tour antes de a pessoa ir até você. Quem chega já conhece o espaço e vem decidido.',
-    tag: 'A experiência começa antes da visita',
-  },
-  {
-    icon: 'message',
-    number: '02',
-    title: 'No WhatsApp.',
-    text: 'O cliente abre o link sem criar conta e vê o espaço inteiro em um minuto.',
-    tag: 'Uma visita começa com um link',
-  },
-  {
-    icon: 'globe',
-    number: '03',
-    title: 'No seu site.',
-    text: 'Cole o código na página e mostre por dentro o que uma foto sozinha não mostra.',
-    tag: 'Seu espaço, em todos os ângulos',
-  },
-];
-const features = [
-  ...uses,
-  {
-    icon: 'users',
-    number: '04',
-    title: 'Capture com a equipe.',
-    text: 'Cada pessoa entra com o próprio acesso e captura com o celular. O saldo de créditos é compartilhado pela empresa.',
-    tag: 'Mais autonomia, um só saldo',
-  },
-  {
-    icon: 'audit',
-    number: '05',
-    title: 'Veja quem fez o quê.',
-    text: 'A auditoria registra quem criou e editou cada tour, com data e hora. Mais visibilidade para quem faz a gestão.',
-    tag: 'Gestão com visibilidade',
-  },
-];
+const openingDescription =
+  'Faça o tour virtual 360° do seu espaço só com o celular. E o cliente abre o tour sem criar conta.';
 const roomCards = site.media.fanRooms.map((room, index) => ({
   ...room,
   number: String(index + 1).padStart(2, '0'),
 }));
-const teams = [
-  {
-    icon: 'credits',
-    title: 'Créditos da empresa.',
-    text: 'Um saldo só, da empresa. Você contrata uma vez e toda a equipe usa.',
-  },
-  {
-    icon: 'users',
-    title: 'Equipe.',
-    text: 'Cadastre quem vai capturar, e cada pessoa entra com o próprio acesso.',
-  },
-  {
-    icon: 'audit',
-    title: 'Auditoria.',
-    text: 'Veja quem criou e quem editou cada tour, com data e hora.',
-  },
-  {
-    icon: 'target',
-    title: 'Mesmo padrão para todos.',
-    text: 'A captura guiada faz quem nunca fotografou e quem já é experiente entregarem o mesmo resultado.',
-  },
-];
 ---
 
-<Layout title="Tour virtual 360° com o celular | ARP Vision" schema={[faqSchema]}>
+<Layout
+  title="Tour virtual 360° com o celular | ARP Vision"
+  description={openingDescription}
+  schema={[faqSchema]}
+>
   <section class="hero opening" aria-labelledby="opening-title">
     <div class="container">
       <div class="opening-copy center">
@@ -103,82 +44,35 @@ const teams = [
           <br />
           <span>Só com o celular.</span>
         </h1>
-        <p class="opening-description">
-          Faça o tour virtual 360° do seu espaço só com o celular. As emendas e a luz saem
-          corrigidas, e o cliente abre o tour pelo WhatsApp, sem criar conta.
-        </p>
+        <p class="opening-description">{openingDescription}</p>
       </div>
       <FanCards items={roomCards} />
     </div>
   </section>
-  <section class="hero presentation" aria-labelledby="presentation-title">
-    <div class="container presentation-heading">
-      <div class="hero-copy">
-        <span class="eyebrow">MAIS DO QUE UM LINK BONITO</span>
-        <h2 id="presentation-title">Onde o tour trabalha por você.</h2>
-        <p>Da primeira conversa à próxima visita.</p>
-        <div class="hero-actions">
-          <a class="button button-primary" href={appLink('hero')} data-cta="hero">
-            Criar conta grátis <Icon name="arrow" size={19} />
-          </a>
-          {available.tour ? (
-            <a class="button button-secondary" href="#tour-real">
-              <Icon name="play" size={18} /> Ver um tour de verdade
-            </a>
-          ) : (
-            <a class="button button-secondary" href="#como-funciona">
-              <Icon name="play" size={18} /> Ver como funciona
-            </a>
-          )}
-        </div>
-      </div>
-    </div>
-    <FeatureStack src={site.media.heroEmbed} items={features} />
-  </section>
-  <section class="facts-strip" aria-label="Destaque">
-    <div class="container fact">
-      <span class="fact-icon">
-        <Icon name="phone" size={23} />
-      </span>
-      <div>
-        <strong>Só o celular.</strong>
-        <p>Sem câmera 360°, sem tripé.</p>
-      </div>
-    </div>
-  </section>
-  <Tour />
-  <section class="section how-section" id="como-funciona">
+  <section
+    class="section how-section"
+    id="como-funciona"
+    data-atmosphere="how"
+    aria-labelledby="capture-heading"
+  >
     <div class="container how-grid">
       <div>
-        <span class="eyebrow">TRÊS PASSOS. NENHUM EQUIPAMENTO EXTRA.</span>
-        <h2>Do celular ao tour publicado, no mesmo dia.</h2>
+        <h2 class="capture-heading" id="capture-heading">
+          O app tira as fotos para você
+        </h2>
+        <p class="capture-subtitle">Abra a câmera e siga as instruções</p>
         <div class="steps">
           <article>
             <span class="step-number">01</span>
-            <div>
-              <h3>Capture.</h3>
-              <p>
-                Abra a ARP Vision no navegador do celular e gire devagar seguindo as bolinhas. Cada
-                ambiente leva 8 fotos, numa volta só.
-              </p>
-            </div>
+            <h3>Capture com seu próprio celular.</h3>
           </article>
           <article>
             <span class="step-number">02</span>
-            <div>
-              <h3>A ARP Vision monta.</h3>
-              <p>As fotos viram um 360°, e você continua capturando todo o espaço.</p>
-            </div>
+            <h3>A ARP Vision monta.</h3>
           </article>
           <article>
             <span class="step-number">03</span>
-            <div>
-              <h3>Publique.</h3>
-              <p>
-                Marque as passagens entre os ambientes e publique. Mande o link no WhatsApp ou cole
-                o código no seu site.
-              </p>
-            </div>
+            <h3>Pronto, agora é só compartilhar.</h3>
           </article>
         </div>
       </div>
@@ -212,116 +106,18 @@ const teams = [
       </div>
     </div>
   </section>
-  <section class="section alternatives-section">
-    <div class="container">
-      <div class="section-heading center">
-        <span class="eyebrow">COLOQUE NA PONTA DO LÁPIS</span>
-        <h2>
-          Quanto custa mostrar
-          <br />
-          um espaço por dentro?
-        </h2>
-        <p>Compare o equipamento, o tempo e o jeito de trabalhar.</p>
-      </div>
-      <div class="alternatives-desktop">
-        <table class="alternatives-table">
-          <thead>
-            <tr>
-              <th scope="col">O que faz diferença</th>
-              {alternatives.map((alternative, i) => (
-                <th scope="col" class:list={{ 'arp-column': i === 3 }}>
-                  <Icon name={alternative.icon} size={22} />
-                  <span>{alternative.name}</span>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {alternativeLabels.map((label, index) => (
-              <tr>
-                <th scope="row">{label}</th>
-                {alternatives.map((alternative, i) => (
-                  <td class:list={{ 'arp-column': i === 3 }}>{alternative.values[index]}</td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <!-- No celular: ARP Vision primeiro e aberta; as alternativas ficam recolhidas. -->
-      <div class="alternatives-mobile">
-        {[arpAlternative, ...otherAlternatives].map((alternative) => (
-          <details
-            class:list={['alternative-card', { 'arp-alternative': alternative === arpAlternative }]}
-            open={alternative === arpAlternative}
-          >
-            <summary>
-              <h3>
-                <Icon name={alternative.icon} />
-                {alternative.name}
-              </h3>
-              <Icon name="plus" size={20} />
-            </summary>
-            <dl>
-              {alternativeLabels.map((label, index) => (
-                <div>
-                  <dt>{label}</dt>
-                  <dd>{alternative.values[index]}</dd>
-                </div>
-              ))}
-            </dl>
-          </details>
-        ))}
-      </div>
-      <MarketNote id="referencia-camera" />
-      <p class="footnote">
-        ² Custo por espaço calculado na assinatura mensal com uso integral dos créditos e{' '}
-        {site.pricing.averageRooms} ambientes por espaço.
-      </p>
-      <div class="comparison-quote">
-        <Icon name="phone" size={31} />
-        <p>
-          Uma câmera 360° para a equipe inteira vira fila.
-          <br />
-          <strong>Com a ARP Vision, cada pessoa já tem a sua no bolso.</strong>
-        </p>
-      </div>
-    </div>
-  </section>
-  <section class="section team-section">
-    <div class="container">
-      <div class="team-intro">
-        <div>
-          <span class="eyebrow">UMA FERRAMENTA. A EQUIPE TODA.</span>
-          <h2>
-            Feito para a empresa inteira,
-            <br />
-            não só para uma pessoa.
-          </h2>
-        </div>
-        <p>
-          Mais autonomia para quem captura.
-          <br />
-          Mais visibilidade para quem faz a gestão.
-        </p>
-      </div>
-      <div class="team-features">
-        {teams.map((team) => (
-          <article>
-            <span class="icon-tile">
-              <Icon name={team.icon} size={22} />
-            </span>
-            <div>
-              <h3>{team.title}</h3>
-              <p>{team.text}</p>
-            </div>
-          </article>
-        ))}
-      </div>
-    </div>
-  </section>
   <Credits />
-  <Calculator />
+  <Sharing />
+  <section class="hero presentation" aria-labelledby="presentation-title" data-atmosphere="demo">
+    <div class="container presentation-heading">
+      <div class="hero-copy">
+        <h2 id="presentation-title">Onde o tour trabalha por você.</h2>
+      </div>
+    </div>
+    <TourShowcase src={site.media.heroEmbed} />
+  </section>
+  <Tour />
+  <TeamBenefits />
   <section class="section plans-preview" id="planos">
     <div class="container">
       <div class="section-heading center">

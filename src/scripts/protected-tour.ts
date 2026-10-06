@@ -6,6 +6,7 @@ document.querySelectorAll<HTMLElement>('[data-protected-tour]').forEach((host) =
   host.dataset.enhanced = 'true';
   const setActive = (active: boolean, restoreFocus = false) => {
     host.dataset.tourActive = String(active);
+    activate.setAttribute('aria-expanded', String(active));
     frame.inert = !active;
     frame.tabIndex = active ? 0 : -1;
     shield.hidden = active;

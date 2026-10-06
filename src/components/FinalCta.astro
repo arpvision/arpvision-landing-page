@@ -6,7 +6,7 @@ import { appLink } from '../lib/business';
 import { available } from '../config/site';
 ---
 
-<section class="final-cta">
+<section class="final-cta" data-atmosphere={Astro.url.pathname === '/' ? 'closing' : undefined}>
   <div class="container final-cta-inner">
     <div>
       <Brand white />

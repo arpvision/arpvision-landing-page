@@ -1,0 +1,13 @@
+---
+import ProtectedTour from './ProtectedTour.astro';
+import BenefitsMarquee from './BenefitsMarquee.astro';
+interface Props {
+  src: string;
+}
+const { src } = Astro.props;
+---
+
+<div class="container tour-showcase">
+  <ProtectedTour src={src} />
+  <BenefitsMarquee />
+</div>

@@ -1,0 +1,99 @@
+/* Manchas estáticas da marca. O brilho da abertura continua sendo o mais intenso. */
+:root {
+  --atmosphere-blue: color-mix(in srgb, var(--brand-blue) 10%, transparent);
+  --atmosphere-teal: color-mix(in srgb, var(--brand-teal) 8%, transparent);
+  --atmosphere-neutral: color-mix(in srgb, var(--text-strong) 4%, transparent);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --atmosphere-blue: color-mix(in srgb, var(--brand-blue) 24%, transparent);
+    --atmosphere-teal: color-mix(in srgb, var(--brand-teal) 16%, transparent);
+    --atmosphere-neutral: color-mix(in srgb, var(--white) 9%, transparent);
+  }
+}
+:root[data-theme='dark'] {
+  --atmosphere-blue: color-mix(in srgb, var(--brand-blue) 24%, transparent);
+  --atmosphere-teal: color-mix(in srgb, var(--brand-teal) 16%, transparent);
+  --atmosphere-neutral: color-mix(in srgb, var(--white) 9%, transparent);
+}
+[data-atmosphere] {
+  position: relative;
+  isolation: isolate;
+}
+[data-atmosphere]::before,
+[data-atmosphere]::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  /* A luz se dissolve antes da próxima seção, sem criar faixas retangulares. */
+  mask-image: linear-gradient(transparent, #000 14%, #000 84%, transparent);
+}
+[data-atmosphere]::before {
+  z-index: -2;
+  background: var(--atmosphere-spots);
+}
+[data-atmosphere]::after {
+  z-index: -1;
+  background: url('/images/gradient-noise.svg');
+  opacity: 0.045;
+  mix-blend-mode: soft-light;
+}
+[data-atmosphere='how'] {
+  --atmosphere-spots:
+    radial-gradient(ellipse 46% 66% at 85% 54%, var(--atmosphere-neutral), transparent 74%),
+    radial-gradient(ellipse 36% 48% at 94% 70%, var(--atmosphere-teal), transparent 76%),
+    radial-gradient(ellipse 40% 58% at -5% 22%, var(--atmosphere-blue), transparent 78%);
+}
+[data-atmosphere='credits'] {
+  --atmosphere-spots:
+    radial-gradient(ellipse 45% 75% at 7% 30%, var(--atmosphere-neutral), transparent 75%),
+    radial-gradient(ellipse 34% 55% at 2% 63%, var(--atmosphere-blue), transparent 78%),
+    radial-gradient(ellipse 36% 52% at 99% 42%, var(--atmosphere-teal), transparent 75%);
+}
+[data-atmosphere='demo'] {
+  --atmosphere-spots:
+    radial-gradient(ellipse 55% 62% at 95% 38%, var(--atmosphere-blue), transparent 78%),
+    radial-gradient(ellipse 52% 78% at 3% 70%, var(--atmosphere-neutral), transparent 76%),
+    radial-gradient(ellipse 42% 56% at 12% 90%, var(--atmosphere-teal), transparent 76%);
+}
+[data-atmosphere='sharing'] {
+  --atmosphere-spots:
+    radial-gradient(ellipse 50% 72% at 82% 45%, var(--atmosphere-neutral), transparent 78%),
+    radial-gradient(ellipse 45% 66% at 98% 72%, var(--atmosphere-teal), transparent 80%),
+    radial-gradient(ellipse 40% 60% at 0% 28%, var(--atmosphere-blue), transparent 80%);
+}
+[data-atmosphere='team'] {
+  --atmosphere-spots:
+    radial-gradient(ellipse 72% 80% at 55% 80%, var(--atmosphere-neutral), transparent 78%),
+    radial-gradient(ellipse 42% 58% at 87% 24%, var(--atmosphere-blue), transparent 80%),
+    radial-gradient(ellipse 36% 64% at 5% 50%, var(--atmosphere-teal), transparent 80%);
+  background: var(--bg-base);
+}
+[data-atmosphere='closing'] {
+  --atmosphere-blue: color-mix(in srgb, var(--brand-blue) 28%, transparent);
+  --atmosphere-teal: color-mix(in srgb, var(--brand-teal) 18%, transparent);
+  --atmosphere-neutral: color-mix(in srgb, var(--white) 10%, transparent);
+  --atmosphere-spots:
+    radial-gradient(ellipse 54% 100% at 0% 25%, var(--atmosphere-blue), transparent 78%),
+    radial-gradient(ellipse 38% 85% at 72% 110%, var(--atmosphere-teal), transparent 76%),
+    radial-gradient(ellipse 35% 70% at 98% 22%, var(--atmosphere-neutral), transparent 78%);
+  background: var(--ink);
+}
+/* O cabeçalho já saiu de cena aqui; a leitura fixa aproveita o espaço livre. */
+.opening ~ .faq-section .faq-layout > div:first-child {
+  top: 32px;
+}
+@media (max-width: 767px) {
+  [data-atmosphere='how'] {
+    --atmosphere-spots:
+      radial-gradient(ellipse 92% 400px at 94% 70%, var(--atmosphere-teal), transparent 78%),
+      radial-gradient(ellipse 78% 420px at 4% 24%, var(--atmosphere-neutral), transparent 76%);
+  }
+  [data-atmosphere='demo'] {
+    --atmosphere-spots:
+      radial-gradient(ellipse 90% 460px at 96% 380px, var(--atmosphere-blue), transparent 78%),
+      radial-gradient(ellipse 94% 580px at 0% 72%, var(--atmosphere-neutral), transparent 76%),
+      radial-gradient(ellipse 88% 410px at 100% 91%, var(--atmosphere-teal), transparent 78%);
+  }
+}

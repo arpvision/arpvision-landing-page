@@ -26,6 +26,55 @@ const dimensions = (page) =>
     scroll: document.documentElement.scrollWidth,
     layout: innerWidth,
   }));
+const verifyHeaderBoundary = async (page) => {
+  const header = page.locator('.site-header');
+  const boundary = await page.locator('.opening').evaluate((el) => {
+    const rect = el.getBoundingClientRect();
+    return { top: rect.top + scrollY, bottom: rect.bottom + scrollY };
+  });
+  const scroll = async (top) => {
+    await page.evaluate(
+      (y) =>
+        new Promise((resolve) => {
+          window.addEventListener(
+            'scroll',
+            () => requestAnimationFrame(() => requestAnimationFrame(resolve)),
+            { once: true },
+          );
+          scrollTo({ top: y, behavior: 'instant' });
+        }),
+      top,
+    );
+  };
+  await scroll(boundary.top + 20);
+  await page.waitForFunction(
+    () => document.querySelector('.site-header')?.dataset.headerHidden === 'false',
+  );
+  assert.equal(await header.isVisible(), true, 'cabeçalho acompanha a abertura');
+  await scroll(boundary.bottom - 36);
+  await page.waitForFunction(
+    () => document.querySelector('.site-header')?.getBoundingClientRect().y < 0,
+    null,
+    { timeout: 5000 },
+  );
+  assert.ok((await header.boundingBox()).y < 0, 'cabeçalho sai junto com o fim da seção');
+  await scroll(boundary.bottom + 20);
+  await page.waitForFunction(
+    () => getComputedStyle(document.querySelector('.site-header')).visibility === 'hidden',
+    null,
+    { timeout: 5000 },
+  );
+  assert.equal(await header.isVisible(), false, 'cabeçalho ausente nas próximas seções');
+  assert.equal(await header.evaluate((el) => el.inert), true, 'controles ocultos fora do teclado');
+  await scroll(0);
+  await page.waitForFunction(
+    () => getComputedStyle(document.querySelector('.site-header')).visibility === 'visible',
+    null,
+    { timeout: 5000 },
+  );
+  assert.equal(await header.isVisible(), true, 'cabeçalho retorna ao voltar para a abertura');
+  assert.equal(await header.evaluate((el) => el.inert), false);
+};
 try {
   const { context, page } = await setup({
     viewport: { width: 1440, height: 900 },
@@ -53,12 +102,21 @@ try {
   });
   await page.goto(base, { waitUntil: 'domcontentloaded' });
   await page.evaluate(() => document.fonts.ready);
-  // O leque fica na primeira tela e abre sozinho, sem rolar (pedido de 02/10/2026).
+  // A abertura mostra a ponta da pilha; a rolagem revela e abre o leque.
+  assert.equal(await page.locator('[data-fan]').getAttribute('data-fan-state'), 'stacked');
+  const peek = await page.locator('.fan-card').evaluateAll((cards) => ({
+    visible: innerHeight - Math.min(...cards.map((card) => card.getBoundingClientRect().top)),
+    full: cards.some((card) => card.getBoundingClientRect().bottom <= innerHeight),
+  }));
+  assert.ok(peek.visible > 15 && peek.visible < 120, `só a ponta aparece: ${JSON.stringify(peek)}`);
+  assert.equal(peek.full, false, 'nenhum cartão inteiro antes de rolar');
+  await page.screenshot({ path: '.artifacts/opening-desktop-peek.png' });
+  await page.evaluate(() => scrollTo({ top: 350, behavior: 'instant' }));
   await page.waitForFunction(
     () => document.querySelector('[data-fan]')?.dataset.fanState === 'open',
   );
   await page.waitForFunction(() => Reflect.get(window, 'fanSampleDone'));
-  assert.equal(await page.evaluate(() => scrollY), 0, 'abre no carregamento, sem rolagem');
+  assert.equal(await page.evaluate(() => scrollY), 350, 'a rolagem abre o leque');
   const frames = await page.evaluate(() => Reflect.get(window, 'fanFrames'));
   const stacked = frames.find((frame) => frame.state === 'stacked');
   const open = frames.filter((frame) => frame.state === 'open');
@@ -80,24 +138,42 @@ try {
   );
   assert.ok(
     boxes.every((r) => r.y > 0 && r.bottom < 900),
-    'leque inteiro na primeira tela',
+    'leque inteiro após rolar',
   );
-  assert.ok(boxes[1].y < boxes[0].y && boxes[1].y < boxes[2].y, 'centro mais alto');
-  // O texto de benefício de cada cartão fica à vista (os laterais não cobrem o central).
-  const readable = await page.locator('.fan-card').evaluateAll((cards) =>
-    cards.map((card) => {
-      const range = document.createRange();
-      range.selectNodeContents(card.querySelector('h3'));
-      return [...range.getClientRects()].every((rect) =>
-        [0.1, 0.5, 0.9].every((f) =>
-          card.contains(
-            document.elementFromPoint(rect.left + rect.width * f, rect.top + rect.height / 2),
-          ),
-        ),
-      );
-    }),
+  assert.ok(
+    boxes.every((box, index) => index === 2 || box.y > boxes[2].y),
+    'centro mais alto',
   );
-  assert.deepEqual(readable, [true, true, true], 'benefícios legíveis nos três cartões');
+  assert.equal(await page.locator('.fan-card').count(), 5);
+  assert.equal(
+    await page.locator('.fan-card h3, .fan-card p, .fan-photo-badge, .fan-photo-caption').count(),
+    0,
+    'sem textos descritivos nas fotografias',
+  );
+  assert.equal(await page.locator('.fan-arrow[data-liquid]').count(), 5);
+  assert.equal(await page.locator('.fan-room-link[data-liquid]').count(), 5);
+  assert.deepEqual(
+    await page.locator('.fan-room-link').allTextContents(),
+    Array(5).fill('ambiente x'),
+  );
+  assert.equal(await page.locator('.header-capsule[data-liquid]').count(), 1);
+  assert.ok((await page.locator('.site-header').boundingBox()).width <= 1060, 'cabeçalho estreito');
+  assert.equal(
+    await page.locator('.opening + #como-funciona').count(),
+    1,
+    'passos logo após o leque',
+  );
+  assert.equal(await page.locator('.opening + #como-funciona + #creditos').count(), 1);
+  assert.equal(await page.locator('.presentation .hero-actions').count(), 0);
+  assert.equal(
+    await page
+      .locator('.fan-card')
+      .evaluateAll((cards) =>
+        cards.every((c) => c.getAttribute('aria-label') && c.querySelector('img').naturalWidth > 0),
+      ),
+    true,
+    'fotos carregadas e descrição acessível',
+  );
   await page.screenshot({ path: '.artifacts/opening-desktop.png' });
   const first = page.locator('.fan-card').first();
   const resting = await first.boundingBox();
@@ -131,52 +207,29 @@ try {
   );
   await page.evaluate(() => scrollTo({ top: 0, behavior: 'instant' }));
   await page.waitForFunction(
+    () => document.querySelector('[data-fan]')?.dataset.fanState === 'stacked',
+  );
+  await page.evaluate(() => scrollTo({ top: 350, behavior: 'instant' }));
+  await page.waitForFunction(
     () => document.querySelector('[data-fan]')?.dataset.fanState === 'open',
   );
   results.push(
-    '1440×900: leque inteiro na primeira tela, abre sozinho a partir da pilha em 900ms, benefícios legíveis, hover e foco preservados.',
+    '1440×900: apenas a ponta na abertura; rolagem revela o leque em 900ms, cinco fotos com seta e ambiente x, hover e foco preservados.',
   );
 
-  // Compara os conteúdos/links/mídias anteriores, quando a captura local existe.
-  let baseline;
-  try {
-    baseline = JSON.parse(await readFile('.artifacts/baseline-content.json', 'utf8'));
-  } catch {}
-  if (baseline) {
-    const current = await page.evaluate(() => ({
-      texts: [
-        ...document.querySelectorAll(
-          'main h1, main h2, main h3, main p, main .eyebrow, main .use-tag',
-        ),
-      ].map((el) => el.textContent.replace(/\s+/g, ' ').trim()),
-      links: [...document.querySelectorAll('a')].map((el) => ({
-        href: el.getAttribute('href'),
-        text: el.textContent.replace(/\s+/g, ' ').trim(),
-        label: el.getAttribute('aria-label'),
-      })),
-      sections: [...document.querySelectorAll('main section[id]')].map((el) => ({
-        id: el.id,
-        hidden: el.hidden,
-      })),
-      media: [...document.querySelectorAll('img,video,iframe')].map((el) => ({
-        src: el.getAttribute('src'),
-        poster: el.getAttribute('poster'),
-      })),
-    }));
-    for (const key of ['texts', 'links', 'sections', 'media']) {
-      const remaining = current[key].map((item) => JSON.stringify(item));
-      for (const item of baseline[key]) {
-        const index = remaining.indexOf(JSON.stringify(item));
-        assert.ok(index >= 0, `conteúdo anterior preservado (${key}): ${JSON.stringify(item)}`);
-        remaining.splice(index, 1);
-      }
-    }
-    results.push(
-      'Comparação com a página anterior: textos, links, seções identificadas e mídias preservados.',
-    );
-  }
   assert.equal(await page.locator('main h1').count(), 1);
-  assert.equal(await page.locator('.use-card').count(), 3, 'sem cartões duplicados');
+  assert.equal(await page.locator('.use-card').count(), 5, 'sem cartões duplicados');
+  await verifyHeaderBoundary(page);
+  await page.goto(base + '/planos', { waitUntil: 'domcontentloaded' });
+  await page.evaluate(() => scrollTo({ top: 1500, behavior: 'instant' }));
+  assert.equal(
+    await page.locator('.site-header').isVisible(),
+    true,
+    'navegação da página de planos preservada',
+  );
+  results.push(
+    'Cabeçalho até o fim do primeiro slide, saída com a abertura, controles ocultos sem foco e retorno ao início; /planos preservado.',
+  );
   await context.close();
 
   const axeSource = await readFile('node_modules/axe-core/axe.min.js', 'utf8');
@@ -198,6 +251,17 @@ try {
     });
     await page.goto(base, { waitUntil: 'domcontentloaded' });
     await page.evaluate(() => document.fonts.ready);
+    const initial = await page.locator('.fan-card').evaluateAll((cards) => ({
+      visible: innerHeight - Math.min(...cards.map((card) => card.getBoundingClientRect().top)),
+      full: cards.some((card) => card.getBoundingClientRect().bottom <= innerHeight),
+    }));
+    assert.ok(
+      initial.visible > 15 && initial.visible < 120,
+      `${width}px: só a ponta: ${JSON.stringify(initial)}`,
+    );
+    assert.equal(initial.full, false, `${width}px: nenhum cartão inteiro antes de rolar`);
+    await page.screenshot({ path: `.artifacts/opening-peek-${width}.png` });
+    await page.evaluate(() => scrollTo({ top: 350, behavior: 'instant' }));
     const d = await dimensions(page);
     assert.ok(
       d.scroll <= width && d.layout <= width,
@@ -217,10 +281,10 @@ try {
       const bottom = await page
         .locator('.fan-card')
         .evaluateAll((cards) => Math.max(...cards.map((c) => c.getBoundingClientRect().bottom)));
-      assert.ok(bottom <= height, `${width}px: leque inteiro na primeira tela (${bottom})`);
+      assert.ok(bottom <= height, `${width}px: leque inteiro após rolar (${bottom})`);
     }
     if (width < 768) {
-      for (let index = 0; index < 3; index++) {
+      for (let index = 0; index < 5; index++) {
         await page.locator('[data-fan-select]').nth(index).click();
         assert.equal(
           await page.locator('[data-fan-select]').nth(index).getAttribute('aria-pressed'),
@@ -231,14 +295,14 @@ try {
           .locator('.fan-card')
           .nth(index)
           .evaluate((card) => {
-            const title = card.querySelector('h3').getBoundingClientRect();
+            const title = card.querySelector('img').getBoundingClientRect();
             return card.contains(
               document.elementFromPoint(title.x + title.width / 2, title.y + title.height / 2),
             );
           });
         assert.equal(visible, true, `${width}px: cartão ${index + 1} acessível ao toque`);
       }
-      await page.locator('[data-fan-select]').nth(1).click();
+      await page.locator('[data-fan-select]').nth(2).click();
       await page.evaluate(() => scrollTo(0, 0));
       await page.locator('.menu-toggle').click();
       assert.equal(await page.locator('#mobile-nav').isVisible(), true);
@@ -250,6 +314,7 @@ try {
       );
       await page.evaluate(() => document.activeElement?.blur());
     }
+    await verifyHeaderBoundary(page);
     await page.addScriptTag({ content: axeSource });
     const violations = await page.evaluate(async () =>
       (await window.axe.run(document, { runOnly: ['color-contrast'] })).violations.flatMap((v) =>
@@ -290,14 +355,22 @@ try {
   const glass = await setup({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' });
   await glass.page.route('**/*.css', async (route) => {
     const response = await route.fetch();
-    // Simula a feature ausente antes de o navegador interpretar a folha de estilos.
-    const css = (await response.text()).replace(
-      /@supports[^{]*backdrop-filter[^{]*\{\s*\.glass-surface\s*\{[^}]*\}\s*\}/g,
-      '',
-    );
+    const css = (await response.text()).replaceAll('@supports', '@supports not');
     await route.fulfill({ response, body: css });
   });
+  const fallbackSession = await glass.page.context().newCDPSession(glass.page);
+  await fallbackSession.send('Emulation.setEmulatedMedia', {
+    features: [{ name: 'prefers-reduced-transparency', value: 'no-preference' }],
+  });
   await glass.page.goto(base, { waitUntil: 'domcontentloaded' });
+  await glass.page.evaluate(() => document.fonts.ready);
+  await glass.page.waitForFunction(
+    () =>
+      getComputedStyle(document.querySelector('.header-capsule')).backgroundColor ===
+      'rgb(15, 23, 42)',
+    null,
+    { timeout: 5000 },
+  );
   const glassFallback = await glass.page.evaluate(() => {
     const style = getComputedStyle(document.querySelector('.header-capsule'));
     return {
@@ -308,7 +381,7 @@ try {
   });
   assert.deepEqual(
     glassFallback,
-    { background: 'rgb(255, 255, 255)', image: 'none', blur: 'none' },
+    { background: 'rgb(15, 23, 42)', image: 'none', blur: 'none' },
     'fallback de vidro sólido',
   );
   await glass.page.screenshot({ path: '.artifacts/opening-no-blur.png' });
@@ -337,7 +410,7 @@ try {
     'open',
     'toque mantém o cartão legível após parar',
   );
-  await tablet.page.locator('#opening-title').tap();
+  await tablet.page.touchscreen.tap(20, 120);
   assert.equal(
     await tablet.page.locator('[data-fan]').getAttribute('data-fan-state'),
     'open',

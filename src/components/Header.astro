@@ -8,8 +8,8 @@ const isHome = Astro.url.pathname === '/';
 const anchor = (id: string) => `${isHome ? '' : '/'}#${id}`;
 ---
 
-<header class="site-header">
-  <GlassSurface class="header-capsule">
+<header class="site-header" data-home={isHome ? 'true' : undefined}>
+  <GlassSurface class="header-capsule" liquid clear>
     <div class="header-inner">
       <Brand />
       <nav class="desktop-nav" aria-label="Navegação principal">
@@ -90,3 +90,10 @@ const anchor = (id: string) => `${isHome ? '' : '/'}#${id}`;
     </nav>
   </GlassSurface>
 </header>
+<script is:inline>
+  const header = document.currentScript.previousElementSibling;
+  if (header) {
+    header.dataset.headerEnhanced = '';
+    if (header.dataset.home === 'true') header.dataset.headerSurface = 'opening';
+  }
+</script>

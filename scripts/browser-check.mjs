@@ -43,27 +43,28 @@ try {
   assert.equal(await page.locator('.team-visual').count(), 0, 'sem card ilustrativo da equipe');
   assert.equal(await page.locator('#creditos').isVisible(), true, 'seção sobre créditos');
   assert.equal(await page.locator('[data-number="agents"]').count(), 0, 'sem pessoas na equipe');
-  assert.match(await page.locator('[data-result="plan"]').textContent(), /Business/);
-  await page.locator('#properties-number').fill('2');
-  assert.equal(await page.locator('[data-range="properties"]').inputValue(), '2');
-  assert.equal(await page.locator('[data-result="credits"]').textContent(), '16');
-  assert.equal(await page.locator('[data-result="plan"]').textContent(), 'Professional');
-  await page.locator('#properties-number').fill('200');
-  await page.locator('#rooms-number').fill('15');
-  assert.equal(await page.locator('[data-result="credits"]').textContent(), '3.000');
-  assert.equal(await page.locator('[data-result="plan"]').textContent(), 'Enterprise');
-  assert.equal(await page.locator('[data-result="cta"] svg').count(), 1, 'seta mantida no botão');
-  // Acima do maior plano, o botão abre o WhatsApp comercial em nova aba.
-  assert.match(
-    await page.locator('[data-result="cta"]').getAttribute('href'),
-    /^https:\/\/wa\.me\/5551995273661\?text=/,
+  assert.equal(await page.locator('.calculator, .alternatives-section, .facts-strip').count(), 0);
+  assert.equal(
+    await page.locator('.feature-stack, .feature-card, [data-feature-scroll]').count(),
+    0,
   );
-  assert.equal(await page.locator('[data-result="cta"]').getAttribute('target'), '_blank');
+  assert.equal(await page.locator('.steps p').count(), 0);
+  assert.equal(await page.locator('.team-benefit').count(), 2, 'somente benefícios já definidos');
+  assert.equal(await page.locator('.credit-facts, .sharing-details').count(), 0);
+  assert.match(await page.locator('#creditos').innerText(), /30 segundos/);
+  assert.match(
+    await page.locator('.credit-example').innerText(),
+    /5 ambientes, ou seja, 5 créditos/,
+  );
+  assert.equal(
+    await page.locator('#compartilhamento img').getAttribute('src'),
+    '/images/conversa-whatsapp.webp',
+  );
   // Sem tour configurado, a seção e os links para ela ficam fora da página.
   assert.equal(await page.locator('#tour-real').isVisible(), false);
   assert.equal(await page.locator('a[href$="#tour-real"]:visible').count(), 0);
   assert.equal(await page.locator('[data-tour-host] iframe').count(), 0);
-  results.push('Calculadora, WhatsApp, reduced motion, seções removidas e demo oculta OK');
+  results.push('Reduções, seções removidas, compartilhamento, dois benefícios e demo oculta OK');
 
   // Menu do desktop acompanha a seção visível.
   for (const [id, label] of [

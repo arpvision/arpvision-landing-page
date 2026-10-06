@@ -74,11 +74,15 @@ Com a prévia na porta 4321 e Chrome instalado:
 
 ```sh
 npm run preview -- --port 4321
-node scripts/browser-check.mjs
+npm run test:browser
+npm run test:opening
+npm run test:showcase
 node scripts/lighthouse.mjs
 ```
 
 Relatórios e capturas são salvos em `.artifacts/` (ignorado pelo Git). Lighthouse usa emulação móvel; resultados de laboratório não substituem medições de usuários reais.
+
+A abertura e a demonstração também verificam a saída do cabeçalho ao fim do primeiro slide, o leque de fotos, a proteção do tour, o movimento contínuo das palavras (inclusive ao passar o mouse), o contraste e os layouts de 320 a 1440px. Com movimento reduzido ou sem JavaScript, os benefícios aparecem como uma lista estática.
 
 Os WebPs podem ser gerados com `node scripts/prepare-images.mjs`. O script já traz a nova redação para o cartão Open Graph da Home; o PNG atual foi preservado nesta atualização de texto. Não há upload, pagamento, envio de e-mail nem publicação automática.
 

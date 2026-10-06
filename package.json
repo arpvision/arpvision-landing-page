@@ -11,7 +11,7 @@
     "check:site": "node scripts/check-site.mjs",
     "test:browser": "node scripts/browser-check.mjs && node scripts/tour-check.mjs",
     "test:opening": "node scripts/opening-check.mjs",
-    "test:features": "node scripts/feature-check.mjs",
+    "test:showcase": "node scripts/showcase-check.mjs",
     "audit": "node scripts/lighthouse.mjs",
     "format": "prettier --write src scripts tests astro.config.mjs tsconfig.json package.json"
   },

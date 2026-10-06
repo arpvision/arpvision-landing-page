@@ -20,21 +20,26 @@ const { src } = Astro.props;
     inert
   ></iframe>
   <div class="tour-shield" data-tour-shield>
-    <GlassSurface class="tour-entry-panel">
-      <span class="tour-entry-icon">
-        <Icon name="expand" size={28} />
+    <button
+      class="glass-surface tour-unlock"
+      data-glass-clear
+      data-tour-activate
+      aria-controls="presentation-tour"
+      aria-expanded="false"
+    >
+      <span class="tour-entry-copy">
+        <span class="tour-entry-icon">
+          <Icon name="expand" size={28} />
+        </span>
+        <strong>Olhe o espaço por dentro.</strong>
+        <span>Clique ou toque para explorar o tour.</span>
       </span>
-      <strong>Olhe o espaço por dentro.</strong>
-      <p>Ative o tour para explorar os ambientes. Até lá, role a página normalmente.</p>
-      <button class="button button-primary" data-tour-activate aria-controls="presentation-tour">
-        Explorar o tour <Icon name="arrow" size={18} />
-      </button>
-      <noscript>
-        <a class="button button-primary" href={src} target="_blank" rel="noopener noreferrer">
-          Abrir tour em nova aba <Icon name="arrow" size={18} />
-        </a>
-      </noscript>
-    </GlassSurface>
+    </button>
+    <noscript>
+      <a class="glass-surface tour-fallback" href={src} target="_blank" rel="noopener noreferrer">
+        Abrir tour em nova aba <Icon name="arrow" size={18} />
+      </a>
+    </noscript>
   </div>
   <GlassSurface class="tour-exit-panel">
     <button data-tour-lock aria-controls="presentation-tour">
