@@ -61,7 +61,7 @@ const roomCards = site.media.fanRooms.map((room, index) => ({
     aria-labelledby="capture-heading"
   >
     <div class="container how-grid">
-      <div>
+      <div class="capture-copy">
         <h2 class="capture-heading" id="capture-heading">
           O app tira as fotos para você
         </h2>
@@ -111,12 +111,7 @@ const roomCards = site.media.fanRooms.map((room, index) => ({
       </div>
     </div>
   </section>
-  <section class="hero presentation" aria-labelledby="presentation-title" data-atmosphere="demo">
-    <div class="container presentation-heading">
-      <div class="hero-copy">
-        <h2 id="presentation-title">Onde o tour trabalha por você.</h2>
-      </div>
-    </div>
+  <section class="hero presentation" aria-label="Tour virtual e benefícios" data-atmosphere="demo">
     <TourShowcase src={site.media.heroEmbed} />
   </section>
   <Credits />

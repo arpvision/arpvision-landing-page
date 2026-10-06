@@ -30,24 +30,20 @@
   pointer-events: none;
   background: linear-gradient(145deg, #ffffff30, transparent 36%, transparent 72%, #0f172a18);
 }
-.presentation-heading {
-  margin-bottom: 48px;
-}
-.presentation-heading .hero-copy {
-  max-width: 880px;
-}
-.presentation-heading h2 {
-  max-width: 720px;
-}
 .tour-showcase {
   --showcase-height: clamp(480px, calc(100svh - 120px), 720px);
   display: grid;
-  grid-template-columns: 1.05fr 0.95fr;
+  grid-template-columns: 0.95fr 1.05fr;
+  grid-template-areas: 'benefits tour';
   gap: 72px;
   align-items: center;
 }
 .tour-showcase .protected-tour {
+  grid-area: tour;
   height: var(--showcase-height);
+}
+.tour-showcase .benefit-marquee {
+  grid-area: benefits;
 }
 .protected-tour {
   position: relative;
@@ -253,12 +249,10 @@
   }
 }
 @media (max-width: 767px) {
-  .presentation-heading {
-    margin-bottom: 32px;
-  }
   .tour-showcase {
     --showcase-height: 420px;
     grid-template-columns: 1fr;
+    grid-template-areas: 'tour' 'benefits';
     gap: 32px;
   }
   .protected-tour {
