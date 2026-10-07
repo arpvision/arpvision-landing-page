@@ -402,10 +402,6 @@ export const faqGroups = [
           'Serve. Envie as fotos 360° pela galeria e monte o tour normalmente. Fotos da galeria não gastam créditos.',
       },
       {
-        question: 'O meu cliente precisa criar conta para ver o tour?',
-        answer: 'Não. Ele abre o link direto, no celular ou no computador.',
-      },
-      {
         question: 'Posso colocar o tour no meu site?',
         answer:
           'Pode. Cada tour tem um código para colar no site, nos formatos responsivo, 16:9 ou quadrado.',
@@ -420,20 +416,8 @@ export const faqGroups = [
         answer:
           'Cada ambiente fotografado com o celular usa 1 crédito. Os créditos são da empresa, e toda a equipe usa o mesmo saldo.',
       },
-      {
-        question: 'E se um ambiente não ficar pronto?',
-        answer: 'O crédito volta para o saldo, e você pode fotografar o ambiente de novo.',
-      },
-      {
-        question: 'Quantos tours posso manter no ar?',
-        answer:
-          'Individual: 1 tour por 1 ano. Professional: até 30 tours enquanto a assinatura estiver ativa. Business: até 120 tours enquanto a assinatura estiver ativa. No Enterprise, o limite é combinado em contrato.',
-      },
-      { question: 'Quais tours contam no limite?', answer: site.policies.liveTourLimit },
       { question: 'Como funciona o Individual?', answer: site.policies.individualTerm },
-      { question: 'Posso comprar ambientes extras?', answer: site.policies.monthlyExtras },
       { question: 'Como funciona o pagamento?', answer: site.policies.billing },
-      { question: 'Como funciona o cancelamento?', answer: site.policies.cancellation },
     ],
   },
 ];
