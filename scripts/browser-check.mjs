@@ -294,6 +294,14 @@ try {
   await phone.waitForFunction(() =>
     /plano 3 de 4/.test(document.querySelector('#planos [data-carousel-status]').textContent),
   );
+  // O carrossel não rola na vertical: o gesto de subir/descer sobre os cards move a página.
+  assert.equal(
+    await phone
+      .locator('#planos [data-pricing-grid]')
+      .evaluate((grid) => getComputedStyle(grid).overflowY),
+    'hidden',
+    'carrossel de planos sem rolagem vertical',
+  );
   await phone.locator('.faq-item').first().locator('summary').click();
   assert.equal(await phone.locator('.faq-item').first().getAttribute('open'), '');
   await phone.goto(base + '/planos');

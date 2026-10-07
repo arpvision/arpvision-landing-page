@@ -3000,13 +3000,19 @@ input[type='number']::-webkit-outer-spin-button {
   .example-notice svg {
     margin-top: 1px;
   }
-  /* No celular os planos viram carrossel horizontal (abre no recomendado; ver pricing.ts). */
+  /*
+   * No celular os planos viram carrossel horizontal (abre no recomendado; ver pricing.ts).
+   * O carrossel só rola na horizontal: com overflow-x: auto, o eixo vertical também viraria
+   * rolável, e a fita 0–9 do odômetro (recortada só na pintura) faria os cards subirem e
+   * descerem sob o dedo depois de trocar mensal/anual. O gesto vertical fica com a página.
+   */
   .pricing-grid {
     grid-template-columns: none;
     grid-auto-flow: column;
     grid-auto-columns: min(84%, 340px);
     gap: 14px;
     overflow-x: auto;
+    overflow-y: hidden;
     overscroll-behavior-x: contain;
     scroll-snap-type: x mandatory;
     scroll-padding-inline: 20px;
