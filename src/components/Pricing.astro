@@ -20,11 +20,13 @@ const paymentFor = (plan: Plan) => {
   return 'Condições em contrato';
 };
 const highlightsFor = (plan: Plan) => {
+  // As estatísticas dos tours são do Business para cima, como no app.
+  const stats = plan.stats ? ['Estatísticas de visitas dos tours'] : [];
   if (plan.billing === 'once')
-    return [`${plan.credits} ambientes`, `${plan.liveTours} tour no ar por 1 ano`];
+    return [`${plan.credits} ambientes`, `${plan.liveTours} tour no ar por 1 ano`, ...stats];
   if (plan.billing === 'monthly')
-    return [`${plan.credits} ambientes por mês`, `Até ${plan.liveTours} tours no ar`];
-  return ['Ambientes sob medida', 'Volume e limite de tours combinados em contrato.'];
+    return [`${plan.credits} ambientes por mês`, `Até ${plan.liveTours} tours no ar`, ...stats];
+  return ['Ambientes sob medida', 'Volume e limite de tours combinados em contrato.', ...stats];
 };
 ---
 

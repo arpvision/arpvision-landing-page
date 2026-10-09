@@ -19,6 +19,11 @@ export interface Plan {
   extraRoomPrice: number | null;
   renewalPrice: number | null;
   users: null;
+  /**
+   * O plano mostra as estatísticas dos tours (visitas, tempo por ambiente,
+   * origem). Do Business para cima desde 09/10/2026, como no app.
+   */
+  stats: boolean;
   recommended?: boolean;
 }
 
@@ -129,6 +134,7 @@ export const site = {
         extraRoomPrice: 20,
         renewalPrice: 79,
         users: null,
+        stats: false,
       },
       {
         id: 'corretor',
@@ -145,6 +151,7 @@ export const site = {
         extraRoomPrice: null,
         renewalPrice: 79,
         users: null,
+        stats: false,
       },
       {
         id: 'imobiliaria',
@@ -161,6 +168,7 @@ export const site = {
         extraRoomPrice: null,
         renewalPrice: 79,
         users: null,
+        stats: true,
         recommended: true,
       },
       {
@@ -178,6 +186,7 @@ export const site = {
         extraRoomPrice: null,
         renewalPrice: null,
         users: null,
+        stats: true,
       },
     ] as Plan[],
     extraCredits: [] as { credits: number; price: number | null }[],
@@ -359,6 +368,10 @@ export const featureGroups: FeatureGroup[] = [
       { name: 'Link público: o cliente abre sem conta', values: all },
       { name: 'Atalho para WhatsApp e e-mail', values: all },
       { name: 'Código para o site: responsivo, 16:9 e quadrado', values: all },
+      {
+        name: 'Estatísticas de visitas: tempo em cada ambiente e de onde vieram',
+        values: site.pricing.plans.map((p) => p.stats),
+      },
     ],
   },
   {
