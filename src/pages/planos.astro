@@ -7,6 +7,8 @@ import Icon from '../components/Icon.astro';
 import FeatureValue from '../components/FeatureValue.astro';
 import { site, featureGroups, faq } from '../config/site';
 import { softwareApplicationSchema } from '../lib/schema';
+// Preços ainda em definição: quem chega por um link antigo vai para a cotação na Home.
+if (!site.pricing.showPrices) return Astro.redirect('/#cotacao', 301);
 const schema = [
   softwareApplicationSchema('planos'),
   {

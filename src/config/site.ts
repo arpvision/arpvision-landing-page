@@ -108,6 +108,10 @@ export const site = {
   // Adicione somente tours públicos aprovados para demonstração.
   tours: [] as DemoTour[],
   pricing: {
+    // Preços ainda em definição: com `false`, a Home mostra a cotação pelo WhatsApp no lugar
+    // dos planos, /planos redireciona para ela e nenhum valor aparece (FAQ e JSON-LD
+    // inclusos). Quando os preços forem aprovados, basta mudar para `true`.
+    showPrices: false,
     isExample: false,
     exampleNotice: '',
     // Plano anual: 20% de desconto nas assinaturas mensais (Professional e Business).
@@ -384,6 +388,9 @@ export const featureGroups: FeatureGroup[] = [
   },
 ];
 
+// Teste grátis por extenso ("1 ambiente", "2 ambientes"), usado na cotação e no FAQ.
+export const trialRooms = `${site.pricing.freeTrialCredits} ${site.pricing.freeTrialCredits === 1 ? 'ambiente' : 'ambientes'}`;
+
 // Um FAQ só, em dois grupos, usado pela Home e por /planos.
 export const faqGroups = [
   {
@@ -422,15 +429,31 @@ export const faqGroups = [
     ],
   },
   {
-    title: 'Créditos, planos e pagamento',
+    title: site.pricing.showPrices
+      ? 'Créditos, planos e pagamento'
+      : 'Créditos, cotação e pagamento',
     items: [
       {
         question: 'O que é um crédito?',
         answer:
           'Cada ambiente fotografado com o celular usa 1 crédito. Os créditos são da empresa, e toda a equipe usa o mesmo saldo.',
       },
-      { question: 'Como funciona o Individual?', answer: site.policies.individualTerm },
-      { question: 'Como funciona o pagamento?', answer: site.policies.billing },
+      ...(site.pricing.showPrices
+        ? [
+            { question: 'Como funciona o Individual?', answer: site.policies.individualTerm },
+            { question: 'Como funciona o pagamento?', answer: site.policies.billing },
+          ]
+        : [
+            {
+              question: 'Quanto custa?',
+              answer: `Depende de quantos ambientes você fotografa por mês. Peça sua cotação pelo WhatsApp e receba uma proposta para o seu volume. Para conhecer antes, crie sua conta grátis, fotografe ${trialRooms} e deixe o tour no ar por ${site.pricing.freeTrialDays} dias, sem pagar nada.`,
+            },
+            {
+              question: 'Como funciona o pagamento?',
+              answer:
+                'O pagamento é feito no app, com segurança, pelo Asaas. As condições vêm junto com a sua proposta.',
+            },
+          ]),
     ],
   },
 ];

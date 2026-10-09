@@ -1,0 +1,119 @@
+---
+import Icon from './Icon.astro';
+import ContactLink from './ContactLink.astro';
+import { site, trialRooms } from '../config/site';
+import { appLink } from '../lib/business';
+
+// Cotação pelo WhatsApp enquanto os preços não são públicos (site.pricing.showPrices).
+// Três toques montam uma mensagem pronta; a pessoa vê o texto e só precisa enviar.
+// Sem JS, o botão abre o WhatsApp com a mensagem padrão.
+const questions = [
+  {
+    id: 'perfil',
+    label: 'Como você trabalha?',
+    summary: 'Como trabalho',
+    options: ['Tenho 1 espaço', 'Trabalho sozinho', 'Tenho uma equipe', 'Várias unidades'],
+  },
+  {
+    id: 'volume',
+    label: 'Quantos espaços por mês?',
+    summary: 'Espaços por mês',
+    options: ['1', '2 a 5', '6 a 15', 'Mais de 15'],
+  },
+  {
+    id: 'prazo',
+    label: 'Para quando?',
+    summary: 'Para quando',
+    options: ['Esta semana', 'Este mês', 'Ainda pesquisando'],
+  },
+];
+const greeting = 'Olá! Vim pelo site e quero uma cotação da ARP Vision.';
+const benefits = [
+  {
+    icon: 'target',
+    title: 'Proposta para o seu volume.',
+    text: 'Você paga por ambiente pronto, não por foto.',
+  },
+  {
+    icon: 'phone',
+    title: 'Sem câmera 360° e sem fotógrafo.',
+    text: 'O celular que você já tem faz o tour.',
+  },
+  {
+    icon: 'message',
+    title: 'Conversa direta com o time.',
+    text: 'Tire as dúvidas antes de decidir.',
+  },
+];
+---
+
+<section class="section quote-section" id="cotacao" aria-labelledby="quote-title">
+  <div class="container quote-layout">
+    <div class="quote-copy">
+      <span class="eyebrow">
+        <span class="eyebrow-line"></span> PREÇO SOB MEDIDA
+      </span>
+      <h2 id="quote-title">Cada negócio tem um tamanho. A sua proposta também.</h2>
+      <p class="quote-lead">
+        Responda 3 perguntas rápidas e receba pelo WhatsApp uma proposta para o seu volume de
+        espaços, sem compromisso.
+      </p>
+      <ul class="quote-benefits">
+        {benefits.map((benefit) => (
+          <li>
+            <span class="icon-tile">
+              <Icon name={benefit.icon} size={20} />
+            </span>
+            <span>
+              <strong>{benefit.title}</strong> {benefit.text}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+    <div class="quote-card" data-quote data-greeting={greeting}>
+      {questions.map((question, index) => (
+        <fieldset class="quote-question" data-summary={question.summary}>
+          <legend>
+            <span class="quote-step" aria-hidden="true">
+              {index + 1}
+            </span>
+            {question.label}
+          </legend>
+          <div class="quote-options">
+            {question.options.map((option) => (
+              <label class="quote-option">
+                <input type="radio" name={`cotacao-${question.id}`} value={option} />
+                <span>{option}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      ))}
+      <div class="quote-preview">
+        <span class="quote-preview-label">Sua mensagem</span>
+        <p class="quote-bubble" data-quote-preview>
+          {greeting}
+        </p>
+      </div>
+      <div class="quote-actions">
+        <ContactLink class="button button-primary quote-submit" message={greeting}>
+          <Icon name="message" size={19} /> Quero minha cotação no WhatsApp
+        </ContactLink>
+        <p class="quote-note">
+          Abre o WhatsApp com a mensagem pronta. Você revisa antes de enviar.
+        </p>
+      </div>
+    </div>
+  </div>
+  <p class="container quote-trial">
+    Prefere testar antes? Crie sua conta grátis, fotografe {trialRooms} e deixe o tour no ar por{' '}
+    {site.pricing.freeTrialDays} dias, sem pagar nada.{' '}
+    <a href={appLink('cotacao-teste')} data-cta="cotacao-teste">
+      Criar conta grátis
+    </a>
+  </p>
+</section>
+<script>
+  import '../scripts/quote';
+</script>

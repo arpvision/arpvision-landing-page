@@ -19,7 +19,11 @@ import { appLink } from '../lib/business';
       <h2>Conheça</h2>
       <a href="/#como-funciona">Como funciona</a>
       {available.tour && <a href="/#tour-real">Tour real</a>}
-      <a href="/planos">Planos</a>
+      {site.pricing.showPrices ? (
+        <a href="/planos">Planos</a>
+      ) : (
+        <a href="/#cotacao">Pedir cotação</a>
+      )}
       <a href="/#duvidas">Dúvidas frequentes</a>
     </div>
     <div>

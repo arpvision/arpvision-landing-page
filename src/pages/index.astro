@@ -4,6 +4,7 @@ import Icon from '../components/Icon.astro';
 import Tour from '../components/Tour.astro';
 import Credits from '../components/Credits.astro';
 import Pricing from '../components/Pricing.astro';
+import Quote from '../components/Quote.astro';
 import Faq from '../components/Faq.astro';
 import FinalCta from '../components/FinalCta.astro';
 import FanCards from '../components/FanCards.astro';
@@ -117,16 +118,21 @@ const roomCards = site.media.fanRooms.map((room, index) => ({
   <Credits />
   <Tour />
   <TeamBenefits />
-  <section class="section plans-preview" id="planos">
-    <div class="container">
-      <div class="section-heading center">
-        <span class="eyebrow">COMECE PEQUENO. MOSTRE POR INTEIRO.</span>
-        <h2>Um plano para o seu próximo passo.</h2>
-        <p>1 crédito = 1 ambiente fotografado com o celular. O saldo é da sua empresa.</p>
+  {/* Com os preços ainda em definição, a cotação pelo WhatsApp ocupa o lugar dos planos. */}
+  {site.pricing.showPrices ? (
+    <section class="section plans-preview" id="planos">
+      <div class="container">
+        <div class="section-heading center">
+          <span class="eyebrow">COMECE PEQUENO. MOSTRE POR INTEIRO.</span>
+          <h2>Um plano para o seu próximo passo.</h2>
+          <p>1 crédito = 1 ambiente fotografado com o celular. O saldo é da sua empresa.</p>
+        </div>
+        <Pricing />
       </div>
-      <Pricing />
-    </div>
-  </section>
+    </section>
+  ) : (
+    <Quote />
+  )}
   <FinalCta />
   <Faq />
 </Layout>

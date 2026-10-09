@@ -229,15 +229,16 @@ try {
   assert.equal(await page.locator('main h1').count(), 1);
   assert.equal(await page.locator('.use-card').count(), 5, 'sem cartões duplicados');
   await verifyHeaderBoundary(page);
-  await page.goto(base + '/planos', { waitUntil: 'domcontentloaded' });
+  // Página interna que existe com ou sem preços públicos (/planos pode só redirecionar).
+  await page.goto(base + '/termos-de-uso', { waitUntil: 'domcontentloaded' });
   await page.evaluate(() => scrollTo({ top: 1500, behavior: 'instant' }));
   assert.equal(
     await page.locator('.site-header').isVisible(),
     true,
-    'navegação da página de planos preservada',
+    'navegação das páginas internas preservada',
   );
   results.push(
-    'Cabeçalho até o fim do primeiro slide, saída com a abertura, controles ocultos sem foco e retorno ao início; /planos preservado.',
+    'Cabeçalho até o fim do primeiro slide, saída com a abertura, controles ocultos sem foco e retorno ao início; páginas internas preservadas.',
   );
   await context.close();
 

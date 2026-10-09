@@ -3,9 +3,18 @@ import Brand from './Brand.astro';
 import Icon from './Icon.astro';
 import GlassSurface from './GlassSurface.astro';
 import { appLink } from '../lib/business';
-import { available } from '../config/site';
+import { site, available } from '../config/site';
 const isHome = Astro.url.pathname === '/';
 const anchor = (id: string) => `${isHome ? '' : '/'}#${id}`;
+// Sem preços públicos, o item "Planos" vira "Cotação" e leva à seção da Home.
+const plans = site.pricing.showPrices
+  ? {
+      href: '/planos',
+      spy: 'planos',
+      label: 'Planos',
+      current: Astro.url.pathname.startsWith('/planos') ? ('page' as const) : undefined,
+    }
+  : { href: anchor('cotacao'), spy: 'cotacao', label: 'Cotação', current: undefined };
 ---
 
 <header class="site-header" data-home={isHome ? 'true' : undefined}>
@@ -21,12 +30,8 @@ const anchor = (id: string) => `${isHome ? '' : '/'}#${id}`;
             Tour real
           </a>
         )}
-        <a
-          href="/planos"
-          data-spy="planos"
-          aria-current={Astro.url.pathname.startsWith('/planos') ? 'page' : undefined}
-        >
-          Planos
+        <a href={plans.href} data-spy={plans.spy} aria-current={plans.current}>
+          {plans.label}
         </a>
         <a href={anchor('duvidas')} data-spy="duvidas">
           Dúvidas
@@ -70,11 +75,8 @@ const anchor = (id: string) => `${isHome ? '' : '/'}#${id}`;
     <nav id="mobile-nav" class="mobile-nav" aria-label="Navegação no celular" hidden>
       <a href={anchor('como-funciona')}>Como funciona</a>
       {available.tour && <a href={anchor('tour-real')}>Tour real</a>}
-      <a
-        href="/planos"
-        aria-current={Astro.url.pathname.startsWith('/planos') ? 'page' : undefined}
-      >
-        Planos
+      <a href={plans.href} aria-current={plans.current}>
+        {plans.label}
       </a>
       <a href={anchor('duvidas')}>Dúvidas</a>
       <a href={appLink('cabecalho', 'login')}>

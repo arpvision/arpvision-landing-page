@@ -1,9 +1,13 @@
 import { readFile, readdir, stat } from 'node:fs/promises';
 import path from 'node:path';
 import assert from 'node:assert/strict';
+// Sem preços públicos (site.pricing.showPrices), /planos é só um redirecionamento.
+const pricesShown = !(await readFile('dist/planos/index.html', 'utf8')).includes(
+  'http-equiv="refresh"',
+);
 const routes = [
   'index.html',
-  'planos/index.html',
+  ...(pricesShown ? ['planos/index.html'] : []),
   'termos-de-uso/index.html',
   'politica-de-privacidade/index.html',
 ];
@@ -66,6 +70,23 @@ for (const route of routes) {
     /<script[^>]+type="application\/ld\+json"[^>]*>(.*?)<\/script>/gs,
   ))
     JSON.parse(match[1]);
+  if (!pricesShown) {
+    assert.doesNotMatch(html, /R\$(?:\s|&nbsp;)*\d/, `${route}: nenhum valor em reais`);
+    assert.ok(!html.includes('"offers"'), `${route}: JSON-LD sem ofertas com preço`);
+    assert.ok(!html.includes('href="/planos"'), `${route}: sem link para /planos`);
+  }
+}
+if (!pricesShown) {
+  const planos = await readFile('dist/planos/index.html', 'utf8');
+  assert.match(planos, /url=\/#cotacao/, '/planos redireciona para a cotação');
+  assert.match(planos, /name="robots" content="noindex"/, '/planos fora do índice');
+  const home = await readFile('dist/index.html', 'utf8');
+  assert.ok(home.includes('id="cotacao"'), 'Home com a seção de cotação');
+  assert.match(
+    home,
+    /<a href="https:\/\/wa\.me\/\d+\?text=[^"]+" class="[^"]*quote-submit/,
+    'botão da cotação abre o WhatsApp com mensagem pronta',
+  );
 }
 const files = await allFiles('dist/_astro');
 let jsBytes = 0;
@@ -76,6 +97,7 @@ assert.equal(canonicalOrigins.size, 1, `um só domínio nos canonicals: ${[...ca
 const [canonicalOrigin] = canonicalOrigins;
 const sitemap = await readFile('dist/sitemap.xml', 'utf8');
 assert.ok(sitemap.includes('/politica-de-privacidade'));
+assert.equal(sitemap.includes('/planos'), pricesShown, 'sitemap só lista /planos com preços');
 for (const [, loc] of sitemap.matchAll(/<loc>([^<]+)<\/loc>/g))
   assert.equal(new URL(loc).origin, canonicalOrigin, `sitemap no domínio canônico: ${loc}`);
 assert.match(
@@ -91,5 +113,5 @@ assert.ok(
   'robots aponta o sitemap do domínio canônico',
 );
 console.log(
-  `4 rotas HTML verificadas; ${verifiedLinks} referências locais válidas; ${(jsBytes / 1024).toFixed(1)} KB de JavaScript total (sem gzip). Sitemap, robots, metadados, schemas e UTMs válidos.`,
+  `${routes.length} rotas HTML verificadas${pricesShown ? '' : ' (preços ocultos: cotação na Home, /planos redireciona)'}; ${verifiedLinks} referências locais válidas; ${(jsBytes / 1024).toFixed(1)} KB de JavaScript total (sem gzip). Sitemap, robots, metadados, schemas e UTMs válidos.`,
 );

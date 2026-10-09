@@ -7,6 +7,16 @@ const base = process.env.SITE_URL || 'http://127.0.0.1:4321';
 const browser = await chromium.launch({ channel: 'chrome', headless: true });
 const errors = [];
 const results = [];
+// Sem preços públicos (site.pricing.showPrices), /planos só redireciona para a cotação.
+const pricesShown = !(await (await fetch(`${base}/planos`)).text()).includes(
+  'http-equiv="refresh"',
+);
+const routes = [
+  '/',
+  ...(pricesShown ? ['/planos'] : []),
+  '/termos-de-uso',
+  '/politica-de-privacidade',
+];
 try {
   const desktop = await browser.newContext({
     viewport: { width: 1440, height: 1000 },
@@ -14,7 +24,7 @@ try {
   });
   const page = await desktop.newPage();
   page.on('pageerror', (error) => errors.push(error.message));
-  for (const route of ['/', '/planos', '/termos-de-uso', '/politica-de-privacidade']) {
+  for (const route of routes) {
     const response = await page.goto(base + route);
     assert.equal(response.status(), 200);
     assert.equal(await page.locator('h1').count(), 1);
@@ -69,7 +79,7 @@ try {
   // Menu do desktop acompanha a seção visível.
   for (const [id, label] of [
     ['como-funciona', 'Como funciona'],
-    ['planos', 'Planos'],
+    pricesShown ? ['planos', 'Planos'] : ['cotacao', 'Cotação'],
     ['duvidas', 'Dúvidas'],
   ]) {
     await page.evaluate((section) => {
@@ -85,7 +95,7 @@ try {
   }
   results.push('Menu do desktop destaca a seção visível OK');
 
-  for (const route of ['/', '/planos']) {
+  for (const route of pricesShown ? ['/', '/planos'] : ['/']) {
     await page.goto(base + route);
     const text = await page.locator('body').innerText();
     assert.ok(!/\[[^\]]*a definir[^\]]*\]/i.test(text), `${route}: sem "[a definir]" visível`);
@@ -96,86 +106,138 @@ try {
     );
     assert.equal(await page.locator('#duvidas').count(), 1, `${route}: um FAQ só`);
   }
-  await page.goto(base + '/planos');
-  // Mesmos quatro cards da tela de planos do app; o teste grátis vira uma nota.
-  assert.equal(await page.locator('.plan-card').count(), 4);
-  assert.equal(await page.locator('.feature-table thead th').count(), 5);
-  // Plano anual com 20%: o seletor mensal/anual aparece uma vez.
-  assert.equal(await page.locator('[data-billing-toggle]').count(), 1);
-  const individual = await page.locator('[data-plan="individual"]').innerText();
-  assert.match(individual, /12x\s*R\$\s*23,25/);
-  assert.match(individual, /ou R\$\s*229 à vista no Pix/);
-  assert.match(individual, /8 ambientes/);
-  assert.match(individual, /1 tour no ar por 1 ano/);
-  assert.match(individual, /Renovação R\$\s*79\/ano/);
-  assert.match(
-    await page.locator('[data-plan="corretor"] [data-price]').textContent(),
-    /R\$\s*249$/,
-  );
-  assert.match(await page.locator('[data-plan="corretor"]').textContent(), /20 ambientes por mês/);
-  assert.match(await page.locator('[data-plan="corretor"]').textContent(), /Até 30 tours no ar/);
-  assert.match(
-    await page.locator('[data-plan="imobiliaria"] [data-price]').textContent(),
-    /R\$\s*599$/,
-  );
-  assert.match(await page.locator('[data-plan="rede"]').textContent(), /Falar no WhatsApp/);
-  const trial = await page.locator('.pricing-trial').textContent();
-  assert.match(trial, /fotografe\s+1 ambiente/);
-  assert.match(trial, /por\s+7 dias/);
-  assert.match(trial, /sem pagar nada/);
-  assert.match(
-    await page.locator('[data-plan="imobiliaria"]').textContent(),
-    /Até 120 tours no ar/,
-  );
-  // Seletor mensal/anual: 20% nas assinaturas; Individual e Enterprise não mudam.
-  const billingSwitch = page.locator('[data-billing-switch]');
-  assert.equal(await billingSwitch.getAttribute('role'), 'switch');
-  assert.equal(await billingSwitch.getAttribute('aria-checked'), 'false');
-  await billingSwitch.click();
-  assert.equal(await billingSwitch.getAttribute('aria-checked'), 'true');
-  const priceOf = (plan) => page.locator(`[data-plan="${plan}"] [data-price]`);
-  // O Intl separa "R$" do número com espaço inseparável: normaliza antes de comparar.
-  const waitForPrice = (plan, text) =>
-    page.waitForFunction(
-      ([id, expected]) =>
-        document
-          .querySelector(`[data-plan="${id}"] [data-price]`)
-          .textContent.replace(/\s+/g, ' ')
-          .trim() === expected,
-      [plan, text],
+  if (!pricesShown) {
+    // Preços ocultos: a Home pede cotação pelo WhatsApp e nenhum valor aparece.
+    await page.goto(base);
+    assert.doesNotMatch(await page.locator('body').innerText(), /R\$\s*\d/, 'Home sem valores');
+    assert.equal(
+      await page.locator('[data-pricing], .plan-card').count(),
+      0,
+      'sem cards de planos',
     );
-  await waitForPrice('corretor', 'R$ 199,20');
-  assert.match(await priceOf('imobiliaria').textContent(), /R\$\s*479,20$/);
-  assert.match(
-    await page.locator('[data-plan="corretor"] .plan-payment').textContent(),
-    /Cobrança anual de R\$\s*2\.390,40/,
-  );
-  assert.match(
-    await page.locator('[data-plan="imobiliaria"] .plan-payment').textContent(),
-    /Cobrança anual de R\$\s*5\.750,40/,
-  );
-  assert.match(await priceOf('individual').textContent(), /R\$\s*23,25/);
-  assert.match(await page.locator('[data-billing-status]').textContent(), /plano anual/);
-  await page.locator('[data-billing-option="monthly"]').click();
-  await waitForPrice('corretor', 'R$ 249');
-  assert.match(
-    await page.locator('[data-plan="corretor"] .plan-payment').textContent(),
-    /Cobrança mensal, no cartão/,
-  );
-  const schema = JSON.parse(await page.locator('script[type="application/ld+json"]').textContent());
-  const offers = schema.find((item) => item['@type'] === 'SoftwareApplication').offers;
-  assert.deepEqual(
-    offers.map((offer) => [offer.name, offer.price]),
-    [
-      ['Individual', 229],
-      ['Professional', 249],
-      ['Business', 599],
-    ],
-  );
-  await page.screenshot({ path: '.artifacts/planos-desktop.png' });
-  results.push(
-    'Quatro planos como no app, Pix/parcelas, seletor mensal/anual (20%), limites e ofertas estruturadas OK',
-  );
+    const quote = page.locator('#cotacao');
+    const submit = quote.locator('.quote-submit');
+    const message = async () => new URL(await submit.getAttribute('href')).searchParams.get('text');
+    const greeting = 'Olá! Vim pelo site e quero uma cotação da ARP Vision.';
+    assert.equal(await message(), greeting);
+    assert.equal(await submit.getAttribute('target'), '_blank');
+    await quote.locator('input[value="Tenho uma equipe"]').check();
+    await quote.locator('input[value="6 a 15"]').check();
+    await quote.locator('input[value="Este mês"]').check();
+    const filled = [
+      greeting,
+      '• Como trabalho: Tenho uma equipe',
+      '• Espaços por mês: 6 a 15',
+      '• Para quando: Este mês',
+      'Pode me mandar uma proposta?',
+    ].join('\n');
+    assert.equal(await message(), filled, 'respostas entram na mensagem');
+    assert.equal(await quote.locator('[data-quote-preview]').textContent(), filled, 'prévia igual');
+    // Teclado: as setas trocam a escolha dentro da mesma pergunta.
+    await quote.locator('input[value="Este mês"]').press('ArrowRight');
+    assert.match(await message(), /• Para quando: Ainda pesquisando/);
+    assert.match(await page.locator('#duvidas').innerText(), /Quanto custa\?/);
+    const schema = JSON.parse(
+      await page.locator('script[type="application/ld+json"]').textContent(),
+    );
+    assert.equal(
+      schema.find((item) => item['@type'] === 'SoftwareApplication').offers,
+      undefined,
+      'JSON-LD sem ofertas com preço',
+    );
+    await quote.screenshot({ path: '.artifacts/cotacao-desktop.png' });
+    await page.goto(base + '/planos');
+    await page.waitForURL(/\/#cotacao$/);
+    results.push(
+      'Preços ocultos: cotação pelo WhatsApp com mensagem pronta, sem valores nem ofertas; /planos leva à cotação OK',
+    );
+  } else {
+    await page.goto(base + '/planos');
+    // Mesmos quatro cards da tela de planos do app; o teste grátis vira uma nota.
+    assert.equal(await page.locator('.plan-card').count(), 4);
+    assert.equal(await page.locator('.feature-table thead th').count(), 5);
+    // Plano anual com 20%: o seletor mensal/anual aparece uma vez.
+    assert.equal(await page.locator('[data-billing-toggle]').count(), 1);
+    const individual = await page.locator('[data-plan="individual"]').innerText();
+    assert.match(individual, /12x\s*R\$\s*23,25/);
+    assert.match(individual, /ou R\$\s*229 à vista no Pix/);
+    assert.match(individual, /8 ambientes/);
+    assert.match(individual, /1 tour no ar por 1 ano/);
+    assert.match(individual, /Renovação R\$\s*79\/ano/);
+    assert.match(
+      await page.locator('[data-plan="corretor"] [data-price]').textContent(),
+      /R\$\s*249$/,
+    );
+    assert.match(
+      await page.locator('[data-plan="corretor"]').textContent(),
+      /20 ambientes por mês/,
+    );
+    assert.match(await page.locator('[data-plan="corretor"]').textContent(), /Até 30 tours no ar/);
+    assert.match(
+      await page.locator('[data-plan="imobiliaria"] [data-price]').textContent(),
+      /R\$\s*599$/,
+    );
+    assert.match(await page.locator('[data-plan="rede"]').textContent(), /Falar no WhatsApp/);
+    const trial = await page.locator('.pricing-trial').textContent();
+    assert.match(trial, /fotografe\s+1 ambiente/);
+    assert.match(trial, /por\s+7 dias/);
+    assert.match(trial, /sem pagar nada/);
+    assert.match(
+      await page.locator('[data-plan="imobiliaria"]').textContent(),
+      /Até 120 tours no ar/,
+    );
+    // Seletor mensal/anual: 20% nas assinaturas; Individual e Enterprise não mudam.
+    const billingSwitch = page.locator('[data-billing-switch]');
+    assert.equal(await billingSwitch.getAttribute('role'), 'switch');
+    assert.equal(await billingSwitch.getAttribute('aria-checked'), 'false');
+    await billingSwitch.click();
+    assert.equal(await billingSwitch.getAttribute('aria-checked'), 'true');
+    const priceOf = (plan) => page.locator(`[data-plan="${plan}"] [data-price]`);
+    // O Intl separa "R$" do número com espaço inseparável: normaliza antes de comparar.
+    const waitForPrice = (plan, text) =>
+      page.waitForFunction(
+        ([id, expected]) =>
+          document
+            .querySelector(`[data-plan="${id}"] [data-price]`)
+            .textContent.replace(/\s+/g, ' ')
+            .trim() === expected,
+        [plan, text],
+      );
+    await waitForPrice('corretor', 'R$ 199,20');
+    assert.match(await priceOf('imobiliaria').textContent(), /R\$\s*479,20$/);
+    assert.match(
+      await page.locator('[data-plan="corretor"] .plan-payment').textContent(),
+      /Cobrança anual de R\$\s*2\.390,40/,
+    );
+    assert.match(
+      await page.locator('[data-plan="imobiliaria"] .plan-payment').textContent(),
+      /Cobrança anual de R\$\s*5\.750,40/,
+    );
+    assert.match(await priceOf('individual').textContent(), /R\$\s*23,25/);
+    assert.match(await page.locator('[data-billing-status]').textContent(), /plano anual/);
+    await page.locator('[data-billing-option="monthly"]').click();
+    await waitForPrice('corretor', 'R$ 249');
+    assert.match(
+      await page.locator('[data-plan="corretor"] .plan-payment').textContent(),
+      /Cobrança mensal, no cartão/,
+    );
+    const schema = JSON.parse(
+      await page.locator('script[type="application/ld+json"]').textContent(),
+    );
+    const offers = schema.find((item) => item['@type'] === 'SoftwareApplication').offers;
+    assert.deepEqual(
+      offers.map((offer) => [offer.name, offer.price]),
+      [
+        ['Individual', 229],
+        ['Professional', 249],
+        ['Business', 599],
+      ],
+    );
+    await page.screenshot({ path: '.artifacts/planos-desktop.png' });
+    results.push(
+      'Quatro planos como no app, Pix/parcelas, seletor mensal/anual (20%), limites e ofertas estruturadas OK',
+    );
+  }
 
   // Temas: contraste AA nos dois, logo certo e escolha salva entre recarregamentos.
   const axeSource = await readFile('node_modules/axe-core/axe.min.js', 'utf8');
@@ -187,7 +249,8 @@ try {
     });
     const themed = await context.newPage();
     themed.on('pageerror', (error) => errors.push(error.message));
-    for (const route of ['/', '/planos']) {
+    // Termina numa página interna: na Home, o cabeçalho sobre a abertura usa o logo branco.
+    for (const route of ['/', pricesShown ? '/planos' : '/termos-de-uso']) {
       await themed.goto(base + route);
       await themed.addScriptTag({ content: axeSource });
       const contrast = await themed.evaluate(async () =>
@@ -228,7 +291,7 @@ try {
   });
   const phone = await mobile.newPage();
   phone.on('pageerror', (error) => errors.push(error.message));
-  for (const route of ['/', '/planos', '/termos-de-uso', '/politica-de-privacidade']) {
+  for (const route of routes) {
     await phone.goto(base + route);
     // Em emulação de celular, innerWidth cresce junto com o conteúdo largo; a largura visível
     // é clientWidth, então é com ela que o scrollWidth deve ser comparado.
@@ -283,40 +346,57 @@ try {
   await phone.locator('#mobile-nav a').first().click();
   assert.equal(await phone.locator('#mobile-nav').isVisible(), false);
   assert.equal(await phone.evaluate(() => getComputedStyle(document.body).overflow), 'visible');
-  const status = phone.locator('#planos [data-carousel-status]');
-  await status.scrollIntoViewIfNeeded();
-  assert.match(await status.textContent(), /Business · plano 3 de 4/);
-  await phone.locator('#planos [data-carousel-next]').click();
-  await phone.waitForFunction(() =>
-    /plano 4 de 4/.test(document.querySelector('#planos [data-carousel-status]').textContent),
-  );
-  await phone.locator('#planos [data-carousel-prev]').click();
-  await phone.waitForFunction(() =>
-    /plano 3 de 4/.test(document.querySelector('#planos [data-carousel-status]').textContent),
-  );
-  // O carrossel não rola na vertical: o gesto de subir/descer sobre os cards move a página.
-  assert.equal(
-    await phone
-      .locator('#planos [data-pricing-grid]')
-      .evaluate((grid) => getComputedStyle(grid).overflowY),
-    'hidden',
-    'carrossel de planos sem rolagem vertical',
-  );
-  await phone.locator('.faq-item').first().locator('summary').click();
-  assert.equal(await phone.locator('.faq-item').first().getAttribute('open'), '');
-  await phone.goto(base + '/planos');
-  assert.equal(await phone.locator('.feature-table-wrap').isVisible(), false);
-  const plans = phone.locator('.feature-plan');
-  assert.equal(await plans.count(), 4);
-  assert.equal(await phone.locator('[data-feature-plan="imobiliaria"]').getAttribute('open'), '');
-  await phone.locator('[data-feature-plan="individual"] summary').click();
-  assert.match(
-    await phone.locator('[data-feature-plan="individual"]').innerText(),
-    /229 no Pix ou 12x de R\$\s*23,25/,
-  );
-  results.push(
-    '360px: quatro rotas sem overflow, texto < 12px ou alvo pequeno; menu, carrossel, FAQ e recursos por plano OK',
-  );
+  if (!pricesShown) {
+    // Cotação no celular: toque numa opção atualiza a mensagem; o FAQ continua abrindo.
+    const quote = phone.locator('#cotacao');
+    await quote.scrollIntoViewIfNeeded();
+    await quote.locator('input[value="Trabalho sozinho"]').tap();
+    assert.match(
+      new URL(await quote.locator('.quote-submit').getAttribute('href')).searchParams.get('text'),
+      /• Como trabalho: Trabalho sozinho/,
+    );
+    await quote.screenshot({ path: '.artifacts/cotacao-mobile.png' });
+    await phone.locator('.faq-item').first().locator('summary').click();
+    assert.equal(await phone.locator('.faq-item').first().getAttribute('open'), '');
+    results.push(
+      '360px: três rotas sem overflow, texto < 12px ou alvo pequeno; menu, cotação e FAQ OK',
+    );
+  } else {
+    const status = phone.locator('#planos [data-carousel-status]');
+    await status.scrollIntoViewIfNeeded();
+    assert.match(await status.textContent(), /Business · plano 3 de 4/);
+    await phone.locator('#planos [data-carousel-next]').click();
+    await phone.waitForFunction(() =>
+      /plano 4 de 4/.test(document.querySelector('#planos [data-carousel-status]').textContent),
+    );
+    await phone.locator('#planos [data-carousel-prev]').click();
+    await phone.waitForFunction(() =>
+      /plano 3 de 4/.test(document.querySelector('#planos [data-carousel-status]').textContent),
+    );
+    // O carrossel não rola na vertical: o gesto de subir/descer sobre os cards move a página.
+    assert.equal(
+      await phone
+        .locator('#planos [data-pricing-grid]')
+        .evaluate((grid) => getComputedStyle(grid).overflowY),
+      'hidden',
+      'carrossel de planos sem rolagem vertical',
+    );
+    await phone.locator('.faq-item').first().locator('summary').click();
+    assert.equal(await phone.locator('.faq-item').first().getAttribute('open'), '');
+    await phone.goto(base + '/planos');
+    assert.equal(await phone.locator('.feature-table-wrap').isVisible(), false);
+    const plans = phone.locator('.feature-plan');
+    assert.equal(await plans.count(), 4);
+    assert.equal(await phone.locator('[data-feature-plan="imobiliaria"]').getAttribute('open'), '');
+    await phone.locator('[data-feature-plan="individual"] summary').click();
+    assert.match(
+      await phone.locator('[data-feature-plan="individual"]').innerText(),
+      /229 no Pix ou 12x de R\$\s*23,25/,
+    );
+    results.push(
+      '360px: quatro rotas sem overflow, texto < 12px ou alvo pequeno; menu, carrossel, FAQ e recursos por plano OK',
+    );
+  }
   assert.deepEqual(errors, []);
   console.log(results.join('\n'));
   await writeFile('.artifacts/browser-results.json', JSON.stringify({ results, errors }, null, 2));

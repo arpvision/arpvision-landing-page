@@ -37,17 +37,20 @@ export const softwareApplicationSchema = (section: string) => ({
   description:
     'Tour virtual 360° de espaços usando o celular, com captura guiada e aprimoramento automático.',
   publisher: { '@id': organizationId },
-  offers: site.pricing.plans
-    .filter((plan) => plan.billing !== 'custom')
-    .map((plan) => ({
-      '@type': 'Offer',
-      name: plan.name,
-      price: plan.billing === 'once' ? plan.pixPrice : plan.monthlyPrice,
-      priceCurrency: 'BRL',
-      description:
-        plan.billing === 'once'
-          ? 'Pagamento único por 1 tour no ar por 1 ano: à vista no Pix ou em 12x no cartão. Renovação anual à parte.'
-          : 'Assinatura mensal no cartão; tours no ar enquanto a assinatura estiver ativa, dentro do limite do plano.',
-      url: appLink(section),
-    })),
+  // Sem preços públicos, nenhuma oferta com valor vai para o Google.
+  ...(site.pricing.showPrices && {
+    offers: site.pricing.plans
+      .filter((plan) => plan.billing !== 'custom')
+      .map((plan) => ({
+        '@type': 'Offer',
+        name: plan.name,
+        price: plan.billing === 'once' ? plan.pixPrice : plan.monthlyPrice,
+        priceCurrency: 'BRL',
+        description:
+          plan.billing === 'once'
+            ? 'Pagamento único por 1 tour no ar por 1 ano: à vista no Pix ou em 12x no cartão. Renovação anual à parte.'
+            : 'Assinatura mensal no cartão; tours no ar enquanto a assinatura estiver ativa, dentro do limite do plano.',
+        url: appLink(section),
+      })),
+  }),
 });
