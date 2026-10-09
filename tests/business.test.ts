@@ -39,6 +39,23 @@ test('configuração publica os quatro planos do app com 20% no anual e sem paco
   assert.deepEqual(site.pricing.extraCredits, []);
   assert.ok(featureGroups.every((group) => group.rows.every((row) => row.values.length === 4)));
 });
+// Desde 09/10/2026 as estatísticas dos tours são do Business para cima, no app
+// (`PLANOS.*.stats` na API). O site diz o mesmo nos cards e na tabela de /planos.
+test('estatísticas dos tours só no Business e no Enterprise, como no app', () => {
+  assert.deepEqual(
+    site.pricing.plans.map((plan) => [plan.name, plan.stats]),
+    [
+      ['Individual', false],
+      ['Professional', false],
+      ['Business', true],
+      ['Enterprise', true],
+    ],
+  );
+  const linha = featureGroups
+    .flatMap((group) => group.rows)
+    .find((row) => row.name.startsWith('Estatísticas'));
+  assert.deepEqual(linha?.values, [false, false, true, true]);
+});
 test('calculadora mensal exclui o teste e o Individual e respeita 20/80 ambientes', () => {
   assert.equal(calculateUsage(1, 8).plan?.name, 'Professional');
   assert.equal(calculateUsage(2, 10).plan?.name, 'Professional');
