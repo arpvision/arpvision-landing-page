@@ -4,25 +4,33 @@ import Icon from './Icon.astro';
 import ContactLink from './ContactLink.astro';
 import { appLink } from '../lib/business';
 import { available } from '../config/site';
+import { pageLocale } from '../i18n';
+import { pagePath } from '../i18n/routes';
+const { locale, t } = pageLocale(Astro);
+const isHome = Astro.url.pathname === pagePath(locale, 'home');
 ---
 
-<section class="final-cta" data-atmosphere={Astro.url.pathname === '/' ? 'closing' : undefined}>
+<section class="final-cta" data-atmosphere={isHome ? 'closing' : undefined}>
   <div class="container final-cta-inner">
     <div>
       <Brand white />
-      <h2>O seu espaço pode ter tour 360° hoje.</h2>
-      <p>Você já tem o celular. O próximo passo é seu.</p>
+      <h2>{t.finalCta.title}</h2>
+      <p>{t.finalCta.lead}</p>
     </div>
     <div class="final-cta-actions">
-      <a href={appLink('chamada-final')} class="button button-white" data-cta="chamada-final">
-        Criar conta grátis <Icon name="arrow" size={18} />
+      <a
+        href={appLink('chamada-final', 'register', locale)}
+        class="button button-white"
+        data-cta="chamada-final"
+      >
+        {t.finalCta.signup} <Icon name="arrow" size={18} />
       </a>
       {available.whatsapp && (
         <ContactLink class="button button-on-blue">
-          <Icon name="message" size={19} /> Falar no WhatsApp
+          <Icon name="message" size={19} /> {t.finalCta.whatsapp}
         </ContactLink>
       )}
-      <span>Sem cartão. Sem baixar app.</span>
+      <span>{t.finalCta.note}</span>
     </div>
   </div>
 </section>

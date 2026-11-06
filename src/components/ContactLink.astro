@@ -1,16 +1,20 @@
 ---
 import { whatsappLink } from '../lib/business';
 import { site } from '../config/site';
+import { pageLocale } from '../i18n';
+import { anchorId } from '../i18n/routes';
 interface Props {
   class?: string;
   message?: string;
   label?: string;
 }
 const { class: className = '', message, label } = Astro.props;
+const { locale, t } = pageLocale(Astro);
+const href = whatsappLink(message ?? t.whatsappMessage, `#${anchorId(locale, 'contact')}`);
 ---
 
 <a
-  href={whatsappLink(message)}
+  href={href}
   class={className}
   data-whatsapp
   data-contact-pending={!site.contact.whatsapp ? 'true' : undefined}

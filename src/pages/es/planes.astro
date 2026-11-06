@@ -1,0 +1,11 @@
+---
+import PlansPage from '../../components/pages/PlansPage.astro';
+import { site } from '../../config/site';
+import { pageLocale } from '../../i18n';
+import { sectionPath } from '../../i18n/routes';
+// Preços ainda em definição: leva à cotação na Home em espanhol (/es#cotizacion).
+const { locale } = pageLocale(Astro);
+if (!site.pricing.showPrices) return Astro.redirect(sectionPath(locale, 'home', 'quote'), 301);
+---
+
+<PlansPage />

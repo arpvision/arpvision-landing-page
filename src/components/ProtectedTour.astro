@@ -1,10 +1,12 @@
 ---
 import GlassSurface from './GlassSurface.astro';
 import Icon from './Icon.astro';
+import { pageLocale } from '../i18n';
 interface Props {
   src: string;
 }
 const { src } = Astro.props;
+const { t } = pageLocale(Astro);
 ---
 
 <div class="protected-tour" data-protected-tour data-tour-active="false">
@@ -12,7 +14,7 @@ const { src } = Astro.props;
     id="presentation-tour"
     class="hero-embed"
     src={src}
-    title="Tour 360° de demonstração da ARP Vision"
+    title={t.showcase.frameTitle}
     allow="fullscreen"
     allowfullscreen
     referrerpolicy="strict-origin-when-cross-origin"
@@ -31,19 +33,19 @@ const { src } = Astro.props;
         <span class="tour-entry-icon">
           <Icon name="expand" size={28} />
         </span>
-        <strong>Olhe o espaço por dentro.</strong>
-        <span>Clique ou toque para explorar o tour.</span>
+        <strong>{t.showcase.title}</strong>
+        <span>{t.showcase.hint}</span>
       </span>
     </button>
     <noscript>
       <a class="glass-surface tour-fallback" href={src} target="_blank" rel="noopener noreferrer">
-        Abrir tour em nova aba <Icon name="arrow" size={18} />
+        {t.showcase.newTab} <Icon name="arrow" size={18} />
       </a>
     </noscript>
   </div>
   <GlassSurface class="tour-exit-panel">
     <button data-tour-lock aria-controls="presentation-tour">
-      <Icon name="shield" size={18} /> Encerrar exploração
+      <Icon name="shield" size={18} /> {t.showcase.exit}
     </button>
   </GlassSurface>
 </div>

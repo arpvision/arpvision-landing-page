@@ -1,7 +1,10 @@
 import { site } from '../config/site';
+import { localeInfo, translations, type Locale } from '../i18n';
+import { pagePath } from '../i18n/routes';
 import { appLink } from './business';
 
 // Dados estruturados (JSON-LD). Os `@id` ligam empresa, site e app num só grafo para o Google.
+// A empresa é uma só; cada idioma é um WebSite com a própria Home e o próprio `inLanguage`.
 const home = new URL('/', site.domain).href;
 const organizationId = `${home}#organization`;
 
@@ -16,41 +19,42 @@ export const organizationSchema = {
   ...(site.contact.whatsapp ? { telephone: `+${site.contact.whatsapp.replace(/\D/g, '')}` } : {}),
 };
 
-export const websiteSchema = {
+const homeOf = (locale: Locale) => new URL(pagePath(locale, 'home'), site.domain).href;
+
+export const websiteSchema = (locale: Locale) => ({
   '@context': 'https://schema.org',
   '@type': 'WebSite',
-  '@id': `${home}#website`,
+  '@id': `${homeOf(locale)}#website`,
   name: site.name,
-  url: home,
-  inLanguage: 'pt-BR',
+  url: homeOf(locale),
+  inLanguage: localeInfo[locale].lang,
   publisher: { '@id': organizationId },
-};
-
-export const softwareApplicationSchema = (section: string) => ({
-  '@context': 'https://schema.org',
-  '@type': 'SoftwareApplication',
-  name: site.name,
-  url: home,
-  applicationCategory: 'BusinessApplication',
-  operatingSystem: 'Web',
-  inLanguage: 'pt-BR',
-  description:
-    'Tour virtual 360° de espaços usando o celular, com captura guiada e aprimoramento automático.',
-  publisher: { '@id': organizationId },
-  // Sem preços públicos, nenhuma oferta com valor vai para o Google.
-  ...(site.pricing.showPrices && {
-    offers: site.pricing.plans
-      .filter((plan) => plan.billing !== 'custom')
-      .map((plan) => ({
-        '@type': 'Offer',
-        name: plan.name,
-        price: plan.billing === 'once' ? plan.pixPrice : plan.monthlyPrice,
-        priceCurrency: 'BRL',
-        description:
-          plan.billing === 'once'
-            ? 'Pagamento único por 1 tour no ar por 1 ano: à vista no Pix ou em 12x no cartão. Renovação anual à parte.'
-            : 'Assinatura mensal no cartão; tours no ar enquanto a assinatura estiver ativa, dentro do limite do plano.',
-        url: appLink(section),
-      })),
-  }),
 });
+
+export const softwareApplicationSchema = (section: string, locale: Locale) => {
+  const t = translations(locale).schema;
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: site.name,
+    url: homeOf(locale),
+    applicationCategory: 'BusinessApplication',
+    operatingSystem: 'Web',
+    inLanguage: localeInfo[locale].lang,
+    description: t.appDescription,
+    publisher: { '@id': organizationId },
+    // Sem preços públicos, nenhuma oferta com valor vai para o Google.
+    ...(site.pricing.showPrices && {
+      offers: site.pricing.plans
+        .filter((plan) => plan.billing !== 'custom')
+        .map((plan) => ({
+          '@type': 'Offer',
+          name: plan.name,
+          price: plan.billing === 'once' ? plan.pixPrice : plan.monthlyPrice,
+          priceCurrency: 'BRL',
+          description: plan.billing === 'once' ? t.offerOnce(plan.installments!) : t.offerMonthly,
+          url: appLink(section, 'register', locale),
+        })),
+    }),
+  };
+};

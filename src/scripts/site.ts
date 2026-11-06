@@ -58,11 +58,13 @@ if (header && opening) {
 const menuButton = document.querySelector<HTMLButtonElement>('.menu-toggle');
 const menu = document.querySelector<HTMLElement>('#mobile-nav');
 const menuLabel = menuButton?.querySelector<HTMLElement>('[data-menu-label]');
+// Os rótulos vêm da página, no idioma dela: "Menu" no HTML e "Fechar" em data-label-close.
+const menuText = menuLabel?.textContent?.trim() ?? '';
 const setMenu = (open: boolean) => {
   if (!menu || !menuButton) return;
   menu.hidden = !open;
   menuButton.setAttribute('aria-expanded', String(open));
-  if (menuLabel) menuLabel.textContent = open ? 'Fechar' : 'Menu';
+  if (menuLabel) menuLabel.textContent = open ? (menuLabel.dataset.labelClose ?? '') : menuText;
   // Com o menu aberto, a página por trás não rola.
   document.body.classList.toggle('menu-is-open', open);
 };
@@ -178,8 +180,9 @@ document.querySelectorAll<HTMLButtonElement>('[data-video-toggle]').forEach((but
   const video = document.getElementById(button.dataset.videoToggle!) as HTMLVideoElement | null;
   if (!video) return;
   // Botão só com ícone: o nome acessível acompanha a ação e o CSS troca play/pausa.
+  // Os dois rótulos vêm da página (data-label-play e data-label-pause), no idioma dela.
   const update = () => {
-    const label = video.paused ? 'Reproduzir vídeo' : 'Pausar vídeo';
+    const label = (video.paused ? button.dataset.labelPlay : button.dataset.labelPause) ?? '';
     button.setAttribute('aria-label', label);
     button.title = label;
     button.dataset.playing = String(!video.paused);

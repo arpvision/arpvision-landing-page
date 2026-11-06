@@ -1,28 +1,22 @@
 ---
 import Icon from './Icon.astro';
 import GlassSurface from './GlassSurface.astro';
+import { pageLocale } from '../i18n';
+const { t } = pageLocale(Astro);
 // O terceiro benefício será acrescentado quando seu texto estiver definido.
 const benefits = [
-  {
-    icon: 'users',
-    title: 'Mais autonomia para quem captura.',
-    text: 'Mais visibilidade para quem faz a gestão.',
-  },
-  {
-    icon: 'target',
-    title: 'Mesmo padrão para todos.',
-    text: 'Feito para quem nunca fotografou e quem já é experiente entregarem o mesmo resultado.',
-  },
+  { icon: 'users', ...t.team.benefits.autonomy },
+  { icon: 'target', ...t.team.benefits.standard },
 ];
 ---
 
 <section class="section team-section" data-atmosphere="team" aria-labelledby="benefits-title">
   <div class="container">
     <div class="section-heading center benefits-heading">
-      <span class="eyebrow">UMA FERRAMENTA. A EQUIPE TODA.</span>
+      <span class="eyebrow">{t.team.eyebrow}</span>
       <h2 id="benefits-title">
-        Monte seu ecossistema de tours,
-        <br /> pensado para empresas.
+        {t.team.title1}
+        <br /> {t.team.title2}
       </h2>
     </div>
     <div class="benefits-grid">

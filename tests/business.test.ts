@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { calculateUsage, appLink, whatsappLink, annualPricing } from '../src/lib/business';
-import { site, featureGroups } from '../src/config/site';
+import { site } from '../src/config/site';
+import { featureGroups } from '../src/lib/content';
 
 test('configuração publica os quatro planos do app com 20% no anual e sem pacotes indefinidos', () => {
   const [individual, professional, business, enterprise] = site.pricing.plans;
@@ -37,7 +38,10 @@ test('configuração publica os quatro planos do app com 20% no anual e sem paco
   assert.ok(site.pricing.plans.every((plan) => plan.users === null));
   assert.equal(site.pricing.annualDiscount, 0.2);
   assert.deepEqual(site.pricing.extraCredits, []);
-  assert.ok(featureGroups.every((group) => group.rows.every((row) => row.values.length === 4)));
+  for (const locale of ['pt', 'es'] as const)
+    assert.ok(
+      featureGroups(locale).every((group) => group.rows.every((row) => row.values.length === 4)),
+    );
 });
 // Desde 09/10/2026 as estatísticas dos tours são do Business para cima, no app
 // (`PLANOS.*.stats` na API). O site diz o mesmo nos cards e na tabela de /planos.
@@ -51,10 +55,18 @@ test('estatísticas dos tours só no Business e no Enterprise, como no app', () 
       ['Enterprise', true],
     ],
   );
-  const linha = featureGroups
-    .flatMap((group) => group.rows)
-    .find((row) => row.name.startsWith('Estatísticas'));
-  assert.deepEqual(linha?.values, [false, false, true, true]);
+  for (const locale of ['pt', 'es'] as const) {
+    const linha = featureGroups(locale)
+      .flatMap((group) => group.rows)
+      .find((row) => row.id === 'stats');
+    assert.deepEqual(linha?.values, [false, false, true, true]);
+  }
+  assert.ok(
+    featureGroups('pt')
+      .flatMap((group) => group.rows)
+      .find((row) => row.id === 'stats')
+      ?.name.startsWith('Estatísticas'),
+  );
 });
 test('calculadora mensal exclui o teste e o Individual e respeita 20/80 ambientes', () => {
   assert.equal(calculateUsage(1, 8).plan?.name, 'Professional');

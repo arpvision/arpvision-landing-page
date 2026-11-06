@@ -1,0 +1,44 @@
+---
+import Icon from './Icon.astro';
+import { pageLocale } from '../i18n';
+// Conversa de WhatsApp em HTML, no lugar da imagem de conversa-whatsapp.webp (que tem o
+// texto em português gravado). Reproduz a imagem: o contato, a mensagem com a prévia do
+// link do tour e a resposta. O estilo está em landing-polish.css, junto da imagem, para
+// não virar mais um arquivo de CSS na Home em português.
+const { t } = pageLocale(Astro);
+const chat = t.sharing.chat;
+---
+
+<figure class="sharing-conversation chat-preview" aria-label={chat.label}>
+  <div class="chat-contact">
+    <span class="chat-avatar" aria-hidden="true">
+      <Icon name="user" size={20} />
+    </span>
+    <span>
+      <strong>{chat.contact}</strong>
+      <span>{chat.status}</span>
+    </span>
+  </div>
+  <div class="chat-thread">
+    <div class="chat-bubble">
+      <p>{chat.message}</p>
+      <div class="chat-link">
+        <img
+          src="/images/tours/patio.webp"
+          alt=""
+          width="1600"
+          height="800"
+          loading="lazy"
+          decoding="async"
+        />
+        <strong>{chat.linkTitle}</strong>
+        <span>arpvision.app</span>
+      </div>
+      <time>10:24</time>
+    </div>
+    <div class="chat-bubble">
+      <p>{chat.reply}</p>
+      <time>10:24</time>
+    </div>
+  </div>
+</figure>

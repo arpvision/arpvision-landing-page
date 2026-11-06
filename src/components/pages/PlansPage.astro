@@ -1,0 +1,125 @@
+---
+// /planos e /es/planes, quando os preços estão públicos (`site.pricing.showPrices`).
+import Layout from '../../layouts/Layout.astro';
+import Pricing from '../Pricing.astro';
+import Faq from '../Faq.astro';
+import FinalCta from '../FinalCta.astro';
+import Icon from '../Icon.astro';
+import FeatureValue from '../FeatureValue.astro';
+import { site } from '../../config/site';
+import { pageLocale } from '../../i18n';
+import { anchorId, pagePath } from '../../i18n/routes';
+import { faqSchema, featureGroups } from '../../lib/content';
+import { softwareApplicationSchema } from '../../lib/schema';
+const { locale, t } = pageLocale(Astro);
+const text = t.plansPage;
+const groups = featureGroups(locale);
+const schema = [softwareApplicationSchema('planos', locale), faqSchema(locale)];
+---
+
+<Layout
+  title={text.title}
+  description={text.description}
+  ogImage={text.ogImage}
+  page="plans"
+  schema={schema}
+>
+  <section class="section plans-page">
+    <div class="container">
+      <div class="section-heading center">
+        <a class="breadcrumb" href={pagePath(locale, 'home')}>
+          {text.breadcrumb}
+        </a>
+        <span class="eyebrow">{text.eyebrow}</span>
+        <h1>
+          {text.title1}
+          <br />
+          {text.title2}
+        </h1>
+        <p>
+          {text.lead1}
+          <br />
+          {text.lead2}
+        </p>
+      </div>
+      <Pricing full />
+    </div>
+  </section>
+  <section class="section feature-comparison" id={anchorId(locale, 'compare')}>
+    <div class="container">
+      <div class="section-heading center">
+        <span class="eyebrow">{text.compareEyebrow}</span>
+        <h2>{text.compareTitle}</h2>
+        <p>{text.compareLead}</p>
+      </div>
+      <div class="feature-table-wrap" tabindex="0" role="region" aria-label={text.tableLabel}>
+        <table class="feature-table">
+          <thead>
+            <tr>
+              <th scope="col">{text.features}</th>
+              {site.pricing.plans.map((plan) => (
+                <th scope="col" class:list={{ 'recommended-cell': plan.recommended }}>
+                  {plan.name}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {groups.map((group) => (
+              <>
+                <tr class="feature-group">
+                  <th colspan={site.pricing.plans.length + 1} scope="colgroup">
+                    {group.title}
+                  </th>
+                </tr>
+                {group.rows.map((row) => (
+                  <tr>
+                    <th scope="row">{row.name}</th>
+                    {row.values.map((value, index) => (
+                      <td
+                        class:list={{ 'recommended-cell': site.pricing.plans[index].recommended }}
+                      >
+                        <FeatureValue value={value} />
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <!-- No celular, a tabela larga vira uma lista por plano (a tabela fica oculta via CSS). -->
+      <div class="feature-plans">
+        {site.pricing.plans.map((plan, index) => (
+          <details class="feature-plan" open={plan.recommended} data-feature-plan={plan.id}>
+            <summary>
+              <span>
+                {plan.name}
+                {plan.recommended && <span class="feature-plan-badge">{text.recommended}</span>}
+              </span>
+              <Icon name="plus" size={20} />
+            </summary>
+            {groups.map((group) => (
+              <div class="feature-plan-group">
+                <h3>{group.title}</h3>
+                <dl>
+                  {group.rows.map((row) => (
+                    <div>
+                      <dt>{row.name}</dt>
+                      <dd>
+                        <FeatureValue value={row.values[index]} />
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            ))}
+          </details>
+        ))}
+      </div>
+    </div>
+  </section>
+  <Faq />
+  <FinalCta />
+</Layout>

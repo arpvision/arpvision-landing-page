@@ -1,0 +1,32 @@
+---
+import { localeInfo, locales, pageLocale } from '../i18n';
+import { pageAt, pagePath } from '../i18n/routes';
+// Seletor PT | ES: leva à mesma página no outro idioma. Nunca troca sozinho pelo idioma do
+// navegador; quem escolhe é a pessoa.
+interface Props {
+  class?: string;
+  /** Só um seletor por página vira região de navegação (o do rodapé); os outros são grupos. */
+  landmark?: boolean;
+}
+const { class: className, landmark = false } = Astro.props;
+const { locale, t } = pageLocale(Astro);
+const page = pageAt(locale, Astro.url.pathname) ?? 'home';
+const Tag = landmark ? 'nav' : 'div';
+---
+
+<Tag
+  class:list={['language-switch', className]}
+  role={landmark ? undefined : 'group'}
+  aria-label={t.language.label}
+>
+  {locales.map((code) => (
+    <a
+      href={pagePath(code, page)}
+      hreflang={localeInfo[code].lang}
+      lang={localeInfo[code].lang}
+      aria-current={code === locale ? 'true' : undefined}
+    >
+      {localeInfo[code].code} <span class="sr-only">{localeInfo[code].name}</span>
+    </a>
+  ))}
+</Tag>

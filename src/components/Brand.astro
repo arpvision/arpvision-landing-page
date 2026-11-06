@@ -1,10 +1,17 @@
 ---
 import { site } from '../config/site';
+import { pageLocale } from '../i18n';
+import { pagePath } from '../i18n/routes';
 const { white = false } = Astro.props;
+const { locale, t } = pageLocale(Astro);
 const source = white ? site.brand.logoWhite : site.brand.logoBlue;
 ---
 
-<a href="/" class:list={['brand', { 'brand-white': white }]} aria-label="ARP Vision — início">
+<a
+  href={pagePath(locale, 'home')}
+  class:list={['brand', { 'brand-white': white }]}
+  aria-label={t.brand.home}
+>
   {source ? (
     white ? (
       <img src={source} alt="ARP Vision" width="162" height="36" />

@@ -6,30 +6,53 @@ import '../styles/tour-showcase.css';
 import '../styles/atmosphere.css';
 import '../styles/landing-polish.css';
 import '../styles/quote.css';
+import '../styles/language.css';
 import Header from '../components/Header.astro';
 import GlassFilter from '../components/GlassFilter.astro';
 import Footer from '../components/Footer.astro';
 import { site } from '../config/site';
+import { defaultLocale, localeInfo, locales, pageLocale } from '../i18n';
+import { anchorId, pagePath, type PageId } from '../i18n/routes';
 import { organizationSchema, websiteSchema } from '../lib/schema';
 interface Props {
   title: string;
   description?: string;
   ogImage?: string;
   schema?: Record<string, unknown>[];
+  /** Página com versão em cada idioma (canonical e hreflang). Sem ela, a página fica fora do índice. */
+  page?: PageId;
+  /** Sem cabeçalho e rodapé (a página 404, que fala os dois idiomas). */
+  bare?: boolean;
 }
+const { locale, t } = pageLocale(Astro);
 const {
   title,
-  description = 'Faça o tour virtual 360° do seu espaço só com o celular. As emendas e a luz saem corrigidas, e o cliente abre o tour pelo WhatsApp, sem criar conta.',
-  ogImage = site.media.ogHome,
+  description = t.meta.defaultDescription,
+  ogImage = t.home.ogImage,
   schema = [],
+  page,
+  bare = false,
 } = Astro.props;
-const canonical = new URL(Astro.url.pathname, site.domain).href;
+const urlOf = (path: string) => new URL(path, site.domain).href;
+const canonical = page ? urlOf(pagePath(locale, page)) : undefined;
+// Cada página aponta a versão de todos os idiomas, e o português responde por x-default.
+const alternates = page
+  ? [
+      ...locales.map((code) => ({
+        hreflang: localeInfo[code].lang,
+        href: urlOf(pagePath(code, page)),
+      })),
+      { hreflang: 'x-default', href: urlOf(pagePath(defaultLocale, page)) },
+    ]
+  : [];
 const ogImageUrl = new URL(ogImage, site.domain).href;
 const ogImageAlt = `${site.name} — ${title}`;
+const indexable = site.readyToIndex && page;
+const contentId = anchorId(locale, 'content');
 ---
 
 <!doctype html>
-<html lang="pt-BR">
+<html lang={localeInfo[locale].lang}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -44,11 +67,14 @@ const ogImageAlt = `${site.name} — ${title}`;
     </script>
     <title>{title}</title>
     <meta name="description" content={description} />
-    <link rel="canonical" href={canonical} />
+    {canonical && <link rel="canonical" href={canonical} />}
+    {alternates.map((alternate) => (
+      <link rel="alternate" hreflang={alternate.hreflang} href={alternate.href} />
+    ))}
     <meta
       name="robots"
       content={
-        site.readyToIndex
+        indexable
           ? 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'
           : 'noindex, nofollow'
       }
@@ -56,11 +82,16 @@ const ogImageAlt = `${site.name} — ${title}`;
     <link rel="icon" type="image/svg+xml" href={site.brand.symbol} />
     <link rel="preload" href={interFontUrl} as="font" type="font/woff2" crossorigin />
     <meta property="og:type" content="website" />
-    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:locale" content={localeInfo[locale].ogLocale} />
+    {locales
+      .filter((code) => code !== locale)
+      .map((code) => (
+        <meta property="og:locale:alternate" content={localeInfo[code].ogLocale} />
+      ))}
     <meta property="og:site_name" content={site.name} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:url" content={canonical} />
+    {canonical && <meta property="og:url" content={canonical} />}
     <meta property="og:image" content={ogImageUrl} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
@@ -72,7 +103,7 @@ const ogImageAlt = `${site.name} — ${title}`;
     <meta name="twitter:image:alt" content={ogImageAlt} />
     <script
       type="application/ld+json"
-      set:html={JSON.stringify([organizationSchema, websiteSchema, ...schema]).replace(
+      set:html={JSON.stringify([organizationSchema, websiteSchema(locale), ...schema]).replace(
         /</g,
         '\\u003c',
       )}
@@ -89,14 +120,14 @@ const ogImageAlt = `${site.name} — ${title}`;
   </head>
   <body>
     <GlassFilter />
-    <a href="#conteudo" class="skip-link">
-      Pular para o conteúdo
+    <a href={`#${contentId}`} class="skip-link">
+      {t.layout.skipLink}
     </a>
-    <Header />
-    <main id="conteudo">
+    {!bare && <Header />}
+    <main id={contentId}>
       <slot />
     </main>
-    <Footer />
+    {!bare && <Footer />}
     <script>
       import '../scripts/site';
     </script>

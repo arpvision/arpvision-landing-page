@@ -1,0 +1,49 @@
+---
+// Termos de uso e política de privacidade de cada idioma. Sem o texto do documento no
+// dicionário, a página mostra o aviso de documento em preparação.
+import Layout from '../../layouts/Layout.astro';
+import { site } from '../../config/site';
+import { pageLocale } from '../../i18n';
+import { pagePath } from '../../i18n/routes';
+interface Props {
+  doc: 'terms' | 'privacy';
+}
+const { doc } = Astro.props;
+const { locale, t } = pageLocale(Astro);
+const text = t.legal[doc];
+const other = doc === 'terms' ? 'privacy' : 'terms';
+---
+
+<Layout title={text.title} description={text.description} page={doc}>
+  <section class="section legal-page container">
+    <a class="breadcrumb" href={pagePath(locale, 'home')}>
+      {text.breadcrumb}
+    </a>
+    <span class="eyebrow">{t.legal.eyebrow}</span>
+    <h1>{text.heading}</h1>
+    {text.body ? (
+      <div class="legal-text">
+        {text.body.split('\n\n').map((paragraph) => (
+          <p>{paragraph}</p>
+        ))}
+      </div>
+    ) : (
+      <div class="legal-notice">
+        <span class="outline-badge">{t.legal.preparing}</span>
+        <h2>{text.notice}</h2>
+        <p>{t.legal.available}</p>
+        <p>
+          {t.legal.contact}{' '}
+          {site.contact.email ? (
+            <a href={`mailto:${site.contact.email}`}>{site.contact.email}</a>
+          ) : (
+            t.legal.emailPending
+          )}
+        </p>
+      </div>
+    )}
+    <a href={pagePath(locale, other)} class="text-link">
+      {t.legal[other].link}
+    </a>
+  </section>
+</Layout>

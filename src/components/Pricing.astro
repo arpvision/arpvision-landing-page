@@ -1,6 +1,8 @@
 ---
 import { site, price, type Plan } from '../config/site';
 import { annualPricing, appLink } from '../lib/business';
+import { pageLocale } from '../i18n';
+import { anchorId, pagePath } from '../i18n/routes';
 import Icon from './Icon.astro';
 import ContactLink from './ContactLink.astro';
 
@@ -8,76 +10,91 @@ import ContactLink from './ContactLink.astro';
 // recursos, botão e descrição. Com desconto anual configurado, um seletor mensal/anual
 // troca o preço das assinaturas (Professional e Business). Detalhes completos em /planos.
 const { full = false } = Astro.props;
+const { locale, t } = pageLocale(Astro);
+const text = t.pricing;
 const discount = site.pricing.annualDiscount;
+const percent = Math.round((discount ?? 0) * 100);
 const hasAnnual = !!discount && site.pricing.plans.some((plan) => plan.billing === 'monthly');
 // Valor de cada parcela do Individual no cartão (o total fica em `oneTimePrice`).
 const installmentFor = (plan: Plan) => (plan.oneTimePrice ?? 0) / (plan.installments ?? 1);
 const annualFor = (plan: Plan) =>
   hasAnnual && plan.billing === 'monthly' ? annualPricing(plan.monthlyPrice!, discount!) : null;
 const paymentFor = (plan: Plan) => {
-  if (plan.billing === 'once') return `ou ${price(plan.pixPrice!)} à vista no Pix`;
-  if (plan.billing === 'monthly') return 'Cobrança mensal, no cartão';
-  return 'Condições em contrato';
+  if (plan.billing === 'once') return text.payOnce(price(plan.pixPrice!));
+  if (plan.billing === 'monthly') return text.payMonthly;
+  return text.payCustom;
 };
 const highlightsFor = (plan: Plan) => {
   // As estatísticas dos tours são do Business para cima, como no app.
-  const stats = plan.stats ? ['Estatísticas de visitas dos tours'] : [];
+  const stats = plan.stats ? [text.stats] : [];
   if (plan.billing === 'once')
-    return [`${plan.credits} ambientes`, `${plan.liveTours} tour no ar por 1 ano`, ...stats];
+    return [text.roomsOnce(plan.credits!), text.toursOnce(plan.liveTours!), ...stats];
   if (plan.billing === 'monthly')
-    return [`${plan.credits} ambientes por mês`, `Até ${plan.liveTours} tours no ar`, ...stats];
-  return ['Ambientes sob medida', 'Volume e limite de tours combinados em contrato.', ...stats];
+    return [text.roomsMonthly(plan.credits!), text.toursMonthly(plan.liveTours!), ...stats];
+  return [text.roomsCustom, text.toursCustom, ...stats];
 };
 ---
 
-<div class="pricing-component" data-pricing>
-  {full && <h2 class="sr-only">Planos disponíveis e valores</h2>}
+<div
+  class="pricing-component"
+  data-pricing
+  data-status-annual={text.statusAnnual}
+  data-status-monthly={text.statusMonthly}
+  data-carousel-format={text.carouselStatus}
+>
+  {full && <h2 class="sr-only">{text.srTitle}</h2>}
   {site.pricing.isExample && (
     <p class="example-notice">
-      <Icon name="info" size={17} /> {site.pricing.exampleNotice}
+      <Icon name="info" size={17} /> {text.exampleNotice}
     </p>
   )}
   {hasAnnual && (
     <div class="billing-toggle" data-billing-toggle>
       <span class="billing-option" data-billing-option="monthly" aria-hidden="true">
-        Mensal
+        {text.monthly}
       </span>
       <button
         type="button"
         class="billing-switch"
         role="switch"
         aria-checked="false"
-        aria-label={`Plano anual, com ${Math.round(discount! * 100)}% de desconto`}
+        aria-label={text.annualSwitch(percent)}
         data-billing-switch
       >
         <span class="billing-switch-thumb" aria-hidden="true"></span>
       </button>
       <span class="billing-option" data-billing-option="annual" aria-hidden="true">
-        Anual <span class="billing-save">economize {Math.round(discount! * 100)}%</span>
+        {text.annual} <span class="billing-save">{text.save(percent)}</span>
       </span>
       <p class="sr-only" aria-live="polite" data-billing-status></p>
     </div>
   )}
   <!-- Só no celular: controles do carrossel de planos. -->
   <div class="pricing-carousel-hint">
-    <button class="carousel-button carousel-prev" data-carousel-prev aria-label="Plano anterior">
+    <button class="carousel-button carousel-prev" data-carousel-prev aria-label={text.previous}>
       <Icon name="arrow" size={20} />
     </button>
     <span data-carousel-status aria-live="polite">
-      Deslize para ver os planos
+      {text.swipe}
     </span>
-    <button class="carousel-button" data-carousel-next aria-label="Próximo plano">
+    <button class="carousel-button" data-carousel-next aria-label={text.next}>
       <Icon name="arrow" size={20} />
     </button>
   </div>
-  <div class="pricing-grid" tabindex="0" role="region" aria-label="Planos" data-pricing-grid>
+  <div
+    class="pricing-grid"
+    tabindex="0"
+    role="region"
+    aria-label={text.gridLabel}
+    data-pricing-grid
+  >
     {site.pricing.plans.map((plan) => {
       const annual = annualFor(plan);
       return (
         <article class:list={['plan-card', { recommended: plan.recommended }]} data-plan={plan.id}>
           {plan.recommended && (
             <span class="plan-badge">
-              <Icon name="star" size={14} /> Recomendado
+              <Icon name="star" size={14} /> {text.recommended}
             </span>
           )}
           <h3 class="plan-name">{plan.name}</h3>
@@ -96,16 +113,16 @@ const highlightsFor = (plan: Plan) => {
                 >
                   {price(plan.monthlyPrice!)}
                 </strong>
-                <span data-period>/mês</span>
+                <span data-period>{text.perMonth}</span>
               </>
             ) : (
-              <strong data-price>Sob consulta</strong>
+              <strong data-price>{text.onRequest}</strong>
             )}
           </div>
           <p
             class="plan-payment"
             data-payment-monthly={annual ? paymentFor(plan) : undefined}
-            data-payment-annual={annual ? `Cobrança anual de ${price(annual.perYear)}` : undefined}
+            data-payment-annual={annual ? text.payAnnual(price(annual.perYear)) : undefined}
           >
             {paymentFor(plan)}
           </p>
@@ -119,28 +136,25 @@ const highlightsFor = (plan: Plan) => {
             {plan.billing === 'once' && plan.renewalPrice !== null && (
               <li class="plan-check-muted">
                 <Icon name="refresh" size={16} />
-                Renovação {price(plan.renewalPrice)}/ano
+                {text.renewal(price(plan.renewalPrice))}
               </li>
             )}
           </ul>
           <div class="plan-footer">
             {plan.billing === 'custom' ? (
-              <ContactLink
-                class="button button-secondary"
-                message={`Olá! Quero conhecer o plano ${plan.name} da ARP Vision.`}
-              >
-                Falar no WhatsApp
+              <ContactLink class="button button-secondary" message={text.contactMessage(plan.name)}>
+                {text.whatsapp}
               </ContactLink>
             ) : (
               <a
-                href={appLink(`plano-${plan.id}`)}
+                href={appLink(`plano-${plan.id}`, 'register', locale)}
                 class:list={['button', plan.recommended ? 'button-primary' : 'button-secondary']}
                 data-cta={`plano-${plan.id}`}
               >
-                {plan.billing === 'once' ? 'Comprar' : 'Assinar'}
+                {plan.billing === 'once' ? text.buy : text.subscribe}
               </a>
             )}
-            <p class="plan-audience">{plan.audience}</p>
+            <p class="plan-audience">{t.plans[plan.id].audience}</p>
           </div>
         </article>
       );
@@ -156,20 +170,21 @@ const highlightsFor = (plan: Plan) => {
     })();
   </script>
   <p class="pricing-secure">
-    <span aria-hidden="true"></span> Pagamento seguro via Asaas · Pix ou cartão
+    <span aria-hidden="true"></span> {text.secure}
   </p>
   <p class="pricing-trial">
-    Quer testar antes? Crie sua conta grátis, fotografe {site.pricing.freeTrialCredits}{' '}
-    {site.pricing.freeTrialCredits === 1 ? 'ambiente' : 'ambientes'} e deixe o tour no ar por{' '}
-    {site.pricing.freeTrialDays} dias, sem pagar nada.{' '}
-    <a href={appLink(full ? 'planos-teste' : 'plano-teste')} data-cta="plano-teste">
-      Criar conta grátis
+    {text.trial(site.pricing.freeTrialCredits, site.pricing.freeTrialDays)}{' '}
+    <a
+      href={appLink(full ? 'planos-teste' : 'plano-teste', 'register', locale)}
+      data-cta="plano-teste"
+    >
+      {text.signup}
     </a>
   </p>
   {!full && (
     <div class="center">
-      <a class="text-link" href="/planos#comparar">
-        Comparar todos os recursos <Icon name="arrow" size={18} />
+      <a class="text-link" href={`${pagePath(locale, 'plans')}#${anchorId(locale, 'compare')}`}>
+        {text.compare} <Icon name="arrow" size={18} />
       </a>
     </div>
   )}

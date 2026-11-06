@@ -1,3 +1,5 @@
+import { fill } from '../i18n/fill';
+
 // Planos: carrossel no celular, seletor mensal/anual com preço em "painel eletrônico",
 // varredura holográfica e lantejoulas, e entrada dos cards no desktop. Sem dependências.
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
@@ -168,6 +170,8 @@ const sequins = (origin: DOMRect) => {
   requestAnimationFrame(frame);
 };
 
+// Os textos que o script escreve vêm da página (data-status-*, data-carousel-format), no
+// idioma dela.
 document.querySelectorAll<HTMLElement>('[data-pricing]').forEach((root) => {
   const grid = root.querySelector<HTMLElement>('[data-pricing-grid]')!;
   const cards = [...grid.querySelectorAll<HTMLElement>('.plan-card')];
@@ -194,9 +198,7 @@ document.querySelectorAll<HTMLElement>('[data-pricing]').forEach((root) => {
           ? element.dataset.paymentAnnual!
           : element.dataset.paymentMonthly!;
       });
-      status.textContent = annual
-        ? 'Mostrando os preços do plano anual, com desconto.'
-        : 'Mostrando os preços mensais.';
+      status.textContent = (annual ? root.dataset.statusAnnual : root.dataset.statusMonthly) ?? '';
       if (annual) {
         replay(button, 'data-pulse', 'billing-pulse');
         sequins(button.getBoundingClientRect());
@@ -253,7 +255,11 @@ document.querySelectorAll<HTMLElement>('[data-pricing]').forEach((root) => {
   const update = () => {
     const index = current();
     const name = cards[index].querySelector('h3')?.textContent?.trim() ?? '';
-    carouselStatus.textContent = `${name} · plano ${index + 1} de ${cards.length}`;
+    carouselStatus.textContent = fill(root.dataset.carouselFormat ?? '', {
+      name,
+      current: index + 1,
+      total: cards.length,
+    });
     prev.disabled = index === 0;
     next.disabled = index === cards.length - 1;
   };
