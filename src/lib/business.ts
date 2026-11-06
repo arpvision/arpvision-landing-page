@@ -6,7 +6,8 @@ export const money = (value: number) =>
     currency: 'BRL',
     maximumFractionDigits: 2,
   }).format(value);
-export const appLink = (section: string, path: 'register' | 'login' = 'register') =>
+// Os destinos do app abertos a quem não tem conta: criar, entrar e os tutoriais em vídeo.
+export const appLink = (section: string, path: 'register' | 'login' | 'tutoriais' = 'register') =>
   `${site.appUrl}/${path}?${new URLSearchParams({ utm_source: 'site', utm_medium: section, utm_campaign: 'landing' })}`;
 export const whatsappLink = (
   message = 'Olá! Vim pelo site e quero saber mais sobre a ARP Vision.',

@@ -77,8 +77,8 @@ test('cenário além do maior plano não inventa preço nem custo por espaço', 
   assert.equal(result.perProperty, null);
   assert.equal(result.twelveMonthPrice, null);
 });
-test('conta e login apontam ao app com origem e seção rastreáveis', () => {
-  for (const route of ['register', 'login'] as const) {
+test('conta, login e tutoriais apontam ao app com origem e seção rastreáveis', () => {
+  for (const route of ['register', 'login', 'tutoriais'] as const) {
     const url = new URL(appLink('seção de teste', route));
     assert.equal(url.origin, 'https://arpvision.app');
     assert.equal(url.pathname, `/${route}`);

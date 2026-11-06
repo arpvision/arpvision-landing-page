@@ -36,6 +36,8 @@ const plans = site.pricing.showPrices
         <a href={anchor('duvidas')} data-spy="duvidas">
           Dúvidas
         </a>
+        <!-- Os vídeos de cada etapa, na página pública do app: sem data-spy, porque não é seção daqui. -->
+        <a href={appLink('cabecalho', 'tutoriais')}>Tutoriais</a>
       </nav>
       <div class="header-actions">
         <button class="theme-toggle desktop-theme-toggle" data-theme-toggle aria-pressed="false">
@@ -79,6 +81,7 @@ const plans = site.pricing.showPrices
         {plans.label}
       </a>
       <a href={anchor('duvidas')}>Dúvidas</a>
+      <a href={appLink('menu', 'tutoriais')}>Tutoriais</a>
       <a href={appLink('cabecalho', 'login')}>
         Entrar na minha conta <Icon name="arrow" size={18} />
       </a>
