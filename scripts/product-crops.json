@@ -1,0 +1,71 @@
+{
+  "formats": {
+    "16x9": { "site": [960, 540], "video": [1440, 810] },
+    "9x16": { "site": [540, 960], "video": [810, 1440] },
+    "4x5": { "site": [720, 900], "video": [1080, 1350] }
+  },
+  "rooms": [
+    {
+      "name": "patio-fachada",
+      "source": "patio",
+      "views": {
+        "16x9": { "yaw": 20, "pitch": 8, "hfov": 90 },
+        "9x16": { "yaw": 25, "pitch": 5, "hfov": 56 },
+        "4x5": { "yaw": 20, "pitch": 6, "hfov": 76 }
+      }
+    },
+    {
+      "name": "sala-2",
+      "source": "sala-2",
+      "views": {
+        "16x9": { "yaw": 30, "pitch": 0, "hfov": 100 },
+        "9x16": { "yaw": 20, "pitch": 0, "hfov": 56 },
+        "4x5": { "yaw": 30, "pitch": 0, "hfov": 80 }
+      }
+    },
+    {
+      "name": "cozinha",
+      "source": "cozinha",
+      "views": {
+        "16x9": { "yaw": 168, "pitch": 0, "hfov": 92 },
+        "9x16": { "yaw": 175, "pitch": 0, "hfov": 56 },
+        "4x5": { "yaw": 180, "pitch": 0, "hfov": 68 }
+      }
+    },
+    {
+      "name": "quarto-com-suite",
+      "source": "quarto-com-suite",
+      "views": {
+        "16x9": { "yaw": 0, "pitch": 0, "hfov": 100 },
+        "9x16": { "yaw": 0, "pitch": 0, "hfov": 56 },
+        "4x5": { "yaw": 0, "pitch": 0, "hfov": 80 }
+      }
+    },
+    {
+      "name": "banheiro",
+      "source": "banheiro",
+      "views": {
+        "16x9": { "yaw": 185, "pitch": -8, "hfov": 95 },
+        "9x16": { "yaw": 182, "pitch": -5, "hfov": 56 },
+        "4x5": { "yaw": 182, "pitch": -5, "hfov": 76 }
+      }
+    },
+    {
+      "name": "2-andar",
+      "source": "2-andar",
+      "views": {
+        "9x16": { "yaw": 75, "pitch": 0, "hfov": 56 },
+        "4x5": { "yaw": 76, "pitch": 0, "hfov": 76 }
+      }
+    },
+    {
+      "name": "patio-piscina",
+      "source": "patio",
+      "views": {
+        "16x9": { "yaw": 222, "pitch": -6, "hfov": 105 },
+        "9x16": { "yaw": 215, "pitch": 2, "hfov": 60 },
+        "4x5": { "yaw": 215, "pitch": -3, "hfov": 80 }
+      }
+    }
+  ]
+}
