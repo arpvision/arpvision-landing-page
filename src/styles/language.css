@@ -46,6 +46,34 @@
     display: none;
   }
 }
+/* Os rótulos em espanhol somam uns 105px a mais que os do português ("Presupuesto", "Iniciar
+   sesión", "Tutoriales"), e o cabeçalho tem 1010px úteis. No espanhol, o seletor sai do
+   cabeçalho do desktop (fica no rodapé e no menu do celular; o cabeçalho em português o mantém,
+   e é por ele que um espanhol chega aqui) e os links ficam um pouco mais juntos. */
+@media (min-width: 1024px) {
+  .site-header .desktop-language:lang(es) {
+    display: none;
+  }
+  .site-header .desktop-nav:lang(es) {
+    gap: 20px;
+  }
+}
+/* Até 1279px nem assim cabe o botão longo: o rótulo curto ("Crear cuenta"; o "gratis" está no
+   resto da página) e menos espaço entre os itens. */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .site-header .button-small:lang(es) .desktop-label {
+    display: none;
+  }
+  .site-header .button-small:lang(es) .mobile-label {
+    display: inline;
+  }
+  .site-header .desktop-nav:lang(es) {
+    gap: 16px;
+  }
+  .site-header .header-actions:lang(es) {
+    gap: 12px;
+  }
+}
 @media (max-width: 1023px) {
   .mobile-nav .mobile-language {
     display: flex;

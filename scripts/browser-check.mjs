@@ -514,8 +514,12 @@ try {
     await esPage.locator('footer .language-switch [aria-current="true"]').getAttribute('lang'),
     'es-ES',
   );
-  await esPage.locator('.desktop-language a[lang="pt-BR"]').click();
+  // No espanhol o seletor do desktop fica só no rodapé: o cabeçalho não comporta os rótulos
+  // longos e ele. O português o mantém no cabeçalho, que é por onde um espanhol chega ao /es.
+  assert.equal(await esPage.locator('.desktop-language').isVisible(), false);
+  await esPage.locator('footer .language-switch a[lang="pt-BR"]').click();
   await esPage.waitForURL(/\/termos-de-uso$/);
+  assert.equal(await esPage.locator('.desktop-language').isVisible(), true);
   const notFound = await esPage.goto(base + '/pagina-que-nao-existe');
   assert.equal(notFound.status(), 404);
   assert.match(await esPage.locator('h1').innerText(), /Página não encontrada/);
