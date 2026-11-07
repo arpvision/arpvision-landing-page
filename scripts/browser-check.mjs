@@ -15,13 +15,15 @@ const pricesShown = !(await (await fetch(`${base}/planos`)).text()).includes(
 const ptRoutes = [
   '/',
   ...(pricesShown ? ['/planos'] : []),
+  '/tutoriais',
   '/termos-de-uso',
   '/politica-de-privacidade',
 ];
-// As mesmas páginas em espanhol, em /es.
+// As mesmas páginas em espanhol, em /es, na mesma ordem (cada uma é medida contra a do português).
 const esRoutes = [
   '/es',
   ...(pricesShown ? ['/es/planes'] : []),
+  '/es/tutoriales',
   '/es/terminos-de-uso',
   '/es/politica-de-privacidad',
 ];
@@ -49,6 +51,35 @@ try {
     );
     results.push(`Rota ${route}: HTML, imagens e carregamento inicial sem iframe extra OK`);
   }
+  // Tutoriais: o cartão leva ao YouTube; com JavaScript, abre o player no diálogo.
+  await page.goto(base + '/tutoriais');
+  const card = page.locator('.tutorial-card').first();
+  assert.match(await card.getAttribute('href'), /^https:\/\/www\.youtube\.com\/watch\?v=/);
+  assert.equal(
+    await page.locator('.desktop-nav a[href="/tutoriais"]').getAttribute('aria-current'),
+    'page',
+  );
+  await card.click();
+  const videoDialog = page.locator('#tutorial-dialog');
+  assert.equal(await videoDialog.evaluate((dialog) => dialog.open), true);
+  assert.match(
+    await videoDialog.locator('iframe').getAttribute('src'),
+    new RegExp(
+      `^https://www\\.youtube-nocookie\\.com/embed/${await card.getAttribute('data-youtube')}\\?`,
+    ),
+  );
+  assert.equal(
+    await page.locator('#tutorial-dialog-title').textContent(),
+    await card.getAttribute('data-title'),
+  );
+  await page.screenshot({ path: '.artifacts/tutoriais-player-desktop.png' });
+  await page.keyboard.press('Escape');
+  assert.equal(await videoDialog.evaluate((dialog) => dialog.open), false);
+  assert.equal(await videoDialog.locator('iframe').count(), 0, 'fechar tira o player');
+  assert.equal(await card.evaluate((element) => element === document.activeElement), true);
+  results.push(
+    'Tutoriais: player no diálogo só após o clique; Escape fecha, tira o iframe e devolve o foco OK',
+  );
   await page.goto(base);
   await page.evaluate(() => document.fonts.ready);
   await page.screenshot({ path: '.artifacts/home-desktop.png' });

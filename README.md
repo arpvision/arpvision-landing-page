@@ -1,6 +1,6 @@
 # ARP Vision — site de marketing
 
-Landing page em português do Brasil e espanhol da Espanha. Astro gera HTML estático para `/`, `/planos`, `/termos-de-uso` e `/politica-de-privacidade`, as mesmas páginas em espanhol em `/es`, `/es/planes`, `/es/terminos-de-uso` e `/es/politica-de-privacidad`, e uma página 404 nos dois idiomas. Sem framework JavaScript no cliente: interações pequenas em TypeScript e CSS com os tokens da marca.
+Landing page em português do Brasil e espanhol da Espanha. Astro gera HTML estático para `/`, `/planos`, `/tutoriais`, `/termos-de-uso` e `/politica-de-privacidade`, as mesmas páginas em espanhol em `/es`, `/es/planes`, `/es/tutoriales`, `/es/terminos-de-uso` e `/es/politica-de-privacidad`, e uma página 404 nos dois idiomas. Sem framework JavaScript no cliente: interações pequenas em TypeScript e CSS com os tokens da marca.
 
 ## Executar
 
@@ -31,6 +31,7 @@ Os **dados** ficam em **`src/config/site.ts`**: links, contatos, mídias, tours,
 - Os botões de conta usam `arpvision.app` com UTMs; não existe checkout local. Este repositório não concede créditos, bloqueia publicações, gerencia assinaturas nem envia e-mails.
 - `contact.whatsapp` alimenta os links de WhatsApp (o número é usado só com os dígitos). Vazio, os botões abrem um aviso de contato em preparação.
 - O FAQ é um só (`faqGroups` em `src/lib/content.ts`), exibido na Home e em `/planos`. O mesmo arquivo monta a tabela de recursos (`featureGroups`) e as condições comerciais (`policies`): a estrutura é uma só, e o texto vem do dicionário do idioma.
+- Os vídeos de `/tutoriais` e `/es/tutoriales` são os mesmos, narrados em português (a página em espanhol avisa na abertura), e moram no YouTube (Shorts não listados). Ficam em `tutorials`, na ordem do app: o id do YouTube, a duração em segundos, a data de publicação e a seção. Para publicar um: acrescente a entrada (o id dela entra em `TutorialId`); escreva o título e a descrição em `tutorials.videos.<id>` nos dois dicionários; ponha um quadro do vídeo, em pé, em `public/images/tutoriais/<id>-source.jpg`; e rode `node scripts/prepare-images.mjs <id>-360 <id>-720` para gerar as capas WebP. O app tem a mesma lista em `inner-view-client/src/app/tutoriais`. O player só carrega no clique, no diálogo, e o cartão sem JavaScript abre o YouTube.
 - A ativação de analytics exige `analytics.scriptUrl` e `analytics.domain`, de uma instalação Plausible sem cookies. Sem esses campos, nenhum script de analytics é carregado. Eventos não incluem dados pessoais.
 
 ## Mídia real e estados pendentes

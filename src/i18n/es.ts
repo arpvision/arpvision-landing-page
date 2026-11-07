@@ -45,6 +45,7 @@ export const es: Dictionary = {
     plans: 'Planes',
     quote: 'Pedir presupuesto',
     faq: 'Preguntas frecuentes',
+    tutorials: 'Tutoriales en vídeo',
     start: 'Empieza aquí',
     signup: 'Crear cuenta gratis',
     login: 'Iniciar sesión en mi cuenta',
@@ -483,6 +484,35 @@ export const es: Dictionary = {
     tableLabel: 'Tabla comparativa de los planes, con desplazamiento horizontal',
     features: 'Funciones',
     recommended: 'Recomendado',
+  },
+  // Os títulos e as descrições são os da aba Tutoriales do app (es.json).
+  tutorials: {
+    title: 'Tutoriales en vídeo | ARP Vision',
+    // DIFERENTE: os vídeos são narrados em português. A descrição e a abertura avisam logo de
+    // início, como a aba Tutoriales do app; o português não precisa dizer.
+    description:
+      'Vídeos cortos, en portugués, que muestran cada paso de ARP Vision, de la captura con el móvil al tour publicado, y cómo añadir la app a la pantalla de inicio.',
+    breadcrumb: 'Inicio / Tutoriales',
+    eyebrow: 'PASO A PASO EN VÍDEO',
+    heading: 'Tutoriales',
+    lead: 'Vídeos cortos, en portugués, que muestran cada paso de ARP Vision, de la primera estancia fotografiada al tour publicado.',
+    watch: 'Ver',
+    watchLabel: (title: string, duration: string) => `Ver: ${title} (${duration})`,
+    close: 'Cerrar el vídeo',
+    sections: {
+      start: 'Primeros pasos',
+      app: 'Consejos de la app',
+    },
+    videos: {
+      'do-novo-tour-a-publicacao': {
+        title: 'De «Nuevo tour» a la publicación',
+        description: 'El camino completo: captura, estancias, accesos y publicación.',
+      },
+      'app-na-tela-de-inicio': {
+        title: 'La app en la pantalla de inicio',
+        description: 'Abre ARP Vision con un toque, a pantalla completa, en el iPhone.',
+      },
+    },
   },
   legal: {
     eyebrow: 'INFORMACIÓN LEGAL',

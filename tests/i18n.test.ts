@@ -93,6 +93,7 @@ test('cada idioma tem todas as páginas e âncoras, e o espanhol mora em /es', (
   assert.deepEqual(routes.es.pages, {
     home: '/es',
     plans: '/es/planes',
+    tutorials: '/es/tutoriales',
     terms: '/es/terminos-de-uso',
     privacy: '/es/politica-de-privacidad',
   });

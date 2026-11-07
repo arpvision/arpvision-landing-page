@@ -4,7 +4,7 @@
  */
 import type { Locale } from '.';
 
-export type PageId = 'home' | 'plans' | 'terms' | 'privacy';
+export type PageId = 'home' | 'plans' | 'tutorials' | 'terms' | 'privacy';
 export type AnchorId =
   'content' | 'howItWorks' | 'realTour' | 'plans' | 'quote' | 'faq' | 'contact' | 'compare';
 
@@ -18,6 +18,7 @@ export const routes: Record<Locale, LocaleRoutes> = {
     pages: {
       home: '/',
       plans: '/planos',
+      tutorials: '/tutoriais',
       terms: '/termos-de-uso',
       privacy: '/politica-de-privacidade',
     },
@@ -36,6 +37,7 @@ export const routes: Record<Locale, LocaleRoutes> = {
     pages: {
       home: '/es',
       plans: '/es/planes',
+      tutorials: '/es/tutoriales',
       terms: '/es/terminos-de-uso',
       privacy: '/es/politica-de-privacidad',
     },

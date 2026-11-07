@@ -7,7 +7,7 @@
  * `{nome}` marca o valor que o script do navegador preenche (texto que muda depois da carga).
  * Linhas em lista viram linhas separadas por <br /> no componente.
  */
-import type { FanRoomId, PlanId } from '../config/site';
+import type { FanRoomId, PlanId, TutorialId, TutorialSectionId } from '../config/site';
 
 /** "1 ambiente", "2 ambientes". */
 const rooms = (count: number) => `${count} ${count === 1 ? 'ambiente' : 'ambientes'}`;
@@ -47,6 +47,7 @@ export const pt = {
     plans: 'Planos',
     quote: 'Pedir cotação',
     faq: 'Dúvidas frequentes',
+    tutorials: 'Tutoriais em vídeo',
     start: 'Comece por aqui',
     signup: 'Criar conta grátis',
     login: 'Entrar na minha conta',
@@ -488,6 +489,34 @@ export const pt = {
     tableLabel: 'Tabela comparativa dos planos, com rolagem horizontal',
     features: 'Recursos',
     recommended: 'Recomendado',
+  },
+  // /tutoriais. O id do YouTube, a duração, a data e a capa de cada vídeo ficam em
+  // `tutorials` no site.ts; aqui, só o texto, pelo id do vídeo e da seção.
+  tutorials: {
+    title: 'Tutoriais em vídeo | ARP Vision',
+    description:
+      'Vídeos curtos que mostram cada etapa da ARP Vision, da captura com o celular ao tour publicado, e como deixar o app na tela de início.',
+    breadcrumb: 'Início / Tutoriais',
+    eyebrow: 'PASSO A PASSO EM VÍDEO',
+    heading: 'Tutoriais',
+    lead: 'Vídeos curtos que mostram cada etapa da ARP Vision, do primeiro ambiente fotografado ao tour publicado.',
+    watch: 'Assistir',
+    watchLabel: (title: string, duration: string) => `Assistir: ${title} (${duration})`,
+    close: 'Fechar o vídeo',
+    sections: {
+      start: 'Primeiros passos',
+      app: 'Dicas do app',
+    } satisfies Record<TutorialSectionId, string>,
+    videos: {
+      'do-novo-tour-a-publicacao': {
+        title: 'Do Novo tour à publicação',
+        description: 'O caminho inteiro: captura, ambientes, passagens e publicação.',
+      },
+      'app-na-tela-de-inicio': {
+        title: 'O app na tela de início',
+        description: 'Abra a ARP Vision com um toque, em tela cheia, no iPhone.',
+      },
+    } satisfies Record<TutorialId, { title: string; description: string }>,
   },
   legal: {
     eyebrow: 'INFORMAÇÕES LEGAIS',

@@ -2,7 +2,7 @@ import { site } from '../config/site';
 import { defaultLocale, localeInfo, locales } from '../i18n';
 import { pagePath, type PageId } from '../i18n/routes';
 export function GET() {
-  // A Home é a página principal do site; as legais mudam pouco.
+  // A Home é a página principal do site; os tutoriais crescem aos poucos; as legais mudam pouco.
   // /planos só entra com preços públicos; sem eles, a rota redireciona para a cotação.
   // Cada página entra uma vez por idioma, com as versões dos outros idiomas (hreflang).
   const pages: { page: PageId; changefreq: string; priority: string }[] = [
@@ -10,6 +10,7 @@ export function GET() {
     ...(site.pricing.showPrices
       ? [{ page: 'plans' as const, changefreq: 'weekly', priority: '0.8' }]
       : []),
+    { page: 'tutorials', changefreq: 'monthly', priority: '0.6' },
     { page: 'terms', changefreq: 'yearly', priority: '0.3' },
     { page: 'privacy', changefreq: 'yearly', priority: '0.3' },
   ];

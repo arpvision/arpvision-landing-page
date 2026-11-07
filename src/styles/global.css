@@ -120,7 +120,8 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 body.tour-is-open,
-body.menu-is-open {
+body.menu-is-open,
+body:has(.video-dialog[open]) {
   overflow: hidden;
 }
 a {
@@ -2107,10 +2108,12 @@ input[type='number']::-webkit-outer-spin-button {
 .contact-dialog > .button {
   width: 100%;
 }
-.plans-page {
+.plans-page,
+.tutorials-page {
   padding-top: 65px;
 }
-.plans-page .section-heading h1 {
+.plans-page .section-heading h1,
+.tutorials-page .section-heading h1 {
   font-size: 3.4rem;
   margin: 15px 0 20px;
 }
@@ -2122,8 +2125,156 @@ input[type='number']::-webkit-outer-spin-button {
   color: var(--text-muted);
   margin-bottom: 18px;
 }
-.plans-page .eyebrow {
+.plans-page .eyebrow,
+.tutorials-page .eyebrow {
   margin-bottom: 0;
+}
+/* Tutoriais: o cartão inteiro é o link; a capa fica em pé, como o vídeo. */
+.tutorial-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+}
+.tutorial-card {
+  display: grid;
+  grid-template-columns: 168px minmax(0, 1fr);
+  align-items: center;
+  gap: 26px;
+  height: 100%;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  transition: border-color 0.18s;
+}
+.tutorial-card:hover {
+  border-color: var(--accent);
+}
+.tutorial-cover {
+  position: relative;
+  aspect-ratio: 9 / 16;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--ink);
+}
+.tutorial-cover img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.tutorial-play {
+  position: absolute;
+  inset: 0;
+  width: 52px;
+  height: 52px;
+  margin: auto;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--ink) 55%, transparent);
+  color: var(--white);
+  backdrop-filter: blur(6px);
+  transition: background 0.18s;
+}
+.tutorial-card:hover .tutorial-play {
+  background: var(--brand-blue);
+}
+.tutorial-duration {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  padding: 1px 7px;
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--ink) 78%, transparent);
+  color: var(--white);
+  font-size: var(--fs-label);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.tutorial-section {
+  color: var(--brand-blue-dark);
+  font-size: 0.75rem;
+  font-weight: 650;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+.tutorial-body h2 {
+  font-size: 1.5rem;
+  letter-spacing: -0.025em;
+  margin: 8px 0 10px;
+}
+.tutorial-body p {
+  margin: 0;
+  font-size: 0.9375rem;
+}
+.tutorial-watch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 18px;
+  color: var(--brand-blue-dark);
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+/* O vídeo do tutorial: no desktop, um quadro em pé (9:16) sob a barra do título;
+   no celular, a tela inteira. Escuro nos dois temas, como o player. */
+.video-dialog {
+  --video-height: min(calc(100dvh - 140px), 820px);
+  width: calc(var(--video-height) * 9 / 16);
+  max-width: calc(100vw - 32px);
+  max-height: none;
+  padding: 0;
+  border: 0;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--ink);
+  color: var(--white);
+  box-shadow: var(--shadow);
+}
+.video-dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+.video-dialog::backdrop {
+  background: color-mix(in srgb, var(--ink) 75%, transparent);
+}
+.video-dialog-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 6px 6px 18px;
+}
+.video-dialog-title {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: inherit;
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+.video-dialog-close {
+  color: inherit;
+}
+.video-dialog-close:hover {
+  background: color-mix(in srgb, var(--white) 14%, transparent);
+}
+.video-dialog-frame {
+  height: var(--video-height);
+}
+.video-dialog-frame iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
 }
 .feature-comparison {
   background: var(--bg-base);
@@ -2395,6 +2546,10 @@ input[type='number']::-webkit-outer-spin-button {
   }
   .menu-toggle {
     display: inline-flex;
+  }
+  .tutorial-list {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 640px;
   }
   .header-actions {
     gap: 11px;
@@ -3125,11 +3280,46 @@ input[type='number']::-webkit-outer-spin-button {
     bottom: 15px;
     right: 15px;
   }
-  .plans-page {
+  .plans-page,
+  .tutorials-page {
     padding-top: 40px;
   }
-  .plans-page .section-heading h1 {
+  .plans-page .section-heading h1,
+  .tutorials-page .section-heading h1 {
     font-size: 2.6rem;
+  }
+  .tutorial-card {
+    grid-template-columns: 112px minmax(0, 1fr);
+    gap: 16px;
+    padding: 12px;
+  }
+  .tutorial-body h2 {
+    font-size: 1.1875rem;
+    margin: 6px 0;
+  }
+  .tutorial-watch {
+    margin-top: 10px;
+  }
+  .tutorial-play {
+    width: 40px;
+    height: 40px;
+  }
+  .video-dialog {
+    width: 100vw;
+    height: 100dvh;
+    max-width: none;
+    margin: 0;
+    border-radius: 0;
+  }
+  .video-dialog-bar {
+    padding: max(6px, env(safe-area-inset-top)) max(6px, env(safe-area-inset-right)) 6px
+      max(18px, env(safe-area-inset-left));
+  }
+  .video-dialog-frame {
+    flex: 1;
+    min-height: 0;
+    height: auto;
+    padding-bottom: env(safe-area-inset-bottom);
   }
   .feature-table-wrap {
     display: none;
