@@ -31,7 +31,7 @@ const words = [
   'Proximidade',
   'Valor percebido',
 ];
-const setup = async (options) => {
+const setup = async (options, path = '') => {
   const context = await browser.newContext(options);
   const page = await context.newPage();
   page.on('pageerror', (error) => errors.push(error.message));
@@ -41,7 +41,7 @@ const setup = async (options) => {
       body: '<!doctype html><html lang="pt-BR"><body style="margin:0;background:linear-gradient(135deg,#c1a180,#427f86);height:100vh"><button style="margin:40px">Controle do tour de teste</button></body></html>',
     }),
   );
-  await page.goto(base, { waitUntil: 'domcontentloaded' });
+  await page.goto(base + path, { waitUntil: 'domcontentloaded' });
   await page.evaluate(() => document.fonts.ready);
   return { context, page };
 };
@@ -228,6 +228,82 @@ try {
   await fallback.context.close();
   results.push(
     '320–1440px: palavras sem cortes, conversa e benefícios nos dois temas, contraste, toque, movimento reduzido e fallback sem JS OK.',
+  );
+
+  // Em espanhol: as palavras do rolo traduzidas, inteiras e centralizadas, e a conversa do
+  // WhatsApp em HTML legível nos dois temas.
+  const esWords = [
+    'Confianza',
+    'Exclusividad',
+    'Agilidad',
+    'Ahorro de tiempo',
+    'Valor',
+    'Inmersión',
+    'Conexión',
+    'Transparencia',
+    'Credibilidad',
+    'Diferenciación',
+    'Protagonismo',
+    'Alcance',
+    'Accesibilidad',
+    'Comodidad',
+    'Autonomía',
+    'Innovación',
+    'Encanto',
+    'Presencia digital',
+    'Visitas sin límites',
+    'Experiencia interactiva',
+    'Cercanía',
+    'Valor percibido',
+  ];
+  for (const [width, height, colorScheme] of [
+    [1440, 900, 'light'],
+    [768, 1024, 'dark'],
+    [390, 844, 'light'],
+    [320, 740, 'dark'],
+  ]) {
+    const { context, page } = await setup(
+      {
+        viewport: { width, height },
+        colorScheme,
+        reducedMotion: 'reduce',
+        hasTouch: width < 768,
+        isMobile: width < 768,
+      },
+      '/es',
+    );
+    await page.locator('.tour-showcase').scrollIntoViewIfNeeded();
+    assert.deepEqual(await page.locator('.marquee-list:visible li').allTextContents(), esWords);
+    const clipped = await page
+      .locator('.marquee-list:not(.marquee-clone) li')
+      .evaluateAll((items) => items.some((el) => el.scrollWidth > el.clientWidth));
+    assert.equal(clipped, false, `/es ${width}px: palavras completas`);
+    const chat = page.locator('#compartilhamento .chat-preview');
+    await chat.scrollIntoViewIfNeeded();
+    const box = await chat.evaluate((el) => ({
+      overflow: el.scrollHeight > el.clientHeight + 1 || el.scrollWidth > el.clientWidth + 1,
+      width: el.getBoundingClientRect().width,
+    }));
+    assert.equal(box.overflow, false, `/es ${width}px: conversa sem texto cortado`);
+    const dimensions = await page.evaluate(() => ({
+      width: document.documentElement.clientWidth,
+      scroll: document.documentElement.scrollWidth,
+    }));
+    assert.ok(dimensions.scroll <= dimensions.width, `/es ${width}px: sem overflow`);
+    await page.addScriptTag({ content: axeSource });
+    const violations = await page.evaluate(async () =>
+      (await window.axe.run(document, { runOnly: ['color-contrast'] })).violations.flatMap((v) =>
+        v.nodes.map((n) => n.target),
+      ),
+    );
+    assert.deepEqual(violations, [], `/es ${width}px ${colorScheme}: contraste`);
+    await page
+      .locator('#compartilhamento')
+      .screenshot({ path: `.artifacts/sharing-es-${width}-${colorScheme}.png` });
+    await context.close();
+  }
+  results.push(
+    'Espanhol: palavras do rolo traduzidas e inteiras, conversa do WhatsApp em HTML sem cortes, contraste nos dois temas de 320 a 1440px OK.',
   );
   assert.deepEqual(errors, []);
   await writeFile('.artifacts/showcase-results.json', JSON.stringify({ results, errors }, null, 2));

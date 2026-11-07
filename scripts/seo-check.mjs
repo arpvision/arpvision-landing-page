@@ -34,6 +34,8 @@ assert.ok(sitemapUrl, 'robots.txt sem Sitemap');
 const locs = [...(await get(at(sitemapUrl))).matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
 assert.ok(locs.length > 0, 'sitemap vazio');
 
+// hreflang de cada página, para conferir no fim que as versões se apontam umas às outras.
+const alternatesOf = new Map();
 for (const loc of locs) {
   const html = await get(at(loc));
   const head = html.slice(0, html.indexOf('</head>'));
@@ -49,8 +51,18 @@ for (const loc of locs) {
   );
   assert.ok(title?.includes('ARP Vision'), `${loc}: título com a marca`);
   assert.ok(description && description.length <= 160, `${loc}: description até 160 caracteres`);
-  if (new URL(loc).pathname === '/')
+  // A Home de cada idioma: / e /es.
+  if (/^\/(?:[a-z]{2})?$/.test(new URL(loc).pathname))
     assert.ok(description.length >= 140, `${loc}: description da Home com 140+ caracteres`);
+  const alternates = Object.fromEntries(
+    [...head.matchAll(/<link rel="alternate" hreflang="([^"]+)" href="([^"]+)"/g)].map((m) => [
+      m[1],
+      m[2],
+    ]),
+  );
+  assert.ok(alternates['x-default'], `${loc}: hreflang x-default`);
+  assert.ok(Object.values(alternates).includes(loc), `${loc}: hreflang aponta a própria página`);
+  alternatesOf.set(loc, alternates);
   for (const meta of ['og:title', 'og:description', 'og:image', 'twitter:card', 'twitter:image'])
     assert.ok(head.includes(`="${meta}"`), `${loc}: ${meta}`);
   const types = [
@@ -70,6 +82,11 @@ for (const loc of locs) {
     `✓ ${loc}\n  título (${title.length}): ${title}\n  description: ${description.length} caracteres\n  h1: ${h1}\n  JSON-LD: ${types.join(', ')}`,
   );
 }
+for (const [loc, alternates] of alternatesOf)
+  for (const [hreflang, href] of Object.entries(alternates)) {
+    assert.ok(alternatesOf.has(href), `${loc}: hreflang ${hreflang} fora do sitemap: ${href}`);
+    assert.deepEqual(alternatesOf.get(href), alternates, `${loc}: hreflang recíproco com ${href}`);
+  }
 console.log(
-  `\n${locs.length} URLs do sitemap respondem 200, sem noindex e com canonical para si mesmas.`,
+  `\n${locs.length} URLs do sitemap respondem 200, sem noindex, com canonical para si mesmas e hreflang recíproco.`,
 );

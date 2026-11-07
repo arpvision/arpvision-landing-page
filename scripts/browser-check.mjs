@@ -1,6 +1,7 @@
 import { chromium, devices } from '@playwright/test';
 import assert from 'node:assert/strict';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { portugueseWords } from './portuguese-words.mjs';
 
 await mkdir('.artifacts', { recursive: true });
 const base = process.env.SITE_URL || 'http://127.0.0.1:4321';
@@ -11,12 +12,20 @@ const results = [];
 const pricesShown = !(await (await fetch(`${base}/planos`)).text()).includes(
   'http-equiv="refresh"',
 );
-const routes = [
+const ptRoutes = [
   '/',
   ...(pricesShown ? ['/planos'] : []),
   '/termos-de-uso',
   '/politica-de-privacidade',
 ];
+// As mesmas páginas em espanhol, em /es.
+const esRoutes = [
+  '/es',
+  ...(pricesShown ? ['/es/planes'] : []),
+  '/es/terminos-de-uso',
+  '/es/politica-de-privacidad',
+];
+const routes = [...ptRoutes, ...esRoutes];
 try {
   const desktop = await browser.newContext({
     viewport: { width: 1440, height: 1000 },
@@ -359,7 +368,7 @@ try {
     await phone.locator('.faq-item').first().locator('summary').click();
     assert.equal(await phone.locator('.faq-item').first().getAttribute('open'), '');
     results.push(
-      '360px: três rotas sem overflow, texto < 12px ou alvo pequeno; menu, cotação e FAQ OK',
+      `360px: ${routes.length} rotas (pt e es) sem overflow, texto < 12px ou alvo pequeno; menu, cotação e FAQ OK`,
     );
   } else {
     const status = phone.locator('#planos [data-carousel-status]');
@@ -394,9 +403,195 @@ try {
       /229 no Pix ou 12x de R\$\s*23,25/,
     );
     results.push(
-      '360px: quatro rotas sem overflow, texto < 12px ou alvo pequeno; menu, carrossel, FAQ e recursos por plano OK',
+      `360px: ${routes.length} rotas (pt e es) sem overflow, texto < 12px ou alvo pequeno; menu, carrossel, FAQ e recursos por plano OK`,
     );
   }
+  // Espanhol (/es): idioma, texto sem português, links do app e tour no idioma, cotação,
+  // seletor PT | ES, 404 nos dois idiomas e larguras de 320 a 1440px sem estouro.
+  const knownIssues = [];
+  const es = await browser.newContext({
+    viewport: { width: 1440, height: 1000 },
+    reducedMotion: 'reduce',
+  });
+  const esPage = await es.newPage();
+  esPage.on('pageerror', (error) => errors.push(error.message));
+  // Texto visível, sem o que está marcado em português de propósito ("Português" no seletor)
+  // e sem e-mails e domínios.
+  const portugueseLines = () =>
+    esPage.evaluate((source) => {
+      const words = new RegExp(source, 'iu');
+      const hidden = [...document.querySelectorAll('[lang="pt-BR"]')];
+      hidden.forEach((node) => (node.style.display = 'none'));
+      const text = document.body.innerText;
+      hidden.forEach((node) => (node.style.display = ''));
+      return text
+        .replace(/[\w.+-]+@[\w.-]+|[\w-]+(?:\.[\w-]+)+/g, '')
+        .split('\n')
+        .filter((line) => words.test(line));
+    }, portugueseWords.source);
+  for (const route of esRoutes) {
+    await esPage.goto(base + route);
+    assert.equal(await esPage.locator('html').getAttribute('lang'), 'es-ES', `${route}: lang`);
+    assert.deepEqual(await portugueseLines(), [], `${route}: português na página em espanhol`);
+    for (const href of await esPage
+      .locator('a[href^="https://arpvision.app/"]')
+      .evaluateAll((links) => links.map((link) => link.href)))
+      assert.equal(new URL(href).searchParams.get('idioma'), 'es', `${route}: ${href}`);
+  }
+  await esPage.goto(base + '/es');
+  assert.equal(
+    await esPage.locator('.hero-embed').getAttribute('src'),
+    'https://arpvision.app/embed/511a5654-29f2-4798-87ff-5b479210dbf0?idioma=es',
+  );
+  assert.equal(
+    await esPage.locator('#compartilhamento .chat-preview').count(),
+    1,
+    'conversa do WhatsApp em HTML, sem a imagem em português',
+  );
+  assert.equal(await esPage.locator('img[src*="conversa-whatsapp"]').count(), 0);
+  const esSchema = JSON.parse(
+    await esPage.locator('script[type="application/ld+json"]').textContent(),
+  );
+  assert.equal(
+    esSchema.find((item) => item['@type'] === 'SoftwareApplication').inLanguage,
+    'es-ES',
+  );
+  assert.ok(
+    esSchema
+      .find((item) => item['@type'] === 'FAQPage')
+      .mainEntity.some((item) => item.name === '¿Cómo funciona el pago?'),
+    'FAQPage em espanhol',
+  );
+  if (!pricesShown) {
+    const quote = esPage.locator('#cotizacion');
+    const submit = quote.locator('.quote-submit');
+    const message = async () => new URL(await submit.getAttribute('href')).searchParams.get('text');
+    const greeting = '¡Hola! Vengo de la web y quiero un presupuesto de ARP Vision.';
+    assert.equal(await message(), greeting);
+    await quote.locator('input[value="Tengo un equipo"]').check();
+    await quote.locator('input[value="6 a 15"]').check();
+    await quote.locator('input[value="Este mes"]').check();
+    const filled = [
+      greeting,
+      '• Cómo trabajo: Tengo un equipo',
+      '• Espacios al mes: 6 a 15',
+      '• Para cuándo: Este mes',
+      '¿Me puedes enviar una propuesta?',
+    ].join('\n');
+    assert.equal(await message(), filled, 'respostas em espanhol na mensagem');
+    assert.equal(await quote.locator('[data-quote-preview]').textContent(), filled);
+    assert.match(await esPage.locator('#preguntas').innerText(), /¿Cuánto cuesta\?/);
+    await quote.screenshot({ path: '.artifacts/cotizacion-desktop.png' });
+    await esPage.goto(base + '/es/planes');
+    await esPage.waitForURL(/\/es#cotizacion$/);
+  }
+  // Menu do desktop com as âncoras em espanhol.
+  await esPage.goto(base + '/es');
+  for (const [id, label] of [
+    ['como-funciona', 'Cómo funciona'],
+    pricesShown ? ['planes', 'Planes'] : ['cotizacion', 'Presupuesto'],
+    ['preguntas', 'Preguntas'],
+  ]) {
+    await esPage.evaluate((section) => {
+      const top = document.getElementById(section).getBoundingClientRect().top + scrollY;
+      scrollTo({ top: top - 120, behavior: 'instant' });
+    }, id);
+    await esPage.waitForFunction(
+      (text) =>
+        document.querySelector('.desktop-nav [aria-current="location"]')?.textContent.trim() ===
+        text,
+      label,
+    );
+  }
+  await esPage.evaluate(() => scrollTo({ top: 0, behavior: 'instant' }));
+  await esPage.screenshot({ path: '.artifacts/es-desktop.png' });
+  // Seletor PT | ES: leva à mesma página no outro idioma; nada troca sozinho.
+  await esPage.goto(base + '/termos-de-uso');
+  assert.equal(await esPage.locator('html').getAttribute('lang'), 'pt-BR');
+  await esPage.locator('footer .language-switch a[lang="es-ES"]').click();
+  await esPage.waitForURL(/\/es\/terminos-de-uso$/);
+  assert.equal(
+    await esPage.locator('footer .language-switch [aria-current="true"]').getAttribute('lang'),
+    'es-ES',
+  );
+  await esPage.locator('.desktop-language a[lang="pt-BR"]').click();
+  await esPage.waitForURL(/\/termos-de-uso$/);
+  const notFound = await esPage.goto(base + '/pagina-que-nao-existe');
+  assert.equal(notFound.status(), 404);
+  assert.match(await esPage.locator('h1').innerText(), /Página não encontrada/);
+  assert.match(await esPage.locator('main [lang="es-ES"]').innerText(), /Página no encontrada/);
+  await es.close();
+  for (const colorScheme of ['light', 'dark']) {
+    const context = await browser.newContext({
+      viewport: { width: 1440, height: 1000 },
+      colorScheme,
+      reducedMotion: 'reduce',
+    });
+    const themed = await context.newPage();
+    for (const route of ['/es', '/es/terminos-de-uso', '/pagina-que-nao-existe']) {
+      await themed.goto(base + route);
+      await themed.addScriptTag({ content: axeSource });
+      const contrast = await themed.evaluate(async () =>
+        (await window.axe.run(document, { runOnly: ['color-contrast'] })).violations.flatMap(
+          (violation) => violation.nodes.map((node) => node.target.join(' ')),
+        ),
+      );
+      assert.deepEqual(contrast, [], `${colorScheme} ${route}: contraste insuficiente`);
+    }
+    await context.close();
+  }
+  for (const width of [320, 360, 390, 768, 1024, 1280, 1440]) {
+    const context = await browser.newContext({
+      viewport: { width, height: 900 },
+      reducedMotion: 'reduce',
+      isMobile: width < 768,
+      hasTouch: width < 768,
+    });
+    const sized = await context.newPage();
+    sized.on('pageerror', (error) => errors.push(error.message));
+    // A mesma medida na página em português: um estouro que o português também tem não é do
+    // espanhol (a tabela de /planos entre 768 e 1023px, só visível com preços públicos).
+    const measure = async (route) => {
+      await sized.goto(base + route);
+      await sized.evaluate(() => document.fonts.ready);
+      return sized.evaluate(() => ({
+        width: document.documentElement.clientWidth,
+        layout: innerWidth,
+        scroll: document.documentElement.scrollWidth,
+        // Nenhum rótulo do cabeçalho quebra em duas linhas.
+        wrapped: [...document.querySelectorAll('.header-inner a, .header-inner button')]
+          .filter((element) => element.checkVisibility())
+          .filter((element) => element.getBoundingClientRect().height > 50)
+          .map((element) => element.textContent.trim()),
+      }));
+    };
+    for (const route of [...esRoutes, '/pagina-que-nao-existe']) {
+      const dimensions = await measure(route);
+      const overflows =
+        dimensions.scroll > dimensions.width || dimensions.layout > dimensions.width;
+      const ptRoute = ptRoutes[esRoutes.indexOf(route)];
+      const ptDimensions = overflows && ptRoute ? await measure(ptRoute) : null;
+      if (ptDimensions && ptDimensions.scroll > ptDimensions.width)
+        knownIssues.push(
+          `${route} ${width}px: estouro de ${dimensions.scroll - dimensions.width}px, também em ${ptRoute} (${ptDimensions.scroll - ptDimensions.width}px)`,
+        );
+      else assert.ok(!overflows, `${route} ${width}px: sem overflow ${JSON.stringify(dimensions)}`);
+      assert.deepEqual(dimensions.wrapped, [], `${route} ${width}px: cabeçalho em uma linha`);
+    }
+    if (width === 360) {
+      await sized.goto(base + '/es');
+      await sized.locator('.menu-toggle').click();
+      assert.equal((await sized.locator('[data-menu-label]').textContent()).trim(), 'Cerrar');
+      assert.equal(await sized.locator('.mobile-language').isVisible(), true);
+      await sized.screenshot({ path: '.artifacts/es-menu-mobile.png' });
+    }
+    await context.close();
+  }
+  if (knownIssues.length)
+    results.push(`Avisos (problemas que o português também tem): ${knownIssues.join('; ')}`);
+  results.push(
+    'Espanhol: lang es-ES, sem texto em português, app e tour com idioma=es, cotação, seletor PT | ES, 404 nos dois idiomas, contraste e 320–1440px sem estouro OK',
+  );
   assert.deepEqual(errors, []);
   console.log(results.join('\n'));
   await writeFile('.artifacts/browser-results.json', JSON.stringify({ results, errors }, null, 2));

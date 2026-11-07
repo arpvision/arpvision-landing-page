@@ -10,12 +10,14 @@ const chrome = await launch({
   chromeFlags: ['--headless=new', '--disable-gpu', '--no-sandbox'],
 });
 const results = [];
+const base = process.env.SITE_URL || 'http://127.0.0.1:4321';
 try {
   for (const [label, route] of [
     ['home', '/'],
     ['planos', '/planos'],
+    ['home-es', '/es'],
   ]) {
-    const report = await lighthouse(`http://127.0.0.1:4321${route}`, {
+    const report = await lighthouse(`${base}${route}`, {
       port: chrome.port,
       output: 'json',
       logLevel: 'error',
