@@ -1,6 +1,7 @@
 import { track } from './analytics';
 
-// Cotação: cada resposta entra na mensagem do WhatsApp e na prévia, na hora.
+// Cotação: cada resposta entra na mensagem do WhatsApp e na prévia, na hora. A saudação e o
+// fecho vêm da página (data-greeting e data-closing), no idioma dela.
 document.querySelectorAll<HTMLElement>('[data-quote]').forEach((card) => {
   const preview = card.querySelector<HTMLElement>('[data-quote-preview]')!;
   const link = card.querySelector<HTMLAnchorElement>('.quote-submit')!;
@@ -16,7 +17,7 @@ document.querySelectorAll<HTMLElement>('[data-quote]').forEach((card) => {
       ? [
           card.dataset.greeting,
           ...chosen.map(([label, value]) => `• ${label}: ${value}`),
-          'Pode me mandar uma proposta?',
+          card.dataset.closing,
         ].join('\n')
       : card.dataset.greeting!;
     preview.textContent = message;

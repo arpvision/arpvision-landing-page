@@ -1,14 +1,12 @@
 ---
 import Icon from './Icon.astro';
+import { pageLocale } from '../i18n';
+const { t } = pageLocale(Astro);
 // Explica a cobrança por ambiente antes dos planos.
 const flow = [
-  { icon: 'phone', value: '30 segundos', text: 'Uma volta só com o celular, em cada ambiente.' },
-  {
-    icon: 'sparkle',
-    value: '1 imagem 360°',
-    text: 'As fotos viram uma imagem única, em alta qualidade.',
-  },
-  { icon: 'credits', value: '1 crédito', text: 'É o que cada ambiente usa do saldo do plano.' },
+  { icon: 'phone', ...t.credits.flow.capture },
+  { icon: 'sparkle', ...t.credits.flow.image },
+  { icon: 'credits', ...t.credits.flow.credit },
 ];
 ---
 
@@ -16,10 +14,10 @@ const flow = [
   <div class="container">
     <div class="section-heading center">
       <h2>
-        Cada ambiente vira uma
-        <br class="desktop-break" /> imagem 360° de alta qualidade.
+        {t.credits.title1}
+        <br class="desktop-break" /> {t.credits.title2}
       </h2>
-      <p>Você não paga por foto nem por tour. Paga por ambiente pronto.</p>
+      <p>{t.credits.lead}</p>
     </div>
     <ol class="credit-flow">
       {flow.map((step) => (
@@ -32,9 +30,6 @@ const flow = [
         </li>
       ))}
     </ol>
-    <p class="credit-example">
-      Na prática: uma casa com sala, cozinha, 2 quartos, 1 banheiro tem 5 ambientes, ou seja, 5
-      créditos.
-    </p>
+    <p class="credit-example">{t.credits.example}</p>
   </div>
 </section>

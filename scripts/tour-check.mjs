@@ -2,7 +2,7 @@ import { chromium, devices } from '@playwright/test';
 import assert from 'node:assert/strict';
 
 // Fixtures restritas ao navegador de teste. Não alteram o site nem acessam tours reais.
-const base = 'http://127.0.0.1:4321';
+const base = process.env.SITE_URL || 'http://127.0.0.1:4321';
 const tours = [0, 1].map((index) => ({
   id: `test-${index}`,
   name: `Espaço de teste ${index}`,
@@ -20,8 +20,8 @@ const qrCodes = [0, 1].map(
 const attribute = (value) =>
   JSON.stringify(value).replaceAll('&', '&amp;').replaceAll('"', '&quot;');
 const browser = await chromium.launch({ channel: 'chrome', headless: true });
-const fixture = async (page) => {
-  await page.route(base + '/', async (route) => {
+const fixture = async (page, path = '/') => {
+  await page.route(base + path, async (route) => {
     const response = await route.fetch();
     let html = await response.text();
     html = html
@@ -125,6 +125,40 @@ try {
   );
   assert.equal(await timeoutPage.locator('[data-tour-status] a').getAttribute('target'), '_blank');
   console.log('Timeout de 15 segundos: capa restaurada e link alternativo disponível.');
+
+  // Em /es, o tour da demo abre no idioma da página e o aviso de erro fala espanhol.
+  const spanish = await browser.newPage({
+    viewport: { width: 1440, height: 1000 },
+    reducedMotion: 'reduce',
+  });
+  await fixture(spanish, '/es');
+  await spanish.route('https://arpvision.app/embed/**', (route) => {
+    if (!route.request().url().includes('/embed/test-'))
+      return route.fulfill({ contentType: 'text/html', body: '' });
+  });
+  await spanish.clock.install();
+  await spanish.goto(base + '/es');
+  await spanish.locator('[data-tour-open]').click();
+  assert.equal(
+    await spanish.locator('[data-tour-host] iframe').getAttribute('src'),
+    'https://arpvision.app/embed/test-0?idioma=es',
+  );
+  assert.equal(
+    await spanish.locator('[data-tour-host] iframe').getAttribute('title'),
+    'Tour 360° de ejemplo: Espaço de teste 0',
+  );
+  await spanish.clock.fastForward(15100);
+  assert.match(
+    await spanish.locator('[data-tour-status]').textContent(),
+    /No se ha podido abrir el tour ahora/,
+  );
+  assert.equal(
+    await spanish.locator('[data-tour-status] a').textContent(),
+    'Abrir en una pestaña nueva',
+  );
+  await spanish.locator('[data-tour-index="1"]').click();
+  assert.equal(await spanish.locator('[data-tour-photos]').textContent(), '8 fotos por estancia');
+  console.log('Tour em espanhol: embed com idioma=es, título, erro e troca de tour no idioma.');
 } finally {
   await browser.close();
 }

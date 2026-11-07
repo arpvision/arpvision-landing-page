@@ -1,28 +1,7 @@
 ---
-const words = [
-  'Confiança',
-  'Exclusividade',
-  'Agilidade',
-  'Economia de tempo',
-  'Valor',
-  'Imersão',
-  'Conexão',
-  'Transparência',
-  'Credibilidade',
-  'Diferenciação',
-  'Destaque',
-  'Alcance',
-  'Acessibilidade',
-  'Conveniência',
-  'Autonomia',
-  'Inovação',
-  'Encantamento',
-  'Presença digital',
-  'Visita sem limites',
-  'Experiência interativa',
-  'Proximidade',
-  'Valor percebido',
-];
+import { pageLocale } from '../i18n';
+const { t } = pageLocale(Astro);
+const words = t.showcase.words;
 ---
 
 <div
@@ -32,7 +11,7 @@ const words = [
 >
   <div class="marquee-window">
     <div class="marquee-track">
-      <ul class="marquee-list" aria-label="O que o tour entrega">
+      <ul class="marquee-list" aria-label={t.showcase.marqueeLabel}>
         {words.map((word) => (
           <li>
             <span class="marquee-word">{word}</span>

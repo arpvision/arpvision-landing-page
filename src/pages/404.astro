@@ -1,0 +1,59 @@
+---
+// A Vercel serve esta página para qualquer endereço que não existe (dist/404.html). Ela não
+// sabe o idioma de quem chegou, então fala todos: o português primeiro, que é o padrão.
+import Layout from '../layouts/Layout.astro';
+import Brand from '../components/Brand.astro';
+import { localeInfo, locales, translations } from '../i18n';
+import { pagePath } from '../i18n/routes';
+const texts = locales.map((locale) => ({
+  locale,
+  lang: localeInfo[locale].lang,
+  ...translations(locale).notFound,
+}));
+---
+
+<Layout
+  title={`${texts.map((text) => text.title).join(' · ')} | ARP Vision`}
+  description={texts.map((text) => text.lead).join(' ')}
+  bare
+>
+  <section class="section not-found container">
+    <Brand />
+    {texts.map((text, index) => (
+      <div class="not-found-block" lang={index === 0 ? undefined : text.lang}>
+        {index === 0 ? <h1>{text.title}</h1> : <h2>{text.title}</h2>}
+        <p>{text.lead}</p>
+        <a
+          class:list={['button', index === 0 ? 'button-primary' : 'button-secondary']}
+          href={pagePath(text.locale, 'home')}
+          hreflang={text.lang}
+        >
+          {text.home}
+        </a>
+      </div>
+    ))}
+  </section>
+</Layout>
+
+<style>
+  .not-found {
+    display: grid;
+    gap: 40px;
+    justify-items: start;
+    min-height: 70vh;
+    align-content: center;
+  }
+  .not-found-block {
+    display: grid;
+    gap: 12px;
+    justify-items: start;
+  }
+  .not-found-block h1,
+  .not-found-block h2 {
+    margin: 0;
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+  }
+  .not-found-block p {
+    margin: 0 0 8px;
+  }
+</style>

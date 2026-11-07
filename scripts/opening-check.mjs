@@ -242,8 +242,38 @@ try {
   );
   await context.close();
 
+  // A abertura em espanhol: mesma composição, com os nomes dos ambientes traduzidos.
+  {
+    const { context, page } = await setup({
+      viewport: { width: 1440, height: 900 },
+      reducedMotion: 'reduce',
+      colorScheme: 'light',
+    });
+    await page.goto(base + '/es', { waitUntil: 'domcontentloaded' });
+    assert.deepEqual(await page.locator('.fan-room-link').allTextContents(), [
+      'Suite',
+      'Dormitorio',
+      'Salón',
+      'Invitados',
+      'Patio',
+    ]);
+    assert.equal(
+      await page
+        .locator('.opening + #compartilhamento + #como-funciona + .presentation + #creditos')
+        .count(),
+      1,
+      'mesma sequência de seções em espanhol',
+    );
+    assert.ok(
+      (await page.locator('.site-header').boundingBox()).width <= 1060,
+      'cabeçalho estreito em espanhol',
+    );
+    await page.screenshot({ path: '.artifacts/opening-es-desktop.png' });
+    await context.close();
+  }
+
   const axeSource = await readFile('node_modules/axe-core/axe.min.js', 'utf8');
-  for (const [width, height] of [
+  for (const [width, height, path] of [
     [1280, 720],
     [1024, 768],
     [768, 1024],
@@ -251,7 +281,7 @@ try {
     [390, 844],
     [360, 800],
     [320, 740],
-  ]) {
+  ].flatMap((size) => ['', '/es'].map((path) => [...size, path]))) {
     const { context, page } = await setup({
       viewport: { width, height },
       reducedMotion: 'reduce',
@@ -259,7 +289,7 @@ try {
       isMobile: width < 768,
       hasTouch: width < 768,
     });
-    await page.goto(base, { waitUntil: 'domcontentloaded' });
+    await page.goto(base + path, { waitUntil: 'domcontentloaded' });
     await page.evaluate(() => document.fonts.ready);
     const initial = await page.locator('.fan-card').evaluateAll((cards) => ({
       visible: innerHeight - Math.min(...cards.map((card) => card.getBoundingClientRect().top)),
@@ -267,15 +297,17 @@ try {
     }));
     assert.ok(
       initial.visible > 15 && initial.visible < 120,
-      `${width}px: só a ponta: ${JSON.stringify(initial)}`,
+      `${width}px${path}: só a ponta: ${JSON.stringify(initial)}`,
     );
-    assert.equal(initial.full, false, `${width}px: nenhum cartão inteiro antes de rolar`);
-    await page.screenshot({ path: `.artifacts/opening-peek-${width}.png` });
+    assert.equal(initial.full, false, `${width}px${path}: nenhum cartão inteiro antes de rolar`);
+    await page.screenshot({
+      path: `.artifacts/opening-peek-${width}${path.replace('/', '-')}.png`,
+    });
     await page.evaluate(() => scrollTo({ top: 350, behavior: 'instant' }));
     const d = await dimensions(page);
     assert.ok(
       d.scroll <= width && d.layout <= width,
-      `${width}px: sem scroll horizontal ${JSON.stringify(d)}`,
+      `${width}px${path}: sem scroll horizontal ${JSON.stringify(d)}`,
     );
     const bounds = await page.locator('.fan-card').evaluateAll((cards) =>
       cards.map((card) => {
@@ -285,13 +317,13 @@ try {
     );
     assert.ok(
       bounds.every((r) => r.left >= 0 && r.right <= width),
-      `${width}px: cartões sem cortes`,
+      `${width}px${path}: cartões sem cortes`,
     );
     if (width >= 768) {
       const bottom = await page
         .locator('.fan-card')
         .evaluateAll((cards) => Math.max(...cards.map((c) => c.getBoundingClientRect().bottom)));
-      assert.ok(bottom <= height, `${width}px: leque inteiro após rolar (${bottom})`);
+      assert.ok(bottom <= height, `${width}px${path}: leque inteiro após rolar (${bottom})`);
     }
     if (width < 768) {
       for (let index = 0; index < 5; index++) {
@@ -310,7 +342,7 @@ try {
               document.elementFromPoint(title.x + title.width / 2, title.y + title.height / 2),
             );
           });
-        assert.equal(visible, true, `${width}px: cartão ${index + 1} acessível ao toque`);
+        assert.equal(visible, true, `${width}px${path}: cartão ${index + 1} acessível ao toque`);
       }
       await page.locator('[data-fan-select]').nth(2).click();
       await page.evaluate(() => scrollTo(0, 0));
@@ -331,8 +363,8 @@ try {
         v.nodes.map((n) => n.target),
       ),
     );
-    assert.deepEqual(violations, [], `${width}px: contraste`);
-    await page.screenshot({ path: `.artifacts/opening-${width}.png` });
+    assert.deepEqual(violations, [], `${width}px${path}: contraste`);
+    await page.screenshot({ path: `.artifacts/opening-${width}${path.replace('/', '-')}.png` });
     assert.ok(
       await page
         .locator('.fan-position')
@@ -343,7 +375,7 @@ try {
     await context.close();
   }
   results.push(
-    '320–1440px: sem cortes/overflow; controles ao toque, menu, Escape, foco, contraste e movimento reduzido.',
+    '320–1440px, em português e em espanhol: sem cortes/overflow; controles ao toque, menu, Escape, foco, contraste e movimento reduzido.',
   );
 
   const dark = await setup({

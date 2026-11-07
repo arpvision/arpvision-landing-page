@@ -1,13 +1,17 @@
 ---
 import ProtectedTour from './ProtectedTour.astro';
 import BenefitsMarquee from './BenefitsMarquee.astro';
+import { pageLocale } from '../i18n';
+import { embedLink } from '../lib/business';
 interface Props {
   src: string;
 }
 const { src } = Astro.props;
+// O tour embutido abre no idioma da página.
+const { locale } = pageLocale(Astro);
 ---
 
 <div class="container tour-showcase">
-  <ProtectedTour src={src} />
+  <ProtectedTour src={embedLink(src, locale)} />
   <BenefitsMarquee />
 </div>

@@ -2,80 +2,84 @@
 import Brand from './Brand.astro';
 import ContactLink from './ContactLink.astro';
 import Icon from './Icon.astro';
+import LanguageSwitch from './LanguageSwitch.astro';
 import { site, available } from '../config/site';
 import { appLink } from '../lib/business';
+import { pageLocale } from '../i18n';
+import { anchorId, pagePath, sectionPath } from '../i18n/routes';
+const { locale, t } = pageLocale(Astro);
+const { freeTrialCredits, freeTrialDays } = site.pricing;
 ---
 
-<footer class="site-footer" id="contato">
+<footer class="site-footer" id={anchorId(locale, 'contact')}>
   <div class="container footer-grid">
     <div class="footer-brand">
       <Brand />
       <p>
-        O espaço por inteiro.
-        <br />O celular é só o começo.
+        {t.footer.taglineLines[0]}
+        <br />
+        {t.footer.taglineLines[1]}
       </p>
     </div>
     <div>
-      <h2>Conheça</h2>
-      <a href="/#como-funciona">Como funciona</a>
-      {available.tour && <a href="/#tour-real">Tour real</a>}
+      <h2>{t.footer.discover}</h2>
+      <a href={sectionPath(locale, 'home', 'howItWorks')}>{t.footer.howItWorks}</a>
+      {available.tour && <a href={sectionPath(locale, 'home', 'realTour')}>{t.footer.realTour}</a>}
       {site.pricing.showPrices ? (
-        <a href="/planos">Planos</a>
+        <a href={pagePath(locale, 'plans')}>{t.footer.plans}</a>
       ) : (
-        <a href="/#cotacao">Pedir cotação</a>
+        <a href={sectionPath(locale, 'home', 'quote')}>{t.footer.quote}</a>
       )}
-      <a href="/#duvidas">Dúvidas frequentes</a>
-      <a href="/tutoriais">Tutoriais em vídeo</a>
+      <a href={sectionPath(locale, 'home', 'faq')}>{t.footer.faq}</a>
+      <a href={pagePath(locale, 'tutorials')}>{t.footer.tutorials}</a>
     </div>
     <div>
-      <h2>Comece por aqui</h2>
-      <a href={appLink('rodape')} data-cta="rodape">
-        Criar conta grátis
+      <h2>{t.footer.start}</h2>
+      <a href={appLink('rodape', 'register', locale)} data-cta="rodape">
+        {t.footer.signup}
       </a>
-      <a href={appLink('rodape', 'login')}>Entrar na minha conta</a>
+      <a href={appLink('rodape', 'login', locale)}>{t.footer.login}</a>
     </div>
     {(available.email || available.whatsapp) && (
       <div>
-        <h2>Vamos conversar</h2>
+        <h2>{t.footer.talk}</h2>
         {available.email && <a href={`mailto:${site.contact.email}`}>{site.contact.email}</a>}
-        {available.whatsapp && <ContactLink>WhatsApp {site.contact.whatsapp}</ContactLink>}
-        <span class="footer-note">Feito para quem tem espaços para mostrar.</span>
+        {available.whatsapp && (
+          <ContactLink>{t.footer.whatsapp(site.contact.whatsapp)}</ContactLink>
+        )}
+        <span class="footer-note">{t.footer.note}</span>
       </div>
     )}
   </div>
   <div class="container footer-bottom">
     <p>
       © {site.company.year} ARP Vision{site.company.legalName ? ` · ${site.company.legalName}` : ''}
-      {site.company.cnpj ? ` · CNPJ ${site.company.cnpj}` : ''}
+      {site.company.cnpj ? ` · ${t.footer.cnpj} ${site.company.cnpj}` : ''}
     </p>
+    <LanguageSwitch landmark />
     <div>
-      <a href="/termos-de-uso">Termos de Uso</a>
-      <a href="/politica-de-privacidade">Política de Privacidade</a>
+      <a href={pagePath(locale, 'terms')}>{t.footer.terms}</a>
+      <a href={pagePath(locale, 'privacy')}>{t.footer.privacy}</a>
     </div>
   </div>
 </footer>
 {available.whatsapp && (
-  <aside aria-label="Contato rápido">
-    <ContactLink class="floating-whatsapp" label="Falar com a ARP Vision no WhatsApp">
+  <aside aria-label={t.footer.quickContact}>
+    <ContactLink class="floating-whatsapp" label={t.footer.floatingWhatsapp}>
       <Icon name="message" size={25} />
     </ContactLink>
   </aside>
 )}
 <dialog id="contact-dialog" class="contact-dialog" aria-labelledby="contact-title">
-  <button class="dialog-close icon-button" data-close-dialog aria-label="Fechar">
+  <button class="dialog-close icon-button" data-close-dialog aria-label={t.contactDialog.close}>
     <Icon name="close" />
   </button>
   <span class="icon-tile">
     <Icon name="message" />
   </span>
-  <h2 id="contact-title">Vamos conversar em breve.</h2>
-  <p>
-    Nosso atendimento comercial abre em breve. Enquanto isso, crie sua conta grátis e teste a
-    captura com {site.pricing.freeTrialCredits}{' '}
-    {site.pricing.freeTrialCredits === 1 ? 'crédito' : 'créditos'}, por {site.pricing.freeTrialDays}{' '}
-    dias, sem cartão.
-  </p>
-  <a class="button button-primary" href={appLink('contato')} data-cta="contato">
-    Criar conta grátis <Icon name="arrow" size={18} />
+  <h2 id="contact-title">{t.contactDialog.title}</h2>
+  <p>{t.contactDialog.text(freeTrialCredits, freeTrialDays)}</p>
+  <a class="button button-primary" href={appLink('contato', 'register', locale)} data-cta="contato">
+    {t.contactDialog.signup} <Icon name="arrow" size={18} />
   </a>
 </dialog>

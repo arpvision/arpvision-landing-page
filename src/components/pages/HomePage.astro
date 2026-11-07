@@ -1,0 +1,129 @@
+---
+// A Home de cada idioma (/ e /es): o mesmo conteúdo, com o texto do dicionário da página.
+import Layout from '../../layouts/Layout.astro';
+import Icon from '../Icon.astro';
+import Tour from '../Tour.astro';
+import Credits from '../Credits.astro';
+import Pricing from '../Pricing.astro';
+import Quote from '../Quote.astro';
+import Faq from '../Faq.astro';
+import FinalCta from '../FinalCta.astro';
+import FanCards from '../FanCards.astro';
+import TourShowcase from '../TourShowcase.astro';
+import Sharing from '../Sharing.astro';
+import TeamBenefits from '../TeamBenefits.astro';
+import { site } from '../../config/site';
+import { pageLocale } from '../../i18n';
+import { anchorId } from '../../i18n/routes';
+import { faqSchema } from '../../lib/content';
+import { softwareApplicationSchema } from '../../lib/schema';
+const { locale, t } = pageLocale(Astro);
+const text = t.home;
+const roomCards = site.media.fanRooms.map((room, index) => ({
+  ...room,
+  ...t.fan.rooms[room.id],
+  number: String(index + 1).padStart(2, '0'),
+}));
+---
+
+<Layout
+  title={text.title}
+  description={text.description}
+  ogImage={text.ogImage}
+  page="home"
+  schema={[softwareApplicationSchema('home', locale), faqSchema(locale)]}
+>
+  <section class="hero opening" aria-labelledby="opening-title">
+    <div class="container">
+      <div class="opening-copy center">
+        <span class="eyebrow">
+          <span class="eyebrow-line"></span> {text.eyebrow}
+        </span>
+        <h1 id="opening-title">
+          {text.title1}
+          <br />
+          <span>{text.title2}</span>
+        </h1>
+        <p class="opening-description">{text.opening}</p>
+      </div>
+      <FanCards items={roomCards} />
+    </div>
+  </section>
+  <Sharing />
+  <section
+    class="section how-section"
+    id={anchorId(locale, 'howItWorks')}
+    data-atmosphere="how"
+    aria-labelledby="capture-heading"
+  >
+    <div class="container how-grid">
+      <div class="capture-copy">
+        <h2 class="capture-heading" id="capture-heading">
+          {text.howTitle}
+        </h2>
+        <p class="capture-subtitle">{text.howSubtitle}</p>
+        <div class="steps">
+          {text.steps.map((step, index) => (
+            <article>
+              <span class="step-number">{String(index + 1).padStart(2, '0')}</span>
+              <h3>{step}</h3>
+            </article>
+          ))}
+        </div>
+      </div>
+      <!-- Vídeo sem moldura: toca sozinho quando aparece na tela; o botão pausa. -->
+      <div class="tutorial-video">
+        <video
+          id="tutorial-video"
+          src={site.media.tutorial}
+          poster={site.media.tutorialPoster}
+          width="720"
+          height="1280"
+          muted
+          loop
+          playsinline
+          preload="none"
+          data-autoplay
+          aria-label={text.videoLabel}
+        ></video>
+        <button
+          class="video-toggle"
+          data-video-toggle="tutorial-video"
+          data-label-play={text.videoPlay}
+          data-label-pause={text.videoPause}
+          aria-label={text.videoPlay}
+        >
+          <span class="video-toggle-play">
+            <Icon name="play" size={18} />
+          </span>
+          <span class="video-toggle-pause">
+            <Icon name="pause" size={18} />
+          </span>
+        </button>
+      </div>
+    </div>
+  </section>
+  <section class="hero presentation" aria-label={text.presentationLabel} data-atmosphere="demo">
+    <TourShowcase src={site.media.heroEmbed} />
+  </section>
+  <Credits />
+  <Tour />
+  <TeamBenefits />
+  {/* Com os preços ainda em definição, a cotação pelo WhatsApp ocupa o lugar dos planos. */}
+  {site.pricing.showPrices ? (
+    <section class="section plans-preview" id={anchorId(locale, 'plans')}>
+      <div class="container">
+        <div class="section-heading center">
+          <span class="eyebrow">{text.plansEyebrow}</span>
+          <h2>{text.plansTitle}</h2>
+          <p>{text.plansLead}</p>
+        </div>
+        <Pricing />
+      </div>
+    </section>
+  ) : (
+    <Quote />
+  )}
+  <FinalCta />
+  <Faq />
+</Layout>

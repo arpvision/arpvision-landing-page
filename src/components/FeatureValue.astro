@@ -1,21 +1,23 @@
 ---
 import Icon from './Icon.astro';
-import type { FeatureValue } from '../config/site';
+import { pageLocale } from '../i18n';
+import type { FeatureValue } from '../lib/content';
 interface Props {
   value: FeatureValue;
 }
 const { value } = Astro.props;
+const { t } = pageLocale(Astro);
 ---
 
 {value === true ? (
   <span class="included">
     <Icon name="check" size={19} />
-    <span class="sr-only">Incluído</span>
+    <span class="sr-only">{t.features.included}</span>
   </span>
 ) : value === false ? (
-  <span aria-label="Não incluído">—</span>
-) : value === 'Em breve' ? (
-  <span class="coming-soon">Em breve</span>
+  <span aria-label={t.features.notIncluded}>—</span>
+) : value === t.features.comingSoon ? (
+  <span class="coming-soon">{t.features.comingSoon}</span>
 ) : (
   value
 )}

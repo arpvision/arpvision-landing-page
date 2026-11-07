@@ -1,22 +1,26 @@
 ---
 import Icon from './Icon.astro';
-import { faqGroups } from '../config/site';
+import { pageLocale } from '../i18n';
+import { anchorId } from '../i18n/routes';
+import { faqGroups } from '../lib/content';
 // O mesmo FAQ na Home e em /planos: uma lista só, separada por assunto.
+const { locale, t } = pageLocale(Astro);
+const groups = faqGroups(locale);
 ---
 
-<section class="section faq-section" id="duvidas" aria-labelledby="faq-title">
+<section class="section faq-section" id={anchorId(locale, 'faq')} aria-labelledby="faq-title">
   <div class="container faq-layout">
     <div>
-      <span class="eyebrow">DÚVIDAS FREQUENTES</span>
-      <h2 id="faq-title">Você pergunta.<br />A gente explica.</h2>
+      <span class="eyebrow">{t.faq.eyebrow}</span>
+      <h2 id="faq-title">{t.faq.title1}<br />{t.faq.title2}</h2>
       <p>
-        Sem letras miúdas.
+        {t.faq.lead1}
         <br />
-        Entenda cada parte do seu tour.
+        {t.faq.lead2}
       </p>
     </div>
     <div class="faq-groups">
-      {faqGroups.map((group) => (
+      {groups.map((group) => (
         <div class="faq-group">
           <h3>{group.title}</h3>
           <div class="faq-list">

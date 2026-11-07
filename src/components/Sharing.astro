@@ -1,22 +1,13 @@
 ---
 import Icon from './Icon.astro';
-import { site } from '../config/site';
+import ChatPreview from './ChatPreview.astro';
+import { pageLocale } from '../i18n';
+const { t } = pageLocale(Astro);
+const text = t.sharing;
 const channels = [
-  {
-    icon: 'message',
-    title: 'No WhatsApp',
-    text: 'O cliente abre o link sem criar conta e vê o espaço inteiro.',
-  },
-  {
-    icon: 'code',
-    title: 'No seu site',
-    text: 'Cole o código na página, nos formatos responsivo, 16:9 ou quadrado.',
-  },
-  {
-    icon: 'home',
-    title: 'Antes da visita',
-    text: 'Quem chega já conhece o espaço e vem decidido.',
-  },
+  { icon: 'message', ...text.channels.whatsapp },
+  { icon: 'code', ...text.channels.site },
+  { icon: 'home', ...text.channels.visit },
 ];
 ---
 
@@ -29,11 +20,11 @@ const channels = [
   <div class="container sharing-grid">
     <div class="sharing-copy">
       <span class="eyebrow">
-        <span class="sharing-dot"></span> COMPARTILHAMENTO
+        <span class="sharing-dot"></span> {text.eyebrow}
       </span>
       <h2 id="sharing-title">
-        Um link. O cliente
-        <br class="desktop-break" /> abre onde estiver.
+        {text.title1}
+        <br class="desktop-break" /> {text.title2}
       </h2>
       <div class="sharing-channels">
         {channels.map((channel) => (
@@ -49,15 +40,19 @@ const channels = [
         ))}
       </div>
     </div>
-    <figure class="sharing-conversation">
-      <img
-        src={site.media.whatsappConversation}
-        width="720"
-        height="1280"
-        loading="lazy"
-        decoding="async"
-        alt="Simulação de um corretor enviando um tour de 9 ambientes no WhatsApp. A mensagem explica que o cliente pode abrir no computador ou no celular, sem baixar nada nem criar conta."
-      />
-    </figure>
+    {text.conversationImage ? (
+      <figure class="sharing-conversation">
+        <img
+          src={text.conversationImage.src}
+          width="720"
+          height="1280"
+          loading="lazy"
+          decoding="async"
+          alt={text.conversationImage.alt}
+        />
+      </figure>
+    ) : (
+      <ChatPreview />
+    )}
   </div>
 </section>

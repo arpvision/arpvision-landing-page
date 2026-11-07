@@ -1,4 +1,5 @@
 import { site } from '../config/site';
+import { appLanguageParam, defaultLocale, type Locale } from '../i18n';
 
 export const money = (value: number) =>
   new Intl.NumberFormat('pt-BR', {
@@ -6,8 +7,19 @@ export const money = (value: number) =>
     currency: 'BRL',
     maximumFractionDigits: 2,
   }).format(value);
-export const appLink = (section: string, path: 'register' | 'login' = 'register') =>
-  `${site.appUrl}/${path}?${new URLSearchParams({ utm_source: 'site', utm_medium: section, utm_campaign: 'landing' })}`;
+// Os destinos do app abertos a quem não tem conta: criar e entrar, com a origem rastreável;
+// fora do português, o idioma vai junto.
+export const appLink = (
+  section: string,
+  path: 'register' | 'login' = 'register',
+  locale: Locale = defaultLocale,
+) =>
+  `${site.appUrl}/${path}?${new URLSearchParams({ utm_source: 'site', utm_medium: section, utm_campaign: 'landing', ...appLanguageParam(locale) })}`;
+// Tour embutido (/embed/...) no idioma da página.
+export const embedLink = (url: string, locale: Locale = defaultLocale) => {
+  const params = new URLSearchParams(appLanguageParam(locale)).toString();
+  return params ? `${url}${url.includes('?') ? '&' : '?'}${params}` : url;
+};
 // Player do YouTube para os tutoriais. O domínio nocookie só grava cookie depois do play;
 // playsinline toca dentro da página no iPhone; rel=0 encerra com vídeos do próprio canal.
 export const youtubeEmbed = (id: string) =>
@@ -19,11 +31,11 @@ export const clockDuration = (seconds: number) =>
   `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
 export const isoDuration = (seconds: number) =>
   `PT${seconds >= 60 ? `${Math.floor(seconds / 60)}M` : ''}${seconds % 60}S`;
-export const whatsappLink = (
-  message = 'Olá! Vim pelo site e quero saber mais sobre a ARP Vision.',
-) => {
+// A mensagem pronta vem do dicionário do idioma da página. `fallback` é a âncora do
+// rodapé de contato, que também muda com o idioma.
+export const whatsappLink = (message: string, fallback = '#contato') => {
   const number = site.contact.whatsapp.replace(/\D/g, '');
-  return number ? `https://wa.me/${number}?text=${encodeURIComponent(message)}` : '#contato';
+  return number ? `https://wa.me/${number}?text=${encodeURIComponent(message)}` : fallback;
 };
 // Preço no plano anual: valor mensal com desconto (arredondado em centavos) e total do ano.
 export const annualPricing = (monthlyPrice: number, discount: number) => {
