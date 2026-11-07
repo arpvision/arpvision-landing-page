@@ -95,6 +95,10 @@ test('cada idioma tem todas as páginas e âncoras, e o espanhol mora em /es', (
     plans: '/es/planes',
     terms: '/es/terminos-de-uso',
     privacy: '/es/politica-de-privacidad',
+    products: '/es/productos',
+    productInstagram: '/es/productos/piloto-automatico-para-instagram',
+    productAutochat: '/es/productos/autochat',
+    productVideos: '/es/productos/videos-a-partir-de-fotos',
   });
   assert.equal(routes.es.anchors.quote, 'cotizacion');
   assert.equal(routes.pt.anchors.quote, 'cotacao');

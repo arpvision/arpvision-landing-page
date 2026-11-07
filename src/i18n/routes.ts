@@ -4,9 +4,25 @@
  */
 import type { Locale } from '.';
 
-export type PageId = 'home' | 'plans' | 'terms' | 'privacy';
+export type PageId =
+  | 'home'
+  | 'plans'
+  | 'terms'
+  | 'privacy'
+  | 'products'
+  | 'productInstagram'
+  | 'productAutochat'
+  | 'productVideos';
 export type AnchorId =
-  'content' | 'howItWorks' | 'realTour' | 'plans' | 'quote' | 'faq' | 'contact' | 'compare';
+  | 'content'
+  | 'howItWorks'
+  | 'realTour'
+  | 'plans'
+  | 'quote'
+  | 'faq'
+  | 'contact'
+  | 'compare'
+  | 'inPerson';
 
 interface LocaleRoutes {
   pages: Record<PageId, string>;
@@ -20,6 +36,10 @@ export const routes: Record<Locale, LocaleRoutes> = {
       plans: '/planos',
       terms: '/termos-de-uso',
       privacy: '/politica-de-privacidade',
+      products: '/produtos',
+      productInstagram: '/produtos/piloto-automatico-para-instagram',
+      productAutochat: '/produtos/autochat',
+      productVideos: '/produtos/videos-a-partir-de-fotos',
     },
     anchors: {
       content: 'conteudo',
@@ -30,6 +50,7 @@ export const routes: Record<Locale, LocaleRoutes> = {
       faq: 'duvidas',
       contact: 'contato',
       compare: 'comparar',
+      inPerson: 'presencial',
     },
   },
   es: {
@@ -38,6 +59,10 @@ export const routes: Record<Locale, LocaleRoutes> = {
       plans: '/es/planes',
       terms: '/es/terminos-de-uso',
       privacy: '/es/politica-de-privacidad',
+      products: '/es/productos',
+      productInstagram: '/es/productos/piloto-automatico-para-instagram',
+      productAutochat: '/es/productos/autochat',
+      productVideos: '/es/productos/videos-a-partir-de-fotos',
     },
     anchors: {
       content: 'contenido',
@@ -48,9 +73,18 @@ export const routes: Record<Locale, LocaleRoutes> = {
       faq: 'preguntas',
       contact: 'contacto',
       compare: 'comparar',
+      inPerson: 'presencial',
     },
   },
 };
+
+/**
+ * As páginas publicadas. Menu, rodapé, sitemap e checagens usam só estas: uma página nova entra
+ * aqui quando fica pronta, e não antes. `plans` está na lista, mas só aparece com preços
+ * públicos (`site.pricing.showPrices`). Este arquivo só tem `import type`, para os scripts de
+ * checagem (Node) poderem importá-lo direto.
+ */
+export const publishedPageIds: readonly PageId[] = ['home', 'plans', 'terms', 'privacy'];
 
 export const pagePath = (locale: Locale, page: PageId) => routes[locale].pages[page];
 export const anchorId = (locale: Locale, anchor: AnchorId) => routes[locale].anchors[anchor];
