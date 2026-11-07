@@ -8,6 +8,7 @@ const pricesShown = !(await readFile('dist/planos/index.html', 'utf8')).includes
 const routes = [
   'index.html',
   ...(pricesShown ? ['planos/index.html'] : []),
+  'tutoriais/index.html',
   'termos-de-uso/index.html',
   'politica-de-privacidade/index.html',
 ];
@@ -97,6 +98,7 @@ assert.equal(canonicalOrigins.size, 1, `um só domínio nos canonicals: ${[...ca
 const [canonicalOrigin] = canonicalOrigins;
 const sitemap = await readFile('dist/sitemap.xml', 'utf8');
 assert.ok(sitemap.includes('/politica-de-privacidade'));
+assert.ok(sitemap.includes('/tutoriais'));
 assert.equal(sitemap.includes('/planos'), pricesShown, 'sitemap só lista /planos com preços');
 for (const [, loc] of sitemap.matchAll(/<loc>([^<]+)<\/loc>/g))
   assert.equal(new URL(loc).origin, canonicalOrigin, `sitemap no domínio canônico: ${loc}`);

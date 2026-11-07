@@ -1,7 +1,16 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { calculateUsage, appLink, whatsappLink, annualPricing } from '../src/lib/business';
-import { site, featureGroups } from '../src/config/site';
+import { existsSync } from 'node:fs';
+import {
+  calculateUsage,
+  appLink,
+  whatsappLink,
+  annualPricing,
+  youtubeEmbed,
+  clockDuration,
+  isoDuration,
+} from '../src/lib/business';
+import { site, featureGroups, tutorials } from '../src/config/site';
 
 test('configuração publica os quatro planos do app com 20% no anual e sem pacotes indefinidos', () => {
   const [individual, professional, business, enterprise] = site.pricing.plans;
@@ -77,8 +86,8 @@ test('cenário além do maior plano não inventa preço nem custo por espaço', 
   assert.equal(result.perProperty, null);
   assert.equal(result.twelveMonthPrice, null);
 });
-test('conta, login e tutoriais apontam ao app com origem e seção rastreáveis', () => {
-  for (const route of ['register', 'login', 'tutoriais'] as const) {
+test('conta e login apontam ao app com origem e seção rastreáveis', () => {
+  for (const route of ['register', 'login'] as const) {
     const url = new URL(appLink('seção de teste', route));
     assert.equal(url.origin, 'https://arpvision.app');
     assert.equal(url.pathname, `/${route}`);
@@ -86,6 +95,31 @@ test('conta, login e tutoriais apontam ao app com origem e seção rastreáveis'
     assert.equal(url.searchParams.get('utm_medium'), 'seção de teste');
     assert.equal(url.searchParams.get('utm_campaign'), 'landing');
   }
+});
+test('tutoriais: id do YouTube válido, capa nos dois tamanhos e ids únicos', () => {
+  assert.ok(tutorials.length > 0);
+  assert.equal(new Set(tutorials.map((tutorial) => tutorial.id)).size, tutorials.length);
+  for (const tutorial of tutorials) {
+    assert.match(tutorial.youtube, /^[A-Za-z0-9_-]{11}$/, tutorial.id);
+    assert.ok(tutorial.duration > 0, tutorial.id);
+    assert.ok(!Number.isNaN(Date.parse(tutorial.uploadDate)), tutorial.id);
+    for (const width of [360, 720])
+      assert.ok(existsSync(`public/images/tutoriais/${tutorial.id}-${width}.webp`), tutorial.id);
+  }
+});
+test('player dos tutoriais pelo youtube-nocookie e durações nos dois formatos', () => {
+  const url = new URL(youtubeEmbed('-FXGq9PymS0'));
+  assert.equal(url.origin + url.pathname, 'https://www.youtube-nocookie.com/embed/-FXGq9PymS0');
+  assert.equal(url.searchParams.get('playsinline'), '1');
+  assert.equal(url.searchParams.get('rel'), '0');
+  assert.deepEqual(
+    [clockDuration(134), clockDuration(41), clockDuration(60)],
+    ['2:14', '0:41', '1:00'],
+  );
+  assert.deepEqual(
+    [isoDuration(134), isoDuration(41), isoDuration(60)],
+    ['PT2M14S', 'PT41S', 'PT1M0S'],
+  );
 });
 test('WhatsApp comercial abre com o número completo e a mensagem codificada', () => {
   const url = new URL(whatsappLink('Olá! Quero saber mais.'));

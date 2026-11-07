@@ -4,5 +4,6 @@
 - Foto ilustrativa: Point3D Commercial Imaging Ltd., https://unsplash.com/photos/0BTn_jX0roU. Licença: https://unsplash.com/license. A fotografia não representa uma captura ou um aprimoramento da ARP Vision.
 - Cartões Open Graph: composição tipográfica própria, marca oficial e fotografia ilustrativa acima, gerada por `scripts/prepare-images.mjs`.
 - Miniaturas dos tours: cinco panoramas 2:1 enviados pelo proprietário em 05/10/2026, otimizados para WebP em `images/tours/`. Os enquadramentos são definidos em `site.media.fanRooms` e aplicados no CSS; os ambientes não foram alterados. Os três prints anteriores permanecem no diretório, sem uso na abertura.
+- Capas dos tutoriais: um quadro de cada vídeo tutorial da ARP Vision (projeto Remotion próprio), em `images/tutoriais/<id>-source.jpg`; os WebP de 360 e 720 px saem de `scripts/prepare-images.mjs`. Os vídeos estão no YouTube, no canal da ARP Vision.
 - Textura do gradiente: ruído procedural em SVG, composto no CSS com as cores da marca.
 - Conversa no WhatsApp: simulação enviada pelo proprietário em 06/10/2026, atualizada com `conversa-whatsapp (1).webp`. O original foi preservado em `images/conversa-whatsapp.webp`, incluindo a transparência; a conversa ilustra o compartilhamento do tour e o acesso sem baixar nada nem criar conta.

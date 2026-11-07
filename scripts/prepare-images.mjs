@@ -1,8 +1,20 @@
 import sharp from 'sharp';
-import { readFile, mkdir } from 'node:fs/promises';
+import { readFile, readdir, mkdir } from 'node:fs/promises';
 
 await mkdir('public/images', { recursive: true });
+// Capas da página /tutoriais: um quadro de cada vídeo, em pé (9:16), em <id>-source.jpg.
+const tutorialCovers = (await readdir('public/images/tutoriais'))
+  .filter((file) => file.endsWith('-source.jpg'))
+  .map((file) => file.replace(/-source\.jpg$/, ''));
 await Promise.all([
+  ...tutorialCovers.flatMap((id) =>
+    [360, 720].map((width) =>
+      sharp(`public/images/tutoriais/${id}-source.jpg`)
+        .resize(width)
+        .webp({ quality: 80 })
+        .toFile(`public/images/tutoriais/${id}-${width}.webp`),
+    ),
+  ),
   ...[640, 960, 1600].map((width) =>
     sharp('public/images/interior-source.jpg')
       .resize(width)

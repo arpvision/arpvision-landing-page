@@ -1,0 +1,98 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Icon from '../components/Icon.astro';
+import FinalCta from '../components/FinalCta.astro';
+import { site, tutorials } from '../config/site';
+import { clockDuration, isoDuration, youtubeWatch } from '../lib/business';
+import { organizationSchema } from '../lib/schema';
+const cover = (id: string, width: number) => `/images/tutoriais/${id}-${width}.webp`;
+const videoSchema = tutorials.map((tutorial) => ({
+  '@context': 'https://schema.org',
+  '@type': 'VideoObject',
+  name: tutorial.title,
+  description: tutorial.description,
+  thumbnailUrl: new URL(cover(tutorial.id, 720), site.domain).href,
+  uploadDate: tutorial.uploadDate,
+  duration: isoDuration(tutorial.duration),
+  embedUrl: `https://www.youtube.com/embed/${tutorial.youtube}`,
+  inLanguage: 'pt-BR',
+  publisher: { '@id': organizationSchema['@id'] },
+}));
+---
+
+<Layout
+  title="Tutoriais em vídeo | ARP Vision"
+  description="Vídeos curtos que mostram cada etapa da ARP Vision, da captura com o celular ao tour publicado, e como deixar o app na tela de início."
+  schema={videoSchema}
+>
+  <section class="section tutorials-page">
+    <div class="container">
+      <div class="section-heading center">
+        <a class="breadcrumb" href="/">
+          Início / Tutoriais
+        </a>
+        <span class="eyebrow">PASSO A PASSO EM VÍDEO</span>
+        <h1>Tutoriais</h1>
+        <p>
+          Vídeos curtos que mostram cada etapa da ARP Vision, do primeiro ambiente fotografado ao
+          tour publicado.
+        </p>
+      </div>
+      <!-- Cada cartão é um link para o YouTube; com JavaScript, o vídeo abre no diálogo abaixo. -->
+      <ul class="tutorial-list" role="list">
+        {tutorials.map((tutorial, index) => (
+          <li id={tutorial.id}>
+            <a
+              class="tutorial-card"
+              href={youtubeWatch(tutorial.youtube)}
+              aria-label={`Assistir: ${tutorial.title} (${clockDuration(tutorial.duration)})`}
+              aria-describedby={`${tutorial.id}-descricao`}
+              data-tutorial={tutorial.id}
+              data-youtube={tutorial.youtube}
+              data-title={tutorial.title}
+            >
+              <div class="tutorial-cover">
+                <img
+                  src={cover(tutorial.id, 360)}
+                  srcset={`${cover(tutorial.id, 360)} 360w, ${cover(tutorial.id, 720)} 720w`}
+                  sizes="(max-width: 767px) 112px, 168px"
+                  width="360"
+                  height="640"
+                  loading={index < 2 ? 'eager' : 'lazy'}
+                  alt=""
+                />
+                <span class="tutorial-play" aria-hidden="true">
+                  <Icon name="play" size={20} />
+                </span>
+                <span class="tutorial-duration" aria-hidden="true">
+                  {clockDuration(tutorial.duration)}
+                </span>
+              </div>
+              <div class="tutorial-body">
+                <span class="tutorial-section">{tutorial.section}</span>
+                <h2>{tutorial.title}</h2>
+                <p id={`${tutorial.id}-descricao`}>{tutorial.description}</p>
+                <span class="tutorial-watch" aria-hidden="true">
+                  Assistir <Icon name="arrow" size={16} />
+                </span>
+              </div>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+  <FinalCta />
+  <dialog id="tutorial-dialog" class="video-dialog" aria-labelledby="tutorial-dialog-title">
+    <div class="video-dialog-bar">
+      <p id="tutorial-dialog-title" class="video-dialog-title"></p>
+      <button class="icon-button video-dialog-close" data-close-dialog aria-label="Fechar o vídeo">
+        <Icon name="close" />
+      </button>
+    </div>
+    <div class="video-dialog-frame" data-video-frame></div>
+  </dialog>
+  <script>
+    import '../scripts/tutorials';
+  </script>
+</Layout>
