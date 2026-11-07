@@ -6,9 +6,19 @@ export const money = (value: number) =>
     currency: 'BRL',
     maximumFractionDigits: 2,
   }).format(value);
-// Os destinos do app abertos a quem não tem conta: criar, entrar e os tutoriais em vídeo.
-export const appLink = (section: string, path: 'register' | 'login' | 'tutoriais' = 'register') =>
+export const appLink = (section: string, path: 'register' | 'login' = 'register') =>
   `${site.appUrl}/${path}?${new URLSearchParams({ utm_source: 'site', utm_medium: section, utm_campaign: 'landing' })}`;
+// Player do YouTube para os tutoriais. O domínio nocookie só grava cookie depois do play;
+// playsinline toca dentro da página no iPhone; rel=0 encerra com vídeos do próprio canal.
+export const youtubeEmbed = (id: string) =>
+  `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&playsinline=1&rel=0`;
+// Sem JavaScript, ou com Ctrl/⌘ no clique, o tutorial abre no próprio YouTube.
+export const youtubeWatch = (id: string) => `https://www.youtube.com/watch?v=${id}`;
+// Duração em segundos: "2:14" no cartão, "PT2M14S" nos dados estruturados.
+export const clockDuration = (seconds: number) =>
+  `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
+export const isoDuration = (seconds: number) =>
+  `PT${seconds >= 60 ? `${Math.floor(seconds / 60)}M` : ''}${seconds % 60}S`;
 export const whatsappLink = (
   message = 'Olá! Vim pelo site e quero saber mais sobre a ARP Vision.',
 ) => {

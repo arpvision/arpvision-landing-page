@@ -459,3 +459,38 @@ export const faqGroups = [
 ];
 
 export const faq = faqGroups.flatMap((group) => group.items);
+
+// Os vídeos da página /tutoriais, na ordem do app (o app tem a mesma lista em
+// inner-view-client/src/app/tutoriais). Moram no YouTube, como Shorts não listados.
+// A capa é <id>-source.jpg em public/images/tutoriais, e `prepare-images` gera os WebP.
+export interface Tutorial {
+  id: string;
+  section: string;
+  title: string;
+  description: string;
+  youtube: string;
+  /** Em segundos. */
+  duration: number;
+  /** Data da publicação no YouTube, para os dados estruturados. */
+  uploadDate: string;
+}
+export const tutorials: Tutorial[] = [
+  {
+    id: 'do-novo-tour-a-publicacao',
+    section: 'Primeiros passos',
+    title: 'Do Novo tour à publicação',
+    description: 'O caminho inteiro: captura, ambientes, passagens e publicação.',
+    youtube: '2P5RVlg3p3k',
+    duration: 134,
+    uploadDate: '2026-11-06T21:20:54-08:00',
+  },
+  {
+    id: 'app-na-tela-de-inicio',
+    section: 'Dicas do app',
+    title: 'O app na tela de início',
+    description: 'Abra a ARP Vision com um toque, em tela cheia, no iPhone.',
+    youtube: '-FXGq9PymS0',
+    duration: 41,
+    uploadDate: '2026-11-06T21:21:53-08:00',
+  },
+];

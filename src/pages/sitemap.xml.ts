@@ -1,12 +1,13 @@
 import { site } from '../config/site';
 export function GET() {
-  // A Home é a página principal do site; as legais mudam pouco.
+  // A Home é a página principal do site; os tutoriais crescem aos poucos; as legais mudam pouco.
   // /planos só entra com preços públicos; sem eles, a rota redireciona para a cotação.
   const routes = [
     { path: '/', changefreq: 'weekly', priority: '1.0' },
     ...(site.pricing.showPrices
       ? [{ path: '/planos', changefreq: 'weekly', priority: '0.8' }]
       : []),
+    { path: '/tutoriais', changefreq: 'monthly', priority: '0.6' },
     { path: '/termos-de-uso', changefreq: 'yearly', priority: '0.3' },
     { path: '/politica-de-privacidade', changefreq: 'yearly', priority: '0.3' },
   ];
