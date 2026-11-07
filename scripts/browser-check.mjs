@@ -51,34 +51,55 @@ try {
     );
     results.push(`Rota ${route}: HTML, imagens e carregamento inicial sem iframe extra OK`);
   }
-  // Tutoriais: o cartão leva ao YouTube; com JavaScript, abre o player no diálogo.
-  await page.goto(base + '/tutoriais');
-  const card = page.locator('.tutorial-card').first();
-  assert.match(await card.getAttribute('href'), /^https:\/\/www\.youtube\.com\/watch\?v=/);
-  assert.equal(
-    await page.locator('.desktop-nav a[href="/tutoriais"]').getAttribute('aria-current'),
-    'page',
-  );
-  await card.click();
-  const videoDialog = page.locator('#tutorial-dialog');
-  assert.equal(await videoDialog.evaluate((dialog) => dialog.open), true);
+  // Tutoriais, nos dois idiomas: o cartão leva ao YouTube; com JavaScript, abre o player no
+  // diálogo. Cabeçalho, menu do celular e rodapé levam à página do idioma (o seletor PT | ES,
+  // com hreflang, é o único caminho para a do outro).
+  for (const [route, closeLabel, screenshot] of [
+    ['/tutoriais', 'Fechar o vídeo', 'tutoriais'],
+    ['/es/tutoriales', 'Cerrar el vídeo', 'tutoriales'],
+  ]) {
+    await page.goto(base + route);
+    const card = page.locator('.tutorial-card').first();
+    assert.match(await card.getAttribute('href'), /^https:\/\/www\.youtube\.com\/watch\?v=/);
+    for (const menu of ['.desktop-nav', '#mobile-nav'])
+      assert.equal(
+        await page
+          .locator(`${menu} a[href="${route}"]:not([hreflang])`)
+          .getAttribute('aria-current'),
+        'page',
+        `${route}: ${menu} marca a página`,
+      );
+    assert.equal(await page.locator(`footer a[href="${route}"]:not([hreflang])`).count(), 1);
+    await card.click();
+    const videoDialog = page.locator('#tutorial-dialog');
+    assert.equal(await videoDialog.evaluate((dialog) => dialog.open), true);
+    assert.match(
+      await videoDialog.locator('iframe').getAttribute('src'),
+      new RegExp(
+        `^https://www\\.youtube-nocookie\\.com/embed/${await card.getAttribute('data-youtube')}\\?`,
+      ),
+    );
+    assert.equal(
+      await page.locator('#tutorial-dialog-title').textContent(),
+      await card.getAttribute('data-title'),
+    );
+    assert.equal(
+      await videoDialog.locator('[data-close-dialog]').getAttribute('aria-label'),
+      closeLabel,
+    );
+    await page.screenshot({ path: `.artifacts/${screenshot}-player-desktop.png` });
+    await page.keyboard.press('Escape');
+    assert.equal(await videoDialog.evaluate((dialog) => dialog.open), false);
+    assert.equal(await videoDialog.locator('iframe').count(), 0, `${route}: fechar tira o player`);
+    assert.equal(await card.evaluate((element) => element === document.activeElement), true);
+  }
+  // Os vídeos são narrados em português: o espanhol avisa logo na abertura, como o app.
   assert.match(
-    await videoDialog.locator('iframe').getAttribute('src'),
-    new RegExp(
-      `^https://www\\.youtube-nocookie\\.com/embed/${await card.getAttribute('data-youtube')}\\?`,
-    ),
+    await page.locator('.tutorials-page .section-heading p').innerText(),
+    /^Vídeos cortos, en portugués, /,
   );
-  assert.equal(
-    await page.locator('#tutorial-dialog-title').textContent(),
-    await card.getAttribute('data-title'),
-  );
-  await page.screenshot({ path: '.artifacts/tutoriais-player-desktop.png' });
-  await page.keyboard.press('Escape');
-  assert.equal(await videoDialog.evaluate((dialog) => dialog.open), false);
-  assert.equal(await videoDialog.locator('iframe').count(), 0, 'fechar tira o player');
-  assert.equal(await card.evaluate((element) => element === document.activeElement), true);
   results.push(
-    'Tutoriais: player no diálogo só após o clique; Escape fecha, tira o iframe e devolve o foco OK',
+    'Tutoriais nos dois idiomas: player no diálogo só após o clique; Escape fecha, tira o iframe e devolve o foco; menus e rodapé no idioma; aviso "en portugués" OK',
   );
   await page.goto(base);
   await page.evaluate(() => document.fonts.ready);

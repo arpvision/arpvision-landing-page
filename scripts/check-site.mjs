@@ -205,6 +205,25 @@ for (const { locale, page, file } of routes) {
         `${route}: pergunta do FAQPage na página: ${question.name}`,
       );
   }
+  if (page === 'tutorials') {
+    // Um VideoObject por cartão, com o título que o cartão mostra, no idioma da página.
+    const titles = [...html.matchAll(/data-title="([^"]+)"/g)].map((match) => decode(match[1]));
+    assert.ok(titles.length > 0, `${route}: cartões dos tutoriais`);
+    assert.deepEqual(
+      schemas.filter((item) => item['@type'] === 'VideoObject').map((item) => item.name),
+      titles,
+      `${route}: VideoObject de cada cartão`,
+    );
+  }
+  // Cabeçalho, menu do celular e rodapé levam aos tutoriais do idioma da página; os do outro
+  // idioma só aparecem no seletor PT | ES, que leva hreflang.
+  for (const other of locales)
+    assert.equal(
+      html.match(new RegExp(`<a href="${pathOf(other.pages.tutorials)}"(?! hreflang)`, 'g'))
+        ?.length ?? 0,
+      other === locale ? 3 : 0,
+      `${route}: links para os tutoriais em ${other.lang}`,
+    );
   if (locale.code !== 'pt')
     for (const text of readableText(html))
       assert.doesNotMatch(text, portugueseWords, `${route}: português na página: "${text}"`);

@@ -95,7 +95,7 @@ npm run build
 npm run check:site
 ```
 
-Os testes verificam recomendação e dados dos planos, compartilhamento dos números entre superfícies, cenários acima do limite e UTMs; e, nos idiomas, as mesmas chaves no português e no espanhol, nenhuma letra ou palavra do português no espanhol, nenhum "IA", os endereços em `/es` e o `idioma=es` nos links do app. A checagem de saída verifica as rotas dos dois idiomas, `lang`, arquivos locais, metadados, canonical apontando para a própria página, hreflang com `x-default`, `og:locale`, sitemap com as duas versões e robots no mesmo domínio, JSON-LD no idioma da página (e o FAQPage igual ao FAQ dela), a 404, nenhum texto em português nas páginas `/es`, nenhum iframe inicial além do tour da hero e orçamento de JavaScript.
+Os testes verificam recomendação e dados dos planos, compartilhamento dos números entre superfícies, cenários acima do limite e UTMs; e, nos idiomas, as mesmas chaves no português e no espanhol, nenhuma letra ou palavra do português no espanhol, nenhum "IA", os endereços em `/es`, o `idioma=es` nos links do app e o texto de cada tutorial nos dois idiomas, com o aviso em espanhol de que os vídeos são narrados em português. A checagem de saída verifica as rotas dos dois idiomas, `lang`, arquivos locais, metadados, canonical apontando para a própria página, hreflang com `x-default`, `og:locale`, sitemap com as duas versões e robots no mesmo domínio, JSON-LD no idioma da página (e o FAQPage igual ao FAQ dela; o VideoObject dos tutoriais leva o idioma da narração, pt-BR), os links dos tutoriais no idioma da página, a 404, nenhum texto em português nas páginas `/es`, nenhum iframe inicial além do tour da hero e orçamento de JavaScript.
 
 Para ler o site como o Googlebot (robots → sitemap → cada página, sem seguir redirecionamentos), com a prévia no ar ou contra a produção depois do deploy:
 
@@ -114,7 +114,7 @@ npm run test:showcase
 node scripts/lighthouse.mjs
 ```
 
-As checagens de navegador cobrem também o espanhol: texto visível sem português, cotação com a mensagem em espanhol, seletor PT | ES, 404, contraste nos dois temas, tour da demo com `idioma=es` e as larguras de 320 a 1440px sem estouro.
+As checagens de navegador cobrem também o espanhol: texto visível sem português, cotação com a mensagem em espanhol, seletor PT | ES, 404, contraste nos dois temas, tour da demo com `idioma=es`, o player dos tutoriais em `/es/tutoriales` e as larguras de 320 a 1440px sem estouro (com o cabeçalho numa linha).
 
 Relatórios e capturas são salvos em `.artifacts/` (ignorado pelo Git). Lighthouse usa emulação móvel; resultados de laboratório não substituem medições de usuários reais.
 
