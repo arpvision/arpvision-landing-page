@@ -23,7 +23,10 @@ export const es: Dictionary = {
   header: {
     mainNav: 'Navegación principal',
     mobileNav: 'Navegación en el móvil',
-    howItWorks: 'Cómo funciona',
+    products: 'Productos',
+    productsPanel: 'Productos de ARP Vision',
+    viewAllProducts: 'Ver todos los productos',
+    newBadge: 'Nuevo',
     realTour: 'Tour real',
     plans: 'Planes',
     quote: 'Presupuesto',
@@ -36,6 +39,27 @@ export const es: Dictionary = {
     signupShort: 'Crear cuenta',
     menu: 'Menú',
     close: 'Cerrar',
+  },
+  products: {
+    groups: {
+      show: 'Mostrar el inmueble',
+      promote: 'Difundir y atender',
+      team: 'Con nuestro equipo',
+    },
+    items: {
+      tour: { name: 'Tour virtual 360°', line: 'El inmueble por dentro, con el móvil.' },
+      videos: { name: 'Vídeos a partir de fotos', line: 'Reels, stories y portales.' },
+      instagram: {
+        name: 'Piloto automático para Instagram',
+        line: 'El mes de posts, listo para aprobar.',
+      },
+      autochat: {
+        name: 'Autochat',
+        line: 'Atiende por WhatsApp y deriva al agente inmobiliario.',
+      },
+    },
+    // O Presencial ainda não existe no espanhol: o grupo "Com a nossa equipe" não aparece.
+    inPerson: null,
   },
   footer: {
     taglineLines: ['Todo el espacio, por dentro.', 'El móvil es solo el principio.'],

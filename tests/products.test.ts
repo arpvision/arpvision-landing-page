@@ -13,6 +13,7 @@ import {
   products,
   productSlug,
   productsFor,
+  sectionHref,
 } from '../src/lib/products';
 
 const by = (id: string) => products.find((p) => p.id === id)!;
@@ -60,6 +61,27 @@ test('links dos produtos', () => {
 
 test('o Presencial tem a mesma âncora nos dois idiomas', () => {
   for (const locale of locales) assert.equal(anchorId(locale, 'inPerson'), 'presencial');
+});
+
+test('links de seção do cabeçalho: ficam na página quando ela tem a seção', () => {
+  assert.equal(sectionHref('pt', 'quote', '/'), '#cotacao');
+  assert.equal(sectionHref('es', 'faq', '/es'), '#preguntas');
+  assert.equal(sectionHref('pt', 'quote', '/termos-de-uso'), '/#cotacao');
+  assert.equal(sectionHref('es', 'quote', '/es/tutoriales'), '/es#cotizacion');
+  // A página de produto tem cotação e dúvidas próprias, com os ids da home; o resto é da home.
+  for (const locale of locales)
+    for (const page of productPageIds) {
+      const path = routes[locale].pages[page];
+      assert.equal(sectionHref(locale, 'quote', path), `#${anchorId(locale, 'quote')}`);
+      assert.equal(sectionHref(locale, 'faq', path), `#${anchorId(locale, 'faq')}`);
+      assert.equal(
+        sectionHref(locale, 'realTour', path),
+        `${routes[locale].pages.home}#${anchorId(locale, 'realTour')}`,
+      );
+    }
+  // A página com todos os produtos não tem essas seções.
+  assert.equal(sectionHref('pt', 'quote', '/produtos'), '/#cotacao');
+  assert.equal(sectionHref('es', 'faq', '/es/productos'), '/es#preguntas');
 });
 
 test('productOfPage devolve o dono da página, e cada página de produto tem um só dono', () => {

@@ -41,9 +41,12 @@ const shape = (value: unknown): unknown => {
 test('o espanhol tem as mesmas chaves e funções do português, e nenhum texto vazio a mais', () => {
   const pt = shape(translations('pt')) as Record<string, unknown>;
   const es = shape(translations('es')) as Record<string, unknown>;
-  // A conversa do WhatsApp é imagem em português e HTML em espanhol: é a única diferença.
+  // As duas diferenças: a conversa do WhatsApp é imagem em português e HTML em espanhol, e o
+  // ARP Vision Presencial (o grupo "Com a nossa equipe" do menu Produtos) só existe em português.
   delete (pt.sharing as Record<string, unknown>).conversationImage;
   delete (es.sharing as Record<string, unknown>).conversationImage;
+  delete (pt.products as Record<string, unknown>).inPerson;
+  delete (es.products as Record<string, unknown>).inPerson;
   assert.deepEqual(es, pt);
   const ptTexts = new Map(texts('pt'));
   for (const [path, value] of texts('es')) {
@@ -53,10 +56,9 @@ test('o espanhol tem as mesmas chaves e funções do português, e nenhum texto 
   // Listas com o mesmo número de itens: perguntas, opções e palavras do rolo.
   const ptList = walk(translations('pt')).map(([path]) => path);
   const esList = walk(translations('es')).map(([path]) => path);
-  assert.deepEqual(
-    esList.filter((path) => !path.startsWith('sharing.conversationImage')),
-    ptList.filter((path) => !path.startsWith('sharing.conversationImage')),
-  );
+  const shared = (path: string) =>
+    !path.startsWith('sharing.conversationImage') && !path.startsWith('products.inPerson');
+  assert.deepEqual(esList.filter(shared), ptList.filter(shared));
 });
 
 test('o espanhol não tem letras nem palavras do português e segue o glossário', () => {

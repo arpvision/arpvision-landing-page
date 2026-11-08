@@ -3,19 +3,23 @@ import Brand from './Brand.astro';
 import Icon from './Icon.astro';
 import GlassSurface from './GlassSurface.astro';
 import LanguageSwitch from './LanguageSwitch.astro';
+import ProductsMenu from './ProductsMenu.astro';
 import { appLink } from '../lib/business';
+import { productOfPage, sectionHref } from '../lib/products';
 import { site, available } from '../config/site';
 import { pageLocale } from '../i18n';
-import { anchorId, pagePath } from '../i18n/routes';
+import { anchorId, pageAt, pagePath, type AnchorId } from '../i18n/routes';
 const { locale, t } = pageLocale(Astro);
-const home = pagePath(locale, 'home');
-const isHome = Astro.url.pathname === home;
-const anchor = (id: Parameters<typeof anchorId>[1]) =>
-  `${isHome ? '' : home}#${anchorId(locale, id)}`;
+const path = Astro.url.pathname;
+const page = pageAt(locale, path);
+const isHome = page === 'home';
+// Seções da Home; na página de um produto, "Cotação" e "Dúvidas" ficam na própria página.
+const anchor = (id: AnchorId) => sectionHref(locale, id, path);
+// Na página de um produto (ou na de todos), o botão "Produtos" só ganha a marca visual:
+// aria-current num botão que abre menu é lido errado.
+const productsCurrent = productOfPage(page) !== undefined || page === 'products';
 const tutorialsPath = pagePath(locale, 'tutorials');
-const tutorialsCurrent = Astro.url.pathname.startsWith(tutorialsPath)
-  ? ('page' as const)
-  : undefined;
+const tutorialsCurrent = path.startsWith(tutorialsPath) ? ('page' as const) : undefined;
 // Sem preços públicos, o item "Planos" vira "Cotação" e leva à seção da Home.
 const plansPath = pagePath(locale, 'plans');
 const plans = site.pricing.showPrices
@@ -23,7 +27,7 @@ const plans = site.pricing.showPrices
       href: plansPath,
       spy: anchorId(locale, 'plans'),
       label: t.header.plans,
-      current: Astro.url.pathname.startsWith(plansPath) ? ('page' as const) : undefined,
+      current: path.startsWith(plansPath) ? ('page' as const) : undefined,
     }
   : {
       href: anchor('quote'),
@@ -38,9 +42,16 @@ const plans = site.pricing.showPrices
     <div class="header-inner">
       <Brand />
       <nav class="desktop-nav" aria-label={t.header.mainNav}>
-        <a href={anchor('howItWorks')} data-spy={anchorId(locale, 'howItWorks')}>
-          {t.header.howItWorks}
-        </a>
+        <button
+          type="button"
+          class:list={['products-toggle', { 'is-current': productsCurrent }]}
+          aria-expanded="false"
+          aria-controls="products-panel"
+          data-products-toggle
+        >
+          {t.header.products}
+          <Icon name="down" size={16} />
+        </button>
         {available.tour && (
           <a href={anchor('realTour')} data-spy={anchorId(locale, 'realTour')}>
             {t.header.realTour}
@@ -94,7 +105,21 @@ const plans = site.pricing.showPrices
       </div>
     </div>
     <nav id="mobile-nav" class="mobile-nav" aria-label={t.header.mobileNav} hidden>
-      <a href={anchor('howItWorks')}>{t.header.howItWorks}</a>
+      <!-- "Produtos" é um grupo que abre aqui dentro; os links de seção seguem filhos diretos do menu. -->
+      <div class="mobile-products">
+        <button
+          type="button"
+          class:list={['mobile-products-toggle', { 'is-current': productsCurrent }]}
+          aria-expanded="false"
+          aria-controls="mobile-products-list"
+        >
+          {t.header.products}
+          <Icon name="down" size={20} />
+        </button>
+        <div id="mobile-products-list" class="mobile-products-list" hidden>
+          <ProductsMenu variant="mobile" />
+        </div>
+      </div>
       {available.tour && <a href={anchor('realTour')}>{t.header.realTour}</a>}
       <a href={plans.href} aria-current={plans.current}>
         {plans.label}
@@ -123,6 +148,12 @@ const plans = site.pricing.showPrices
       </a>
     </nav>
   </GlassSurface>
+  <!-- Fora da cápsula: dentro dela, o desfoque do painel só pegaria o que está na própria cápsula. -->
+  <nav id="products-panel" class="products-panel" aria-label={t.header.productsPanel} hidden>
+    <GlassSurface class="products-surface">
+      <ProductsMenu variant="desktop" />
+    </GlassSurface>
+  </nav>
 </header>
 <script is:inline>
   const header = document.currentScript.previousElementSibling;
@@ -130,4 +161,7 @@ const plans = site.pricing.showPrices
     header.dataset.headerEnhanced = '';
     if (header.dataset.home === 'true') header.dataset.headerSurface = 'opening';
   }
+</script>
+<script>
+  import '../scripts/products-menu';
 </script>

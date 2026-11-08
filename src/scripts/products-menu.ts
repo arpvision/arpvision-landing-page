@@ -1,0 +1,72 @@
+// Menu "Produtos". No desktop, o botão abre um painel que fica fora da cápsula do cabeçalho; no
+// celular, um grupo dentro do menu. Os links do grupo fecham o menu como os outros (site.ts).
+const header = document.querySelector<HTMLElement>('.site-header');
+const toggle = document.querySelector<HTMLButtonElement>('[data-products-toggle]');
+const panel = document.querySelector<HTMLElement>('#products-panel');
+
+const isOpen = () => toggle?.getAttribute('aria-expanded') === 'true';
+// O painel começa embaixo do botão, sem passar da borda direita do cabeçalho.
+const place = () => {
+  if (!header || !toggle || !panel) return;
+  const headerBox = header.getBoundingClientRect();
+  const left = toggle.getBoundingClientRect().left - headerBox.left;
+  const room = headerBox.width - panel.offsetWidth;
+  panel.style.setProperty('--products-left', `${Math.max(0, Math.min(left, room))}px`);
+};
+const setPanel = (open: boolean) => {
+  if (!toggle || !panel) return;
+  panel.hidden = !open;
+  toggle.setAttribute('aria-expanded', String(open));
+  if (open) place();
+};
+
+// Clique, Enter e Espaço chegam como clique no botão.
+toggle?.addEventListener('click', () => setPanel(!isOpen()));
+panel
+  ?.querySelectorAll('a')
+  .forEach((link) => link.addEventListener('click', () => setPanel(false)));
+// Clique fora do painel e do botão fecha.
+document.addEventListener('click', (event) => {
+  if (isOpen() && !(event.target as Element).closest('#products-panel, [data-products-toggle]'))
+    setPanel(false);
+});
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && isOpen()) {
+    setPanel(false);
+    toggle?.focus();
+  }
+});
+// Com o painel aberto, o Tab segue a ordem da tela: do botão ao primeiro item e do último item ao
+// link depois do botão (no HTML, o painel vem depois da cápsula).
+toggle?.addEventListener('keydown', (event) => {
+  const first = panel?.querySelector('a');
+  if (event.key !== 'Tab' || event.shiftKey || !isOpen() || !first) return;
+  event.preventDefault();
+  first.focus();
+});
+panel?.addEventListener('keydown', (event) => {
+  if (event.key !== 'Tab') return;
+  const links = [...panel.querySelectorAll('a')];
+  if (event.shiftKey && event.target === links[0]) {
+    event.preventDefault();
+    toggle?.focus();
+  } else if (!event.shiftKey && event.target === links.at(-1)) {
+    event.preventDefault();
+    setPanel(false);
+    (toggle?.nextElementSibling as HTMLElement | null)?.focus();
+  }
+});
+window.addEventListener('resize', () => isOpen() && place(), { passive: true });
+// Abaixo de 1024px o menu Produtos fica no menu do celular.
+matchMedia('(max-width: 1023px)').addEventListener('change', (event) => {
+  if (event.matches) setPanel(false);
+});
+
+const mobileToggle = document.querySelector<HTMLButtonElement>('.mobile-products-toggle');
+const mobileList = document.querySelector<HTMLElement>('#mobile-products-list');
+mobileToggle?.addEventListener('click', () => {
+  if (!mobileList) return;
+  const open = mobileToggle.getAttribute('aria-expanded') !== 'true';
+  mobileList.hidden = !open;
+  mobileToggle.setAttribute('aria-expanded', String(open));
+});

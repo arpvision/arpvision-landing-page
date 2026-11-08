@@ -7,6 +7,7 @@ import { locales, type Locale } from '../i18n';
 import { available } from '../config/site';
 import {
   anchorId,
+  pageAt,
   pagePath,
   publishedPageIds,
   sectionPath,
@@ -143,4 +144,18 @@ export function productSlug(locale: Locale, page: ProductPageId): string {
 /** O produto dono da página, para marcar o item atual do menu. */
 export function productOfPage(page: PageId | undefined): Product | undefined {
   return page ? products.find((product) => product.page === page) : undefined;
+}
+
+/** As seções da home que toda página de produto também tem, com os mesmos ids. */
+const productPageSections: readonly AnchorId[] = ['quote', 'faq'];
+
+/**
+ * O link do cabeçalho para uma seção da home. Fica na própria página quando ela tem a seção (a
+ * home, e a página de produto na cotação e nas dúvidas); das outras, leva à home (`/#cotacao`).
+ */
+export function sectionHref(locale: Locale, anchor: AnchorId, currentPath: string): string {
+  const page = pageAt(locale, currentPath);
+  const local =
+    page === 'home' || (productOfPage(page) !== undefined && productPageSections.includes(anchor));
+  return local ? `#${anchorId(locale, anchor)}` : sectionPath(locale, 'home', anchor);
 }

@@ -25,7 +25,11 @@ export const pt = {
   header: {
     mainNav: 'Navegação principal',
     mobileNav: 'Navegação no celular',
-    howItWorks: 'Como funciona',
+    products: 'Produtos',
+    productsPanel: 'Produtos da ARP Vision',
+    viewAllProducts: 'Ver todos os produtos',
+    // Selo dos produtos novos: quer dizer produto novo, e não "em breve".
+    newBadge: 'Novo',
     realTour: 'Tour real',
     plans: 'Planos',
     quote: 'Cotação',
@@ -38,6 +42,34 @@ export const pt = {
     signupShort: 'Criar conta',
     menu: 'Menu',
     close: 'Fechar',
+  },
+  // Menu "Produtos" do cabeçalho: os grupos e, de cada produto, o nome e uma linha.
+  products: {
+    groups: {
+      show: 'Mostrar o imóvel',
+      promote: 'Divulgar e atender',
+      team: 'Com a nossa equipe',
+    },
+    items: {
+      tour: { name: 'Tour virtual 360°', line: 'O imóvel por dentro, com o celular.' },
+      videos: { name: 'Vídeos a partir de fotos', line: 'Reels, stories e portais.' },
+      instagram: {
+        name: 'Piloto automático para Instagram',
+        line: 'O mês de posts pronto para aprovar.',
+      },
+      autochat: { name: 'Autochat', line: 'Atende no WhatsApp e passa ao corretor.' },
+    },
+    // O ARP Vision Presencial só existe em português, por enquanto: no espanhol, sem o grupo.
+    inPerson: {
+      training: {
+        name: 'Treinamento da equipe',
+        line: 'Seus corretores aprendem a fazer tours com o celular.',
+      },
+      readyTour: { name: 'Tour Pronto', line: 'Nossa equipe vai até o imóvel e faz a captura.' },
+    } as {
+      training: { name: string; line: string };
+      readyTour: { name: string; line: string };
+    } | null,
   },
   footer: {
     taglineLines: ['O espaço por inteiro.', 'O celular é só o começo.'],

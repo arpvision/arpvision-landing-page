@@ -2,6 +2,7 @@ import { chromium, devices } from '@playwright/test';
 import assert from 'node:assert/strict';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { portugueseWords } from './portuguese-words.mjs';
+import { publishedPageIds, routes as localeRoutes } from '../src/i18n/routes.ts';
 
 await mkdir('.artifacts', { recursive: true });
 const base = process.env.SITE_URL || 'http://127.0.0.1:4321';
@@ -12,22 +13,25 @@ const results = [];
 const pricesShown = !(await (await fetch(`${base}/planos`)).text()).includes(
   'http-equiv="refresh"',
 );
-const ptRoutes = [
-  '/',
-  ...(pricesShown ? ['/planos'] : []),
-  '/tutoriais',
-  '/termos-de-uso',
-  '/politica-de-privacidade',
-];
+// As páginas publicadas, na ordem de routes.ts.
+const pageIds = Object.keys(localeRoutes.pt.pages).filter(
+  (page) => publishedPageIds.includes(page) && (pricesShown || page !== 'plans'),
+);
+const ptRoutes = pageIds.map((page) => localeRoutes.pt.pages[page]);
 // As mesmas páginas em espanhol, em /es, na mesma ordem (cada uma é medida contra a do português).
-const esRoutes = [
-  '/es',
-  ...(pricesShown ? ['/es/planes'] : []),
-  '/es/tutoriales',
-  '/es/terminos-de-uso',
-  '/es/politica-de-privacidad',
-];
+const esRoutes = pageIds.map((page) => localeRoutes.es.pages[page]);
 const routes = [...ptRoutes, ...esRoutes];
+// O menu Produtos mostra só o que está no ar: o tour (na home), uma página por produto publicado
+// e o "Ver todos" quando /produtos estiver publicada.
+const productPages = publishedPageIds.filter((page) =>
+  localeRoutes.pt.pages[page].startsWith(`${localeRoutes.pt.pages.products}/`),
+);
+const productLinks = (locale) =>
+  [
+    localeRoutes[locale].pages.home,
+    ...productPages.map((page) => localeRoutes[locale].pages[page]),
+  ].sort();
+const allProductsLinks = publishedPageIds.includes('products') ? 1 : 0;
 try {
   const desktop = await browser.newContext({
     viewport: { width: 1440, height: 1000 },
@@ -139,7 +143,6 @@ try {
 
   // Menu do desktop acompanha a seção visível.
   for (const [id, label] of [
-    ['como-funciona', 'Como funciona'],
     pricesShown ? ['planos', 'Planos'] : ['cotacao', 'Cotação'],
     ['duvidas', 'Dúvidas'],
   ]) {
@@ -155,6 +158,63 @@ try {
     );
   }
   results.push('Menu do desktop destaca a seção visível OK');
+
+  // "Produtos ▾" no lugar de "Como funciona", nos dois idiomas: abre e fecha pelo clique, pelo
+  // teclado e pelo clique fora, e mostra um link por produto no ar.
+  for (const [locale, route] of [
+    ['pt', '/'],
+    ['es', '/es'],
+  ]) {
+    await page.goto(base + route);
+    const toggle = page.locator('.desktop-nav > :first-child');
+    const panel = page.locator('#products-panel');
+    assert.equal(
+      await toggle.evaluate((element) => element.matches('button.products-toggle')),
+      true,
+      `${route}: o primeiro item do menu é o botão Produtos`,
+    );
+    assert.equal(await panel.isVisible(), false, `${route}: painel fechado ao carregar`);
+    await toggle.click();
+    assert.equal(await toggle.getAttribute('aria-expanded'), 'true');
+    assert.equal(await panel.isVisible(), true, `${route}: o clique abre o painel`);
+    assert.deepEqual(
+      (
+        await panel
+          .locator('a[data-product]')
+          .evaluateAll((links) => links.map((link) => link.getAttribute('href')))
+      ).sort(),
+      productLinks(locale),
+      `${route}: um link por produto no ar`,
+    );
+    assert.equal(await panel.locator('a.products-all').count(), allProductsLinks);
+    await page.screenshot({ path: `.artifacts/produtos-menu-${locale}-desktop.png` });
+    await page.keyboard.press('Escape');
+    assert.equal(await panel.isVisible(), false, `${route}: Esc fecha`);
+    assert.equal(await toggle.getAttribute('aria-expanded'), 'false');
+    assert.equal(
+      await toggle.evaluate((element) => element === document.activeElement),
+      true,
+      `${route}: o foco volta ao botão`,
+    );
+    await page.keyboard.press('Enter');
+    assert.equal(await panel.isVisible(), true, `${route}: Enter reabre`);
+    // O painel vem depois da cápsula no HTML: o Tab leva do botão ao primeiro item dele.
+    await page.keyboard.press('Tab');
+    assert.equal(
+      await panel
+        .locator('a')
+        .first()
+        .evaluate((element) => element === document.activeElement),
+      true,
+      `${route}: Tab do botão aberto vai ao painel`,
+    );
+    await page.locator('.hero h1').click({ position: { x: 10, y: 10 } });
+    assert.equal(await panel.isVisible(), false, `${route}: clique fora fecha`);
+    assert.equal(await toggle.getAttribute('aria-expanded'), 'false');
+  }
+  results.push(
+    'Menu Produtos no desktop (pt e es): primeiro item, clique, Esc com o foco de volta, Enter, Tab até o painel, clique fora e os produtos no ar OK',
+  );
 
   for (const route of pricesShown ? ['/', '/planos'] : ['/']) {
     await page.goto(base + route);
@@ -404,10 +464,35 @@ try {
   await phone.locator('.hero h1').click({ position: { x: 10, y: 10 } });
   assert.equal(await phone.locator('#mobile-nav').isVisible(), false, 'toque fora fecha o menu');
   await phone.locator('.menu-toggle').click();
-  await phone.locator('#mobile-nav a').first().click();
+  // O grupo Produtos abre dentro do menu, com os produtos do painel e toques de 44px.
+  const productsToggle = phone.locator('.mobile-products-toggle');
+  const productsList = phone.locator('#mobile-products-list');
+  assert.equal(await productsList.isVisible(), false, 'grupo Produtos fechado ao abrir o menu');
+  await productsToggle.tap();
+  assert.equal(await productsToggle.getAttribute('aria-expanded'), 'true');
+  const productItems = await productsList.locator('a').evaluateAll((links) =>
+    links.map((link) => ({
+      label: link.textContent.trim().slice(0, 30),
+      href: link.dataset.product ? link.getAttribute('href') : null,
+      visible: link.checkVisibility(),
+      height: Math.round(link.getBoundingClientRect().height),
+    })),
+  );
+  assert.deepEqual(
+    productItems.flatMap((item) => (item.href ? [item.href] : [])).sort(),
+    productLinks('pt'),
+    'grupo Produtos com os produtos no ar',
+  );
+  assert.equal(productItems.length, productLinks('pt').length + allProductsLinks);
+  for (const item of productItems)
+    assert.ok(item.visible && item.height >= 44, `item do grupo Produtos: ${JSON.stringify(item)}`);
+  await phone.screenshot({ path: '.artifacts/produtos-menu-mobile.png' });
+  // "Produtos" é um botão: o primeiro link do menu continua sendo uma seção da home.
+  await phone.locator('#mobile-nav > a').first().click();
   assert.equal(await phone.locator('#mobile-nav').isVisible(), false);
   assert.equal(await phone.evaluate(() => getComputedStyle(document.body).overflow), 'visible');
   if (!pricesShown) {
+    assert.equal(phone.url(), `${base}/#cotacao`, 'o primeiro link do menu leva à cotação');
     // Cotação no celular: toque numa opção atualiza a mensagem; o FAQ continua abrindo.
     const quote = phone.locator('#cotacao');
     await quote.scrollIntoViewIfNeeded();
@@ -540,7 +625,6 @@ try {
   // Menu do desktop com as âncoras em espanhol.
   await esPage.goto(base + '/es');
   for (const [id, label] of [
-    ['como-funciona', 'Cómo funciona'],
     pricesShown ? ['planes', 'Planes'] : ['cotizacion', 'Presupuesto'],
     ['preguntas', 'Preguntas'],
   ]) {
@@ -596,7 +680,9 @@ try {
     }
     await context.close();
   }
-  for (const width of [320, 360, 390, 768, 1024, 1280, 1440]) {
+  // Cabeçalho em uma linha em todas as rotas dos dois idiomas, inclusive de 1024 a 1100px, onde
+  // os rótulos do espanhol ficam mais apertados.
+  for (const width of [320, 360, 390, 768, 1024, 1040, 1100, 1280, 1440]) {
     const context = await browser.newContext({
       viewport: { width, height: 900 },
       reducedMotion: 'reduce',
@@ -605,8 +691,6 @@ try {
     });
     const sized = await context.newPage();
     sized.on('pageerror', (error) => errors.push(error.message));
-    // A mesma medida na página em português: um estouro que o português também tem não é do
-    // espanhol (a tabela de /planos entre 768 e 1023px, só visível com preços públicos).
     const measure = async (route) => {
       await sized.goto(base + route);
       await sized.evaluate(() => document.fonts.ready);
@@ -614,25 +698,42 @@ try {
         width: document.documentElement.clientWidth,
         layout: innerWidth,
         scroll: document.documentElement.scrollWidth,
-        // Nenhum rótulo do cabeçalho quebra em duas linhas.
+        // Nenhum rótulo do cabeçalho quebra em duas linhas, o botão Produtos incluído.
         wrapped: [...document.querySelectorAll('.header-inner a, .header-inner button')]
           .filter((element) => element.checkVisibility())
           .filter((element) => element.getBoundingClientRect().height > 50)
           .map((element) => element.textContent.trim()),
+        products: document.querySelector('.products-toggle')?.checkVisibility() ?? false,
       }));
     };
+    // A mesma medida na página em português: um estouro que o português também tem não é do
+    // espanhol (a tabela de /planos entre 768 e 1023px, só visível com preços públicos).
+    const ptDimensions = new Map();
+    for (const route of ptRoutes) {
+      const dimensions = await measure(route);
+      ptDimensions.set(route, dimensions);
+      assert.deepEqual(dimensions.wrapped, [], `${route} ${width}px: cabeçalho em uma linha`);
+      assert.equal(dimensions.products, width >= 1024, `${route} ${width}px: Produtos no desktop`);
+    }
     for (const route of [...esRoutes, '/pagina-que-nao-existe']) {
       const dimensions = await measure(route);
       const overflows =
         dimensions.scroll > dimensions.width || dimensions.layout > dimensions.width;
       const ptRoute = ptRoutes[esRoutes.indexOf(route)];
-      const ptDimensions = overflows && ptRoute ? await measure(ptRoute) : null;
-      if (ptDimensions && ptDimensions.scroll > ptDimensions.width)
+      const pt = overflows && ptRoute ? ptDimensions.get(ptRoute) : null;
+      if (pt && pt.scroll > pt.width)
         knownIssues.push(
-          `${route} ${width}px: estouro de ${dimensions.scroll - dimensions.width}px, também em ${ptRoute} (${ptDimensions.scroll - ptDimensions.width}px)`,
+          `${route} ${width}px: estouro de ${dimensions.scroll - dimensions.width}px, também em ${ptRoute} (${pt.scroll - pt.width}px)`,
         );
       else assert.ok(!overflows, `${route} ${width}px: sem overflow ${JSON.stringify(dimensions)}`);
       assert.deepEqual(dimensions.wrapped, [], `${route} ${width}px: cabeçalho em uma linha`);
+      // A 404 não tem cabeçalho.
+      if (ptRoute)
+        assert.equal(
+          dimensions.products,
+          width >= 1024,
+          `${route} ${width}px: Produtos no desktop`,
+        );
     }
     if (width === 360) {
       await sized.goto(base + '/es');
@@ -647,6 +748,9 @@ try {
     results.push(`Avisos (problemas que o português também tem): ${knownIssues.join('; ')}`);
   results.push(
     'Espanhol: lang es-ES, sem texto em português, app e tour com idioma=es, cotação, seletor PT | ES, 404 nos dois idiomas, contraste e 320–1440px sem estouro OK',
+  );
+  results.push(
+    `Cabeçalho em uma linha, com Produtos só a partir de 1024px: ${routes.length} rotas (pt e es) de 320 a 1440px OK`,
   );
   assert.deepEqual(errors, []);
   console.log(results.join('\n'));
