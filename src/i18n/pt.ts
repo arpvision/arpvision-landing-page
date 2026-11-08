@@ -11,6 +11,8 @@ import type { FanRoomId, PlanId, TutorialId, TutorialSectionId } from '../config
 
 /** "1 ambiente", "2 ambientes". */
 const rooms = (count: number) => `${count} ${count === 1 ? 'ambiente' : 'ambientes'}`;
+/** Parte que só existe em português: nos outros idiomas a chave vale null e ela não aparece. */
+const onlyInPortuguese = <T>(value: T): T | null => value;
 
 export const pt = {
   meta: {
@@ -250,6 +252,28 @@ export const pt = {
       },
     },
   },
+  // ARP Vision Presencial: a equipe vai até a imobiliária treinar os corretores ou até o imóvel
+  // fazer a captura. Atende Porto Alegre e região, por isso só existe em português.
+  inPerson: onlyInPortuguese({
+    nav: 'Presencial',
+    eyebrow: 'ARP VISION PRESENCIAL',
+    title1: 'Treinamos sua equipe.',
+    title2: 'Ou fazemos o tour por ela.',
+    lead: 'Para imobiliárias de Porto Alegre e região, a equipe da ARP Vision vai até você.',
+    services: {
+      training: {
+        title: 'Treinamento da equipe',
+        text: 'Seus corretores aprendem a fazer tours com o celular, na sua imobiliária e com prática num imóvel de verdade.',
+      },
+      ready: {
+        title: 'Tour Pronto',
+        text: 'Nossa equipe vai até o imóvel e faz a captura. O tour aparece na conta da sua imobiliária, pronto para compartilhar, e seus corretores poupam tempo e trabalho.',
+      },
+    },
+    message: 'Olá! Vim pelo site e quero saber do ARP Vision Presencial.',
+    button: 'Falar sobre o Presencial no WhatsApp',
+    note: 'Atendimento presencial em Porto Alegre e região.',
+  }),
   quote: {
     eyebrow: 'PREÇO SOB MEDIDA',
     title: 'Cada negócio tem um tamanho. A sua proposta também.',
@@ -260,8 +284,8 @@ export const pt = {
         text: 'Você paga por ambiente pronto, não por foto.',
       },
       phone: {
-        title: 'Sem câmera 360° e sem fotógrafo.',
-        text: 'O celular que você já tem faz o tour.',
+        title: 'Sem câmera 360°.',
+        text: 'Com o celular da sua equipe ou com a nossa.',
       },
       team: { title: 'Conversa direta com o time.', text: 'Tire as dúvidas antes de decidir.' },
     },

@@ -1,0 +1,79 @@
+/*
+ * ARP Vision Presencial (InPerson.astro): os dois serviços em cartões com o vidro dos
+ * benefícios da equipe logo acima (landing-polish.css) e o WhatsApp centralizado embaixo.
+ */
+.in-person-section {
+  background: var(--bg-base);
+}
+/* No celular os textos quebram sozinhos (o título sem o <br> do desktop); "pretty" evita uma
+   palavra sozinha na última linha ("ela.", "você.", "região."). */
+.in-person-section h2,
+.in-person-section .section-heading p,
+.in-person-note {
+  text-wrap: pretty;
+}
+/* Mesmas colunas dos benefícios da equipe (.benefits-grid): os cartões se alinham com os de cima. */
+.in-person-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 48px;
+  max-width: 980px;
+  margin-inline: auto;
+}
+.in-person-card.glass-surface {
+  padding: 32px;
+}
+.in-person-card .icon-tile {
+  margin-bottom: 22px;
+}
+/* O azul fica no treinamento; o verde marca o Tour Pronto, como nos benefícios da equipe. */
+.in-person-card-teal .icon-tile {
+  background: var(--brand-teal-soft);
+  color: var(--brand-teal-dark);
+}
+.in-person-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 44px;
+  text-align: center;
+}
+.in-person-actions .button {
+  max-width: 100%;
+  font-size: var(--fs-small);
+  text-wrap: balance;
+}
+.in-person-note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--fs-note);
+}
+@media (max-width: 1023px) {
+  .in-person-grid {
+    gap: 32px;
+  }
+  .in-person-card.glass-surface {
+    padding: 28px 24px;
+  }
+}
+@media (max-width: 767px) {
+  .in-person-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+  .in-person-card.glass-surface {
+    padding: 24px;
+  }
+  .in-person-card .icon-tile {
+    margin-bottom: 18px;
+  }
+  .in-person-actions {
+    margin-top: 32px;
+  }
+}
+@media (max-width: 479px) {
+  .in-person-actions .button {
+    width: 100%;
+  }
+}

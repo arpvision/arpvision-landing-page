@@ -6,7 +6,15 @@ import type { Locale } from '.';
 
 export type PageId = 'home' | 'plans' | 'tutorials' | 'terms' | 'privacy';
 export type AnchorId =
-  'content' | 'howItWorks' | 'realTour' | 'plans' | 'quote' | 'faq' | 'contact' | 'compare';
+  | 'content'
+  | 'howItWorks'
+  | 'realTour'
+  | 'inPerson'
+  | 'plans'
+  | 'quote'
+  | 'faq'
+  | 'contact'
+  | 'compare';
 
 interface LocaleRoutes {
   pages: Record<PageId, string>;
@@ -26,6 +34,7 @@ export const routes: Record<Locale, LocaleRoutes> = {
       content: 'conteudo',
       howItWorks: 'como-funciona',
       realTour: 'tour-real',
+      inPerson: 'presencial',
       plans: 'planos',
       quote: 'cotacao',
       faq: 'duvidas',
@@ -45,6 +54,8 @@ export const routes: Record<Locale, LocaleRoutes> = {
       content: 'contenido',
       howItWorks: 'como-funciona',
       realTour: 'tour-real',
+      // Sem a seção no espanhol (o Presencial é só de Porto Alegre e região); o tipo pede a âncora.
+      inPerson: 'presencial',
       plans: 'planes',
       quote: 'cotizacion',
       faq: 'preguntas',

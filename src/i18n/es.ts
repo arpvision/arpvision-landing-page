@@ -249,6 +249,8 @@ export const es: Dictionary = {
       },
     },
   },
+  // O ARP Vision Presencial só atende Porto Alegre e região: no espanhol não há seção nem menu.
+  inPerson: null,
   quote: {
     eyebrow: 'PRECIO A MEDIDA',
     title: 'Cada negocio tiene su tamaño. Tu propuesta, también.',
