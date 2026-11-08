@@ -16,6 +16,7 @@ const locales = [
     pages: {
       home: 'index.html',
       plans: 'planos/index.html',
+      tutorials: 'tutoriais/index.html',
       terms: 'termos-de-uso/index.html',
       privacy: 'politica-de-privacidade/index.html',
     },
@@ -28,12 +29,13 @@ const locales = [
     pages: {
       home: 'es/index.html',
       plans: 'es/planes/index.html',
+      tutorials: 'es/tutoriales/index.html',
       terms: 'es/terminos-de-uso/index.html',
       privacy: 'es/politica-de-privacidad/index.html',
     },
   },
 ];
-const pageIds = ['home', ...(pricesShown ? ['plans'] : []), 'terms', 'privacy'];
+const pageIds = ['home', ...(pricesShown ? ['plans'] : []), 'tutorials', 'terms', 'privacy'];
 const pathOf = (file) => `/${file.replace(/\/?index\.html$/, '')}`;
 const routes = locales.flatMap((locale) =>
   pageIds.map((page) => ({ locale, page, file: locale.pages[page] })),
@@ -186,8 +188,13 @@ for (const { locale, page, file } of routes) {
   const schemas = [
     ...html.matchAll(/<script[^>]+type="application\/ld\+json"[^>]*>(.*?)<\/script>/gs),
   ].flatMap((match) => JSON.parse(match[1]));
+  // O VideoObject dos tutoriais leva o idioma do vídeo, narrado em português nos dois idiomas.
   for (const item of schemas.filter((item) => 'inLanguage' in item))
-    assert.equal(item.inLanguage, locale.lang, `${route}: JSON-LD ${item['@type']} no idioma`);
+    assert.equal(
+      item.inLanguage,
+      item['@type'] === 'VideoObject' ? 'pt-BR' : locale.lang,
+      `${route}: JSON-LD ${item['@type']} no idioma`,
+    );
   if (page === 'home') {
     // O FAQPage é o FAQ que aparece na página, no idioma dela.
     const questions = schemas.find((item) => item['@type'] === 'FAQPage')?.mainEntity ?? [];
@@ -198,6 +205,25 @@ for (const { locale, page, file } of routes) {
         `${route}: pergunta do FAQPage na página: ${question.name}`,
       );
   }
+  if (page === 'tutorials') {
+    // Um VideoObject por cartão, com o título que o cartão mostra, no idioma da página.
+    const titles = [...html.matchAll(/data-title="([^"]+)"/g)].map((match) => decode(match[1]));
+    assert.ok(titles.length > 0, `${route}: cartões dos tutoriais`);
+    assert.deepEqual(
+      schemas.filter((item) => item['@type'] === 'VideoObject').map((item) => item.name),
+      titles,
+      `${route}: VideoObject de cada cartão`,
+    );
+  }
+  // Cabeçalho, menu do celular e rodapé levam aos tutoriais do idioma da página; os do outro
+  // idioma só aparecem no seletor PT | ES, que leva hreflang.
+  for (const other of locales)
+    assert.equal(
+      html.match(new RegExp(`<a href="${pathOf(other.pages.tutorials)}"(?! hreflang)`, 'g'))
+        ?.length ?? 0,
+      other === locale ? 3 : 0,
+      `${route}: links para os tutoriais em ${other.lang}`,
+    );
   if (locale.code !== 'pt')
     for (const text of readableText(html))
       assert.doesNotMatch(text, portugueseWords, `${route}: português na página: "${text}"`);

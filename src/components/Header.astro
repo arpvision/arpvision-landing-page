@@ -12,6 +12,10 @@ const home = pagePath(locale, 'home');
 const isHome = Astro.url.pathname === home;
 const anchor = (id: Parameters<typeof anchorId>[1]) =>
   `${isHome ? '' : home}#${anchorId(locale, id)}`;
+const tutorialsPath = pagePath(locale, 'tutorials');
+const tutorialsCurrent = Astro.url.pathname.startsWith(tutorialsPath)
+  ? ('page' as const)
+  : undefined;
 // Sem preços públicos, o item "Planos" vira "Cotação" e leva à seção da Home.
 const plansPath = pagePath(locale, 'plans');
 const plans = site.pricing.showPrices
@@ -48,8 +52,10 @@ const plans = site.pricing.showPrices
         <a href={anchor('faq')} data-spy={anchorId(locale, 'faq')}>
           {t.header.faq}
         </a>
-        <!-- Os vídeos de cada etapa, na página pública do app: sem data-spy, porque não é seção daqui. -->
-        <a href={appLink('cabecalho', 'tutoriais', locale)}>{t.header.tutorials}</a>
+        <!-- Página própria, não seção da Home: sem data-spy. -->
+        <a href={tutorialsPath} aria-current={tutorialsCurrent}>
+          {t.header.tutorials}
+        </a>
       </nav>
       <div class="header-actions">
         <LanguageSwitch class="desktop-language" />
@@ -94,7 +100,9 @@ const plans = site.pricing.showPrices
         {plans.label}
       </a>
       <a href={anchor('faq')}>{t.header.faq}</a>
-      <a href={appLink('menu', 'tutoriais', locale)}>{t.header.tutorials}</a>
+      <a href={tutorialsPath} aria-current={tutorialsCurrent}>
+        {t.header.tutorials}
+      </a>
       <a href={appLink('cabecalho', 'login', locale)}>
         {t.header.loginLong} <Icon name="arrow" size={18} />
       </a>

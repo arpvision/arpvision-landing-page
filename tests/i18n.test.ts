@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { site } from '../src/config/site';
+import { site, tutorials } from '../src/config/site';
 import { appLanguageParam, locales, translations, type Locale } from '../src/i18n';
 import { routes } from '../src/i18n/routes';
 import { appLink, embedLink, whatsappLink } from '../src/lib/business';
@@ -93,6 +93,7 @@ test('cada idioma tem todas as páginas e âncoras, e o espanhol mora em /es', (
   assert.deepEqual(routes.es.pages, {
     home: '/es',
     plans: '/es/planes',
+    tutorials: '/es/tutoriales',
     terms: '/es/terminos-de-uso',
     privacy: '/es/politica-de-privacidad',
     products: '/es/productos',
@@ -184,6 +185,7 @@ test('títulos e descrições cabem no resultado de busca', () => {
     );
     for (const description of [
       t.plansPage.description,
+      t.tutorials.description,
       t.legal.terms.description,
       t.legal.privacy.description,
     ])
@@ -191,11 +193,33 @@ test('títulos e descrições cabem no resultado de busca', () => {
     for (const title of [
       t.home.title,
       t.plansPage.title,
+      t.tutorials.title,
       t.legal.terms.title,
       t.legal.privacy.title,
     ])
       assert.match(title, /ARP Vision/);
   }
+});
+
+test('cada tutorial tem título, descrição e seção nos dois idiomas, e o espanhol avisa que são em português', () => {
+  for (const locale of locales) {
+    const text = translations(locale).tutorials;
+    // Nem vídeo sem texto, nem texto de vídeo que saiu de site.ts.
+    assert.deepEqual(
+      Object.keys(text.videos).sort(),
+      tutorials.map((tutorial) => tutorial.id).sort(),
+      locale,
+    );
+    for (const tutorial of tutorials) {
+      assert.ok(text.videos[tutorial.id].title.trim(), `${locale}: ${tutorial.id}`);
+      assert.ok(text.videos[tutorial.id].description.trim(), `${locale}: ${tutorial.id}`);
+      assert.ok(text.sections[tutorial.section].trim(), `${locale}: ${tutorial.section}`);
+    }
+  }
+  // Os vídeos são narrados em português: o espanhol diz isso na abertura e na busca, como o app.
+  const es = translations('es').tutorials;
+  assert.match(es.lead, /^Vídeos cortos, en portugués, /);
+  assert.match(es.description, /^Vídeos cortos, en portugués, /);
 });
 
 test('dados estruturados no idioma da página', () => {

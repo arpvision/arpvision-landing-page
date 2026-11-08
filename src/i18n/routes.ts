@@ -7,6 +7,7 @@ import type { Locale } from '.';
 export type PageId =
   | 'home'
   | 'plans'
+  | 'tutorials'
   | 'terms'
   | 'privacy'
   | 'products'
@@ -34,6 +35,7 @@ export const routes: Record<Locale, LocaleRoutes> = {
     pages: {
       home: '/',
       plans: '/planos',
+      tutorials: '/tutoriais',
       terms: '/termos-de-uso',
       privacy: '/politica-de-privacidade',
       products: '/produtos',
@@ -57,6 +59,7 @@ export const routes: Record<Locale, LocaleRoutes> = {
     pages: {
       home: '/es',
       plans: '/es/planes',
+      tutorials: '/es/tutoriales',
       terms: '/es/terminos-de-uso',
       privacy: '/es/politica-de-privacidad',
       products: '/es/productos',
@@ -84,7 +87,13 @@ export const routes: Record<Locale, LocaleRoutes> = {
  * públicos (`site.pricing.showPrices`). Este arquivo só tem `import type`, para os scripts de
  * checagem (Node) poderem importá-lo direto.
  */
-export const publishedPageIds: readonly PageId[] = ['home', 'plans', 'terms', 'privacy'];
+export const publishedPageIds: readonly PageId[] = [
+  'home',
+  'plans',
+  'tutorials',
+  'terms',
+  'privacy',
+];
 
 export const pagePath = (locale: Locale, page: PageId) => routes[locale].pages[page];
 export const anchorId = (locale: Locale, anchor: AnchorId) => routes[locale].anchors[anchor];

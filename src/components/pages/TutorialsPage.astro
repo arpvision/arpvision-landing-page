@@ -1,0 +1,104 @@
+---
+// /tutoriais e /es/tutoriales: os vídeos de `tutorials` (site.ts), com o texto do dicionário
+// da página. Os vídeos são os mesmos nos dois idiomas, narrados em português.
+import Layout from '../../layouts/Layout.astro';
+import Icon from '../Icon.astro';
+import FinalCta from '../FinalCta.astro';
+import { site, tutorials } from '../../config/site';
+import { pageLocale } from '../../i18n';
+import { pagePath } from '../../i18n/routes';
+import { clockDuration, isoDuration, youtubeWatch } from '../../lib/business';
+import { organizationSchema } from '../../lib/schema';
+const { locale, t } = pageLocale(Astro);
+const text = t.tutorials;
+const cover = (id: string, width: number) => `/images/tutoriais/${id}-${width}.webp`;
+const videos = tutorials.map((tutorial) => ({
+  ...tutorial,
+  ...text.videos[tutorial.id],
+  sectionName: text.sections[tutorial.section],
+  clock: clockDuration(tutorial.duration),
+}));
+// `inLanguage` é o idioma do vídeo, não o da página: a narração é em português nos dois.
+const videoSchema = videos.map((video) => ({
+  '@context': 'https://schema.org',
+  '@type': 'VideoObject',
+  name: video.title,
+  description: video.description,
+  thumbnailUrl: new URL(cover(video.id, 720), site.domain).href,
+  uploadDate: video.uploadDate,
+  duration: isoDuration(video.duration),
+  embedUrl: `https://www.youtube.com/embed/${video.youtube}`,
+  inLanguage: 'pt-BR',
+  publisher: { '@id': organizationSchema['@id'] },
+}));
+---
+
+<Layout title={text.title} description={text.description} page="tutorials" schema={videoSchema}>
+  <section class="section tutorials-page">
+    <div class="container">
+      <div class="section-heading center">
+        <a class="breadcrumb" href={pagePath(locale, 'home')}>
+          {text.breadcrumb}
+        </a>
+        <span class="eyebrow">{text.eyebrow}</span>
+        <h1>{text.heading}</h1>
+        <p>{text.lead}</p>
+      </div>
+      <!-- Cada cartão é um link para o YouTube; com JavaScript, o vídeo abre no diálogo abaixo. -->
+      <ul class="tutorial-list" role="list">
+        {videos.map((video, index) => (
+          <li id={video.id}>
+            <a
+              class="tutorial-card"
+              href={youtubeWatch(video.youtube)}
+              aria-label={text.watchLabel(video.title, video.clock)}
+              aria-describedby={`${video.id}-descricao`}
+              data-tutorial={video.id}
+              data-youtube={video.youtube}
+              data-title={video.title}
+            >
+              <div class="tutorial-cover">
+                <img
+                  src={cover(video.id, 360)}
+                  srcset={`${cover(video.id, 360)} 360w, ${cover(video.id, 720)} 720w`}
+                  sizes="(max-width: 767px) 112px, 168px"
+                  width="360"
+                  height="640"
+                  loading={index < 2 ? 'eager' : 'lazy'}
+                  alt=""
+                />
+                <span class="tutorial-play" aria-hidden="true">
+                  <Icon name="play" size={20} />
+                </span>
+                <span class="tutorial-duration" aria-hidden="true">
+                  {video.clock}
+                </span>
+              </div>
+              <div class="tutorial-body">
+                <span class="tutorial-section">{video.sectionName}</span>
+                <h2>{video.title}</h2>
+                <p id={`${video.id}-descricao`}>{video.description}</p>
+                <span class="tutorial-watch" aria-hidden="true">
+                  {text.watch} <Icon name="arrow" size={16} />
+                </span>
+              </div>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+  <FinalCta />
+  <dialog id="tutorial-dialog" class="video-dialog" aria-labelledby="tutorial-dialog-title">
+    <div class="video-dialog-bar">
+      <p id="tutorial-dialog-title" class="video-dialog-title"></p>
+      <button class="icon-button video-dialog-close" data-close-dialog aria-label={text.close}>
+        <Icon name="close" />
+      </button>
+    </div>
+    <div class="video-dialog-frame" data-video-frame></div>
+  </dialog>
+  <script>
+    import '../../scripts/tutorials';
+  </script>
+</Layout>

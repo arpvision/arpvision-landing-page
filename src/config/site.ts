@@ -228,3 +228,36 @@ export const price = (value: number) =>
 
 /** Plano pelo id, para os textos que citam os valores de um plano específico. */
 export const planById = (id: PlanId) => site.pricing.plans.find((plan) => plan.id === id)!;
+
+// Os vídeos de /tutoriais e /es/tutoriales, na ordem do app (o app tem a mesma lista em
+// inner-view-client/src/app/tutoriais). Moram no YouTube, como Shorts não listados, e são
+// narrados em português nos dois idiomas. O título, a descrição e o nome da seção de cada
+// vídeo ficam nos dicionários (`tutorials`). A capa é <id>-source.jpg em
+// public/images/tutoriais, e `prepare-images` gera os WebP.
+export type TutorialId = 'do-novo-tour-a-publicacao' | 'app-na-tela-de-inicio';
+export type TutorialSectionId = 'start' | 'app';
+export interface Tutorial {
+  id: TutorialId;
+  section: TutorialSectionId;
+  youtube: string;
+  /** Em segundos. */
+  duration: number;
+  /** Data da publicação no YouTube, para os dados estruturados. */
+  uploadDate: string;
+}
+export const tutorials: Tutorial[] = [
+  {
+    id: 'do-novo-tour-a-publicacao',
+    section: 'start',
+    youtube: '2P5RVlg3p3k',
+    duration: 134,
+    uploadDate: '2026-11-06T21:20:54-08:00',
+  },
+  {
+    id: 'app-na-tela-de-inicio',
+    section: 'app',
+    youtube: '-FXGq9PymS0',
+    duration: 41,
+    uploadDate: '2026-11-06T21:21:53-08:00',
+  },
+];

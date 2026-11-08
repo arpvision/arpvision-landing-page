@@ -5,13 +5,27 @@
 //   (og-home, og-planos) foram preservados de uma redação anterior: regenerá-los troca o
 //   texto deles pelo daqui.
 import sharp from 'sharp';
-import { readFile, mkdir } from 'node:fs/promises';
+import { readFile, readdir, mkdir } from 'node:fs/promises';
 
 const only = process.argv.slice(2);
 const wanted = (name) => only.length === 0 || only.includes(name);
 
 await mkdir('public/images', { recursive: true });
+// Capas da página /tutoriais: um quadro de cada vídeo, em pé (9:16), em <id>-source.jpg.
+const tutorialCovers = (await readdir('public/images/tutoriais'))
+  .filter((file) => file.endsWith('-source.jpg'))
+  .map((file) => file.replace(/-source\.jpg$/, ''));
 await Promise.all([
+  ...tutorialCovers.flatMap((id) =>
+    [360, 720]
+      .filter((width) => wanted(`${id}-${width}`))
+      .map((width) =>
+        sharp(`public/images/tutoriais/${id}-source.jpg`)
+          .resize(width)
+          .webp({ quality: 80 })
+          .toFile(`public/images/tutoriais/${id}-${width}.webp`),
+      ),
+  ),
   ...[640, 960, 1600]
     .filter((width) => wanted(`interior-${width}`))
     .map((width) =>
