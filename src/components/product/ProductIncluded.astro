@@ -1,13 +1,16 @@
 ---
 // "O que está incluído" de uma página de produto: de seis a oito itens, cada um com um ícone. Os
-// ícones (nomes de Icon.astro) seguem a ordem dos itens.
+// ícones (nomes de Icon.astro) seguem a ordem dos itens, e listas de tamanhos diferentes param o
+// build.
 import Icon from '../Icon.astro';
+import { pairByPosition } from '../../lib/products';
 interface Props {
   title: string;
   items: { title: string; text: string }[];
   icons: string[];
 }
 const { title, items, icons } = Astro.props;
+const entries = pairByPosition('ProductIncluded', items, icons);
 ---
 
 <section class="section product-included-section" aria-labelledby="included-title">
@@ -16,10 +19,10 @@ const { title, items, icons } = Astro.props;
       <h2 id="included-title">{title}</h2>
     </div>
     <ul class="product-included" role="list">
-      {items.map((item, index) => (
+      {entries.map(([item, icon]) => (
         <li>
           <span class="icon-tile">
-            <Icon name={icons[index]} size={22} />
+            <Icon name={icon} size={22} />
           </span>
           <h3>{item.title}</h3>
           <p>{item.text}</p>

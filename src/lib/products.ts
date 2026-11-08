@@ -186,3 +186,43 @@ export function sectionHref(locale: Locale, anchor: AnchorId, currentPath: strin
     page === 'home' || (productOfPage(page) !== undefined && productPageSections.includes(anchor));
   return local ? `#${anchorId(locale, anchor)}` : sectionPath(locale, 'home', anchor);
 }
+
+/**
+ * Junta cada item de uma lista do dicionário com o que o componente decide para ele (a foto e o
+ * formato de uma arte, por exemplo), pelo `id` do item, em qualquer ordem. Um id sem par, sobrando
+ * no componente ou repetido no dicionário para o build com o nome do componente (`scope`): sem
+ * isso, uma arte nova sairia sem foto, e reordenar o dicionário trocaria as fotos sem aviso.
+ */
+export function pairById<Item extends { id: string }, Extra>(
+  scope: string,
+  items: readonly Item[],
+  extras: Readonly<Record<string, Extra>>,
+): [Item, Extra][] {
+  const ids = items.map((item) => item.id);
+  const problems = [
+    ...ids.filter((id) => !Object.hasOwn(extras, id)).map((id) => `"${id}" sem par`),
+    ...Object.keys(extras)
+      .filter((id) => !ids.includes(id))
+      .map((id) => `"${id}" sobrando`),
+    ...ids.filter((id, index) => ids.indexOf(id) !== index).map((id) => `"${id}" repetido`),
+  ];
+  if (problems.length) throw new Error(`${scope}: ${problems.join(', ')}`);
+  return items.map((item) => [item, extras[item.id]]);
+}
+
+/**
+ * Junta, pela posição, cada item de uma lista do dicionário com o que o componente decide para ele
+ * (o ícone de um item, por exemplo). Listas de tamanhos diferentes param o build com o nome do
+ * componente (`scope`): um item a mais ficaria sem ícone, sem aviso.
+ */
+export function pairByPosition<Item, Extra>(
+  scope: string,
+  items: readonly Item[],
+  extras: readonly Extra[],
+): [Item, Extra][] {
+  if (items.length !== extras.length)
+    throw new Error(
+      `${scope}: ${items.length} itens no dicionário e ${extras.length} no componente`,
+    );
+  return items.map((item, index) => [item, extras[index]]);
+}

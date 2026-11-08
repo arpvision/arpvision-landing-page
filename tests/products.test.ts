@@ -7,6 +7,8 @@ import { anchorId, publishedPageIds, routes, type PageId } from '../src/i18n/rou
 import {
   isLive,
   liveProductsFor,
+  pairById,
+  pairByPosition,
   productGroups,
   productHref,
   productOfPage,
@@ -264,6 +266,46 @@ test('a descrição de cada tela de exemplo começa por "Exemplo:" no idioma', (
         assert.ok(text.startsWith(`${example}: `), `${locale}/${id}.${path}: "${text}"`);
     }
   }
+});
+
+// O que o componente decide para cada item do dicionário (a foto de uma arte, o ícone de um item)
+// fica casado com ele pelo id ou pela posição, e qualquer descasamento para o build.
+test('pairById junta pelo id, em qualquer ordem, e recusa id sem par, sobrando ou repetido', () => {
+  const items = [
+    { id: 'sale', title: 'À venda' },
+    { id: 'sold', title: 'Vendido' },
+  ];
+  assert.deepEqual(pairById('Galeria', items, { sold: 'pátio', sale: 'piscina' }), [
+    [items[0], 'piscina'],
+    [items[1], 'pátio'],
+  ]);
+  assert.throws(() => pairById('Galeria', items, { sale: 'piscina' }), /Galeria.*sold/);
+  assert.throws(
+    () => pairById('Galeria', items, { sale: 'piscina', sold: 'pátio', rent: 'sala' }),
+    /Galeria.*rent/,
+  );
+  assert.throws(
+    () => pairById('Galeria', [...items, { id: 'sale', title: 'De novo' }], { sale: '', sold: '' }),
+    /Galeria.*sale/,
+  );
+  // Um id que só existe no protótipo de todo objeto não conta como par.
+  assert.throws(() => pairById('Galeria', [{ id: 'toString' }], {}), /Galeria.*toString/);
+});
+
+test('pairByPosition junta pela posição e recusa listas de tamanhos diferentes', () => {
+  assert.deepEqual(pairByPosition('Incluído', ['Posts', 'Marca'], ['calendar', 'star']), [
+    ['Posts', 'calendar'],
+    ['Marca', 'star'],
+  ]);
+  assert.throws(() => pairByPosition('Incluído', ['Posts', 'Marca'], ['calendar']), /Incluído/);
+  assert.throws(() => pairByPosition('Incluído', ['Posts'], ['calendar', 'star']), /Incluído/);
+});
+
+test('as artes do Piloto têm ids únicos, os mesmos e na mesma ordem nos dois idiomas', () => {
+  const ids = (locale: (typeof locales)[number]) =>
+    translations(locale).productPages.instagram.gallery.arts.map((art) => art.id);
+  assert.equal(new Set(ids('pt')).size, ids('pt').length);
+  assert.deepEqual(ids('es'), ids('pt'));
 });
 
 test('a tabela de comparação tem um valor por coluna em cada linha', () => {

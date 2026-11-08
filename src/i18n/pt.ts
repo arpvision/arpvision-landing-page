@@ -127,20 +127,21 @@ export const pt = {
           },
         ],
       },
-      // As oito artes, nesta ordem (PostGallery.astro escolhe a foto e o formato de cada uma):
-      // `kind` é o tipo de post, e `title`, o texto principal da arte.
+      // As oito artes, nesta ordem. PostGallery.astro escolhe a foto e o formato de cada uma pelo
+      // `id`, que é o mesmo nos dois idiomas e não aparece na página; `kind` é o tipo de post, e
+      // `title`, o texto principal da arte.
       gallery: {
         title: 'Assim ficam os seus posts',
         lead: 'Com as fotos dos seus imóveis, o seu logo e o CRECI em todas as peças.',
         arts: [
-          { kind: 'À venda', title: 'Casa com 3 quartos e piscina' },
-          { kind: 'Para alugar', title: 'Casa com lareira e varanda' },
-          { kind: 'Vendido', title: 'Mais uma chave entregue no Bairro Exemplo' },
-          { kind: 'Tour 360°', title: 'Veja esta casa por dentro' },
-          { kind: 'Seu bairro', title: 'O que tem perto no Bairro Exemplo' },
-          { kind: 'Dica', title: 'Documentos para separar antes de vender' },
-          { kind: 'Captação', title: 'Vai vender ou alugar? Peça uma avaliação' },
-          { kind: 'Story', title: 'Novidade no Bairro Exemplo' },
+          { id: 'sale', kind: 'À venda', title: 'Casa com 3 quartos e piscina' },
+          { id: 'rent', kind: 'Para alugar', title: 'Casa com lareira e varanda' },
+          { id: 'sold', kind: 'Vendido', title: 'Mais uma chave entregue no Bairro Exemplo' },
+          { id: 'tour', kind: 'Tour 360°', title: 'Veja esta casa por dentro' },
+          { id: 'neighborhood', kind: 'Seu bairro', title: 'O que tem perto no Bairro Exemplo' },
+          { id: 'tip', kind: 'Dica', title: 'Documentos para separar antes de vender' },
+          { id: 'valuation', kind: 'Captação', title: 'Vai vender ou alugar? Peça uma avaliação' },
+          { id: 'story', kind: 'Story', title: 'Novidade no Bairro Exemplo' },
         ],
       },
       included: {
