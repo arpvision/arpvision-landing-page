@@ -114,9 +114,9 @@ const legibleAcross = async (target, selector, scene, before) => {
       );
     }, selector);
     assert.equal(behind, true, `${scene}: atrás do cabeçalho na parada de ${stop}px`);
-    const reading = await legibleHeader(target, `${scene}, parada de ${stop}px`, before);
-    lowest.light = Math.min(lowest.light, reading.light);
-    lowest.dark = Math.min(lowest.dark, reading.dark);
+    const measured = await legibleHeader(target, `${scene}, parada de ${stop}px`, before);
+    lowest.light = Math.min(lowest.light, measured.light);
+    lowest.dark = Math.min(lowest.dark, measured.dark);
   }
   return lowest;
 };
