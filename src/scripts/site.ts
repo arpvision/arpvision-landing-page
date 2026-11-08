@@ -21,20 +21,15 @@ themeButtons.forEach((button) =>
 systemDark.addEventListener('change', syncThemeButtons);
 syncThemeButtons();
 
-// O vidro do cabeçalho deixa o fundo passar: a escrita fica branca quando mais da metade dele
-// está sobre uma seção escura ([data-surface="dark"]). Na home, ele sai de cena junto com a
-// abertura; depois dela, volta quando a pessoa sobe a página e sai quando ela desce.
+// Na home, o cabeçalho é um vidro transparente com a escrita branca enquanto está sobre a abertura
+// (data-header-surface="opening"). Fora dela, e com o menu do celular aberto, a cápsula fica quase
+// opaca, na cor do tema (global.css). Ele sai de cena junto com a abertura; depois dela, volta
+// quando a pessoa sobe a página e sai quando ela desce.
 const header = document.querySelector<HTMLElement>('.site-header');
-if (header) {
-  const opening = document.querySelector<HTMLElement>('.opening');
-  const surfaces = [...document.querySelectorAll<HTMLElement>('[data-surface="dark"]')];
-  // Onde a seção pinta: a abertura estende o fundo para cima da própria caixa, por trás do
-  // cabeçalho (o ::before com inset negativo, em opening.css).
-  const paintedArea = (surface: HTMLElement) => {
-    const box = surface.getBoundingClientRect();
-    const bleed = parseFloat(getComputedStyle(surface, '::before').top) || 0;
-    return { top: box.top + Math.min(0, bleed), bottom: box.bottom };
-  };
+const opening = document.querySelector<HTMLElement>('.opening');
+// Refeito na rolagem, no tamanho da janela e quando o menu do celular abre e fecha.
+let scheduleHeader = () => {};
+if (header && opening) {
   // Um vai e volta menor que isso (o elástico e a barra de endereço do Safari) não mexe nele.
   const threshold = 8;
   // "true": voltou quando a pessoa subiu; "false": saiu de novo quando ela desceu (os dois
@@ -46,57 +41,50 @@ if (header) {
   let pending = false;
   const updateHeader = () => {
     const top = parseFloat(getComputedStyle(header).top);
-    const height = header.offsetHeight;
-    const bottom = top + height;
-    let shift = 0;
-    let hidden = false;
-    if (opening) {
-      // Só a rolagem da página conta, sem o elástico além das pontas.
-      const y = Math.min(Math.max(scrollY, 0), document.documentElement.scrollHeight - innerHeight);
-      // A cápsula acompanha apenas a abertura, incluindo o leque de fotos.
-      // A altura de layout evita realimentar o cálculo com o próprio transform.
-      const boundaryBottom = opening.getBoundingClientRect().bottom;
-      if (boundaryBottom >= bottom) {
-        // Ainda sobre a abertura: ele fica no lugar, como sempre.
-        revealed = undefined;
+    const bottom = top + header.offsetHeight;
+    const menuOpen = document.body.classList.contains('menu-is-open');
+    // Só a rolagem da página conta, sem o elástico além das pontas.
+    const y = Math.min(Math.max(scrollY, 0), document.documentElement.scrollHeight - innerHeight);
+    // A cápsula acompanha apenas a abertura, incluindo o leque de fotos.
+    // A altura de layout evita realimentar o cálculo com o próprio transform.
+    const boundaryBottom = opening.getBoundingClientRect().bottom;
+    if (boundaryBottom >= bottom) {
+      // Ainda sobre a abertura: ele fica no lugar, como sempre.
+      revealed = undefined;
+      turn = y;
+    } else if (menuOpen) {
+      // A página está travada: quem muda o scrollY é o navegador, compensando a altura do
+      // menu, e não a pessoa.
+      turn = y;
+    } else if (revealed === 'true') {
+      turn = Math.min(turn, y);
+      if (y - turn > threshold) {
+        revealed = 'false';
         turn = y;
-      } else if (document.body.classList.contains('menu-is-open')) {
-        // A página está travada: quem muda o scrollY é o navegador, compensando a altura do
-        // menu, e não a pessoa.
-        turn = y;
-      } else if (revealed === 'true') {
-        turn = Math.min(turn, y);
-        if (y - turn > threshold) {
-          revealed = 'false';
-          turn = y;
-        }
-      } else {
-        turn = Math.max(turn, y);
-        if (turn - y > threshold) {
-          revealed = 'true';
-          turn = y;
-        }
       }
-      shift = revealed === 'true' ? 0 : Math.max(-bottom - 1, Math.min(0, boundaryBottom - bottom));
-      hidden = revealed !== 'true' && boundaryBottom <= 0;
-      header.dataset.headerBounded = '';
-      header.style.setProperty('--header-shift', `${shift}px`);
-      header.dataset.headerHidden = String(hidden);
-      header.inert = hidden;
-      if (revealed) header.dataset.headerRevealed = revealed;
-      else delete header.dataset.headerRevealed;
+    } else {
+      turn = Math.max(turn, y);
+      if (turn - y > threshold) {
+        revealed = 'true';
+        turn = y;
+      }
     }
-    // Escondido, ele sai de cena com a cor que tinha.
-    if (hidden) return;
-    const bandTop = top + shift;
-    const covered = surfaces.reduce((sum, surface) => {
-      const area = paintedArea(surface);
-      const overlap = Math.min(bandTop + height, area.bottom) - Math.max(bandTop, area.top);
-      return sum + Math.max(0, overlap);
-    }, 0);
-    header.dataset.headerSurface = covered * 2 > height ? 'dark' : '';
+    const shift =
+      revealed === 'true' ? 0 : Math.max(-bottom - 1, Math.min(0, boundaryBottom - bottom));
+    const hidden = revealed !== 'true' && boundaryBottom <= 0;
+    // O vidro da abertura vale enquanto ele acompanha a abertura. De volta, ele pode ficar metade
+    // sobre ela e metade sobre a seção seguinte; com o menu aberto, a abertura desce e o menu
+    // fica sobre fundos misturados.
+    header.dataset.headerSurface =
+      revealed !== 'true' && boundaryBottom > 0 && !menuOpen ? 'opening' : '';
+    header.dataset.headerBounded = '';
+    header.style.setProperty('--header-shift', `${shift}px`);
+    header.dataset.headerHidden = String(hidden);
+    header.inert = hidden;
+    if (revealed) header.dataset.headerRevealed = revealed;
+    else delete header.dataset.headerRevealed;
   };
-  const scheduleHeader = () => {
+  scheduleHeader = () => {
     if (pending) return;
     pending = true;
     requestAnimationFrame(() => {
@@ -107,8 +95,6 @@ if (header) {
   window.addEventListener('scroll', scheduleHeader, { passive: true });
   window.addEventListener('resize', scheduleHeader, { passive: true });
   window.addEventListener('pageshow', scheduleHeader);
-  // O menu do celular aberto muda a altura do cabeçalho, e com ela o que fica atrás dele.
-  new ResizeObserver(scheduleHeader).observe(header);
   updateHeader();
   void document.fonts.ready.then(updateHeader);
 }
@@ -125,6 +111,8 @@ const setMenu = (open: boolean) => {
   if (menuLabel) menuLabel.textContent = open ? (menuLabel.dataset.labelClose ?? '') : menuText;
   // Com o menu aberto, a página por trás não rola.
   document.body.classList.toggle('menu-is-open', open);
+  // E a cápsula deixa o vidro da abertura, ainda antes de pintar o menu.
+  scheduleHeader();
 };
 menuButton?.addEventListener('click', () =>
   setMenu(menuButton.getAttribute('aria-expanded') !== 'true'),

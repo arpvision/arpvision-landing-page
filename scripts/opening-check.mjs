@@ -98,6 +98,22 @@ const verifyHeaderBoundary = async (page) => {
   );
   assert.equal(await header.isVisible(), false, 'cabeçalho sai ao descer de novo');
   assert.equal(await header.evaluate((el) => el.inert), true, 'controles ocultos de novo');
+  // O limiar de 8 px: subir 6 px (o vai e volta do Safari) não traz o cabeçalho; subir mais 10, sim.
+  const lowest = await page.evaluate(() => scrollY);
+  await scroll(lowest - 6);
+  assert.equal(
+    await header.getAttribute('data-header-hidden'),
+    'true',
+    'subir 6 px não traz o cabeçalho de volta',
+  );
+  assert.equal(await header.evaluate((el) => el.inert), true);
+  await scroll(lowest - 16);
+  assert.equal(
+    await header.getAttribute('data-header-hidden'),
+    'false',
+    'subir mais 10 px traz o cabeçalho de volta',
+  );
+  assert.equal(await header.evaluate((el) => el.inert), false);
   await scroll(0);
   await page.waitForFunction(
     () => getComputedStyle(document.querySelector('.site-header')).visibility === 'visible',
@@ -270,7 +286,7 @@ try {
     'navegação das páginas internas preservada',
   );
   results.push(
-    'Cabeçalho até o fim do primeiro slide, saída com a abertura, controles ocultos sem foco, volta ao subir, saída ao descer de novo e retorno ao início; páginas internas preservadas.',
+    'Cabeçalho até o fim do primeiro slide, saída com a abertura, controles ocultos sem foco, volta ao subir, saída ao descer de novo, limiar de 8 px (6 px não trazem de volta, 16 px trazem) e retorno ao início; páginas internas preservadas.',
   );
   await context.close();
 

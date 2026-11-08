@@ -404,37 +404,36 @@ p {
     inset 0 -2px 4px color-mix(in srgb, var(--surface) 45%, transparent),
     0 16px 44px color-mix(in srgb, var(--ink) 10%, transparent);
 }
-/* Sobre a abertura e as outras seções escuras, a escrita e o logo ficam brancos. "opening" é o
-   que o Header.astro põe na home antes da primeira pintura; depois, o site.ts mede o que está
-   atrás do cabeçalho e põe "dark" ou nada. */
-.site-header[data-header-surface='opening'],
-.site-header[data-header-surface='dark'] {
+/* Sobre a abertura da home, a escrita e o logo ficam brancos. "opening" é o que o Header.astro põe
+   na home antes da primeira pintura; o site.ts o mantém enquanto o cabeçalho acompanha a abertura
+   e o menu do celular está fechado. */
+.site-header[data-header-surface='opening'] {
   --header-ink: var(--white);
   --header-fallback: var(--ink);
 }
-.site-header[data-header-surface='opening'] .brand-logo-light,
-.site-header[data-header-surface='dark'] .brand-logo-light {
+.site-header[data-header-surface='opening'] .brand-logo-light {
   display: none;
 }
-.site-header[data-header-surface='opening'] .brand-logo-dark,
-.site-header[data-header-surface='dark'] .brand-logo-dark {
+.site-header[data-header-surface='opening'] .brand-logo-dark {
   display: inline-block;
 }
-/* Ali, o azul do link sob o ponteiro ou da página e da seção da vez sumiria: ele continua branco,
-   marcado só pelo traço embaixo (no menu do celular, só pelo peso). */
+/* Ali, o azul do link sob o ponteiro ou da seção da vez sumiria: ele continua branco, marcado só
+   pelo traço embaixo. */
 .site-header[data-header-surface='opening'] .desktop-nav a:hover,
-.site-header[data-header-surface='opening'] .desktop-nav a[aria-current],
-.site-header[data-header-surface='opening'] .mobile-nav a[aria-current],
-.site-header[data-header-surface='dark'] .desktop-nav a:hover,
-.site-header[data-header-surface='dark'] .desktop-nav a[aria-current],
-.site-header[data-header-surface='dark'] .mobile-nav a[aria-current] {
+.site-header[data-header-surface='opening'] .desktop-nav a[aria-current] {
   color: inherit;
 }
 .site-header:not([data-header-enhanced]) .header-capsule {
   background: var(--surface);
 }
 @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  /* Fora da abertura, a cápsula fica quase opaca, na superfície do tema, com o desfoque: a escrita
+     na cor do tema não depende do que passa atrás (a faixa azul, o tour, o rodapé). */
   .site-header[data-header-enhanced] .header-capsule {
+    background: color-mix(in srgb, var(--surface) 90%, transparent);
+  }
+  /* Sobre a abertura, o vidro transparente. */
+  .site-header[data-header-surface='opening'] .header-capsule {
     background: linear-gradient(135deg, #ffffff2e, #ffffff0a);
   }
 }
@@ -589,8 +588,15 @@ p {
   font-size: var(--fs-small);
   font-weight: 600;
 }
-.menu-toggle:hover {
-  background: var(--bg-section);
+/* Só com mouse: no toque, o :hover fica preso no botão depois de tocar. Sobre a abertura, o
+   círculo é branco translúcido, porque o ícone ali é branco. */
+@media (hover: hover) {
+  .menu-toggle:hover {
+    background: var(--bg-section);
+  }
+  .site-header[data-header-surface='opening'] .menu-toggle:hover {
+    background: color-mix(in srgb, var(--white) 16%, transparent);
+  }
 }
 .menu-toggle > span {
   display: inline-flex;

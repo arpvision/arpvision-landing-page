@@ -10,7 +10,7 @@ const { locale, t } = pageLocale(Astro);
 const isHome = Astro.url.pathname === pagePath(locale, 'home');
 ---
 
-<section class="final-cta" data-atmosphere={isHome ? 'closing' : undefined} data-surface="dark">
+<section class="final-cta" data-atmosphere={isHome ? 'closing' : undefined}>
   <div class="container final-cta-inner">
     <div>
       <Brand white />

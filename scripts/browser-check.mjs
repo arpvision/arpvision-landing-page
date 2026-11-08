@@ -1,6 +1,7 @@
 import { chromium, devices } from '@playwright/test';
 import assert from 'node:assert/strict';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { parseColor, textContrast } from './lib/contrast.mjs';
 import { portugueseWords } from './portuguese-words.mjs';
 import { publishedPageIds, routes as localeRoutes } from '../src/i18n/routes.ts';
 
@@ -32,6 +33,96 @@ const productLinks = (locale) =>
     ...productPages.map((page) => localeRoutes[locale].pages[page]),
   ].sort();
 const allProductsLinks = publishedPageIds.includes('products') ? 1 : 0;
+// Cada rolagem espera o evento e dois quadros, como no opening-check: duas rolagens no mesmo quadro
+// chegariam ao site como uma só. Sem ter para onde rolar, não há evento a esperar.
+const scrollPage = (target, top) =>
+  target.evaluate(
+    (y) =>
+      new Promise((resolve) => {
+        const end = document.documentElement.scrollHeight - innerHeight;
+        if (Math.abs(Math.min(Math.max(y, 0), end) - scrollY) < 1) return resolve();
+        addEventListener(
+          'scroll',
+          () => requestAnimationFrame(() => requestAnimationFrame(resolve)),
+          {
+            once: true,
+          },
+        );
+        scrollTo({ top: y, behavior: 'instant' });
+      }),
+    top,
+  );
+// Fora da abertura da home, a cápsula do cabeçalho fica quase opaca, na cor do tema, e cada texto
+// dele passa de 4,5:1 sobre qualquer seção. O axe marca texto sobre vidro como "incomplete", então
+// o contraste é medido na imagem (scripts/lib/contrast.mjs), no tema claro e no escuro. O `before`
+// prepara cada tema (o fundo do tour, por exemplo). Devolve o menor contraste de cada tema.
+const legibleHeader = async (target, scene, before = async () => {}) => {
+  const lowest = {};
+  for (const theme of ['light', 'dark']) {
+    await target.evaluate((value) => (document.documentElement.dataset.theme = value), theme);
+    await before(theme);
+    const items = await textContrast(target.locator('.header-capsule'));
+    assert.deepEqual(
+      items.filter((item) => item.ratio < 4.5),
+      [],
+      `${scene}, tema ${theme}: texto do cabeçalho abaixo de 4,5:1`,
+    );
+    const look = await target.locator('.site-header').evaluate((header) => {
+      const capsule = getComputedStyle(header.querySelector('.header-capsule'));
+      return {
+        image: capsule.backgroundImage,
+        color: capsule.backgroundColor,
+        logo: [...header.querySelectorAll('.brand img')].find((image) => image.checkVisibility())
+          ?.src,
+      };
+    });
+    assert.ok(
+      look.image === 'none' && parseColor(look.color)[3] >= 0.85,
+      `${scene}, tema ${theme}: cápsula quase opaca ${JSON.stringify(look)}`,
+    );
+    assert.match(look.logo, theme === 'dark' ? /white/ : /blue/, `${scene}, tema ${theme}: logo`);
+    lowest[theme] = Math.min(...items.map((item) => item.ratio));
+  }
+  await target.evaluate(() => delete document.documentElement.dataset.theme);
+  return lowest;
+};
+// O que passa atrás do cabeçalho (o título, os botões e o logo de uma faixa) muda com a posição:
+// a seção é percorrida de baixo para cima (na home, ele continua de volta), de 60 em 60 px, sempre
+// atrás do cabeçalho inteiro, e cada parada é medida.
+const legibleAcross = async (target, selector, scene, before) => {
+  const stops = await target.evaluate((sectionSelector) => {
+    const header = document.querySelector('.site-header');
+    const top = parseFloat(getComputedStyle(header).top);
+    const section = document.querySelector(sectionSelector).getBoundingClientRect();
+    const first = section.bottom + scrollY - top - header.offsetHeight;
+    const last = Math.ceil(section.top + scrollY - top);
+    const list = [];
+    for (let y = first; y > last; y -= 60) list.push(Math.floor(y));
+    return [...list, last];
+  }, selector);
+  const lowest = { light: Infinity, dark: Infinity };
+  for (const stop of stops) {
+    await scrollPage(target, stop);
+    const behind = await target.evaluate((sectionSelector) => {
+      const section = document.querySelector(sectionSelector).getBoundingClientRect();
+      const capsule = document.querySelector('.header-capsule').getBoundingClientRect();
+      return (
+        section.top <= capsule.top &&
+        section.bottom >= capsule.bottom &&
+        section.left < capsule.right &&
+        section.right > capsule.left
+      );
+    }, selector);
+    assert.equal(behind, true, `${scene}: atrás do cabeçalho na parada de ${stop}px`);
+    const reading = await legibleHeader(target, `${scene}, parada de ${stop}px`, before);
+    lowest.light = Math.min(lowest.light, reading.light);
+    lowest.dark = Math.min(lowest.dark, reading.dark);
+  }
+  return lowest;
+};
+const readings = [];
+const reading = (scene, { light, dark }) =>
+  `${scene}: claro ${light.toFixed(2)}:1, escuro ${dark.toFixed(2)}:1`;
 try {
   const desktop = await browser.newContext({
     viewport: { width: 1440, height: 1000 },
@@ -159,79 +250,151 @@ try {
   }
   results.push('Menu do desktop destaca a seção visível OK');
 
-  // Na home, depois da abertura, o cabeçalho volta quando a pessoa sobe a página. Sobre a faixa
-  // final, escura, a escrita e o logo ficam brancos, também no link da seção da vez.
-  // Cada rolagem espera o evento e dois quadros, como no opening-check: duas rolagens no mesmo
-  // quadro chegariam ao site como uma só.
-  const scrollHome = (top) =>
-    page.evaluate(
-      (y) =>
-        new Promise((resolve) => {
-          addEventListener(
-            'scroll',
-            () => requestAnimationFrame(() => requestAnimationFrame(resolve)),
-            { once: true },
-          );
-          scrollTo({ top: y, behavior: 'instant' });
-        }),
-      top,
+  // Na home, depois da abertura, o cabeçalho volta quando a pessoa sobe a página, numa cápsula
+  // quase opaca: sobre a faixa final escura e sobre o tour da apresentação, que ocupa meia largura.
+  // O tour vira uma página lisa, preta no tema claro e branca no escuro: o pior fundo de cada um.
+  {
+    const context = await browser.newContext({
+      viewport: { width: 1440, height: 1000 },
+      reducedMotion: 'reduce',
+    });
+    const home = await context.newPage();
+    home.on('pageerror', (error) => errors.push(error.message));
+    await home.route('https://arpvision.app/embed/**', (route) =>
+      route.fulfill({
+        contentType: 'text/html',
+        body: '<!doctype html><html lang="pt-BR"><body></body></html>',
+      }),
     );
-  const headerState = () =>
-    page.locator('.site-header').evaluate((header) => ({
-      hidden: header.dataset.headerHidden,
-      surface: header.dataset.headerSurface,
-    }));
-  const pageEnd = await page.evaluate(() => document.documentElement.scrollHeight - innerHeight);
-  await scrollHome(pageEnd);
-  assert.equal((await headerState()).hidden, 'true', 'cabeçalho fora de cena no fim da home');
-  await scrollHome(
-    await page
-      .locator('.final-cta')
-      .evaluate((strip) => strip.getBoundingClientRect().top + scrollY + 100),
-  );
-  assert.deepEqual(
-    await headerState(),
-    { hidden: 'false', surface: 'dark' },
-    'cabeçalho de volta ao subir, sobre a faixa final',
-  );
-  // Logo abaixo da faixa vem a seção Dúvidas, e o link dela é o da seção da vez.
-  await page.waitForFunction(
-    () =>
-      document.querySelector('.desktop-nav [aria-current="location"]')?.textContent.trim() ===
-      'Dúvidas',
-  );
-  assert.deepEqual(
-    await page
-      .locator('.site-header .desktop-nav')
-      .evaluate((nav) => [
-        ...new Set(
-          [...nav.querySelectorAll('a, button')].map((item) => getComputedStyle(item).color),
+    await home.goto(base);
+    await home.evaluate(() => document.fonts.ready);
+    const headerState = () =>
+      home.locator('.site-header').evaluate((header) => ({
+        hidden: header.dataset.headerHidden,
+        surface: header.dataset.headerSurface,
+      }));
+    // A coluna grudada da FAQ fica embaixo do cabeçalho de volta e sobe quando ele sai (a troca de
+    // valor é uma transição, mesmo com movimento reduzido).
+    const faqColumn = async (top, message) => {
+      const column = home.locator('.faq-layout > div:first-child');
+      await home
+        .waitForFunction(
+          (value) =>
+            getComputedStyle(document.querySelector('.faq-layout > div:first-child')).top === value,
+          top,
+          { timeout: 3000 },
+        )
+        .catch(() => {});
+      assert.equal(await column.evaluate((element) => getComputedStyle(element).top), top, message);
+    };
+    const pageEnd = await home.evaluate(() => document.documentElement.scrollHeight - innerHeight);
+    await scrollPage(home, pageEnd);
+    assert.equal((await headerState()).hidden, 'true', 'cabeçalho fora de cena no fim da home');
+    // Subindo até a faixa final, com o fim dela no fim do cabeçalho: logo abaixo vem a seção
+    // Dúvidas, e o link dela é o da seção da vez.
+    await scrollPage(
+      home,
+      await home.locator('.final-cta').evaluate((strip) => {
+        const header = document.querySelector('.site-header');
+        const bottom = parseFloat(getComputedStyle(header).top) + header.offsetHeight;
+        return Math.floor(strip.getBoundingClientRect().bottom + scrollY - bottom);
+      }),
+    );
+    assert.deepEqual(
+      await headerState(),
+      { hidden: 'false', surface: '' },
+      'cabeçalho de volta ao subir, sobre a faixa final, fora do vidro da abertura',
+    );
+    await home.waitForFunction(
+      () =>
+        document.querySelector('.desktop-nav [aria-current="location"]')?.textContent.trim() ===
+        'Dúvidas',
+    );
+    readings.push(
+      reading(
+        'home, de volta sobre a faixa final',
+        await legibleAcross(home, '.final-cta', 'home, de volta sobre a faixa final'),
+      ),
+    );
+    await faqColumn('104px', 'a coluna da FAQ desce para baixo do cabeçalho de volta');
+    await home.screenshot({ path: '.artifacts/cabecalho-faixa-final.png' });
+    readings.push(
+      reading(
+        'home, de volta sobre o tour',
+        await legibleAcross(home, '.hero-embed', 'home, de volta sobre o tour', (theme) =>
+          home
+            .frameLocator('.hero-embed')
+            .locator('body')
+            .evaluate(
+              (body, color) => (body.style.background = color),
+              theme === 'dark' ? '#fff' : '#000',
+            ),
         ),
-      ]),
-    ['rgb(255, 255, 255)'],
-    'menu branco sobre a faixa final',
-  );
-  assert.match(
-    await page
-      .locator('.site-header .brand img')
-      .evaluateAll((images) => images.find((image) => image.checkVisibility())?.src),
-    /white/,
-    'logo branco sobre a faixa final',
-  );
-  await page.screenshot({ path: '.artifacts/cabecalho-faixa-final.png' });
-  // O painel Produtos aberto fecha quando o cabeçalho sai de cena.
-  await scrollHome(0);
-  await page.locator('.products-toggle').click();
-  assert.equal(await page.locator('.products-toggle').getAttribute('aria-expanded'), 'true');
-  await scrollHome(pageEnd);
-  assert.equal((await headerState()).hidden, 'true');
-  assert.equal(
-    await page.locator('.products-toggle').getAttribute('aria-expanded'),
-    'false',
-    'o painel Produtos fecha quando o cabeçalho sai',
-  );
+      ),
+    );
+    assert.deepEqual(await headerState(), { hidden: 'false', surface: '' });
+    await home.screenshot({ path: '.artifacts/cabecalho-sobre-o-tour.png' });
+    // Descer de novo tira o cabeçalho de cena, e a coluna da FAQ volta para cima.
+    await scrollPage(home, await home.evaluate(() => scrollY + 200));
+    assert.equal((await headerState()).hidden, 'true', 'cabeçalho sai ao descer de novo');
+    await faqColumn('32px', 'a coluna da FAQ sobe quando o cabeçalho sai');
+    // O painel Produtos aberto fecha quando o cabeçalho sai de cena.
+    await scrollPage(home, 0);
+    await home.locator('.products-toggle').click();
+    assert.equal(await home.locator('.products-toggle').getAttribute('aria-expanded'), 'true');
+    await scrollPage(home, pageEnd);
+    assert.equal((await headerState()).hidden, 'true');
+    assert.equal(
+      await home.locator('.products-toggle').getAttribute('aria-expanded'),
+      'false',
+      'o painel Produtos fecha quando o cabeçalho sai',
+    );
+    // Fora da home ele fica sempre na tela: em /tutoriais, sobre a faixa azul do fim. A janela é
+    // baixa para a faixa chegar ao cabeçalho.
+    await home.setViewportSize({ width: 1440, height: 640 });
+    await home.goto(base + localeRoutes.pt.pages.tutorials);
+    await home.evaluate(() => document.fonts.ready);
+    readings.push(
+      reading(
+        '/tutoriais, sobre a faixa azul',
+        await legibleAcross(home, '.final-cta', '/tutoriais, sobre a faixa azul'),
+      ),
+    );
+    await home.screenshot({ path: '.artifacts/cabecalho-faixa-azul.png' });
+    await context.close();
+  }
   results.push(
-    'Home: o cabeçalho volta ao subir, fica branco sobre a faixa final (menu, seção da vez e logo) e fecha o painel Produtos ao sair OK',
+    'Cabeçalho fora da abertura: volta ao subir na home, cápsula quase opaca com contraste AA (faixa final, tour e faixa azul de /tutoriais, nos dois temas), coluna da FAQ em 104px e 32px, e o painel Produtos fecha ao sair OK',
+  );
+  // Com mouse, o botão do menu (abaixo de 1024px) ganha um círculo sob o ponteiro. Sobre a
+  // abertura, ele é branco translúcido, porque o ícone ali é branco.
+  {
+    const context = await browser.newContext({
+      viewport: { width: 900, height: 800 },
+      reducedMotion: 'reduce',
+    });
+    const narrow = await context.newPage();
+    narrow.on('pageerror', (error) => errors.push(error.message));
+    await narrow.goto(base);
+    await narrow.waitForFunction(
+      () => document.querySelector('.site-header').dataset.headerSurface === 'opening',
+    );
+    await narrow.locator('.menu-toggle').hover();
+    const hoverFill = parseColor(
+      await narrow
+        .locator('.menu-toggle')
+        .evaluate((button) => getComputedStyle(button).backgroundColor),
+    );
+    assert.ok(
+      hoverFill.slice(0, 3).every((value) => value === 255) &&
+        hoverFill[3] > 0 &&
+        hoverFill[3] <= 0.3,
+      `hover do botão do menu branco translúcido sobre a abertura: ${hoverFill}`,
+    );
+    await context.close();
+  }
+  results.push(
+    '900px, com mouse: o hover do botão do menu é branco translúcido sobre a abertura OK',
   );
 
   // "Produtos ▾" no lugar de "Como funciona", nos dois idiomas: abre e fecha pelo clique, pelo
@@ -530,99 +693,91 @@ try {
     );
     assert.deepEqual(smallTargets, [], `${route}: alvos de toque abaixo do mínimo`);
   }
-  // Fora da home, o menu aberto também pode ficar sobre a faixa azul: com ela atrás da maior
-  // parte do cabeçalho, a superfície é escura e o menu inteiro fica branco, inclusive o item da
-  // página, marcado só pelo peso. A página não rola pelo toque com o menu aberto, mas rola pelo
-  // script: a faixa vai para o topo do cabeçalho (evento de rolagem e dois quadros, como no
-  // scrollHome).
+  // Aberto, o menu do celular fica numa cápsula opaca, na cor do tema: as linhas dele passam por
+  // fundos misturados. Fora da home, ele pode ficar sobre a faixa azul, o título dela desfocado e
+  // o rodapé. A página não rola pelo toque com o menu aberto, mas rola pelo script: a faixa vai
+  // para o topo do cabeçalho.
   await phone.goto(base + localeRoutes.pt.pages.tutorials);
   await phone.locator('.menu-toggle').click();
-  await phone.evaluate(
-    () =>
-      new Promise((resolve) => {
-        const header = document.querySelector('.site-header');
-        const top =
-          document.querySelector('.final-cta').getBoundingClientRect().top +
-          scrollY -
-          parseFloat(getComputedStyle(header).top);
-        addEventListener(
-          'scroll',
-          () => requestAnimationFrame(() => requestAnimationFrame(resolve)),
-          { once: true },
-        );
-        scrollTo({ top, behavior: 'instant' });
-      }),
+  await scrollPage(
+    phone,
+    await phone.evaluate(
+      () =>
+        document.querySelector('.final-cta').getBoundingClientRect().top +
+        scrollY -
+        parseFloat(getComputedStyle(document.querySelector('.site-header')).top) +
+        4,
+    ),
   );
   assert.equal(
-    await phone.locator('.site-header').getAttribute('data-header-surface'),
-    'dark',
-    'menu aberto em /tutoriais com a faixa azul atrás da maior parte dele',
+    await phone.evaluate(
+      () =>
+        document.querySelector('.final-cta').getBoundingClientRect().top <=
+        document.querySelector('.header-capsule').getBoundingClientRect().top,
+    ),
+    true,
+    'menu aberto em /tutoriais com a faixa azul atrás dele',
   );
   // O botão Produtos só ganha is-current nas páginas de produto (Tarefa 6); aqui a classe entra
   // à mão.
-  const mobileInk = await phone.locator('#mobile-nav').evaluate(async (nav) => {
-    // Com movimento reduzido, toda troca de cor vira uma transição de 0,01 ms, que pode levar
-    // alguns quadros para começar e puxar outras nos filhos: cada leitura espera o menu parar.
-    const settle = async () => {
-      for (let round = 0; round < 10; round++) {
-        const running = nav.getAnimations({ subtree: true });
-        if (!running.length) return;
-        await Promise.allSettled(running.map((animation) => animation.finished));
-      }
-    };
-    const ink = (item) => `${getComputedStyle(item).color} ${getComputedStyle(item).fontWeight}`;
-    const page = nav.querySelector('a[aria-current="page"]');
-    const products = nav.querySelector('.mobile-products-toggle');
-    const read = async () => {
-      await settle();
-      return {
-        colors: [
-          ...new Set(
-            [...nav.querySelectorAll('a, button')].map((item) => getComputedStyle(item).color),
-          ),
-        ],
-        page: ink(page),
-        products: ink(products),
-      };
-    };
-    products.classList.add('is-current');
-    const light = await read();
-    document.documentElement.dataset.theme = 'dark';
-    const dark = await read();
-    delete document.documentElement.dataset.theme;
-    products.classList.remove('is-current');
-    await settle();
-    return { light, dark };
-  });
+  const productsCurrent = (on) =>
+    phone
+      .locator('.mobile-products-toggle')
+      .evaluate((button, value) => button.classList.toggle('is-current', value), on);
+  await productsCurrent(true);
+  readings.push(
+    reading(
+      '360px, menu aberto sobre a faixa azul de /tutoriais',
+      await legibleHeader(phone, '360px, menu aberto sobre a faixa azul de /tutoriais'),
+    ),
+  );
   await phone.screenshot({ path: '.artifacts/tutoriais-menu-faixa-mobile.png' });
-  const whiteMenu = {
-    colors: ['rgb(255, 255, 255)'],
-    page: 'rgb(255, 255, 255) 600',
-    products: 'rgb(255, 255, 255) 600',
-  };
-  assert.deepEqual(
-    mobileInk,
-    { light: whiteMenu, dark: whiteMenu },
-    'menu do celular branco sobre a faixa azul, com o item atual marcado pelo peso, nos dois temas',
-  );
-  results.push(
-    '360px: em /tutoriais, com o menu aberto sobre a faixa azul, a superfície é dark e o menu fica branco nos dois temas, inclusive o item da página e o botão Produtos marcado (peso 600) OK',
-  );
+  await productsCurrent(false);
   await phone.goto(base);
   await phone.screenshot({ path: '.artifacts/home-mobile.png' });
-  await phone.locator('.menu-toggle').click();
+  await phone.locator('.menu-toggle').tap();
   assert.equal(await phone.locator('#mobile-nav').isVisible(), true);
   assert.equal(await phone.evaluate(() => getComputedStyle(document.body).overflow), 'hidden');
-  // Aberto no topo da home, o menu empurra a abertura para baixo: a maior parte do cabeçalho
-  // fica sobre o fundo claro, e a escrita volta à cor de sempre.
+  // Aberto no topo da home, o menu empurra a abertura para baixo, e o cabeçalho fica sobre o fundo
+  // claro e o começo dela: a cápsula deixa o vidro da abertura.
   await phone.waitForFunction(
     () => document.querySelector('.site-header').dataset.headerSurface === '',
+    null,
+    { timeout: 5000 },
+  );
+  readings.push(
+    reading(
+      '360px, menu aberto no topo da home',
+      await legibleHeader(phone, '360px, menu aberto no topo da home'),
+    ),
+  );
+  await phone.screenshot({ path: '.artifacts/home-menu-aberto-mobile.png' });
+  // Fechado pelo próprio botão, ele volta ao vidro da abertura. O :hover fica no botão depois do
+  // toque, mas sem mouse o botão não ganha o círculo claro atrás do ícone branco.
+  await phone.locator('.menu-toggle').tap();
+  await phone.waitForFunction(
+    () => document.querySelector('.site-header').dataset.headerSurface === 'opening',
+    null,
+    { timeout: 5000 },
+  );
+  assert.equal(
+    await phone
+      .locator('.menu-toggle')
+      .evaluate((button) => getComputedStyle(button).backgroundColor),
+    'rgba(0, 0, 0, 0)',
+    'sem círculo de hover no botão do menu depois do toque',
+  );
+  results.push(
+    '360px: menu aberto numa cápsula opaca com contraste AA (topo da home e faixa azul de /tutoriais, nos dois temas); fechado, volta ao vidro da abertura, sem o círculo de hover preso no botão OK',
   );
   // Toque fora do menu num ponto sem link (o título da hero), para não navegar.
+  await phone.locator('.menu-toggle').click();
   await phone.locator('.hero h1').click({ position: { x: 10, y: 10 } });
   assert.equal(await phone.locator('#mobile-nav').isVisible(), false, 'toque fora fecha o menu');
   await phone.waitForFunction(
-    () => document.querySelector('.site-header').dataset.headerSurface === 'dark',
+    () => document.querySelector('.site-header').dataset.headerSurface === 'opening',
+    null,
+    { timeout: 5000 },
   );
   await phone.locator('.menu-toggle').click();
   // O grupo Produtos abre dentro do menu, com os produtos do painel e toques de 44px.
@@ -648,8 +803,9 @@ try {
   for (const item of productItems)
     assert.ok(item.visible && item.height >= 44, `item do grupo Produtos: ${JSON.stringify(item)}`);
   await phone.screenshot({ path: '.artifacts/produtos-menu-mobile.png' });
-  // "Produtos" é um botão: o primeiro link do menu continua sendo uma seção da home.
-  await phone.locator('#mobile-nav > a').first().click();
+  // "Produtos" é um botão: o primeiro link de seção do menu leva à home e fecha o menu. Com preços
+  // públicos, o primeiro link é "Planos" (/planos), que sai da home; o de seção é "Dúvidas".
+  await phone.locator('#mobile-nav > a[href^="#"]').first().click();
   assert.equal(await phone.locator('#mobile-nav').isVisible(), false);
   assert.equal(await phone.evaluate(() => getComputedStyle(document.body).overflow), 'visible');
   if (!pricesShown) {
@@ -913,6 +1069,7 @@ try {
   results.push(
     `Cabeçalho em uma linha, com Produtos só a partir de 1024px: ${routes.length} rotas (pt e es) de 320 a 1440px OK`,
   );
+  results.push(`Menor contraste do texto do cabeçalho, medido na imagem: ${readings.join('; ')}`);
   assert.deepEqual(errors, []);
   console.log(results.join('\n'));
   await writeFile('.artifacts/browser-results.json', JSON.stringify({ results, errors }, null, 2));
