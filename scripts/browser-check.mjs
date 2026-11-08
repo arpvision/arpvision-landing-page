@@ -150,6 +150,30 @@ const exampleScreens = (target) =>
       };
     }),
   );
+// As telas dos passos são pequenas: nada pode sair da caixa delas, e o endereço do campo do site
+// aparece inteiro (ele não quebra linha; sem espaço, seria cortado).
+const stepScreensOverflow = (target) =>
+  target.locator('.product-steps .example-screen').evaluateAll((screens) =>
+    screens.flatMap((screen) => {
+      const box = screen.getBoundingClientRect();
+      const name = screen.classList[screen.classList.length - 1];
+      const out = [...screen.querySelectorAll('*')]
+        .filter((element) => {
+          const rect = element.getBoundingClientRect();
+          return (
+            rect.width > 0 &&
+            (rect.left < box.left - 0.5 ||
+              rect.right > box.right + 0.5 ||
+              rect.top < box.top - 0.5 ||
+              rect.bottom > box.bottom + 0.5)
+          );
+        })
+        .map((element) => `${name}: ${element.className || element.tagName} sai da tela`);
+      const url = screen.querySelector('.site-url');
+      if (url && url.scrollWidth > url.clientWidth) out.push(`${name}: endereço cortado`);
+      return out;
+    }),
+  );
 const checkExampleScreens = (screens, example, scene) => {
   assert.ok(screens.length > 0, `${scene}: telas de exemplo`);
   for (const screen of screens) {
@@ -591,10 +615,30 @@ try {
     await page.goto(base + route);
     await page.evaluate(() => document.fonts.ready);
     assert.equal(await page.locator('h1').count(), 1, `${route}: um h1`);
-    // O calendário do topo, o perfil parado da dor e as oito artes.
+    // O calendário do topo, o perfil parado da dor, uma tela em cada um dos três passos e as oito
+    // artes.
     const screens = await exampleScreens(page);
-    assert.equal(screens.length, 10, `${route}: dez telas de exemplo`);
+    assert.equal(screens.length, 13, `${route}: treze telas de exemplo`);
     checkExampleScreens(screens, expected.example, route);
+    // Cada passo do "Como funciona" leva a sua tela, e a lista dos passos continua lista no Safari,
+    // que tira a semântica de lista com `list-style: none`.
+    assert.deepEqual(
+      await page.locator('.product-steps').evaluate((list) => ({
+        role: list.getAttribute('role'),
+        screens: [...list.children].map((step) => step.querySelectorAll('.example-screen').length),
+      })),
+      { role: 'list', screens: [1, 1, 1] },
+      `${route}: uma tela em cada passo`,
+    );
+    // Nos cartões mais estreitos (de 1024 a 1199px, os três lado a lado) e no desktop largo.
+    for (const width of [1024, 1100, 1440]) {
+      await page.setViewportSize({ width, height: 1000 });
+      assert.deepEqual(
+        await stepScreensOverflow(page),
+        [],
+        `${route}, ${width}px: telas dos passos`,
+      );
+    }
     await page.screenshot({ path: `.artifacts/produto-instagram-${locale}-desktop.png` });
     assert.equal(
       await page
@@ -777,7 +821,7 @@ try {
     await context.close();
   }
   results.push(
-    'Piloto automático para Instagram (pt e es): 1 h1; 10 telas de exemplo com a etiqueta visível, aria-hidden, inert e a descrição "Exemplo:"; nada do tour na cotação e na faixa; dúvidas sem título de grupo; o produto nos 5 botões de WhatsApp; a mensagem e os eventos da cotação; o menu marca o produto; Cotação e Dúvidas na página; a frase da dor troca 2 voltas e para no primeiro trecho, e não troca com movimento reduzido OK',
+    'Piloto automático para Instagram (pt e es): 1 h1; 13 telas de exemplo (uma em cada passo) com a etiqueta visível, aria-hidden, inert e a descrição "Exemplo:"; a lista dos passos com role="list" e nada para fora das telas dos passos a 1024, 1100 e 1440px; nada do tour na cotação e na faixa; dúvidas sem título de grupo; o produto nos 5 botões de WhatsApp; a mensagem e os eventos da cotação; o menu marca o produto; Cotação e Dúvidas na página; a frase da dor troca 2 voltas e para no primeiro trecho, e não troca com movimento reduzido OK',
   );
 
   for (const route of pricesShown ? ['/', '/planos'] : ['/']) {
@@ -1066,9 +1110,16 @@ try {
     );
     assert.deepEqual(smallTargets, [], `${route}: alvos de toque abaixo do mínimo`);
   }
-  // A 360 px, as telas do Piloto continuam marcadas, e o calendário do topo mostra uma semana só.
+  // A 360 px, as telas do Piloto (as dos passos também) continuam marcadas, e o calendário do topo
+  // mostra uma semana só.
   await phone.goto(base + localeRoutes.pt.pages.productInstagram);
-  checkExampleScreens(await exampleScreens(phone), 'Exemplo', '360px, Piloto');
+  const phoneScreens = await exampleScreens(phone);
+  assert.equal(phoneScreens.length, 13, '360px, Piloto: treze telas de exemplo');
+  checkExampleScreens(phoneScreens, 'Exemplo', '360px, Piloto');
+  for (const width of [390, 360]) {
+    await phone.setViewportSize({ width, height: 800 });
+    assert.deepEqual(await stepScreensOverflow(phone), [], `${width}px, Piloto: telas dos passos`);
+  }
   assert.deepEqual(
     await phone
       .locator('.calendar-week')
@@ -1169,7 +1220,7 @@ try {
     'sem círculo de hover no botão do menu depois do toque',
   );
   results.push(
-    '360px: telas do Piloto marcadas e o calendário com uma semana só; menu aberto numa cápsula opaca com contraste AA (topo da home e faixa azul de /tutoriais e do Piloto, com o produto marcado, nos dois temas); fechado, volta ao vidro da abertura, sem o círculo de hover preso no botão OK',
+    '360px: as 13 telas do Piloto marcadas, nada para fora das telas dos passos (390 e 360px) e o calendário com uma semana só; menu aberto numa cápsula opaca com contraste AA (topo da home e faixa azul de /tutoriais e do Piloto, com o produto marcado, nos dois temas); fechado, volta ao vidro da abertura, sem o círculo de hover preso no botão OK',
   );
   // Toque fora do menu num ponto sem link (o título da hero), para não navegar.
   await phone.locator('.menu-toggle').click();

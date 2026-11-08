@@ -16,6 +16,9 @@ import ProductComparison from '../product/ProductComparison.astro';
 import AlsoProducts from '../product/AlsoProducts.astro';
 import CalendarMock from '../mocks/CalendarMock.astro';
 import StaleProfileMock from '../mocks/StaleProfileMock.astro';
+import SiteReadMock from '../mocks/SiteReadMock.astro';
+import StyleChoiceMock from '../mocks/StyleChoiceMock.astro';
+import MonthApprovalMock from '../mocks/MonthApprovalMock.astro';
 import { pageLocale } from '../../i18n';
 import { productOfPage, type ProductPageId } from '../../lib/products';
 import { faqPageSchema, serviceSchema } from '../../lib/schema';
@@ -55,7 +58,11 @@ const text = t.productPages.instagram;
   <ProductPain {...text.pain}>
     <StaleProfileMock />
   </ProductPain>
-  <ProductSteps title={text.steps.title} items={text.steps.items} />
+  <ProductSteps title={text.steps.title} items={text.steps.items}>
+    <SiteReadMock slot="step-1" />
+    <StyleChoiceMock slot="step-2" />
+    <MonthApprovalMock slot="step-3" />
+  </ProductSteps>
   <PostGallery />
   <ProductIncluded
     title={text.included.title}

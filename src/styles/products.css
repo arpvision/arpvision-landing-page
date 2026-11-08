@@ -504,7 +504,9 @@
   opacity: 0.5;
 }
 
-/* Como funciona: os passos em ordem. */
+/* Como funciona: os passos em ordem, cada um com a sua tela pequena. No desktop, cada cartão ocupa
+   as quatro linhas da grade (subgrid): a tela, o número, o título e o texto se alinham entre os
+   três. A tela fica em cima, embora venha depois do texto no HTML. */
 .product-steps,
 .product-included,
 .post-gallery,
@@ -516,7 +518,28 @@
 .product-steps {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 24px;
+  column-gap: 24px;
+}
+.product-steps > li {
+  display: grid;
+  grid-row: span 4;
+  grid-template-rows: subgrid;
+  row-gap: 0;
+}
+.product-steps .example-figure {
+  display: flex;
+  flex-direction: column;
+  grid-row: 1;
+  margin-bottom: 24px;
+}
+.product-steps .product-step-number {
+  grid-row: 2;
+}
+.product-steps h3 {
+  grid-row: 3;
+}
+.product-steps > li > p {
+  grid-row: 4;
 }
 .product-steps > li,
 .product-included > li {
@@ -542,10 +565,285 @@
   margin-bottom: 8px;
   font-size: 1.125rem;
 }
-.product-steps p,
+.product-steps > li > p,
 .product-included p {
   margin: 0;
   font-size: var(--fs-small);
+}
+
+/* As telas dos passos: a etiqueta no alto, à direita, e o conteúdo no meio da altura. No desktop,
+   as três têm a altura da maior. Os "botões" são span, como em toda tela de exemplo. */
+.step-mock {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 16px;
+  font-size: var(--fs-note);
+}
+.step-mock-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.step-mock-head .example-tag {
+  margin-left: auto;
+}
+.step-mock-body {
+  display: grid;
+  gap: 12px;
+  margin-block: auto;
+}
+.step-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 13px;
+  border: 1px solid var(--brand-blue);
+  border-radius: 8px;
+  background: var(--brand-blue);
+  color: var(--white);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.step-button.is-secondary {
+  border-color: var(--border);
+  background: var(--surface);
+  color: var(--text-strong);
+}
+.step-check {
+  display: inline-grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--status-success);
+  color: var(--white);
+}
+/* Passo 1: o campo com o endereço e o botão; embaixo, o que a leitura achou no site. */
+.site-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 5px 5px 12px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: var(--bg-section);
+}
+.site-address {
+  display: inline-flex;
+  flex: 1;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  color: var(--text-strong);
+  font-weight: 600;
+}
+.site-address svg {
+  color: var(--accent);
+}
+/* O endereço fica numa linha, como num campo de verdade: nunca quebra no meio. */
+.site-url {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.site-found {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-strong);
+  font-weight: 600;
+}
+.site-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.site-logo {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: var(--brand-blue);
+  color: var(--white);
+}
+.site-colors {
+  display: flex;
+  gap: 5px;
+}
+.site-colors > span {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--brand-blue);
+  box-shadow: 0 0 0 1px var(--border);
+}
+.site-colors > span:nth-child(2) {
+  background: #13233f;
+}
+.site-colors > span:nth-child(3) {
+  background: var(--status-warning);
+}
+/* As miniaturas dos imóveis encolhem quando a tela é estreita. */
+.site-listings {
+  display: flex;
+  flex: 0 1 auto;
+  gap: 5px;
+  min-width: 0;
+  margin-left: auto;
+}
+.site-listings img {
+  flex: 0 1 34px;
+  width: 34px;
+  min-width: 0;
+  height: 42px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+/* Passo 2: a mesma casa em três estilos; o escolhido leva o anel e o nome embaixo. As artes têm as
+   cores de um post, iguais nos dois temas. */
+.styles-row {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
+}
+.style-option {
+  display: grid;
+  justify-items: center;
+  gap: 9px;
+}
+.style-art {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border-radius: 9px;
+  background: var(--ink);
+}
+.style-art img {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.style-lines {
+  display: grid;
+  gap: 4px;
+  padding: 8px;
+}
+.style-lines > span {
+  width: 82%;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--white);
+}
+.style-lines > span + span {
+  width: 52%;
+  opacity: 0.75;
+}
+/* Véu: a foto inteira, escurecida embaixo. */
+.style-veil .style-art::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    to bottom,
+    transparent 40%,
+    color-mix(in srgb, var(--ink) 88%, transparent)
+  );
+}
+/* Moldura e cartão: a foto dentro da cor da marca ou do fundo claro, com o texto embaixo dela. */
+.style-frame .style-art,
+.style-card .style-art {
+  padding: 5px 5px 0;
+}
+.style-frame .style-art {
+  background: var(--brand-blue);
+}
+/* O cartão claro leva um contorno: sem ele, some sobre a tela branca do tema claro. */
+.style-card .style-art {
+  background: #eef3ff;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 14%, transparent);
+}
+.style-frame .style-art img,
+.style-card .style-art img {
+  position: static;
+  flex: 1;
+  min-height: 0;
+  border-radius: 5px;
+}
+.style-frame .style-lines,
+.style-card .style-lines {
+  padding: 7px 3px 8px;
+}
+.style-card .style-lines > span {
+  background: var(--ink);
+}
+.style-option.is-chosen .style-art {
+  box-shadow:
+    0 0 0 2px var(--surface),
+    0 0 0 4px var(--accent);
+}
+.style-chosen {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--accent);
+  font-size: var(--fs-label);
+  font-weight: 650;
+  white-space: nowrap;
+}
+/* Passo 3: o mês em miniatura e os dois botões. */
+.month-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-strong);
+  font-weight: 600;
+}
+.month-title svg {
+  color: var(--accent);
+}
+.month-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+}
+.month-day {
+  aspect-ratio: 5 / 4;
+  overflow: hidden;
+  border-radius: 5px;
+  background: var(--bg-section);
+}
+.month-day img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.month-day.is-text {
+  background: var(--brand-blue);
+}
+.month-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.month-actions .step-button {
+  flex: 1 1 auto;
 }
 
 /* As artes: posts 4:5 e o story 9:16, que fica com a altura dos posts. As linhas que não fecham
@@ -782,6 +1080,20 @@
   color: var(--accent);
 }
 
+/* De 1024 a 1199px, os três passos ainda ficam lado a lado, em cartões estreitos: menos respiro em
+   volta das telas, e o campo do site sem o ícone, para o endereço caber inteiro. */
+@media (min-width: 1024px) and (max-width: 1199px) {
+  .product-steps > li {
+    padding: 22px;
+  }
+  .step-mock {
+    padding: 14px;
+  }
+  .site-address svg {
+    display: none;
+  }
+}
+
 @media (max-width: 1023px) {
   .product-hero .hero-grid,
   .product-pain-grid {
@@ -791,7 +1103,8 @@
   .product-hero-mock {
     width: min(100%, 600px);
   }
-  /* Os passos viram uma coluna: o número à esquerda do título e do texto. */
+  /* Os passos viram uma coluna: a tela em cima e, embaixo dela, o número à esquerda do título e do
+     texto. */
   .product-steps {
     grid-template-columns: minmax(0, 1fr);
     gap: 14px;
@@ -799,14 +1112,30 @@
     margin-inline: auto;
   }
   .product-steps > li {
-    display: grid;
+    grid-row: auto;
+    grid-template-rows: none;
     grid-template-columns: auto minmax(0, 1fr);
     column-gap: 18px;
     padding: 22px;
   }
-  .product-step-number {
-    grid-row: span 2;
+  .product-steps .example-figure {
+    grid-column: 1 / -1;
+    width: min(100%, 420px);
+    margin-bottom: 20px;
+  }
+  .product-steps .product-step-number {
+    grid-row: 2 / span 2;
     margin-bottom: 0;
+  }
+  .product-steps h3,
+  .product-steps > li > p {
+    grid-column: 2;
+  }
+  .product-steps h3 {
+    grid-row: 2;
+  }
+  .product-steps > li > p {
+    grid-row: 3;
   }
   .product-included {
     grid-template-columns: repeat(2, minmax(0, 1fr));

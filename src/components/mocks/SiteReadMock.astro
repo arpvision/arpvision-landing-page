@@ -1,0 +1,61 @@
+---
+// Passo 1 do Piloto automático para Instagram, "Mande o endereço do site": o endereço da
+// Imobiliária Exemplo no campo, o botão Ler e o que a ARP Vision achou no site (o logo, as cores e
+// os imóveis). É tela de exemplo: fica fora do leitor de tela, que ouve a descrição antes dela.
+import Icon from '../Icon.astro';
+import ExampleTag from './ExampleTag.astro';
+import { site } from '../../config/site';
+import { pageLocale } from '../../i18n';
+const { t } = pageLocale(Astro);
+const { mock } = t.productPages.instagram;
+const photos = site.media.productPhotos;
+const listings = (['sala-2-4x5', 'cozinha-4x5', 'patio-piscina-4x5'] as const).map(
+  (name) => photos[name],
+);
+---
+
+<div class="example-figure">
+  <p class="sr-only">{mock.siteDescription}</p>
+  <div class="example-screen step-mock site-mock" aria-hidden="true" inert>
+    <span class="step-mock-head">
+      <ExampleTag />
+    </span>
+    <span class="step-mock-body">
+      <span class="site-field">
+        <span class="site-address">
+          <Icon name="globe" size={16} />
+          <span class="site-url">{mock.siteAddress}</span>
+        </span>
+        <span class="step-button">{mock.siteRead}</span>
+      </span>
+      <span class="site-found">
+        <span class="step-check">
+          <Icon name="check" size={12} />
+        </span>
+        {mock.siteFound}
+      </span>
+      <span class="site-brand">
+        <span class="site-logo">
+          <Icon name="home" size={18} />
+        </span>
+        <span class="site-colors">
+          <span></span>
+          <span></span>
+          <span></span>
+        </span>
+        <span class="site-listings">
+          {listings.map((photo) => (
+            <img
+              src={photo.src}
+              width={photo.width}
+              height={photo.height}
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
+          ))}
+        </span>
+      </span>
+    </span>
+  </div>
+</div>

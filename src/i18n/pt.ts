@@ -277,6 +277,19 @@ export const pt = {
         lastPost: 'Último post: junho',
         profileDescription:
           'Exemplo: perfil de imobiliária no Instagram com o último post em junho.',
+        // As telas dos passos de "Como funciona": o endereço do site lido, os estilos e o mês.
+        siteDescription:
+          'Exemplo: o endereço suaimobiliaria.com.br no campo do site, com o botão Ler e o aviso de logo, cores e imóveis encontrados.',
+        siteAddress: 'suaimobiliaria.com.br',
+        siteRead: 'Ler',
+        siteFound: 'Logo, cores e imóveis encontrados',
+        stylesDescription:
+          'Exemplo: a mesma casa em três estilos de arte, com o do meio marcado como o seu estilo.',
+        styleChosen: 'Seu estilo',
+        monthDescription:
+          'Exemplo: o próximo mês de posts num calendário pequeno, com os botões Aprovar tudo e Pedir alteração.',
+        month: 'Próximo mês',
+        requestChange: 'Pedir alteração',
         // As artes. O CRECI é da imobiliária: vai em toda peça, inclusive nas que não anunciam
         // um imóvel (bairro, dica, captação).
         agency: 'Imobiliária Exemplo',

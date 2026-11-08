@@ -1,0 +1,50 @@
+---
+// Passo 2 do Piloto automático para Instagram, "Escolha o estilo": a mesma casa em três estilos de
+// arte (véu escuro, moldura na cor da marca e cartão claro), com o do meio marcado como o escolhido.
+// O texto das artes é só traço: em miniatura, nenhuma palavra leria. É tela de exemplo: fica fora
+// do leitor de tela, que ouve a descrição antes dela.
+import Icon from '../Icon.astro';
+import ExampleTag from './ExampleTag.astro';
+import { site } from '../../config/site';
+import { pageLocale } from '../../i18n';
+const { t } = pageLocale(Astro);
+const { mock } = t.productPages.instagram;
+const photo = site.media.productPhotos['patio-fachada-4x5'];
+const styles = ['veil', 'frame', 'card'] as const;
+const chosen = 'frame';
+---
+
+<div class="example-figure">
+  <p class="sr-only">{mock.stylesDescription}</p>
+  <div class="example-screen step-mock styles-mock" aria-hidden="true" inert>
+    <span class="step-mock-head">
+      <ExampleTag />
+    </span>
+    <span class="step-mock-body styles-row">
+      {styles.map((style) => (
+        <span class:list={['style-option', `style-${style}`, { 'is-chosen': style === chosen }]}>
+          <span class="style-art">
+            <img
+              src={photo.src}
+              width={photo.width}
+              height={photo.height}
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
+            <span class="style-lines">
+              <span></span>
+              <span></span>
+            </span>
+          </span>
+          {style === chosen && (
+            <span class="style-chosen">
+              <Icon name="check" size={13} />
+              {mock.styleChosen}
+            </span>
+          )}
+        </span>
+      ))}
+    </span>
+  </div>
+</div>

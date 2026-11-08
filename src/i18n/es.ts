@@ -262,6 +262,18 @@ export const es: Dictionary = {
         lastPost: 'Última publicación: junio',
         profileDescription:
           'Ejemplo: perfil de inmobiliaria en Instagram con la última publicación en junio.',
+        siteDescription:
+          'Ejemplo: la dirección tuinmobiliaria.es en el campo de la web, con el botón Leer y el aviso de logo, colores e inmuebles encontrados.',
+        siteAddress: 'tuinmobiliaria.es',
+        siteRead: 'Leer',
+        siteFound: 'Logo, colores e inmuebles encontrados',
+        stylesDescription:
+          'Ejemplo: la misma casa en tres estilos de post, con el del medio marcado como tu estilo.',
+        styleChosen: 'Tu estilo',
+        monthDescription:
+          'Ejemplo: el próximo mes de posts en un calendario pequeño, con los botones Aprobar todo y Pedir un cambio.',
+        month: 'Próximo mes',
+        requestChange: 'Pedir un cambio',
         agency: 'Inmobiliaria Ejemplo',
         // A calificación energética é do imóvel: só vai nas artes que anunciam um.
         license: 'Calificación energética: E',

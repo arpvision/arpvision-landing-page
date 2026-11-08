@@ -1,0 +1,68 @@
+---
+// Passo 3 do Piloto automático para Instagram, "Aprove o mês": o próximo mês num calendário
+// pequeno, com um post às segundas, quartas e sextas (um por semana só de texto, na cor da marca),
+// e os botões Aprovar tudo e Pedir alteração, que são `span`. É tela de exemplo: fica fora do
+// leitor de tela, que ouve a descrição antes dela.
+import Icon from '../Icon.astro';
+import ExampleTag from './ExampleTag.astro';
+import { site } from '../../config/site';
+import { pageLocale } from '../../i18n';
+const { t } = pageLocale(Astro);
+const { mock } = t.productPages.instagram;
+const photos = site.media.productPhotos;
+type Post = keyof typeof photos | 'text';
+// Quatro semanas a partir de uma segunda-feira, dia a dia.
+const posts: Partial<Record<number, Post>> = {
+  1: 'patio-fachada-4x5',
+  3: 'sala-2-4x5',
+  5: 'text',
+  8: 'cozinha-4x5',
+  10: 'text',
+  12: 'quarto-com-suite-4x5',
+  15: 'patio-piscina-4x5',
+  17: 'sala-2-4x5',
+  19: 'text',
+  22: 'text',
+  24: 'cozinha-4x5',
+  26: 'patio-fachada-4x5',
+};
+const days = Array.from({ length: 28 }, (_, index) => posts[index + 1]);
+---
+
+<div class="example-figure">
+  <p class="sr-only">{mock.monthDescription}</p>
+  <div class="example-screen step-mock month-mock" aria-hidden="true" inert>
+    <span class="step-mock-head">
+      <span class="month-title">
+        <Icon name="calendar" size={16} />
+        {mock.month}
+      </span>
+      <ExampleTag />
+    </span>
+    <span class="step-mock-body">
+      <span class="month-grid">
+        {days.map((post) => (
+          <span class:list={['month-day', { 'is-text': post === 'text' }]}>
+            {post && post !== 'text' && (
+              <img
+                src={photos[post].src}
+                width={photos[post].width}
+                height={photos[post].height}
+                alt=""
+                loading="lazy"
+                decoding="async"
+              />
+            )}
+          </span>
+        ))}
+      </span>
+      <span class="month-actions">
+        <span class="step-button">
+          <Icon name="check" size={14} />
+          {mock.approveAll}
+        </span>
+        <span class="step-button is-secondary">{mock.requestChange}</span>
+      </span>
+    </span>
+  </div>
+</div>
