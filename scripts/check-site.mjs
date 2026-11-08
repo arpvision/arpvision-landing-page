@@ -2,6 +2,7 @@ import { readFile, readdir, stat } from 'node:fs/promises';
 import path from 'node:path';
 import assert from 'node:assert/strict';
 import { portugueseWords } from './portuguese-words.mjs';
+import { pricePattern } from './lib/prices.mjs';
 import { publishedPageIds, routes as localeRoutes } from '../src/i18n/routes.ts';
 // Sem preços públicos (site.pricing.showPrices), /planos é só um redirecionamento.
 const pricesShown = !(await readFile('dist/planos/index.html', 'utf8')).includes(
@@ -243,7 +244,7 @@ for (const { locale, page, file } of routes) {
       `${route}: seletor leva a ${other.lang}`,
     );
   if (!pricesShown) {
-    assert.doesNotMatch(html, /R\$(?:\s|&nbsp;)*\d/, `${route}: nenhum valor em reais`);
+    assert.doesNotMatch(html, pricePattern, `${route}: nenhum preço em reais ou em euros`);
     assert.ok(!html.includes('"offers"'), `${route}: JSON-LD sem ofertas com preço`);
     assert.ok(
       !html.includes(`href="${pathOf(locale.pages.plans)}"`),

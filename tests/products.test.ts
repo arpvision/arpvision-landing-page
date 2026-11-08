@@ -185,11 +185,35 @@ const leaves = (value: unknown, path = ''): Leaf[] => {
 const productPagesOf = (locale: (typeof locales)[number]) =>
   Object.entries(translations(locale).productPages);
 // As regras de texto da spec: sem "IA" nem o que a pasta de marketing proíbe, sem preço e sem o
-// nome do site de referência.
+// nome do site de referência. Cada regra vale também no espanhol: "generado", o euro com número
+// e "desde" com preço.
 const forbidden =
-  /\bIA\b|\bAI\b|intelig[eê]ncia artificial|inteligente|gerad[oa]s?\b|algoritmo|100% real|sem edição|sin edición|R\$\s*\d|a partir de\s*R\$|\bPedra\b/i;
+  /\bIA\b|\bAI\b|intelig[eê]ncia artificial|inteligente|gerad[oa]s?\b|generad[oa]s?\b|algoritmo|100% real|sem edição|sin edición|R\$\s*\d|€\s*\d|\d\s*€|(?:a partir de|desde)\s*(?:R\$|€)|\bPedra\b/i;
 
-test('páginas de produto: título com a marca, descrição de até 160 e saudação com o nome do produto', () => {
+test('as regras de texto pegam também os equivalentes do espanhol', () => {
+  // "generado", o euro com número (antes ou depois dele) e "a partir de" ou "desde" com preço.
+  for (const text of [
+    'Vídeos generados a partir de tus fotos',
+    'Una imagen generada con tus fotos',
+    'Desde 99 € al mes',
+    'Por 49€ al mes',
+    'Precio: € 99',
+    'A partir de €49',
+    'Desde R$99',
+  ])
+    assert.match(text, forbidden, text);
+  // O que o texto já usa continua valendo: "a partir de" e "desde" sem preço e número sem moeda.
+  for (const text of [
+    'A partir de tu web o de las fotos que mandas',
+    'Desde tu móvil',
+    'hasta 2.500 al mes',
+    'Calificación energética: E',
+    '3 dormitorios · 240 m²',
+  ])
+    assert.doesNotMatch(text, forbidden, text);
+});
+
+test('páginas de produto: título com a marca, descrição de até 160 e as mensagens com o nome do produto', () => {
   for (const locale of locales) {
     const { items } = translations(locale).products;
     for (const [id, page] of productPagesOf(locale)) {
@@ -200,6 +224,11 @@ test('páginas de produto: título com a marca, descrição de até 160 e sauda�
         `${locale}/${id}: descrição com ${page.meta.description.length} caracteres`,
       );
       assert.ok(page.quote.greeting.includes(name), `${locale}/${id}: a saudação cita "${name}"`);
+      // A mensagem do rodapé e do botão flutuante é a do produto, e não a de outra página.
+      assert.ok(
+        page.whatsappMessage.includes(name),
+        `${locale}/${id}: a mensagem do WhatsApp cita "${name}"`,
+      );
     }
   }
 });

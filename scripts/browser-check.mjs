@@ -174,6 +174,22 @@ try {
     const response = await page.goto(base + route);
     assert.equal(response.status(), 200);
     assert.equal(await page.locator('h1').count(), 1);
+    // Nenhum título vazio: o leitor de tela anunciaria um título sem nome (as dúvidas de um grupo
+    // só, como as de uma página de produto, vão sem o título do grupo).
+    assert.deepEqual(
+      await page
+        .locator('h1, h2, h3, h4, h5, h6')
+        .evaluateAll((headings) =>
+          headings
+            .filter(
+              (heading) =>
+                !heading.textContent.trim() && !heading.querySelector('img:not([alt=""])[alt]'),
+            )
+            .map((heading) => heading.outerHTML.slice(0, 80)),
+        ),
+      [],
+      `${route}: título vazio`,
+    );
     // Só o tour embutido na hero carrega de início; o tour da demo continua sob demanda.
     assert.equal(await page.locator('iframe:not(.hero-embed)').count(), 0);
     assert.equal(
@@ -209,7 +225,7 @@ try {
       for (const href of footerLinks)
         assert.equal((await fetch(base + href)).status, 200, `${route}: ${href} existe`);
     results.push(
-      `Rota ${route}: HTML, imagens, carregamento inicial sem iframe extra e produtos no rodapé OK`,
+      `Rota ${route}: HTML, nenhum título vazio, imagens, carregamento inicial sem iframe extra e produtos no rodapé OK`,
     );
   }
   // Tutoriais, nos dois idiomas: o cartão leva ao YouTube; com JavaScript, abre o player no
@@ -589,6 +605,12 @@ try {
       0,
       `${route}: nada do tour na cotação nem na faixa azul`,
     );
+    // As dúvidas do produto são um grupo só: vão sem título de grupo, nem vazio nem inventado.
+    assert.equal(
+      await page.locator('.faq-section h3').count(),
+      0,
+      `${route}: dúvidas sem título de grupo`,
+    );
     // O topo, a cotação e a faixa pedem a cotação do produto; o rodapé e o botão flutuante falam
     // dele. Todos levam o produto ao evento de analytics.
     const whatsapp = await page
@@ -711,8 +733,24 @@ try {
         .evaluateAll((spans) => spans.map((span) => span.textContent.trim()));
     assert.deepEqual(await shown(), ['vendeu uma casa.']);
     await title.scrollIntoViewIfNeeded();
-    // O IntersectionObserver avisa em tempo real: espera o título entrar na tela.
-    await painPage.waitForTimeout(500);
+    // O IntersectionObserver avisa em tempo real, fora do relógio do teste. Um segundo observador no
+    // mesmo trecho, com o mesmo limiar, recebe o primeiro aviso na mesma entrega que o da página, ou
+    // depois dela: quando ele avisa, a troca já começou (o requestAnimationFrame não serviria aqui,
+    // porque o relógio do teste o para).
+    await title.locator('[data-rotating-phrase]').evaluate(
+      (phrase) =>
+        new Promise((resolve) => {
+          const observer = new IntersectionObserver(
+            (entries) => {
+              if (!entries.some((entry) => entry.isIntersecting)) return;
+              observer.disconnect();
+              resolve();
+            },
+            { threshold: 0.6 },
+          );
+          observer.observe(phrase);
+        }),
+    );
     const seen = [];
     for (let step = 0; step < 10; step++) {
       await painPage.clock.runFor(2500);
@@ -739,7 +777,7 @@ try {
     await context.close();
   }
   results.push(
-    'Piloto automático para Instagram (pt e es): 1 h1; 10 telas de exemplo com a etiqueta visível, aria-hidden, inert e a descrição "Exemplo:"; nada do tour na cotação e na faixa; o produto nos 5 botões de WhatsApp; a mensagem e os eventos da cotação; o menu marca o produto; Cotação e Dúvidas na página; a frase da dor troca 2 voltas e para no primeiro trecho, e não troca com movimento reduzido OK',
+    'Piloto automático para Instagram (pt e es): 1 h1; 10 telas de exemplo com a etiqueta visível, aria-hidden, inert e a descrição "Exemplo:"; nada do tour na cotação e na faixa; dúvidas sem título de grupo; o produto nos 5 botões de WhatsApp; a mensagem e os eventos da cotação; o menu marca o produto; Cotação e Dúvidas na página; a frase da dor troca 2 voltas e para no primeiro trecho, e não troca com movimento reduzido OK',
   );
 
   for (const route of pricesShown ? ['/', '/planos'] : ['/']) {
