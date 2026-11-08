@@ -1,6 +1,7 @@
 import { chromium } from '@playwright/test';
 import assert from 'node:assert/strict';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { browserLocale, chooseLanguage } from './language-choice.mjs';
 
 await mkdir('.artifacts', { recursive: true });
 const base = process.env.SITE_URL || 'http://127.0.0.1:4321';
@@ -31,8 +32,12 @@ const words = [
   'Proximidade',
   'Valor percebido',
 ];
+// Cada contexto no idioma do navegador da página que testa e com a escolha de idioma gravada:
+// a faixa de sugestão de idioma não entra nesta checagem.
 const setup = async (options, path = '') => {
-  const context = await browser.newContext(options);
+  const locale = path.slice(1) || 'pt';
+  const context = await browser.newContext({ locale: browserLocale[locale], ...options });
+  await chooseLanguage(context, locale);
   const page = await context.newPage();
   page.on('pageerror', (error) => errors.push(error.message));
   await page.route('https://arpvision.app/embed/**', (route) =>
@@ -230,8 +235,8 @@ try {
     '320–1440px: palavras sem cortes, conversa e benefícios nos dois temas, contraste, toque, movimento reduzido e fallback sem JS OK.',
   );
 
-  // Em espanhol: as palavras do rolo traduzidas, inteiras e centralizadas, e a conversa do
-  // WhatsApp em HTML legível nos dois temas.
+  // Em espanhol e em inglês: as palavras do rolo traduzidas, inteiras e centralizadas, e a
+  // conversa do WhatsApp em HTML legível nos dois temas.
   const esWords = [
     'Confianza',
     'Exclusividad',
@@ -256,12 +261,39 @@ try {
     'Cercanía',
     'Valor percibido',
   ];
-  for (const [width, height, colorScheme] of [
+  const enWords = [
+    'Trust',
+    'Exclusivity',
+    'Speed',
+    'Time saved',
+    'Value',
+    'Immersion',
+    'Connection',
+    'Transparency',
+    'Credibility',
+    'Differentiation',
+    'Standing out',
+    'Reach',
+    'Accessibility',
+    'Convenience',
+    'Autonomy',
+    'Innovation',
+    'Delight',
+    'Digital presence',
+    'Unlimited visits',
+    'Interactive experience',
+    'Closeness',
+    'Perceived value',
+  ];
+  for (const [width, height, colorScheme, path, translatedWords] of [
     [1440, 900, 'light'],
     [768, 1024, 'dark'],
     [390, 844, 'light'],
     [320, 740, 'dark'],
-  ]) {
+  ].flatMap((size) => [
+    [...size, '/es', esWords],
+    [...size, '/en', enWords],
+  ])) {
     const { context, page } = await setup(
       {
         viewport: { width, height },
@@ -270,40 +302,43 @@ try {
         hasTouch: width < 768,
         isMobile: width < 768,
       },
-      '/es',
+      path,
     );
     await page.locator('.tour-showcase').scrollIntoViewIfNeeded();
-    assert.deepEqual(await page.locator('.marquee-list:visible li').allTextContents(), esWords);
+    assert.deepEqual(
+      await page.locator('.marquee-list:visible li').allTextContents(),
+      translatedWords,
+    );
     const clipped = await page
       .locator('.marquee-list:not(.marquee-clone) li')
       .evaluateAll((items) => items.some((el) => el.scrollWidth > el.clientWidth));
-    assert.equal(clipped, false, `/es ${width}px: palavras completas`);
+    assert.equal(clipped, false, `${path} ${width}px: palavras completas`);
     const chat = page.locator('#compartilhamento .chat-preview');
     await chat.scrollIntoViewIfNeeded();
     const box = await chat.evaluate((el) => ({
       overflow: el.scrollHeight > el.clientHeight + 1 || el.scrollWidth > el.clientWidth + 1,
       width: el.getBoundingClientRect().width,
     }));
-    assert.equal(box.overflow, false, `/es ${width}px: conversa sem texto cortado`);
+    assert.equal(box.overflow, false, `${path} ${width}px: conversa sem texto cortado`);
     const dimensions = await page.evaluate(() => ({
       width: document.documentElement.clientWidth,
       scroll: document.documentElement.scrollWidth,
     }));
-    assert.ok(dimensions.scroll <= dimensions.width, `/es ${width}px: sem overflow`);
+    assert.ok(dimensions.scroll <= dimensions.width, `${path} ${width}px: sem overflow`);
     await page.addScriptTag({ content: axeSource });
     const violations = await page.evaluate(async () =>
       (await window.axe.run(document, { runOnly: ['color-contrast'] })).violations.flatMap((v) =>
         v.nodes.map((n) => n.target),
       ),
     );
-    assert.deepEqual(violations, [], `/es ${width}px ${colorScheme}: contraste`);
+    assert.deepEqual(violations, [], `${path} ${width}px ${colorScheme}: contraste`);
     await page
       .locator('#compartilhamento')
-      .screenshot({ path: `.artifacts/sharing-es-${width}-${colorScheme}.png` });
+      .screenshot({ path: `.artifacts/sharing${path.replace('/', '-')}-${width}-${colorScheme}.png` });
     await context.close();
   }
   results.push(
-    'Espanhol: palavras do rolo traduzidas e inteiras, conversa do WhatsApp em HTML sem cortes, contraste nos dois temas de 320 a 1440px OK.',
+    'Espanhol e inglês: palavras do rolo traduzidas e inteiras, conversa do WhatsApp em HTML sem cortes, contraste nos dois temas de 320 a 1440px OK.',
   );
   assert.deepEqual(errors, []);
   await writeFile('.artifacts/showcase-results.json', JSON.stringify({ results, errors }, null, 2));

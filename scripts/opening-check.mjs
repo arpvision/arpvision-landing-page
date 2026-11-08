@@ -1,14 +1,18 @@
 import { chromium } from '@playwright/test';
 import assert from 'node:assert/strict';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { browserLocale, chooseLanguage } from './language-choice.mjs';
 
 const base = process.env.SITE_URL || 'http://127.0.0.1:4321';
 await mkdir('.artifacts', { recursive: true });
 const browser = await chromium.launch({ channel: 'chrome', headless: true });
 const errors = [];
 const results = [];
-const setup = async (options) => {
-  const context = await browser.newContext(options);
+// Cada contexto no idioma do navegador da página que testa e com a escolha de idioma gravada:
+// a faixa de sugestão de idioma não entra nesta checagem.
+const setup = async (options, locale = 'pt') => {
+  const context = await browser.newContext({ locale: browserLocale[locale], ...options });
+  await chooseLanguage(context, locale);
   const page = await context.newPage();
   page.on('pageerror', (error) => errors.push(error.message));
   // A resposta remota não faz parte desta revisão de composição/interação.
@@ -242,33 +246,35 @@ try {
   );
   await context.close();
 
-  // A abertura em espanhol: mesma composição, com os nomes dos ambientes traduzidos.
-  {
-    const { context, page } = await setup({
-      viewport: { width: 1440, height: 900 },
-      reducedMotion: 'reduce',
-      colorScheme: 'light',
-    });
-    await page.goto(base + '/es', { waitUntil: 'domcontentloaded' });
-    assert.deepEqual(await page.locator('.fan-room-link').allTextContents(), [
-      'Suite',
-      'Dormitorio',
-      'Salón',
-      'Invitados',
-      'Patio',
-    ]);
-    assert.equal(
-      await page
-        .locator('.opening + #compartilhamento + #como-funciona + .presentation + #creditos')
-        .count(),
-      1,
-      'mesma sequência de seções em espanhol',
+  // A abertura em espanhol e em inglês: mesma composição, com os nomes dos ambientes traduzidos.
+  for (const [code, rooms, ids] of [
+    [
+      'es',
+      ['Suite', 'Dormitorio', 'Salón', 'Invitados', 'Patio'],
+      '.opening + #compartilhamento + #como-funciona + .presentation + #creditos',
+    ],
+    [
+      'en',
+      ['Suite', 'Bedroom', 'Living room', 'Guest room', 'Backyard'],
+      '.opening + #compartilhamento + #how-it-works + .presentation + #creditos',
+    ],
+  ]) {
+    const { context, page } = await setup(
+      {
+        viewport: { width: 1440, height: 900 },
+        reducedMotion: 'reduce',
+        colorScheme: 'light',
+      },
+      code,
     );
+    await page.goto(`${base}/${code}`, { waitUntil: 'domcontentloaded' });
+    assert.deepEqual(await page.locator('.fan-room-link').allTextContents(), rooms);
+    assert.equal(await page.locator(ids).count(), 1, `mesma sequência de seções em /${code}`);
     assert.ok(
       (await page.locator('.site-header').boundingBox()).width <= 1060,
-      'cabeçalho estreito em espanhol',
+      `cabeçalho estreito em /${code}`,
     );
-    await page.screenshot({ path: '.artifacts/opening-es-desktop.png' });
+    await page.screenshot({ path: `.artifacts/opening-${code}-desktop.png` });
     await context.close();
   }
 
@@ -281,14 +287,17 @@ try {
     [390, 844],
     [360, 800],
     [320, 740],
-  ].flatMap((size) => ['', '/es'].map((path) => [...size, path]))) {
-    const { context, page } = await setup({
-      viewport: { width, height },
-      reducedMotion: 'reduce',
-      colorScheme: 'light',
-      isMobile: width < 768,
-      hasTouch: width < 768,
-    });
+  ].flatMap((size) => ['', '/es', '/en'].map((path) => [...size, path]))) {
+    const { context, page } = await setup(
+      {
+        viewport: { width, height },
+        reducedMotion: 'reduce',
+        colorScheme: 'light',
+        isMobile: width < 768,
+        hasTouch: width < 768,
+      },
+      path.slice(1) || 'pt',
+    );
     await page.goto(base + path, { waitUntil: 'domcontentloaded' });
     await page.evaluate(() => document.fonts.ready);
     const initial = await page.locator('.fan-card').evaluateAll((cards) => ({
@@ -375,7 +384,7 @@ try {
     await context.close();
   }
   results.push(
-    '320–1440px, em português e em espanhol: sem cortes/overflow; controles ao toque, menu, Escape, foco, contraste e movimento reduzido.',
+    '320–1440px, em português, espanhol e inglês: sem cortes/overflow; controles ao toque, menu, Escape, foco, contraste e movimento reduzido.',
   );
 
   const dark = await setup({

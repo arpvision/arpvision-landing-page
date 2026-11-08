@@ -1,5 +1,6 @@
 import { chromium, devices } from '@playwright/test';
 import assert from 'node:assert/strict';
+import { browserLocale, chooseLanguage } from './language-choice.mjs';
 
 // Fixtures restritas ao navegador de teste. Não alteram o site nem acessam tours reais.
 const base = process.env.SITE_URL || 'http://127.0.0.1:4321';
@@ -20,12 +21,20 @@ const qrCodes = [0, 1].map(
 const attribute = (value) =>
   JSON.stringify(value).replaceAll('&', '&amp;').replaceAll('"', '&quot;');
 const browser = await chromium.launch({ channel: 'chrome', headless: true });
+// Cada página no idioma do navegador e com a escolha de idioma gravada: a faixa de sugestão de
+// idioma não entra nesta checagem.
+const newPage = async (options, locale = 'pt') => {
+  const page = await browser.newPage({ locale: browserLocale[locale], ...options });
+  await chooseLanguage(page.context(), locale);
+  return page;
+};
 const fixture = async (page, path = '/') => {
   await page.route(base + path, async (route) => {
     const response = await route.fetch();
     let html = await response.text();
+    // A seção do tour pela classe: o id muda com o idioma (#tour-real, #real-tour).
     html = html
-      .replace(/(<section[^>]*id="tour-real"[^>]*?)\s+hidden(?=[\s>])/, '$1')
+      .replace(/(<section[^>]*class="section tour-section"[^>]*?)\s+hidden(?=[\s>])/, '$1')
       .replace(/data-tours="[^"]*"/, `data-tours="${attribute(tours)}"`)
       .replace(/data-qrs="[^"]*"/, `data-qrs="${attribute(qrCodes)}"`);
     const tabs = `<div role="tablist">${tours.map((tour, index) => `<button role="tab" id="test-tab-${index}" aria-controls="tour-panel" aria-selected="${index === 0}" tabindex="${index === 0 ? 0 : -1}" data-tour-index="${index}">${tour.label}</button>`).join('')}</div><a class="tour-qr" href="${tours[0].publicUrl}"><img src="${qrCodes[0]}" width="80" height="80" alt="QR de teste" /></a>`;
@@ -34,7 +43,7 @@ const fixture = async (page, path = '/') => {
   });
 };
 try {
-  const desktop = await browser.newPage({
+  const desktop = await newPage({
     viewport: { width: 1440, height: 1000 },
     reducedMotion: 'reduce',
   });
@@ -73,7 +82,7 @@ try {
     'Tour desktop: sem iframe/requisição inicial; abertura, atributos, troca de tour e QR corretos.',
   );
 
-  const phone = await browser.newPage({
+  const phone = await newPage({
     ...devices['Pixel 7'],
     viewport: { width: 360, height: 800 },
     reducedMotion: 'reduce',
@@ -104,7 +113,7 @@ try {
   );
   console.log('Tour móvel: diálogo 100vw × 100dvh, fechamento e restauração de foco corretos.');
 
-  const timeoutPage = await browser.newPage({
+  const timeoutPage = await newPage({
     viewport: { width: 1440, height: 1000 },
     reducedMotion: 'reduce',
   });
@@ -126,39 +135,46 @@ try {
   assert.equal(await timeoutPage.locator('[data-tour-status] a').getAttribute('target'), '_blank');
   console.log('Timeout de 15 segundos: capa restaurada e link alternativo disponível.');
 
-  // Em /es, o tour da demo abre no idioma da página e o aviso de erro fala espanhol.
-  const spanish = await browser.newPage({
-    viewport: { width: 1440, height: 1000 },
-    reducedMotion: 'reduce',
-  });
-  await fixture(spanish, '/es');
-  await spanish.route('https://arpvision.app/embed/**', (route) => {
-    if (!route.request().url().includes('/embed/test-'))
-      return route.fulfill({ contentType: 'text/html', body: '' });
-  });
-  await spanish.clock.install();
-  await spanish.goto(base + '/es');
-  await spanish.locator('[data-tour-open]').click();
-  assert.equal(
-    await spanish.locator('[data-tour-host] iframe').getAttribute('src'),
-    'https://arpvision.app/embed/test-0?idioma=es',
-  );
-  assert.equal(
-    await spanish.locator('[data-tour-host] iframe').getAttribute('title'),
-    'Tour 360° de ejemplo: Espaço de teste 0',
-  );
-  await spanish.clock.fastForward(15100);
-  assert.match(
-    await spanish.locator('[data-tour-status]').textContent(),
-    /No se ha podido abrir el tour ahora/,
-  );
-  assert.equal(
-    await spanish.locator('[data-tour-status] a').textContent(),
-    'Abrir en una pestaña nueva',
-  );
-  await spanish.locator('[data-tour-index="1"]').click();
-  assert.equal(await spanish.locator('[data-tour-photos]').textContent(), '8 fotos por estancia');
-  console.log('Tour em espanhol: embed com idioma=es, título, erro e troca de tour no idioma.');
+  // Em /es e em /en, o tour da demo abre no idioma da página e o aviso de erro fala o idioma.
+  for (const { code, title, failed, newTab, photos } of [
+    {
+      code: 'es',
+      title: 'Tour 360° de ejemplo: Espaço de teste 0',
+      failed: /No se ha podido abrir el tour ahora/,
+      newTab: 'Abrir en una pestaña nueva',
+      photos: '8 fotos por estancia',
+    },
+    {
+      code: 'en',
+      title: 'Sample 360° tour: Espaço de teste 0',
+      failed: /Couldn't open the tour right now/,
+      newTab: 'Open in a new tab',
+      photos: '8 photos per room',
+    },
+  ]) {
+    const translated = await newPage({ viewport: { width: 1440, height: 1000 }, reducedMotion: 'reduce' }, code);
+    await fixture(translated, `/${code}`);
+    await translated.route('https://arpvision.app/embed/**', (route) => {
+      if (!route.request().url().includes('/embed/test-'))
+        return route.fulfill({ contentType: 'text/html', body: '' });
+    });
+    await translated.clock.install();
+    await translated.goto(`${base}/${code}`);
+    await translated.locator('[data-tour-open]').click();
+    assert.equal(
+      await translated.locator('[data-tour-host] iframe').getAttribute('src'),
+      `https://arpvision.app/embed/test-0?idioma=${code}`,
+    );
+    assert.equal(await translated.locator('[data-tour-host] iframe').getAttribute('title'), title);
+    await translated.clock.fastForward(15100);
+    assert.match(await translated.locator('[data-tour-status]').textContent(), failed);
+    assert.equal(await translated.locator('[data-tour-status] a').textContent(), newTab);
+    await translated.locator('[data-tour-index="1"]').click();
+    assert.equal(await translated.locator('[data-tour-photos]').textContent(), photos);
+    console.log(
+      `Tour em /${code}: embed com idioma=${code}, título, erro e troca de tour no idioma.`,
+    );
+  }
 } finally {
   await browser.close();
 }
