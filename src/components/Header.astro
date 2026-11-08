@@ -63,7 +63,7 @@ const plans = site.pricing.showPrices
         <a href={anchor('faq')} data-spy={anchorId(locale, 'faq')}>
           {t.header.faq}
         </a>
-        <!-- Página própria, não seção da Home: sem data-spy. -->
+        {/* Página própria, não seção da Home: sem data-spy. */}
         <a href={tutorialsPath} aria-current={tutorialsCurrent}>
           {t.header.tutorials}
         </a>
@@ -105,7 +105,7 @@ const plans = site.pricing.showPrices
       </div>
     </div>
     <nav id="mobile-nav" class="mobile-nav" aria-label={t.header.mobileNav} hidden>
-      <!-- "Produtos" é um grupo que abre aqui dentro; os links de seção seguem filhos diretos do menu. -->
+      {/* "Produtos" é um grupo que abre aqui dentro; os links de seção seguem filhos diretos do menu. */}
       <div class="mobile-products">
         <button
           type="button"
@@ -148,7 +148,7 @@ const plans = site.pricing.showPrices
       </a>
     </nav>
   </GlassSurface>
-  <!-- Fora da cápsula: dentro dela, o desfoque do painel só pegaria o que está na própria cápsula. -->
+  {/* Fora da cápsula: dentro dela, o desfoque do painel só pegaria o que está na própria cápsula. */}
   <nav id="products-panel" class="products-panel" aria-label={t.header.productsPanel} hidden>
     <GlassSurface class="products-surface">
       <ProductsMenu variant="desktop" />
