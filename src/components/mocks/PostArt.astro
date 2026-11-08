@@ -1,0 +1,81 @@
+---
+// Uma arte de post ou story da Imobiliária Exemplo, feita em HTML e CSS sobre um recorte da casa
+// de demonstração (ou só com texto, na cor da marca). É tela de exemplo: leva a etiqueta e fica
+// fora do leitor de tela; quem a coloca na página põe a descrição logo antes dela.
+import Icon from '../Icon.astro';
+import ExampleTag from './ExampleTag.astro';
+import { site } from '../../config/site';
+import { pageLocale } from '../../i18n';
+interface Props {
+  art: { kind: string; title: string };
+  /** A foto do fundo. Sem ela, a arte é só de texto, no tom `tone`. */
+  photo?: keyof typeof site.media.productPhotos;
+  tone?: 'blue' | 'light';
+  /** O ícone grande da arte só de texto (nome de Icon.astro). */
+  icon?: string;
+  /** Story (9:16) no lugar do post do feed (4:5). */
+  story?: boolean;
+  /** A arte anuncia um imóvel: leva os dados dele e, no espanhol, a calificación energética. */
+  listing?: boolean;
+  /** O WhatsApp escrito na arte: o story não leva link clicável. */
+  whatsapp?: boolean;
+}
+const {
+  art,
+  photo,
+  tone = 'blue',
+  icon,
+  story = false,
+  listing = false,
+  whatsapp = false,
+} = Astro.props;
+const { t } = pageLocale(Astro);
+const { mock } = t.productPages.instagram;
+const image = photo ? site.media.productPhotos[photo] : undefined;
+// O CRECI é da imobiliária e vai em toda peça; a calificación energética é do imóvel.
+const license = mock.licenseOnEveryPost || listing;
+---
+
+<div
+  class:list={[
+    'example-screen',
+    'post-art',
+    story ? 'post-art-story' : 'post-art-feed',
+    image ? 'post-art-photo' : `post-art-${tone}`,
+  ]}
+  aria-hidden="true"
+  inert
+>
+  {image && (
+    <img
+      class="post-art-image"
+      src={image.src}
+      width={image.width}
+      height={image.height}
+      alt=""
+      loading="lazy"
+      decoding="async"
+    />
+  )}
+  <ExampleTag />
+  {icon && (
+    <span class="post-art-icon">
+      <Icon name={icon} size={34} />
+    </span>
+  )}
+  <span class="post-art-body">
+    <span class="post-art-kind">{art.kind}</span>
+    <span class="post-art-title">{art.title}</span>
+    {listing && <span class="post-art-details">{mock.details}</span>}
+    {whatsapp && (
+      <span class="post-art-whatsapp">
+        <Icon name="message" size={14} />
+        {mock.whatsapp}
+      </span>
+    )}
+  </span>
+  <span class="post-art-footer">
+    <span class="post-art-agency">{mock.agency}</span>
+    {license && <span>{mock.license}</span>}
+  </span>
+</div>

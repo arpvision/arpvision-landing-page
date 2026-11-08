@@ -6,6 +6,7 @@ import {
   liveProductsFor,
   products,
   productHref,
+  productPageText,
   productText,
   type Product,
   type ProductId,
@@ -46,18 +47,20 @@ const productUrl = (locale: Locale, product: Product) =>
 
 /**
  * Um produto como serviço da empresa, para o público da imobiliária. Sem `offers`: os preços não
- * são públicos. Enquanto a página do produto não tem `meta` própria no dicionário, o nome e a
- * descrição saem do texto do menu Produtos (`products.items`).
+ * são públicos. O nome e a descrição são os da página do produto (`productPages.<x>.meta`), com o
+ * título sem a marca, que já está no `provider`. Enquanto a página não tem texto, eles saem do
+ * menu Produtos (`products.items`).
  */
 export function serviceSchema(product: ProductId, locale: Locale): Record<string, unknown> {
   const item = products.find((candidate) => candidate.id === product);
   const text = productText(locale, product);
   if (!item || !text) throw new Error(`Sem texto do produto "${product}" em ${locale}`);
+  const meta = productPageText(locale, product)?.meta;
   return {
     '@context': 'https://schema.org',
     '@type': 'Service',
-    name: text.name,
-    description: text.line,
+    name: meta ? meta.title.replace(/\s*\|\s*ARP Vision$/, '') : text.name,
+    description: meta ? meta.description : text.line,
     provider: { '@id': organizationId },
     audience: {
       '@type': 'BusinessAudience',

@@ -123,6 +123,46 @@ const legibleAcross = async (target, selector, scene, before) => {
 const readings = [];
 const reading = (scene, { light, dark }) =>
   `${scene}: claro ${light.toFixed(2)}:1, escuro ${dark.toFixed(2)}:1`;
+// As telas de exemplo das páginas de produto (calendário, perfil, artes): cada uma mostra a
+// etiqueta "Exemplo" inteira dentro dela, fica fora do leitor de tela (aria-hidden e inert) e vem
+// logo depois da descrição só para ele, que começa por "Exemplo:".
+const exampleScreens = (target) =>
+  target.locator('.example-screen').evaluateAll((screens) =>
+    screens.map((screen) => {
+      const tag = screen.querySelector('.example-tag');
+      const box = screen.getBoundingClientRect();
+      const tagBox = tag?.getBoundingClientRect();
+      const description = screen.previousElementSibling;
+      return {
+        screen: screen.className,
+        hidden: screen.getAttribute('aria-hidden'),
+        inert: screen.inert,
+        tag: tag?.textContent.trim() ?? null,
+        tagShown:
+          !!tag &&
+          tag.checkVisibility({ opacityProperty: true, visibilityProperty: true }) &&
+          tagBox.width > 0 &&
+          tagBox.left >= box.left &&
+          tagBox.right <= box.right &&
+          tagBox.top >= box.top &&
+          tagBox.bottom <= box.bottom,
+        description: description?.matches('.sr-only') ? description.textContent.trim() : null,
+      };
+    }),
+  );
+const checkExampleScreens = (screens, example, scene) => {
+  assert.ok(screens.length > 0, `${scene}: telas de exemplo`);
+  for (const screen of screens) {
+    assert.equal(screen.hidden, 'true', `${scene}: ${screen.screen} fora do leitor de tela`);
+    assert.equal(screen.inert, true, `${scene}: ${screen.screen} inerte`);
+    assert.equal(screen.tag, example, `${scene}: etiqueta de ${screen.screen}`);
+    assert.ok(screen.tagShown, `${scene}: etiqueta visível em ${screen.screen}`);
+    assert.ok(
+      screen.description?.startsWith(`${example}: `),
+      `${scene}: descrição de ${screen.screen}: ${screen.description}`,
+    );
+  }
+};
 try {
   const desktop = await browser.newContext({
     viewport: { width: 1440, height: 1000 },
@@ -387,10 +427,20 @@ try {
       ),
     );
     await home.screenshot({ path: '.artifacts/cabecalho-faixa-azul.png' });
+    // Na página de produto também: no Piloto, a faixa azul do fim passa atrás do cabeçalho.
+    await home.goto(base + localeRoutes.pt.pages.productInstagram);
+    await home.evaluate(() => document.fonts.ready);
+    readings.push(
+      reading(
+        'Piloto, sobre a faixa azul',
+        await legibleAcross(home, '.final-cta', 'Piloto, sobre a faixa azul'),
+      ),
+    );
+    await home.screenshot({ path: '.artifacts/cabecalho-faixa-azul-produto.png' });
     await context.close();
   }
   results.push(
-    'Cabeçalho fora da abertura: volta ao subir na home, cápsula quase opaca com contraste AA (faixa final, tour e faixa azul de /tutoriais, nos dois temas), coluna da FAQ em 104px e 32px, e o painel Produtos fecha ao sair OK',
+    'Cabeçalho fora da abertura: volta ao subir na home, cápsula quase opaca com contraste AA (faixa final, tour e faixa azul de /tutoriais e do Piloto, nos dois temas), coluna da FAQ em 104px e 32px, e o painel Produtos fecha ao sair OK',
   );
   // Com mouse, o botão do menu (abaixo de 1024px) ganha um círculo sob o ponteiro. Sobre a
   // abertura, ele é branco translúcido, porque o ícone ali é branco.
@@ -486,6 +536,210 @@ try {
   }
   results.push(
     'Menu Produtos no desktop (pt e es): primeiro item, clique, Esc com o foco de volta, Enter, Tab até o painel, clique fora e os produtos no ar OK',
+  );
+
+  // A página do Piloto automático para Instagram, nos dois idiomas: as telas de exemplo marcadas,
+  // nada do tour na cotação e na faixa azul, o produto em todo botão de WhatsApp, a mensagem da
+  // cotação e o menu marcando o produto, com Cotação e Dúvidas na própria página.
+  const instagram = {
+    pt: {
+      example: 'Exemplo',
+      contact:
+        'Olá! Vim pelo site e quero saber do Piloto automático para Instagram da ARP Vision.',
+      choices: ['21 a 100', '3', 'Este mês'],
+      message: [
+        'Olá! Vim pelo site e quero uma cotação do Piloto automático para Instagram da ARP Vision.',
+        '• Imóveis anunciados: 21 a 100',
+        '• Posts por semana: 3',
+        '• Para quando: Este mês',
+        'Pode me mandar uma proposta?',
+      ],
+    },
+    es: {
+      example: 'Ejemplo',
+      contact:
+        '¡Hola! Vengo de la web y quiero saber más del Piloto automático para Instagram de ARP Vision.',
+      choices: ['21 a 100', '3', 'Este mes'],
+      message: [
+        '¡Hola! Vengo de la web y quiero un presupuesto del Piloto automático para Instagram de ARP Vision.',
+        '• Inmuebles anunciados: 21 a 100',
+        '• Posts por semana: 3',
+        '• Para cuándo: Este mes',
+        '¿Me puedes enviar una propuesta?',
+      ],
+    },
+  };
+  for (const [locale, expected] of Object.entries(instagram)) {
+    const { pages, anchors } = localeRoutes[locale];
+    const route = pages.productInstagram;
+    await page.goto(base + route);
+    await page.evaluate(() => document.fonts.ready);
+    assert.equal(await page.locator('h1').count(), 1, `${route}: um h1`);
+    // O calendário do topo, o perfil parado da dor e as oito artes.
+    const screens = await exampleScreens(page);
+    assert.equal(screens.length, 10, `${route}: dez telas de exemplo`);
+    checkExampleScreens(screens, expected.example, route);
+    await page.screenshot({ path: `.artifacts/produto-instagram-${locale}-desktop.png` });
+    assert.equal(
+      await page
+        .locator(
+          '.quote-trial, .quote-benefits, [data-cta="chamada-final"], .final-cta-actions > span',
+        )
+        .count(),
+      0,
+      `${route}: nada do tour na cotação nem na faixa azul`,
+    );
+    // O topo, a cotação e a faixa pedem a cotação do produto; o rodapé e o botão flutuante falam
+    // dele. Todos levam o produto ao evento de analytics.
+    const whatsapp = await page
+      .locator('[data-whatsapp]')
+      .evaluateAll((links) =>
+        links.map((link) => [
+          ['product-hero', 'quote-section', 'final-cta', 'site-footer', 'floating-whatsapp'].find(
+            (place) => link.closest(`.${place}`),
+          ),
+          link.dataset.product,
+          new URL(link.href).searchParams.get('text'),
+        ]),
+      );
+    assert.deepEqual(
+      whatsapp,
+      [
+        ['product-hero', 'instagram', expected.message[0]],
+        ['quote-section', 'instagram', expected.message[0]],
+        ['final-cta', 'instagram', expected.message[0]],
+        ['site-footer', 'instagram', expected.contact],
+        ['floating-whatsapp', 'instagram', expected.contact],
+      ],
+      `${route}: botões de WhatsApp com o produto e a mensagem dele`,
+    );
+    // A cotação monta a mensagem do produto com as três respostas.
+    const quote = page.locator(`#${anchors.quote}`);
+    const submit = quote.locator('.quote-submit');
+    assert.equal(await quote.locator('.quote-card').getAttribute('data-product'), 'instagram');
+    for (const choice of expected.choices) await quote.locator(`input[value="${choice}"]`).check();
+    const filled = expected.message.join('\n');
+    assert.equal(
+      new URL(await submit.getAttribute('href')).searchParams.get('text'),
+      filled,
+      `${route}: a mensagem da cotação`,
+    );
+    assert.equal(await quote.locator('[data-quote-preview]').textContent(), filled);
+    // Os eventos levam as respostas e o produto (o clique não segue o link).
+    const events = await submit.evaluate((link) => {
+      const list = [];
+      window.plausible = (name, options) => list.push([name, options?.props]);
+      const stay = (event) => event.preventDefault();
+      document.addEventListener('click', stay, true);
+      link.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+      document.removeEventListener('click', stay, true);
+      return list;
+    });
+    assert.deepEqual(
+      events,
+      [
+        [
+          'cotacao_whatsapp',
+          {
+            ...Object.fromEntries(
+              expected.message.slice(1, -1).map((line) => line.slice(2).split(': ')),
+            ),
+            produto: 'instagram',
+          },
+        ],
+        ['cta_whatsapp', { produto: 'instagram' }],
+      ],
+      `${route}: eventos da cotação com o produto`,
+    );
+    // O menu marca o produto da página; Cotação e Dúvidas ficam na própria página.
+    for (const list of ['#products-panel', '#mobile-products-list'])
+      assert.equal(
+        await page.locator(`${list} a[data-product="instagram"]`).getAttribute('aria-current'),
+        'page',
+        `${route}: ${list} marca o produto`,
+      );
+    assert.equal(
+      await page.locator('.products-toggle').evaluate((button) => button.matches('.is-current')),
+      true,
+      `${route}: o botão Produtos com a marca da página`,
+    );
+    for (const anchor of pricesShown ? ['faq'] : ['quote', 'faq'])
+      assert.equal(
+        await page.locator(`.desktop-nav a[data-spy="${anchors[anchor]}"]`).getAttribute('href'),
+        `#${anchors[anchor]}`,
+        `${route}: ${anchor} na própria página`,
+      );
+  }
+  // O título da dor troca o fim da frase a cada 2,5 s, por 2 voltas, e para no primeiro trecho;
+  // com movimento reduzido, nem começa. O relógio da página é o do teste.
+  for (const reducedMotion of ['reduce', 'no-preference']) {
+    const context = await browser.newContext({
+      viewport: { width: 1440, height: 1000 },
+      reducedMotion,
+    });
+    const painPage = await context.newPage();
+    painPage.on('pageerror', (error) => errors.push(error.message));
+    // O relógio parado desde antes da carga: só anda quando o teste manda.
+    const start = Date.now();
+    await painPage.clock.install({ time: start });
+    await painPage.clock.pauseAt(start + 1000);
+    await painPage.goto(base + localeRoutes.pt.pages.productInstagram);
+    const title = painPage.locator('.pain-title');
+    // O leitor de tela ouve a frase inteira uma vez; os trechos que trocam ficam fora dele.
+    assert.equal(
+      (await title.locator('.sr-only').textContent()).trim(),
+      'Este mês você vendeu uma casa.',
+    );
+    assert.equal(
+      await title
+        .locator('[data-rotating-phrase]')
+        .evaluate((phrase) => !!phrase.closest('[aria-hidden="true"]')),
+      true,
+      'os trechos que trocam ficam fora do leitor de tela',
+    );
+    // O que se vê é a mesma frase, com o espaço antes do trecho que troca.
+    assert.equal(
+      await title
+        .locator('[aria-hidden="true"]')
+        .evaluate((element) => element.innerText.replace(/\s+/g, ' ').trim()),
+      'Este mês você vendeu uma casa.',
+      'a frase que se vê no título da dor',
+    );
+    const shown = () =>
+      title
+        .locator('[data-rotating-phrase] > .is-active')
+        .evaluateAll((spans) => spans.map((span) => span.textContent.trim()));
+    assert.deepEqual(await shown(), ['vendeu uma casa.']);
+    await title.scrollIntoViewIfNeeded();
+    // O IntersectionObserver avisa em tempo real: espera o título entrar na tela.
+    await painPage.waitForTimeout(500);
+    const seen = [];
+    for (let step = 0; step < 10; step++) {
+      await painPage.clock.runFor(2500);
+      seen.push(...(await shown()));
+    }
+    assert.deepEqual(
+      seen,
+      reducedMotion === 'reduce'
+        ? Array(10).fill('vendeu uma casa.')
+        : [
+            'captou dois apartamentos.',
+            'alugou uma sala comercial.',
+            'assinou no cartório.',
+            'vendeu uma casa.',
+            'captou dois apartamentos.',
+            'alugou uma sala comercial.',
+            'assinou no cartório.',
+            'vendeu uma casa.',
+            'vendeu uma casa.',
+            'vendeu uma casa.',
+          ],
+      `movimento ${reducedMotion}: trechos a cada 2,5 s`,
+    );
+    await context.close();
+  }
+  results.push(
+    'Piloto automático para Instagram (pt e es): 1 h1; 10 telas de exemplo com a etiqueta visível, aria-hidden, inert e a descrição "Exemplo:"; nada do tour na cotação e na faixa; o produto nos 5 botões de WhatsApp; a mensagem e os eventos da cotação; o menu marca o produto; Cotação e Dúvidas na página; a frase da dor troca 2 voltas e para no primeiro trecho, e não troca com movimento reduzido OK',
   );
 
   for (const route of pricesShown ? ['/', '/planos'] : ['/']) {
@@ -686,7 +940,11 @@ try {
     const themed = await context.newPage();
     themed.on('pageerror', (error) => errors.push(error.message));
     // Termina numa página interna: na Home, o cabeçalho sobre a abertura usa o logo branco.
-    for (const route of ['/', pricesShown ? '/planos' : '/termos-de-uso']) {
+    for (const route of [
+      '/',
+      localeRoutes.pt.pages.productInstagram,
+      pricesShown ? '/planos' : '/termos-de-uso',
+    ]) {
       await themed.goto(base + route);
       await themed.addScriptTag({ content: axeSource });
       const contrast = await themed.evaluate(async () =>
@@ -770,46 +1028,74 @@ try {
     );
     assert.deepEqual(smallTargets, [], `${route}: alvos de toque abaixo do mínimo`);
   }
+  // A 360 px, as telas do Piloto continuam marcadas, e o calendário do topo mostra uma semana só.
+  await phone.goto(base + localeRoutes.pt.pages.productInstagram);
+  checkExampleScreens(await exampleScreens(phone), 'Exemplo', '360px, Piloto');
+  assert.deepEqual(
+    await phone
+      .locator('.calendar-week')
+      .evaluateAll((weeks) => weeks.map((week) => week.checkVisibility())),
+    [true, false],
+    '360px: o calendário do Piloto mostra uma semana só',
+  );
   // Aberto, o menu do celular fica numa cápsula opaca, na cor do tema: as linhas dele passam por
   // fundos misturados. Fora da home, ele pode ficar sobre a faixa azul, o título dela desfocado e
   // o rodapé. A página não rola pelo toque com o menu aberto, mas rola pelo script: a faixa vai
-  // para o topo do cabeçalho.
-  await phone.goto(base + localeRoutes.pt.pages.tutorials);
-  await phone.locator('.menu-toggle').click();
-  await scrollPage(
-    phone,
-    await phone.evaluate(
-      () =>
-        document.querySelector('.final-cta').getBoundingClientRect().top +
-        scrollY -
-        parseFloat(getComputedStyle(document.querySelector('.site-header')).top) +
-        4,
-    ),
-  );
-  assert.equal(
-    await phone.evaluate(
-      () =>
-        document.querySelector('.final-cta').getBoundingClientRect().top <=
-        document.querySelector('.header-capsule').getBoundingClientRect().top,
-    ),
-    true,
-    'menu aberto em /tutoriais com a faixa azul atrás dele',
-  );
-  // O botão Produtos só ganha is-current nas páginas de produto (Tarefa 6); aqui a classe entra
-  // à mão.
-  const productsCurrent = (on) =>
-    phone
-      .locator('.mobile-products-toggle')
-      .evaluate((button, value) => button.classList.toggle('is-current', value), on);
-  await productsCurrent(true);
-  readings.push(
-    reading(
-      '360px, menu aberto sobre a faixa azul de /tutoriais',
-      await legibleHeader(phone, '360px, menu aberto sobre a faixa azul de /tutoriais'),
-    ),
-  );
-  await phone.screenshot({ path: '.artifacts/tutoriais-menu-faixa-mobile.png' });
-  await productsCurrent(false);
+  // para o topo do cabeçalho. Na página de produto, o grupo Produtos aberto mostra o item da página
+  // marcado, e o botão Produtos leva a marca da página.
+  for (const [route, scene] of [
+    [localeRoutes.pt.pages.tutorials, '/tutoriais'],
+    [localeRoutes.pt.pages.productInstagram, 'Piloto'],
+  ]) {
+    await phone.goto(base + route);
+    await phone.locator('.menu-toggle').click();
+    const productPage = route === localeRoutes.pt.pages.productInstagram;
+    if (productPage) {
+      await phone.locator('.mobile-products-toggle').click();
+      assert.equal(
+        await phone
+          .locator('.mobile-products-toggle')
+          .evaluate((button) => button.matches('.is-current')),
+        true,
+        `${scene}: o botão Produtos do celular com a marca da página`,
+      );
+      assert.equal(
+        await phone
+          .locator('#mobile-products-list a[data-product="instagram"]')
+          .evaluate((link) => link.checkVisibility() && link.getAttribute('aria-current')),
+        'page',
+        `${scene}: o item da página marcado no grupo Produtos`,
+      );
+    }
+    await scrollPage(
+      phone,
+      await phone.evaluate(
+        () =>
+          document.querySelector('.final-cta').getBoundingClientRect().top +
+          scrollY -
+          parseFloat(getComputedStyle(document.querySelector('.site-header')).top) +
+          4,
+      ),
+    );
+    assert.equal(
+      await phone.evaluate(
+        () =>
+          document.querySelector('.final-cta').getBoundingClientRect().top <=
+          document.querySelector('.header-capsule').getBoundingClientRect().top,
+      ),
+      true,
+      `menu aberto em ${scene} com a faixa azul atrás dele`,
+    );
+    readings.push(
+      reading(
+        `360px, menu aberto sobre a faixa azul de ${scene}`,
+        await legibleHeader(phone, `360px, menu aberto sobre a faixa azul de ${scene}`),
+      ),
+    );
+    await phone.screenshot({
+      path: `.artifacts/${productPage ? 'produto' : 'tutoriais'}-menu-faixa-mobile.png`,
+    });
+  }
   await phone.goto(base);
   await phone.screenshot({ path: '.artifacts/home-mobile.png' });
   await phone.locator('.menu-toggle').tap();
@@ -845,7 +1131,7 @@ try {
     'sem círculo de hover no botão do menu depois do toque',
   );
   results.push(
-    '360px: menu aberto numa cápsula opaca com contraste AA (topo da home e faixa azul de /tutoriais, nos dois temas); fechado, volta ao vidro da abertura, sem o círculo de hover preso no botão OK',
+    '360px: telas do Piloto marcadas e o calendário com uma semana só; menu aberto numa cápsula opaca com contraste AA (topo da home e faixa azul de /tutoriais e do Piloto, com o produto marcado, nos dois temas); fechado, volta ao vidro da abertura, sem o círculo de hover preso no botão OK',
   );
   // Toque fora do menu num ponto sem link (o título da hero), para não navegar.
   await phone.locator('.menu-toggle').click();
@@ -1062,7 +1348,12 @@ try {
       reducedMotion: 'reduce',
     });
     const themed = await context.newPage();
-    for (const route of ['/es', '/es/terminos-de-uso', '/pagina-que-nao-existe']) {
+    for (const route of [
+      '/es',
+      localeRoutes.es.pages.productInstagram,
+      '/es/terminos-de-uso',
+      '/pagina-que-nao-existe',
+    ]) {
       await themed.goto(base + route);
       await themed.addScriptTag({ content: axeSource });
       const contrast = await themed.evaluate(async () =>

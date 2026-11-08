@@ -1,0 +1,18 @@
+---
+// /es/productos/<produto>: uma página por produto com página própria, só as já publicadas
+// (`publishedPageIds`).
+import ProductPage from '../../../components/pages/ProductPage.astro';
+import { publishedPageIds } from '../../../i18n/routes';
+import { productPageIds, productSlug, type ProductPageId } from '../../../lib/products';
+export function getStaticPaths() {
+  return productPageIds
+    .filter((page) => publishedPageIds.includes(page))
+    .map((page) => ({ params: { slug: productSlug('es', page) }, props: { page } }));
+}
+interface Props {
+  page: ProductPageId;
+}
+const { page } = Astro.props;
+---
+
+<ProductPage page={page} />

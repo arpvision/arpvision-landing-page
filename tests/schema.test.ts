@@ -5,7 +5,7 @@ import { available } from '../src/config/site';
 import { locales, translations } from '../src/i18n';
 import { publishedPageIds, type PageId } from '../src/i18n/routes';
 import { faq, faqSchema } from '../src/lib/content';
-import { liveProductsFor, productText } from '../src/lib/products';
+import { liveProductsFor, productPageText, productText } from '../src/lib/products';
 import { faqPageSchema, itemListSchema, serviceSchema } from '../src/lib/schema';
 
 // O texto que uma pessoa lê no JSON-LD: tudo, menos endereços e tipos. É a regra do check-site.mjs,
@@ -49,15 +49,34 @@ test('Service do Autochat em es', () => {
   assert.doesNotMatch(JSON.stringify(s), /offers/);
 });
 
-test('Service do Piloto em pt: nome, público, idioma e endereço absoluto', () => {
+test('Service do Piloto em pt: nome e descrição da página, público, idioma e endereço absoluto', () => {
   const s = serviceSchema('instagram', 'pt');
   assert.equal(s['@type'], 'Service');
-  assert.equal(s.name, 'Piloto automático para Instagram');
+  // O título da página sem a marca, que já está no provider.
+  assert.equal(s.name, 'Piloto automático para Instagram de imobiliárias');
+  assert.equal(
+    s.description,
+    'A ARP Vision prepara o mês de posts e stories do Instagram da sua imobiliária, com seus imóveis e sua região. Você aprova e a ARP Vision publica.',
+  );
   assert.equal(s.inLanguage, 'pt-BR');
   assert.equal(s.url, 'https://www.arpvision.com.br/produtos/piloto-automatico-para-instagram');
   assert.deepEqual(s.provider, { '@id': 'https://www.arpvision.com.br/#organization' });
   assert.deepEqual(s.audience, { '@type': 'BusinessAudience', audienceType: 'Imobiliárias' });
   assert.doesNotMatch(JSON.stringify(s), /offers/);
+});
+
+test('Service do Piloto em es: o texto da página em espanhol', () => {
+  const s = serviceSchema('instagram', 'es');
+  const { meta } = translations('es').productPages.instagram;
+  assert.equal(s.name, 'Piloto automático para Instagram de inmobiliarias');
+  assert.equal(`${s.name} | ARP Vision`, meta.title);
+  assert.equal(s.description, meta.description);
+  assert.equal(s.url, 'https://www.arpvision.com.br/es/productos/piloto-automatico-para-instagram');
+  for (const text of readable(s)) assert.doesNotMatch(text, portugueseWords, `es: "${text}"`);
+});
+
+test('Service de um produto sem texto no idioma é erro, e não um JSON-LD vazio', () => {
+  assert.throws(() => serviceSchema('training', 'es'), /training/);
 });
 
 test('cada produto com página tem um Service no idioma dela, sem oferta', () => {
@@ -69,9 +88,19 @@ test('cada produto com página tem um Service no idioma dela, sem oferta', () =>
   for (const locale of locales)
     for (const [id, slug] of Object.entries(pages)) {
       const s = serviceSchema(id as keyof typeof pages, locale);
+      // Com texto de página, o nome e a descrição saem dela; antes disso, do menu Produtos.
+      const meta = productPageText(locale, id as keyof typeof pages)?.meta;
       const item = translations(locale).products.items[id as keyof typeof pages];
-      assert.equal(s.name, item.name, `${locale}/${id}: nome`);
-      assert.ok(typeof s.description === 'string' && s.description, `${locale}/${id}: descrição`);
+      assert.equal(
+        s.name,
+        meta ? meta.title.replace(/ \| ARP Vision$/, '') : item.name,
+        `${locale}/${id}: nome`,
+      );
+      assert.equal(
+        s.description,
+        meta ? meta.description : item.line,
+        `${locale}/${id}: descrição`,
+      );
       assert.equal(
         s.url,
         `https://www.arpvision.com.br${locale === 'es' ? '/es/productos' : '/produtos'}/${slug}`,

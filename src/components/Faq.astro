@@ -4,9 +4,9 @@ import { pageLocale } from '../i18n';
 import { anchorId } from '../i18n/routes';
 import { faqGroups } from '../lib/content';
 // O mesmo FAQ na Home e em /planos: uma lista só, separada por assunto. A página de um produto
-// passa os grupos e o cabeçalho dela.
+// passa os grupos e o cabeçalho dela; com um grupo só, ele vai sem título (sem um h3 vazio).
 interface Props {
-  groups?: { title: string; items: { question: string; answer: string }[] }[];
+  groups?: { title?: string; items: { question: string; answer: string }[] }[];
   eyebrow?: string;
   title1?: string;
   title2?: string;
@@ -38,7 +38,7 @@ const {
     <div class="faq-groups">
       {groups.map((group) => (
         <div class="faq-group">
-          <h3>{group.title}</h3>
+          {group.title && <h3>{group.title}</h3>}
           <div class="faq-list">
             {group.items.map((item) => (
               <details class="faq-item">

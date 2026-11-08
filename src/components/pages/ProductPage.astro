@@ -1,0 +1,95 @@
+---
+// A página de um produto novo (/produtos/<produto> e /es/productos/<produto>), com o texto de
+// `productPages` do dicionário, no roteiro da spec: topo, dor, como funciona, o que sai pronto, o
+// que está incluído, a seção própria do produto, cotação, dúvidas e fechamento. A cotação e a faixa
+// azul não levam nada do tour: a ação é a cotação pelo WhatsApp do produto.
+import Layout from '../../layouts/Layout.astro';
+import Quote from '../Quote.astro';
+import Faq from '../Faq.astro';
+import FinalCta from '../FinalCta.astro';
+import ProductHero from '../product/ProductHero.astro';
+import ProductPain from '../product/ProductPain.astro';
+import ProductSteps from '../product/ProductSteps.astro';
+import PostGallery from '../product/PostGallery.astro';
+import ProductIncluded from '../product/ProductIncluded.astro';
+import ProductComparison from '../product/ProductComparison.astro';
+import AlsoProducts from '../product/AlsoProducts.astro';
+import CalendarMock from '../mocks/CalendarMock.astro';
+import StaleProfileMock from '../mocks/StaleProfileMock.astro';
+import { pageLocale } from '../../i18n';
+import { productOfPage, type ProductPageId } from '../../lib/products';
+import { faqPageSchema, serviceSchema } from '../../lib/schema';
+interface Props {
+  page: ProductPageId;
+}
+const { page } = Astro.props;
+const { locale, t } = pageLocale(Astro);
+const product = productOfPage(page);
+// Por enquanto só o Piloto automático para Instagram tem texto; os outros produtos chegam com as
+// suas páginas.
+if (page !== 'productInstagram' || !product)
+  throw new Error(`Página de produto sem texto: ${page}`);
+const text = t.productPages.instagram;
+---
+
+<Layout
+  title={text.meta.title}
+  description={text.meta.description}
+  page={page}
+  schema={[serviceSchema(product.id, locale), faqPageSchema(text.faq.items)]}
+  whatsappMessage={text.whatsappMessage}
+  product={product.id}
+>
+  <ProductHero
+    eyebrow={text.hero.eyebrow}
+    title={text.hero.title}
+    lead={text.hero.lead}
+    button={text.hero.button}
+    note={text.hero.note}
+    isNew={product.isNew}
+    message={text.quote.greeting}
+    product={product.id}
+  >
+    <CalendarMock />
+  </ProductHero>
+  <ProductPain {...text.pain}>
+    <StaleProfileMock />
+  </ProductPain>
+  <ProductSteps title={text.steps.title} items={text.steps.items} />
+  <PostGallery />
+  <ProductIncluded
+    title={text.included.title}
+    items={text.included.items}
+    icons={['calendar', 'home', 'globe', 'target', 'star', 'shield', 'camera', 'check']}
+  />
+  <ProductComparison {...text.comparison} />
+  <Quote
+    eyebrow={text.quote.eyebrow}
+    title={text.quote.title}
+    lead={text.quote.lead}
+    benefits={[]}
+    questions={text.quote.questions}
+    greeting={text.quote.greeting}
+    closing={text.quote.closing}
+    trial={false}
+    product={product.id}
+  />
+  <Faq
+    groups={[{ items: text.faq.items }]}
+    eyebrow={text.faq.eyebrow}
+    title1={text.faq.title1}
+    title2={text.faq.title2}
+    lead1={text.faq.lead1}
+    lead2={text.faq.lead2}
+  />
+  <FinalCta
+    title={text.finalCta.title}
+    lead={text.finalCta.lead}
+    primary="whatsapp"
+    whatsappLabel={text.finalCta.button}
+    whatsappMessage={text.quote.greeting}
+    product={product.id}
+    note={null}
+  />
+  <AlsoProducts current={product.id} />
+</Layout>

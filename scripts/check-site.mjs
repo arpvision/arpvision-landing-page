@@ -2,40 +2,32 @@ import { readFile, readdir, stat } from 'node:fs/promises';
 import path from 'node:path';
 import assert from 'node:assert/strict';
 import { portugueseWords } from './portuguese-words.mjs';
+import { publishedPageIds, routes as localeRoutes } from '../src/i18n/routes.ts';
 // Sem preços públicos (site.pricing.showPrices), /planos é só um redirecionamento.
 const pricesShown = !(await readFile('dist/planos/index.html', 'utf8')).includes(
   'http-equiv="refresh"',
 );
-// Cada página existe em cada idioma; o português mora na raiz e o espanhol em /es.
+// O arquivo de cada endereço no build: "/" é index.html, "/es/planes" é es/planes/index.html.
+const fileOf = (route) => `${route.slice(1)}/index.html`.replace(/^\//, '');
+// Cada página existe em cada idioma, com os endereços de src/i18n/routes.ts; o português mora
+// na raiz e o espanhol em /es.
 const locales = [
-  {
-    code: 'pt',
-    lang: 'pt-BR',
-    ogLocale: 'pt_BR',
-    quote: 'cotacao',
-    pages: {
-      home: 'index.html',
-      plans: 'planos/index.html',
-      tutorials: 'tutoriais/index.html',
-      terms: 'termos-de-uso/index.html',
-      privacy: 'politica-de-privacidade/index.html',
-    },
-  },
-  {
-    code: 'es',
-    lang: 'es-ES',
-    ogLocale: 'es_ES',
-    quote: 'cotizacion',
-    pages: {
-      home: 'es/index.html',
-      plans: 'es/planes/index.html',
-      tutorials: 'es/tutoriales/index.html',
-      terms: 'es/terminos-de-uso/index.html',
-      privacy: 'es/politica-de-privacidad/index.html',
-    },
-  },
-];
-const pageIds = ['home', ...(pricesShown ? ['plans'] : []), 'tutorials', 'terms', 'privacy'];
+  { code: 'pt', lang: 'pt-BR', ogLocale: 'pt_BR' },
+  { code: 'es', lang: 'es-ES', ogLocale: 'es_ES' },
+].map((locale) => ({
+  ...locale,
+  quote: localeRoutes[locale.code].anchors.quote,
+  pages: Object.fromEntries(
+    Object.entries(localeRoutes[locale.code].pages).map(([page, route]) => [page, fileOf(route)]),
+  ),
+}));
+// Só as páginas publicadas, na ordem de routes.ts; /planos só com preços públicos.
+const pageIds = Object.keys(localeRoutes.pt.pages).filter(
+  (page) => publishedPageIds.includes(page) && (pricesShown || page !== 'plans'),
+);
+// As páginas de produto moram em /produtos/<produto>; /produtos é a lista com todos.
+const isProductPage = (page) =>
+  localeRoutes.pt.pages[page].startsWith(`${localeRoutes.pt.pages.products}/`);
 const pathOf = (file) => `/${file.replace(/\/?index\.html$/, '')}`;
 const routes = locales.flatMap((locale) =>
   pageIds.map((page) => ({ locale, page, file: locale.pages[page] })),
@@ -195,15 +187,32 @@ for (const { locale, page, file } of routes) {
       item['@type'] === 'VideoObject' ? 'pt-BR' : locale.lang,
       `${route}: JSON-LD ${item['@type']} no idioma`,
     );
-  if (page === 'home') {
-    // O FAQPage é o FAQ que aparece na página, no idioma dela.
+  if (page === 'home' || isProductPage(page)) {
+    // O FAQPage é o FAQ que aparece na página, no idioma dela: cada pergunta e cada resposta no
+    // HTML sem os <script>, porque o próprio JSON-LD já traz o texto.
+    const visible = decode(html.replace(/<script[\s\S]*?<\/script>/g, ''));
     const questions = schemas.find((item) => item['@type'] === 'FAQPage')?.mainEntity ?? [];
     assert.ok(questions.length > 0, `${route}: FAQPage`);
-    for (const question of questions)
+    for (const question of questions) {
       assert.ok(
-        decode(html).includes(question.name),
+        visible.includes(question.name),
         `${route}: pergunta do FAQPage na página: ${question.name}`,
       );
+      assert.ok(
+        visible.includes(question.acceptedAnswer.text),
+        `${route}: resposta do FAQPage na página: ${question.acceptedAnswer.text}`,
+      );
+    }
+  }
+  // Cada produto é um Service; a página com todos os produtos é uma ItemList.
+  const types = schemas.map((item) => item['@type']);
+  if (isProductPage(page)) assert.ok(types.includes('Service'), `${route}: JSON-LD Service`);
+  if (page === 'products') assert.ok(types.includes('ItemList'), `${route}: JSON-LD ItemList`);
+  // Nas páginas de produto, a cotação e a faixa azul não falam do tour: sem a linha do teste
+  // grátis e sem o "Criar conta grátis" da faixa.
+  if (isProductPage(page)) {
+    assert.ok(!html.includes('quote-trial'), `${route}: sem a linha do teste grátis`);
+    assert.ok(!html.includes('data-cta="chamada-final"'), `${route}: faixa sem o cadastro`);
   }
   if (page === 'tutorials') {
     // Um VideoObject por cartão, com o título que o cartão mostra, no idioma da página.
@@ -259,6 +268,20 @@ if (!pricesShown)
       `${home}: botão da cotação abre o WhatsApp com mensagem pronta`,
     );
   }
+// O build tem só as páginas publicadas: fora os redirecionamentos (/planos sem preços), cada
+// index.html de dist é uma das rotas verificadas acima, e nenhuma falta.
+const built = [];
+for (const file of await allFiles('dist'))
+  if (
+    path.basename(file) === 'index.html' &&
+    !(await readFile(file, 'utf8')).includes('http-equiv="refresh"')
+  )
+    built.push(path.relative('dist', file).split(path.sep).join('/'));
+assert.deepEqual(
+  built.sort(),
+  routes.map(({ file }) => file).sort(),
+  'as páginas do build são as publicadas em src/i18n/routes.ts',
+);
 // Página 404: fala os dois idiomas, fica fora do índice e não aponta canonical.
 const notFound = await readFile('dist/404.html', 'utf8');
 assert.match(notFound, /name="robots" content="noindex/, '404 fora do índice');
@@ -301,5 +324,5 @@ assert.ok(
   'robots aponta o sitemap do domínio canônico',
 );
 console.log(
-  `${routes.length} rotas HTML verificadas em ${locales.length} idiomas${pricesShown ? '' : ' (preços ocultos: cotação na Home, /planos e /es/planes redirecionam)'}; ${verifiedLinks} referências locais válidas; ${(jsBytes / 1024).toFixed(1)} KB de JavaScript total (sem gzip). Sitemap, hreflang, robots, 404, metadados, schemas, UTMs e idioma das páginas válidos.`,
+  `${routes.length} rotas HTML verificadas em ${locales.length} idiomas (as publicadas em src/i18n/routes.ts, ${pageIds.filter(isProductPage).length} de produto)${pricesShown ? '' : ' (preços ocultos: cotação na Home, /planos e /es/planes redirecionam)'}; ${verifiedLinks} referências locais válidas; ${(jsBytes / 1024).toFixed(1)} KB de JavaScript total (sem gzip). Sitemap, hreflang, robots, 404, metadados, schemas (FAQPage com perguntas e respostas na página, Service nos produtos), UTMs e idioma das páginas válidos.`,
 );

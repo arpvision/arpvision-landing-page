@@ -1,0 +1,9 @@
+---
+// A etiqueta "Exemplo" de toda tela de exemplo das páginas de produto: nenhuma passa por caso
+// real. Ela fica dentro da tela, que é escondida do leitor de tela; quem o usa ouve a descrição
+// que vem antes dela e começa pela mesma palavra.
+import { pageLocale } from '../../i18n';
+const { t } = pageLocale(Astro);
+---
+
+<span class="example-tag">{t.products.example}</span>

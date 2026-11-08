@@ -77,6 +77,34 @@ export const site = {
     tutorialPoster: '/images/tutorial-720.webp',
     // Tour 360° da demonstração, protegido até a pessoa ativar.
     heroEmbed: 'https://arpvision.app/embed/511a5654-29f2-4798-87ff-5b479210dbf0',
+    // Recortes das fotos da casa de demonstração (public/images/produtos) usados nas telas de
+    // exemplo das páginas de produto, um por um e com o tamanho do arquivo. Nem todo ambiente tem
+    // as três proporções (o 2º andar não tem 16:9): nenhum nome é montado por ambiente e
+    // proporção.
+    productPhotos: {
+      'patio-fachada-4x5': {
+        src: '/images/produtos/patio-fachada-4x5.webp',
+        width: 720,
+        height: 900,
+      },
+      'patio-piscina-4x5': {
+        src: '/images/produtos/patio-piscina-4x5.webp',
+        width: 720,
+        height: 900,
+      },
+      'patio-piscina-9x16': {
+        src: '/images/produtos/patio-piscina-9x16.webp',
+        width: 540,
+        height: 960,
+      },
+      'sala-2-4x5': { src: '/images/produtos/sala-2-4x5.webp', width: 720, height: 900 },
+      'cozinha-4x5': { src: '/images/produtos/cozinha-4x5.webp', width: 720, height: 900 },
+      'quarto-com-suite-4x5': {
+        src: '/images/produtos/quarto-com-suite-4x5.webp',
+        width: 720,
+        height: 900,
+      },
+    },
     // Panoramas do proprietário. O enquadramento das miniaturas é feito no layout.
     fanRooms: [
       {

@@ -181,6 +181,9 @@ test('créditos, dias de teste e preços saem de site.ts para os dois idiomas', 
 test('títulos e descrições cabem no resultado de busca', () => {
   for (const locale of locales) {
     const t = translations(locale);
+    // As páginas de produto que já têm texto.
+    const productMeta = Object.values(t.productPages).map((page) => page.meta);
+    assert.ok(productMeta.length > 0, `${locale}: páginas de produto`);
     assert.ok(
       t.home.description.length >= 140 && t.home.description.length <= 160,
       `${locale}: ${t.home.description.length}`,
@@ -190,6 +193,7 @@ test('títulos e descrições cabem no resultado de busca', () => {
       t.tutorials.description,
       t.legal.terms.description,
       t.legal.privacy.description,
+      ...productMeta.map((meta) => meta.description),
     ])
       assert.ok(description.length <= 160, `${locale}: ${description}`);
     for (const title of [
@@ -198,6 +202,7 @@ test('títulos e descrições cabem no resultado de busca', () => {
       t.tutorials.title,
       t.legal.terms.title,
       t.legal.privacy.title,
+      ...productMeta.map((meta) => meta.title),
     ])
       assert.match(title, /ARP Vision/);
   }

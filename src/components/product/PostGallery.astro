@@ -1,0 +1,37 @@
+---
+// "Assim ficam os seus posts": as oito artes do Piloto automático para Instagram. O texto de cada
+// arte vem do dicionário (`gallery.arts`, nesta ordem); a foto, o formato e o que ela anuncia
+// ficam aqui. Antes de cada arte, a descrição só para o leitor de tela, que começa por "Exemplo:".
+import type { ComponentProps } from 'astro/types';
+import PostArt from '../mocks/PostArt.astro';
+import { pageLocale } from '../../i18n';
+const { t } = pageLocale(Astro);
+const { gallery } = t.productPages.instagram;
+const layout: Omit<ComponentProps<typeof PostArt>, 'art'>[] = [
+  { photo: 'patio-piscina-4x5', listing: true },
+  { photo: 'sala-2-4x5', listing: true },
+  { photo: 'patio-fachada-4x5' },
+  { photo: 'quarto-com-suite-4x5', listing: true },
+  { tone: 'blue', icon: 'globe' },
+  { tone: 'light', icon: 'audit' },
+  { photo: 'cozinha-4x5' },
+  { photo: 'patio-piscina-9x16', story: true, listing: true, whatsapp: true },
+];
+---
+
+<section class="section post-gallery-section" aria-labelledby="gallery-title">
+  <div class="container">
+    <div class="section-heading center">
+      <h2 id="gallery-title">{gallery.title}</h2>
+      <p>{gallery.lead}</p>
+    </div>
+    <ul class="post-gallery" role="list">
+      {gallery.arts.map((art, index) => (
+        <li>
+          <p class="sr-only">{`${t.products.example}: ${art.kind}. ${art.title}`}</p>
+          <PostArt art={art} {...layout[index]} />
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>

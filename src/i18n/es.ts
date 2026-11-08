@@ -42,6 +42,8 @@ export const es: Dictionary = {
   },
   products: {
     audience: 'Inmobiliarias',
+    example: 'Ejemplo',
+    also: 'Conoce también',
     groups: {
       show: 'Mostrar el inmueble',
       promote: 'Difundir y atender',
@@ -61,6 +63,213 @@ export const es: Dictionary = {
     },
     // O Presencial ainda não existe no espanhol: o grupo "Com a nossa equipe" não aparece.
     inPerson: null,
+  },
+  // DIFERENTE: a Espanha não tem CRECI. No lugar dele entra a calificación energética, que todo
+  // anúncio de venda ou aluguel precisa mostrar (RD 390/2021): no item do incluído, na dúvida e nas
+  // artes que anunciam um imóvel.
+  productPages: {
+    instagram: {
+      meta: {
+        title: 'Piloto automático para Instagram de inmobiliarias | ARP Vision',
+        description:
+          'ARP Vision prepara el mes de posts y stories del Instagram de tu inmobiliaria, con tus inmuebles y tu zona. Tú apruebas y ARP Vision publica.',
+      },
+      hero: {
+        eyebrow: 'PILOTO AUTOMÁTICO PARA INSTAGRAM',
+        title: 'El Instagram de tu inmobiliaria, en piloto automático.',
+        lead: 'ARP Vision prepara el mes de posts y stories con tus inmuebles, tu zona y el estilo de tu marca. Tú apruebas, y ARP Vision publica el día previsto.',
+        button: 'Quiero un presupuesto por WhatsApp',
+        note: 'Ningún post sale sin tu aprobación.',
+        mockDescription:
+          'Ejemplo: calendario de dos semanas de la Inmobiliaria Ejemplo, con posts y stories ya aprobados, otros pendientes de tu aprobación y el botón Aprobar todo.',
+      },
+      pain: {
+        eyebrow: '¿TE SUENA?',
+        before: 'Este mes',
+        phrases: [
+          'has vendido una casa.',
+          'has captado dos pisos.',
+          'has alquilado un local.',
+          'has firmado en la notaría.',
+        ],
+        after: 'Y nada de eso ha llegado a Instagram.',
+        text: 'Mantener el perfil al día entre una visita y otra es difícil.',
+      },
+      steps: {
+        title: 'Tres pasos. Después, solo tienes que aprobar.',
+        items: [
+          {
+            title: 'Manda la dirección de tu web',
+            text: 'ARP Vision lee tu marca, tu zona y tus inmuebles en tu web. Si no se puede leer la web, o si no tienes web, nos mandas las fotos y los datos de los inmuebles.',
+          },
+          {
+            title: 'Elige el estilo',
+            text: 'Mira uno de tus inmuebles en cada estilo, con tu logo y tus colores, y quédate con el que prefieras.',
+          },
+          {
+            title: 'Aprueba el mes',
+            text: 'Todo a la vez o post a post. Si quieres cambiar algo, pide el cambio en el propio post. ARP Vision publica cada uno el día previsto.',
+          },
+        ],
+      },
+      gallery: {
+        title: 'Así quedan tus posts',
+        lead: 'Con las fotos de tus inmuebles, tu logo y la calificación energética en los anuncios de venta o alquiler.',
+        arts: [
+          { kind: 'En venta', title: 'Casa con 3 dormitorios y piscina' },
+          { kind: 'En alquiler', title: 'Casa con chimenea y porche' },
+          { kind: 'Vendido', title: 'Otra llave entregada en el Barrio Ejemplo' },
+          { kind: 'Tour 360°', title: 'Mira esta casa por dentro' },
+          { kind: 'Tu barrio', title: 'Qué hay cerca en el Barrio Ejemplo' },
+          { kind: 'Consejo', title: 'Documentos que preparar antes de vender' },
+          { kind: 'Captación', title: '¿Vas a vender o alquilar? Pide una valoración' },
+          { kind: 'Story', title: 'Novedad en el Barrio Ejemplo' },
+        ],
+      },
+      included: {
+        title: 'Qué incluye',
+        items: [
+          {
+            title: 'Posts y stories',
+            text: 'El mes entero, en los días y horarios que elijas.',
+          },
+          { title: 'Venta y alquiler', text: 'En venta, en alquiler, vendido y alquilado.' },
+          { title: 'Tu zona', text: 'Posts sobre los barrios donde trabajas.' },
+          {
+            title: 'Captación',
+            text: 'Invitaciones para que los propietarios pidan una valoración.',
+          },
+          { title: 'Tu marca', text: 'Tu logo, tus colores y el estilo que elijas.' },
+          {
+            title: 'Calificación energética en cada anuncio',
+            text: 'La que nos indiques, en los anuncios de venta o alquiler.',
+          },
+          {
+            title: 'Tour 360° en los posts',
+            text: 'Posts que invitan a ver el tour del inmueble.',
+          },
+          { title: 'Tú apruebas antes', text: 'Y pides cambios en el post que quieras.' },
+        ],
+      },
+      comparison: {
+        title: 'Tres formas de llevar el Instagram',
+        columns: ['Hacerlo tú', 'Contratar una agencia', 'ARP Vision'],
+        rows: [
+          {
+            label: 'Tu tiempo',
+            values: ['Horas cada semana', 'Reuniones y revisiones', 'Aprobar el mes'],
+          },
+          {
+            label: 'Con tus inmuebles y tu zona',
+            values: [
+              'Cuando te sobra tiempo',
+              'Si les mandas el material',
+              'A partir de tu web o de las fotos que mandas',
+            ],
+          },
+          { label: 'Constancia', values: ['Depende de la semana', 'Sí', 'Sí, cada mes'] },
+        ],
+      },
+      quote: {
+        eyebrow: 'PRECIO A MEDIDA',
+        title: 'Una propuesta para el tamaño de tu cartera.',
+        lead: 'Responde 3 preguntas rápidas y recibe por WhatsApp una propuesta para tus inmuebles y el número de posts que quieres, sin compromiso.',
+        questions: [
+          {
+            id: 'listings',
+            label: '¿Cuántos inmuebles tienes anunciados?',
+            summary: 'Inmuebles anunciados',
+            options: ['Hasta 20', '21 a 100', 'Más de 100'],
+          },
+          {
+            id: 'posts',
+            label: '¿Cuántos posts por semana?',
+            summary: 'Posts por semana',
+            options: ['2', '3', '5', 'Aún no lo sé'],
+          },
+          {
+            id: 'timing',
+            label: '¿Para cuándo?',
+            summary: 'Para cuándo',
+            options: ['Este mes', 'El mes que viene', 'Aún me estoy informando'],
+          },
+        ],
+        greeting:
+          '¡Hola! Vengo de la web y quiero un presupuesto del Piloto automático para Instagram de ARP Vision.',
+        closing: '¿Me puedes enviar una propuesta?',
+      },
+      faq: {
+        eyebrow: 'PREGUNTAS FRECUENTES',
+        title1: 'Tú preguntas.',
+        title2: 'Nosotros te lo explicamos.',
+        lead1: 'Sin letra pequeña.',
+        lead2: 'Entiende cada parte del Piloto automático.',
+        items: [
+          {
+            question: '¿Necesito una cuenta profesional de Instagram?',
+            answer:
+              'Sí. La cuenta tiene que ser profesional (de empresa o de creador de contenido). El cambio es gratuito y se hace en el propio Instagram.',
+          },
+          {
+            question: '¿Aparece la calificación energética?',
+            answer:
+              'Sí. Cada anuncio de venta o alquiler lleva la calificación energética que nos indiques.',
+          },
+          {
+            question: '¿De dónde salen los inmuebles?',
+            answer:
+              'De la web de tu inmobiliaria. Si no se puede leer la web, o si no tienes web, nos mandas las fotos y los datos de los inmuebles.',
+          },
+          {
+            question: '¿Puedo cambiar un post antes de que salga?',
+            answer: 'Sí. Pides el cambio en el propio post o quitas el post del mes.',
+          },
+          {
+            question: '¿Cuántos posts y stories al mes?',
+            answer: 'Tú eliges cuántos por semana, y la propuesta lo tiene en cuenta.',
+          },
+          {
+            question: '¿Puede salir algún post sin que yo lo vea?',
+            answer: 'No. Solo sale lo que has aprobado.',
+          },
+          {
+            question: '¿Las stories llevan enlace?',
+            answer:
+              'No. La story no lleva un enlace en el que se pueda hacer clic; el WhatsApp de la inmobiliaria va escrito en la imagen.',
+          },
+          {
+            question: '¿Cómo cancelo?',
+            answer:
+              'Las condiciones del contrato, incluida la cancelación, vienen en la propuesta.',
+          },
+        ],
+      },
+      finalCta: {
+        title: 'Tu próximo mes de Instagram, listo para aprobar.',
+        lead: 'Habla con ARP Vision y recibe una propuesta para tu inmobiliaria.',
+        button: 'Quiero un presupuesto por WhatsApp',
+      },
+      whatsappMessage:
+        '¡Hola! Vengo de la web y quiero saber más del Piloto automático para Instagram de ARP Vision.',
+      mock: {
+        period: 'Próximas dos semanas',
+        weekdays: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+        story: 'Story',
+        approved: 'Aprobado',
+        waiting: 'Pendiente',
+        approveAll: 'Aprobar todo',
+        handle: 'tuinmobiliaria',
+        lastPost: 'Última publicación: junio',
+        profileDescription:
+          'Ejemplo: perfil de inmobiliaria en Instagram con la última publicación en junio.',
+        agency: 'Inmobiliaria Ejemplo',
+        // A calificación energética é do imóvel: só vai nas artes que anunciam um.
+        license: 'Calificación energética: E',
+        licenseOnEveryPost: false,
+        details: '3 dormitorios · 240 m²',
+        whatsapp: 'WhatsApp 600 000 000',
+      },
+    },
   },
   footer: {
     taglineLines: ['Todo el espacio, por dentro.', 'El móvil es solo el principio.'],

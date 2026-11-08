@@ -93,6 +93,7 @@ export const publishedPageIds: readonly PageId[] = [
   'tutorials',
   'terms',
   'privacy',
+  'productInstagram',
 ];
 
 export const pagePath = (locale: Locale, page: PageId) => routes[locale].pages[page];

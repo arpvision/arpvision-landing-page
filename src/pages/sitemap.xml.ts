@@ -1,19 +1,26 @@
 import { site } from '../config/site';
 import { defaultLocale, localeInfo, locales } from '../i18n';
-import { pagePath, type PageId } from '../i18n/routes';
+import { pagePath, publishedPageIds, type PageId } from '../i18n/routes';
+// A Home é a página principal do site; os produtos vêm logo depois; os tutoriais crescem aos
+// poucos; as legais mudam pouco.
+const frequency: Record<PageId, { changefreq: string; priority: string }> = {
+  home: { changefreq: 'weekly', priority: '1.0' },
+  plans: { changefreq: 'weekly', priority: '0.8' },
+  products: { changefreq: 'monthly', priority: '0.8' },
+  productInstagram: { changefreq: 'monthly', priority: '0.8' },
+  productAutochat: { changefreq: 'monthly', priority: '0.8' },
+  productVideos: { changefreq: 'monthly', priority: '0.8' },
+  tutorials: { changefreq: 'monthly', priority: '0.6' },
+  terms: { changefreq: 'yearly', priority: '0.3' },
+  privacy: { changefreq: 'yearly', priority: '0.3' },
+};
 export function GET() {
-  // A Home é a página principal do site; os tutoriais crescem aos poucos; as legais mudam pouco.
-  // /planos só entra com preços públicos; sem eles, a rota redireciona para a cotação.
-  // Cada página entra uma vez por idioma, com as versões dos outros idiomas (hreflang).
-  const pages: { page: PageId; changefreq: string; priority: string }[] = [
-    { page: 'home', changefreq: 'weekly', priority: '1.0' },
-    ...(site.pricing.showPrices
-      ? [{ page: 'plans' as const, changefreq: 'weekly', priority: '0.8' }]
-      : []),
-    { page: 'tutorials', changefreq: 'monthly', priority: '0.6' },
-    { page: 'terms', changefreq: 'yearly', priority: '0.3' },
-    { page: 'privacy', changefreq: 'yearly', priority: '0.3' },
-  ];
+  // Só as páginas publicadas (`publishedPageIds`). /planos só entra com preços públicos; sem eles,
+  // a rota redireciona para a cotação. Cada página entra uma vez por idioma, com as versões dos
+  // outros idiomas (hreflang).
+  const pages = publishedPageIds
+    .filter((page) => page !== 'plans' || site.pricing.showPrices)
+    .map((page) => ({ page, ...frequency[page] }));
   const escapeXml = (value: string) =>
     value
       .replaceAll('&', '&amp;')

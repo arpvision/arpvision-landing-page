@@ -47,6 +47,11 @@ export const pt = {
   products: {
     // O público dos dados estruturados (`Service`) de cada produto.
     audience: 'Imobiliárias',
+    // Etiqueta visível de toda tela de exemplo das páginas de produto, que nunca passa por caso
+    // real. A descrição de cada tela para o leitor de tela começa por esta palavra e dois-pontos.
+    example: 'Exemplo',
+    // O fim das páginas de produto, com os outros produtos no ar.
+    also: 'Conheça também',
     groups: {
       show: 'Mostrar o imóvel',
       promote: 'Divulgar e atender',
@@ -72,6 +77,215 @@ export const pt = {
       training: { name: string; line: string };
       readyTour: { name: string; line: string };
     } | null,
+  },
+  // As páginas dos produtos novos (/produtos/<produto>), uma por produto. As telas de exemplo usam
+  // só nomes fictícios (Imobiliária Exemplo, suaimobiliaria, CRECI 00000-J) e nenhum preço.
+  productPages: {
+    instagram: {
+      meta: {
+        title: 'Piloto automático para Instagram de imobiliárias | ARP Vision',
+        description:
+          'A ARP Vision prepara o mês de posts e stories do Instagram da sua imobiliária, com seus imóveis e sua região. Você aprova e a ARP Vision publica.',
+      },
+      hero: {
+        eyebrow: 'PILOTO AUTOMÁTICO PARA INSTAGRAM',
+        title: 'O Instagram da sua imobiliária, no piloto automático.',
+        lead: 'A ARP Vision prepara o mês de posts e stories com os seus imóveis, a sua região e a cara da sua marca. Você aprova, e a ARP Vision publica no dia marcado.',
+        button: 'Quero uma cotação no WhatsApp',
+        note: 'Nenhum post sai sem a sua aprovação.',
+        mockDescription:
+          'Exemplo: calendário de duas semanas da Imobiliária Exemplo, com posts e stories já aprovados, outros esperando a sua aprovação e o botão Aprovar tudo.',
+      },
+      pain: {
+        eyebrow: 'PARECE FAMILIAR?',
+        before: 'Este mês você',
+        // O fim do título troca sozinho entre estes trechos e para no primeiro.
+        phrases: [
+          'vendeu uma casa.',
+          'captou dois apartamentos.',
+          'alugou uma sala comercial.',
+          'assinou no cartório.',
+        ],
+        after: 'E nada disso chegou ao Instagram.',
+        text: 'Manter o perfil em dia entre uma visita e outra é difícil.',
+      },
+      steps: {
+        title: 'Três passos. Depois, é só aprovar.',
+        items: [
+          {
+            title: 'Mande o endereço do site',
+            text: 'A ARP Vision lê a sua marca, a sua região e os seus imóveis no seu site. Se o site não puder ser lido, ou se você não tiver site, você manda as fotos e os dados dos imóveis.',
+          },
+          {
+            title: 'Escolha o estilo',
+            text: 'Veja um imóvel seu em cada estilo, com o seu logo e as suas cores, e fique com o que preferir.',
+          },
+          {
+            title: 'Aprove o mês',
+            text: 'Tudo de uma vez ou post a post. Se quiser mudar algo, peça a alteração no próprio post. A ARP Vision publica cada um no dia marcado.',
+          },
+        ],
+      },
+      // As oito artes, nesta ordem (PostGallery.astro escolhe a foto e o formato de cada uma):
+      // `kind` é o tipo de post, e `title`, o texto principal da arte.
+      gallery: {
+        title: 'Assim ficam os seus posts',
+        lead: 'Com as fotos dos seus imóveis, o seu logo e o CRECI em todas as peças.',
+        arts: [
+          { kind: 'À venda', title: 'Casa com 3 quartos e piscina' },
+          { kind: 'Para alugar', title: 'Casa com lareira e varanda' },
+          { kind: 'Vendido', title: 'Mais uma chave entregue no Bairro Exemplo' },
+          { kind: 'Tour 360°', title: 'Veja esta casa por dentro' },
+          { kind: 'Seu bairro', title: 'O que tem perto no Bairro Exemplo' },
+          { kind: 'Dica', title: 'Documentos para separar antes de vender' },
+          { kind: 'Captação', title: 'Vai vender ou alugar? Peça uma avaliação' },
+          { kind: 'Story', title: 'Novidade no Bairro Exemplo' },
+        ],
+      },
+      included: {
+        title: 'O que está incluído',
+        items: [
+          {
+            title: 'Posts e stories',
+            text: 'O mês inteiro, nos dias e horários que você escolher.',
+          },
+          { title: 'Venda e locação', text: 'À venda, para alugar, vendido e alugado.' },
+          { title: 'Sua região', text: 'Posts sobre os bairros onde você trabalha.' },
+          { title: 'Captação', text: 'Convites para proprietários pedirem uma avaliação.' },
+          { title: 'Sua marca', text: 'Seu logo, suas cores e o estilo que você escolher.' },
+          {
+            title: 'CRECI em toda peça',
+            text: 'O nome da imobiliária e o número do CRECI que você informar, em destaque.',
+          },
+          { title: 'Tour 360° nos posts', text: 'Posts que convidam a ver o tour do imóvel.' },
+          { title: 'Você aprova antes', text: 'E pede alteração no post que quiser.' },
+        ],
+      },
+      comparison: {
+        title: 'Três jeitos de cuidar do Instagram',
+        columns: ['Fazer sozinho', 'Contratar agência', 'ARP Vision'],
+        rows: [
+          {
+            label: 'Seu tempo',
+            values: ['Horas toda semana', 'Reuniões e revisões', 'Aprovar o mês'],
+          },
+          {
+            label: 'Com seus imóveis e sua região',
+            values: [
+              'Quando sobra tempo',
+              'Se você mandar o material',
+              'A partir do seu site ou das fotos que você manda',
+            ],
+          },
+          { label: 'Constância', values: ['Depende da semana', 'Sim', 'Sim, todo mês'] },
+        ],
+      },
+      // A resposta escolhida entra na mensagem do WhatsApp como está escrita aqui; o `id` só
+      // nomeia o campo do formulário.
+      quote: {
+        eyebrow: 'PREÇO SOB MEDIDA',
+        title: 'Uma proposta para o tamanho da sua carteira.',
+        lead: 'Responda 3 perguntas rápidas e receba pelo WhatsApp uma proposta para os seus imóveis e o número de posts que você quer, sem compromisso.',
+        questions: [
+          {
+            id: 'listings',
+            label: 'Quantos imóveis você tem anunciados?',
+            summary: 'Imóveis anunciados',
+            options: ['Até 20', '21 a 100', 'Mais de 100'],
+          },
+          {
+            id: 'posts',
+            label: 'Quantos posts por semana?',
+            summary: 'Posts por semana',
+            options: ['2', '3', '5', 'Ainda não sei'],
+          },
+          {
+            id: 'timing',
+            label: 'Para quando?',
+            summary: 'Para quando',
+            options: ['Este mês', 'Próximo mês', 'Ainda pesquisando'],
+          },
+        ],
+        greeting:
+          'Olá! Vim pelo site e quero uma cotação do Piloto automático para Instagram da ARP Vision.',
+        closing: 'Pode me mandar uma proposta?',
+      },
+      faq: {
+        eyebrow: 'DÚVIDAS FREQUENTES',
+        title1: 'Você pergunta.',
+        title2: 'A gente explica.',
+        lead1: 'Sem letras miúdas.',
+        lead2: 'Entenda cada parte do Piloto automático.',
+        items: [
+          {
+            question: 'Preciso de conta profissional no Instagram?',
+            answer:
+              'Sim. A conta precisa ser profissional (comercial ou de criador de conteúdo). A troca é gratuita e se faz no próprio Instagram.',
+          },
+          {
+            question: 'O CRECI aparece em todos os posts?',
+            answer:
+              'Sim. Toda peça leva o nome da imobiliária e o número do CRECI que você informar.',
+          },
+          {
+            question: 'De onde vêm os imóveis?',
+            answer:
+              'Do site da sua imobiliária. Se o site não puder ser lido, ou se você não tiver site, você manda as fotos e os dados dos imóveis.',
+          },
+          {
+            question: 'Posso mudar um post antes de sair?',
+            answer: 'Sim. Você pede a alteração no próprio post ou tira o post do mês.',
+          },
+          {
+            question: 'Quantos posts e stories por mês?',
+            answer: 'Você escolhe quantos por semana, e a proposta leva isso em conta.',
+          },
+          {
+            question: 'Pode sair algum post sem eu ver?',
+            answer: 'Não. Só sai o que você aprovou.',
+          },
+          {
+            question: 'Os stories têm link?',
+            answer:
+              'Não. O story não leva link clicável; o WhatsApp da imobiliária vai escrito na arte.',
+          },
+          {
+            question: 'Como cancelo?',
+            answer: 'As condições de contrato, inclusive de cancelamento, vêm na proposta.',
+          },
+        ],
+      },
+      finalCta: {
+        title: 'O seu próximo mês de Instagram, pronto para aprovar.',
+        lead: 'Fale com a ARP Vision e receba uma proposta para a sua imobiliária.',
+        button: 'Quero uma cotação no WhatsApp',
+      },
+      // A mensagem do rodapé e do botão flutuante; os botões de cotação usam a saudação da cotação.
+      whatsappMessage:
+        'Olá! Vim pelo site e quero saber do Piloto automático para Instagram da ARP Vision.',
+      // O texto fictício das telas de exemplo.
+      mock: {
+        // O calendário do topo.
+        period: 'Próximas duas semanas',
+        weekdays: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
+        story: 'Story',
+        approved: 'Aprovado',
+        waiting: 'Esperando você',
+        approveAll: 'Aprovar tudo',
+        // O perfil parado, ao lado da dor.
+        handle: 'suaimobiliaria',
+        lastPost: 'Último post: junho',
+        profileDescription:
+          'Exemplo: perfil de imobiliária no Instagram com o último post em junho.',
+        // As artes. O CRECI é da imobiliária: vai em toda peça, inclusive nas que não anunciam
+        // um imóvel (bairro, dica, captação).
+        agency: 'Imobiliária Exemplo',
+        license: 'CRECI 00000-J',
+        licenseOnEveryPost: true,
+        details: '3 quartos · 240 m²',
+        whatsapp: 'WhatsApp (00) 00000-0000',
+      },
+    },
   },
   footer: {
     taglineLines: ['O espaço por inteiro.', 'O celular é só o começo.'],

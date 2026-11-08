@@ -3,7 +3,7 @@
  * saem desta lista, para nenhum esquecer um produto. O tour e o ARP Vision Presencial não têm
  * página própria e levam à home.
  */
-import { locales, translations, type Locale } from '../i18n';
+import { locales, translations, type Dictionary, type Locale } from '../i18n';
 import { available } from '../config/site';
 import {
   anchorId,
@@ -133,6 +133,21 @@ export function productText(
 ): { name: string; line: string } | undefined {
   const { items, inPerson } = translations(locale).products;
   return id === 'training' || id === 'readyTour' ? inPerson?.[id] : items[id];
+}
+
+type ProductPagesText = Dictionary['productPages'];
+
+/**
+ * O texto da página própria do produto (`productPages` do dicionário), ou `undefined` enquanto
+ * ela não tem texto: o tour, o Presencial e as páginas que ainda não foram escritas.
+ */
+export function productPageText(
+  locale: Locale,
+  id: ProductId,
+): ProductPagesText[keyof ProductPagesText] | undefined {
+  const pages: Partial<Record<ProductId, ProductPagesText[keyof ProductPagesText]>> =
+    translations(locale).productPages;
+  return pages[id];
 }
 
 /**

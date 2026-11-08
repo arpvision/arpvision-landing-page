@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { portugueseWords } from '../scripts/portuguese-words.mjs';
 import { available } from '../src/config/site';
-import { locales } from '../src/i18n';
+import { locales, translations } from '../src/i18n';
 import { anchorId, publishedPageIds, routes, type PageId } from '../src/i18n/routes';
 import {
   isLive,
@@ -10,6 +11,7 @@ import {
   productHref,
   productOfPage,
   productPageIds,
+  productPageText,
   products,
   productSlug,
   productsFor,
@@ -166,4 +168,89 @@ test('liveProductsFor tira o que não está publicado e mantém a ordem e o idio
       ['tour', 'videos', 'autochat'],
     );
   });
+});
+
+// As páginas de produto: cada bloco de `productPages` do dicionário, nos dois idiomas.
+type Leaf = [path: string, text: string];
+const leaves = (value: unknown, path = ''): Leaf[] => {
+  if (typeof value === 'string') return [[path, value]];
+  if (Array.isArray(value))
+    return value.flatMap((item, index) => leaves(item, `${path}[${index}]`));
+  if (value && typeof value === 'object')
+    return Object.entries(value).flatMap(([key, item]) =>
+      leaves(item, path ? `${path}.${key}` : key),
+    );
+  return [];
+};
+const productPagesOf = (locale: (typeof locales)[number]) =>
+  Object.entries(translations(locale).productPages);
+// As regras de texto da spec: sem "IA" nem o que a pasta de marketing proíbe, sem preço e sem o
+// nome do site de referência.
+const forbidden =
+  /\bIA\b|\bAI\b|intelig[eê]ncia artificial|inteligente|gerad[oa]s?\b|algoritmo|100% real|sem edição|sin edición|R\$\s*\d|a partir de\s*R\$|\bPedra\b/i;
+
+test('páginas de produto: título com a marca, descrição de até 160 e saudação com o nome do produto', () => {
+  for (const locale of locales) {
+    const { items } = translations(locale).products;
+    for (const [id, page] of productPagesOf(locale)) {
+      const name = items[id as keyof typeof items].name;
+      assert.match(page.meta.title, /ARP Vision/, `${locale}/${id}: título`);
+      assert.ok(
+        page.meta.description.length <= 160,
+        `${locale}/${id}: descrição com ${page.meta.description.length} caracteres`,
+      );
+      assert.ok(page.quote.greeting.includes(name), `${locale}/${id}: a saudação cita "${name}"`);
+    }
+  }
+});
+
+test('o texto das páginas de produto segue as regras da spec', () => {
+  for (const locale of locales)
+    for (const [id, page] of productPagesOf(locale))
+      for (const [path, text] of leaves(page))
+        assert.doesNotMatch(text, forbidden, `${locale}/${id}.${path}: "${text}"`);
+});
+
+test('as páginas de produto em espanhol não têm português nem CRECI', () => {
+  for (const [id, page] of productPagesOf('es'))
+    for (const [path, text] of leaves(page)) {
+      assert.doesNotMatch(text, portugueseWords, `es/${id}.${path}: "${text}"`);
+      assert.doesNotMatch(text, /CRECI/, `es/${id}.${path}: "${text}"`);
+    }
+});
+
+test('o Piloto em português leva o CRECI', () => {
+  assert.match(JSON.stringify(translations('pt').productPages.instagram), /CRECI/);
+});
+
+test('a descrição de cada tela de exemplo começa por "Exemplo:" no idioma', () => {
+  assert.equal(translations('pt').products.example, 'Exemplo');
+  assert.equal(translations('es').products.example, 'Ejemplo');
+  for (const locale of locales) {
+    const { example } = translations(locale).products;
+    for (const [id, page] of productPagesOf(locale)) {
+      const descriptions = leaves(page).filter(([path]) => /Description$/.test(path));
+      assert.ok(descriptions.length > 0, `${locale}/${id}: descrições das telas`);
+      for (const [path, text] of descriptions)
+        assert.ok(text.startsWith(`${example}: `), `${locale}/${id}.${path}: "${text}"`);
+    }
+  }
+});
+
+test('a tabela de comparação tem um valor por coluna em cada linha', () => {
+  for (const locale of locales) {
+    const { comparison } = translations(locale).productPages.instagram;
+    for (const row of comparison.rows)
+      assert.equal(row.values.length, comparison.columns.length, `${locale}: ${row.label}`);
+  }
+});
+
+test('cada página de produto publicada tem texto nos dois idiomas', () => {
+  const published = productPageIds.filter((page) => publishedPageIds.includes(page));
+  assert.ok(published.includes('productInstagram'), 'o Piloto está publicado');
+  for (const locale of locales)
+    for (const page of published)
+      assert.ok(productPageText(locale, productOfPage(page)!.id), `${locale}: ${page}`);
+  // Sem página própria (o tour), sem texto de página.
+  assert.equal(productPageText('pt', 'tour'), undefined);
 });

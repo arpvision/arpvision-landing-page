@@ -2,6 +2,7 @@ import lighthouse from 'lighthouse';
 import { launch } from 'chrome-launcher';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { publishedPageIds, routes } from '../src/i18n/routes.ts';
 await mkdir('.artifacts', { recursive: true });
 await mkdir('.artifacts/lighthouse-profile', { recursive: true });
 const chrome = await launch({
@@ -16,6 +17,13 @@ try {
     ['home', '/'],
     ['planos', '/planos'],
     ['home-es', '/es'],
+    // A página com todos os produtos e a do Piloto, só depois de publicadas (src/i18n/routes.ts).
+    ...[
+      ['produtos', 'products'],
+      ['produto-instagram', 'productInstagram'],
+    ]
+      .filter(([, page]) => publishedPageIds.includes(page))
+      .map(([name, page]) => [name, routes.pt.pages[page]]),
   ]) {
     const report = await lighthouse(`${base}${route}`, {
       port: chrome.port,

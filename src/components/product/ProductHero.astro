@@ -1,0 +1,47 @@
+---
+// O topo de uma página de produto: o nome com o selo "Novo", o título, o apoio, o botão da
+// cotação pelo WhatsApp (com a mensagem e o produto da página) e uma frase curta embaixo. A tela
+// de exemplo do produto entra pelo slot, ao lado.
+import ContactLink from '../ContactLink.astro';
+import Icon from '../Icon.astro';
+import type { ProductId } from '../../lib/products';
+import { pageLocale } from '../../i18n';
+interface Props {
+  eyebrow: string;
+  title: string;
+  lead: string;
+  button: string;
+  note: string;
+  /** O selo "Novo": produto novo, e não "em breve". */
+  isNew: boolean;
+  /** A mensagem pronta do botão de WhatsApp. */
+  message: string;
+  product: ProductId;
+}
+const { eyebrow, title, lead, button, note, isNew, message, product } = Astro.props;
+const { t } = pageLocale(Astro);
+---
+
+<section class="hero product-hero" aria-labelledby="product-title">
+  <div class="container hero-grid">
+    <div class="hero-copy">
+      <span class="eyebrow">
+        <span class="eyebrow-line"></span>
+        {eyebrow}
+        {isNew && <span class="products-badge">{t.header.newBadge}</span>}
+      </span>
+      <h1 id="product-title">{title}</h1>
+      <p class="product-hero-lead">{lead}</p>
+      <div class="hero-actions">
+        <ContactLink class="button button-primary" message={message} product={product}>
+          <Icon name="message" size={19} />
+          {button}
+        </ContactLink>
+      </div>
+      <p class="product-hero-note">{note}</p>
+    </div>
+    <div class="product-hero-mock">
+      <slot />
+    </div>
+  </div>
+</section>
