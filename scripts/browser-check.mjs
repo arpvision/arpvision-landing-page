@@ -380,11 +380,19 @@ try {
       () => document.querySelector('.site-header').dataset.headerSurface === 'opening',
     );
     await narrow.locator('.menu-toggle').hover();
-    const hoverFill = parseColor(
-      await narrow
-        .locator('.menu-toggle')
-        .evaluate((button) => getComputedStyle(button).backgroundColor),
-    );
+    // A cor do hover chega depois do primeiro quadro (a transição do movimento reduzido começa
+    // transparente): a leitura imediata falhava em um de cada quatro cliques. Espera até 1 s.
+    const readFill = async () =>
+      parseColor(
+        await narrow
+          .locator('.menu-toggle')
+          .evaluate((button) => getComputedStyle(button).backgroundColor),
+      );
+    let hoverFill = await readFill();
+    for (let waited = 0; hoverFill[3] === 0 && waited < 1000; waited += 25) {
+      await narrow.waitForTimeout(25);
+      hoverFill = await readFill();
+    }
     assert.ok(
       hoverFill.slice(0, 3).every((value) => value === 255) &&
         hoverFill[3] > 0 &&
