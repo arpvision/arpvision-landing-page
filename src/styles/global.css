@@ -390,14 +390,16 @@ p {
     inset 0 -2px 4px color-mix(in srgb, var(--surface) 45%, transparent),
     0 16px 44px color-mix(in srgb, var(--ink) 10%, transparent);
 }
-.site-header[data-header-surface='opening'] {
+/* Escrita e logo brancos sobre o fundo escuro da abertura, só com o menu fechado: aberto, o
+   cabeçalho cresce e empurra a abertura para baixo. */
+body:not(.menu-is-open) .site-header[data-header-surface='opening'] {
   --header-ink: var(--white);
   --header-fallback: var(--ink);
 }
-.site-header[data-header-surface='opening'] .brand-logo-light {
+body:not(.menu-is-open) .site-header[data-header-surface='opening'] .brand-logo-light {
   display: none;
 }
-.site-header[data-header-surface='opening'] .brand-logo-dark {
+body:not(.menu-is-open) .site-header[data-header-surface='opening'] .brand-logo-dark {
   display: inline-block;
 }
 .site-header:not([data-header-enhanced]) .header-capsule {
@@ -410,6 +412,11 @@ p {
 }
 .menu-is-open .header-capsule {
   --glass-radius: 28px;
+}
+/* Atrás do menu aberto, na Home, ficam a página, o fundo escuro e as fotos da abertura: sobre o
+   vidro nenhuma cor de escrita serve, então ele vira um painel sólido nas cores do tema. */
+.menu-is-open .site-header[data-header-surface='opening'] .header-capsule {
+  background: var(--surface);
 }
 .header-capsule > .glass-refraction {
   padding: 4px;
