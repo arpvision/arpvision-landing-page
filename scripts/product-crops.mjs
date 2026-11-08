@@ -3,6 +3,10 @@
 // scripts/product-crops.json. Cada recorte vira um WebP do site e, com --video-out, um JPG em
 // resolução cheia para os vídeos.
 //
+// O `retouch` do mesmo JSON lista, por panorâmica, as manchas retocadas antes de recortar (o
+// reflexo de quem fotografou no vidro da cabeceira da suíte, que nenhum enquadramento evita sem
+// perder a cama). O retoque é o de scripts/lib/retouch.mjs.
+//
 // Uso:
 //   node scripts/product-crops.mjs --source <pasta> [--site-out <pasta>] [--video-out <pasta>]
 //   --source     a pasta do tour, com a panorâmica 2:1 de cada ambiente em <ambiente>/tratada.jpg
@@ -17,6 +21,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { sampleCoords } from './lib/gnomonic.mjs';
+import { retouchSpot } from './lib/retouch.mjs';
 
 const { values } = parseArgs({
   options: {
@@ -36,9 +41,11 @@ if (!source) {
   process.exit(1);
 }
 
-const { formats, rooms } = JSON.parse(
-  await readFile(new URL('./product-crops.json', import.meta.url), 'utf8'),
-);
+const {
+  formats,
+  rooms,
+  retouch = {},
+} = JSON.parse(await readFile(new URL('./product-crops.json', import.meta.url), 'utf8'));
 
 const panoramas = new Map();
 async function loadPanorama(folder) {
@@ -51,6 +58,9 @@ async function loadPanorama(folder) {
       throw new Error(
         `${file}: esperava uma panorâmica 2:1 em RGB, mas veio ${info.width}×${info.height} com ${info.channels} canais.`,
       );
+    }
+    for (const region of retouch[folder] ?? []) {
+      retouchSpot(data, info.width, info.height, region);
     }
     panoramas.set(folder, { data, width: info.width, height: info.height });
   }

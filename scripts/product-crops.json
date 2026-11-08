@@ -67,5 +67,14 @@
         "4x5": { "yaw": 215, "pitch": -3, "hfov": 80 }
       }
     }
-  ]
+  ],
+  "retouch": {
+    "quarto-com-suite": [
+      {
+        "yaw": [353.5, 359.2],
+        "pitch": [-2.5, 2.8],
+        "reason": "reflexo de quem fotografou no vidro da cabeceira"
+      }
+    ]
+  }
 }
