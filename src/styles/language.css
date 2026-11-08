@@ -1,4 +1,4 @@
-/* Seletor de idioma (PT | ES): cabeçalho do desktop, menu do celular e rodapé. */
+/* Seletor de idioma em linha (PT | ES | EN): menu do celular e rodapé. */
 .language-switch {
   display: inline-flex;
   align-items: center;
@@ -39,17 +39,82 @@
 .mobile-language {
   display: none;
 }
-/* Entre 1024 e 1279px, o cabeçalho em espanhol não comporta o seletor sem quebrar os rótulos;
-   nessa faixa ele fica só no rodapé. */
-@media (max-width: 1279px) {
+/* Seletor compacto do cabeçalho do desktop: o globo e o código do idioma atual abrem a lista.
+   Os três códigos lado a lado (uns 117px) não cabem no cabeçalho do português, que tinha 47px
+   de folga com PT | ES; o compacto ocupa uns 60px. */
+.language-menu {
+  position: relative;
+}
+.language-menu > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding-inline: 6px;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  list-style: none;
+  cursor: pointer;
+  box-shadow: inset 0 -2px 0 transparent;
+  transition: box-shadow 0.15s;
+}
+.language-menu > summary::-webkit-details-marker {
+  display: none;
+}
+.language-menu > summary:hover,
+.language-menu[open] > summary {
+  box-shadow: inset 0 -2px 0 currentColor;
+}
+.language-menu-list {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 14px);
+  right: -12px;
+  display: grid;
+  gap: 2px;
+  min-width: 176px;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--text-strong);
+  box-shadow: var(--shadow);
+}
+.language-menu-list a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+  padding-inline: 12px;
+  border-radius: 9px;
+  font-size: var(--fs-small);
+  font-weight: 500;
+}
+.language-menu-list a:hover {
+  background: var(--bg-section);
+}
+.language-menu-list a[aria-current] {
+  color: var(--brand-blue-dark);
+  font-weight: 700;
+}
+/* No cabeçalho, o seletor aparece a partir de 1100px. Abaixo disso ele não cabe sem apertar os
+   outros itens (em 1024px sobram 66px no português e 52px no inglês; o seletor pede 74px com o
+   espaço entre os itens), e fica no rodapé e na faixa de sugestão. Em 1100px sobram ~50px no
+   inglês, já descontada a barra de rolagem do Windows. */
+@media (max-width: 1099px) {
   .desktop-language {
     display: none;
   }
 }
 /* Os rótulos em espanhol somam uns 105px a mais que os do português ("Presupuesto", "Iniciar
-   sesión", "Tutoriales"), e o cabeçalho tem 1010px úteis. No espanhol, o seletor sai do
-   cabeçalho do desktop (fica no rodapé e no menu do celular; o cabeçalho em português o mantém,
-   e é por ele que um espanhol chega aqui) e os links ficam um pouco mais juntos. */
+   sesión", "Tutoriales"), e o cabeçalho tem 1010px úteis: com o botão longo sobram 31px, menos
+   que o seletor compacto. No espanhol, o seletor sai do cabeçalho do desktop (fica no rodapé e
+   no menu do celular, e a faixa de sugestão de idioma traz quem prefere outro idioma) e os
+   links ficam um pouco mais juntos. */
 @media (min-width: 1024px) {
   .site-header .desktop-language:lang(es) {
     display: none;
@@ -101,5 +166,80 @@
 @media (max-width: 339px) {
   .site-header .button-small:lang(es) {
     padding-inline: 7px;
+  }
+}
+
+/* Faixa de sugestão de idioma (src/scripts/language-suggestion.ts): no pé da tela, à esquerda,
+   longe do cabeçalho e do WhatsApp flutuante (que fica à direita). Fixa: não empurra a página
+   ao aparecer. */
+.language-suggestion {
+  position: fixed;
+  z-index: 45;
+  left: 16px;
+  bottom: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 14px;
+  width: max-content;
+  max-width: min(560px, calc(100% - 32px));
+  padding: 4px 4px 4px 18px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  color: var(--text-strong);
+  box-shadow: var(--shadow);
+  font-size: var(--fs-small);
+  line-height: 1.45;
+}
+.language-suggestion p {
+  flex: 1 1 200px;
+  margin: 0;
+  padding-block: 8px;
+}
+.language-suggestion a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--brand-blue-dark);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.language-suggestion a:hover {
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+.language-suggestion .icon-button {
+  flex: none;
+  margin-left: auto;
+  border-radius: 12px;
+  color: var(--text-secondary);
+}
+.language-suggestion .icon-button:hover {
+  color: var(--text-strong);
+}
+/* Com o menu do celular aberto, a faixa sai de cena, como o WhatsApp flutuante. */
+.menu-is-open .language-suggestion {
+  display: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .language-suggestion {
+    animation: language-suggestion-in 0.35s ease-out both;
+  }
+}
+@keyframes language-suggestion-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+/* No celular, o WhatsApp flutuante ocupa o canto direito (49px a 15px da borda): a faixa para
+   antes dele. */
+@media (max-width: 767px) {
+  .language-suggestion {
+    left: 12px;
+    bottom: 12px;
+    max-width: calc(100% - 12px - 15px - 49px - 12px);
+    padding-left: 14px;
   }
 }

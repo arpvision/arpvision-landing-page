@@ -10,6 +10,7 @@ import '../styles/language.css';
 import Header from '../components/Header.astro';
 import GlassFilter from '../components/GlassFilter.astro';
 import Footer from '../components/Footer.astro';
+import LanguageSuggestion from '../components/LanguageSuggestion.astro';
 import { site } from '../config/site';
 import { defaultLocale, localeInfo, locales, pageLocale } from '../i18n';
 import { anchorId, pagePath, type PageId } from '../i18n/routes';
@@ -19,9 +20,12 @@ interface Props {
   description?: string;
   ogImage?: string;
   schema?: Record<string, unknown>[];
-  /** Página com versão em cada idioma (canonical e hreflang). Sem ela, a página fica fora do índice. */
+  /**
+   * Página com versão em cada idioma (canonical, hreflang e a faixa de sugestão de idioma). Sem
+   * ela, a página fica fora do índice.
+   */
   page?: PageId;
-  /** Sem cabeçalho e rodapé (a página 404, que fala os dois idiomas). */
+  /** Sem cabeçalho, rodapé e faixa de sugestão de idioma (a página 404, que fala todos). */
   bare?: boolean;
 }
 const { locale, t } = pageLocale(Astro);
@@ -128,6 +132,7 @@ const contentId = anchorId(locale, 'content');
       <slot />
     </main>
     {!bare && <Footer />}
+    {!bare && page && <LanguageSuggestion />}
     <script>
       import '../scripts/site';
     </script>

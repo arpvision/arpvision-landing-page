@@ -1,8 +1,8 @@
 /**
- * Português do Brasil: a fonte do texto do site. Todo texto novo, ou mudado, entra aqui e em
- * `es.ts` no mesmo PR; o tipo `Dictionary` sai deste arquivo, então o espanhol não compila
- * se faltar uma chave. Números, preços, links e mídia comum ficam em `src/config/site.ts`
- * e chegam aqui como parâmetros das funções.
+ * Português do Brasil: a fonte do texto do site. Todo texto novo, ou mudado, entra aqui, em
+ * `es.ts` e em `en.ts` no mesmo PR; o tipo `Dictionary` sai deste arquivo, então os outros
+ * idiomas não compilam se faltar uma chave. Números, preços, links e mídia comum ficam em
+ * `src/config/site.ts` e chegam aqui como parâmetros das funções.
  *
  * `{nome}` marca o valor que o script do navegador preenche (texto que muda depois da carga).
  * Linhas em lista viram linhas separadas por <br /> no componente.
@@ -132,7 +132,7 @@ export const pt = {
       visit: { title: 'Antes da visita', text: 'Quem chega já conhece o espaço e vem decidido.' },
     },
     // A conversa em português é uma imagem; sem ela, o componente monta a conversa em
-    // HTML com o texto de `chat` (é o que o espanhol usa).
+    // HTML com o texto de `chat` (é o que o espanhol e o inglês usam).
     conversationImage: {
       src: '/images/conversa-whatsapp.webp',
       alt: 'Simulação de um corretor enviando um tour de 9 ambientes no WhatsApp. A mensagem explica que o cliente pode abrir no computador ou no celular, sem baixar nada nem criar conta.',

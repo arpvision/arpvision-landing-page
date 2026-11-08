@@ -1,6 +1,6 @@
 ---
-// /tutoriais e /es/tutoriales: os vídeos de `tutorials` (site.ts), com o texto do dicionário
-// da página. Os vídeos são os mesmos nos dois idiomas, narrados em português.
+// /tutoriais, /es/tutoriales e /en/tutorials: os vídeos de `tutorials` (site.ts), com o texto do dicionário
+// da página. Os vídeos são os mesmos em todos os idiomas, narrados em português.
 import Layout from '../../layouts/Layout.astro';
 import Icon from '../Icon.astro';
 import FinalCta from '../FinalCta.astro';
@@ -18,7 +18,7 @@ const videos = tutorials.map((tutorial) => ({
   sectionName: text.sections[tutorial.section],
   clock: clockDuration(tutorial.duration),
 }));
-// `inLanguage` é o idioma do vídeo, não o da página: a narração é em português nos dois.
+// `inLanguage` é o idioma do vídeo, não o da página: a narração é em português em todos.
 const videoSchema = videos.map((video) => ({
   '@context': 'https://schema.org',
   '@type': 'VideoObject',

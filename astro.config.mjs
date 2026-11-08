@@ -5,12 +5,13 @@ export default defineConfig({
   trailingSlash: 'never',
   build: { format: 'directory' },
   vite: { build: { assetsInlineLimit: 0 } },
-  // Português na raiz e espanhol em /es. Sem redirecionamento pelo idioma do navegador: o
-  // site estático não tem middleware, e a escolha é sempre do seletor PT | ES.
-  // Os idiomas e os endereços em espanhol estão em src/i18n/ (index.ts e routes.ts).
+  // Português na raiz, espanhol em /es e inglês em /en. Sem redirecionamento pelo idioma do
+  // navegador: a escolha é sempre do seletor de idioma; quando o navegador prefere outro
+  // idioma do site, uma faixa sugere a mesma página nele (src/i18n/suggestion.ts).
+  // Os idiomas e os endereços de cada um estão em src/i18n/ (locales.ts e routes.ts).
   i18n: {
     defaultLocale: 'pt',
-    locales: ['pt', 'es'],
+    locales: ['pt', 'es', 'en'],
     routing: { prefixDefaultLocale: false },
   },
 });
