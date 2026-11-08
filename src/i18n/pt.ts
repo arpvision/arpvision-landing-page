@@ -1,8 +1,9 @@
 /**
  * Português do Brasil: a fonte do texto do site. Todo texto novo, ou mudado, entra aqui e em
- * `es.ts` no mesmo PR; o tipo `Dictionary` sai deste arquivo, então o espanhol não compila
- * se faltar uma chave. Números, preços, links e mídia comum ficam em `src/config/site.ts`
- * e chegam aqui como parâmetros das funções.
+ * `es.ts` no mesmo PR, menos uma parte que só existe em português (um serviço local, como o
+ * Presencial), que vai em `onlyInPortuguese` e vale null em `es.ts`. O tipo `Dictionary` sai
+ * deste arquivo, então o espanhol não compila se faltar uma chave. Números, preços, links e
+ * mídia comum ficam em `src/config/site.ts` e chegam aqui como parâmetros das funções.
  *
  * `{nome}` marca o valor que o script do navegador preenche (texto que muda depois da carga).
  * Linhas em lista viram linhas separadas por <br /> no componente.
@@ -11,7 +12,10 @@ import type { FanRoomId, PlanId, TutorialId, TutorialSectionId } from '../config
 
 /** "1 ambiente", "2 ambientes". */
 const rooms = (count: number) => `${count} ${count === 1 ? 'ambiente' : 'ambientes'}`;
-/** Parte que só existe em português: nos outros idiomas a chave vale null e ela não aparece. */
+/**
+ * Parte que só existe em português: nos outros idiomas a chave vale null (marcada DIFERENTE) e
+ * ela não aparece. A chave entra nas diferenças permitidas de tests/i18n.test.ts.
+ */
 const onlyInPortuguese = <T>(value: T): T | null => value;
 
 export const pt = {

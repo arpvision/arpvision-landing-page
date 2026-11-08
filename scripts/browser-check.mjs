@@ -162,6 +162,8 @@ try {
   // demonstração (aqui simulado, com o data-long-nav que o Header.astro põe).
   for (const tour of [false, true]) {
     await page.goto(base + '/termos-de-uso');
+    // Medido com a fonte de reserva, o cabeçalho tem outra largura e a guarda falha por acaso.
+    await page.evaluate(() => document.fonts.ready);
     if (tour)
       await page.evaluate(() => {
         const header = document.querySelector('.site-header');
@@ -176,6 +178,10 @@ try {
     for (const width of [1024, 1100, 1200, 1280, 1440]) {
       await page.setViewportSize({ width, height: 1000 });
       await page.waitForFunction((size) => innerWidth === size, width);
+      // O innerWidth muda antes de todas as media queries valerem; dois quadros depois, valem.
+      await page.evaluate(
+        () => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))),
+      );
       const wrapped = await page.evaluate(() => {
         const found = [];
         const walker = document.createTreeWalker(

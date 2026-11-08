@@ -3,8 +3,9 @@
  * docs/produto/idiomas.md do repositório do app: estancia (ambiente), mejorar (aprimorar),
  * móvil, ordenador, enlace, tours publicados (tours no ar). Sem "IA".
  *
- * Tradução fiel ao português, com uma exceção: aqui não entra promessa de funcionalidade que
- * o app não tem. Os pontos em que o texto diverge do português estão marcados com DIFERENTE.
+ * Tradução fiel ao português, com duas exceções: aqui não entra promessa de funcionalidade que
+ * o app não tem, nem serviço local (o ARP Vision Presencial, que só atende Porto Alegre e
+ * região). Os pontos em que o texto diverge do português estão marcados com DIFERENTE.
  */
 import type { Dictionary } from './pt';
 
@@ -249,7 +250,8 @@ export const es: Dictionary = {
       },
     },
   },
-  // O ARP Vision Presencial só atende Porto Alegre e região: no espanhol não há seção nem menu.
+  // DIFERENTE: o ARP Vision Presencial só atende Porto Alegre e região; no espanhol não há seção
+  // nem menu.
   inPerson: null,
   quote: {
     eyebrow: 'PRECIO A MEDIDA',
@@ -260,6 +262,8 @@ export const es: Dictionary = {
         title: 'Propuesta para tu volumen.',
         text: 'Pagas por estancia terminada, no por foto.',
       },
+      // DIFERENTE: o português oferece também o celular da equipe da ARP Vision ("ou com a
+      // nossa"), do Presencial, que só atende Porto Alegre e região.
       phone: {
         title: 'Sin cámara 360° y sin fotógrafo.',
         text: 'El móvil que ya tienes hace el tour.',

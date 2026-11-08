@@ -48,8 +48,10 @@
 }
 /* Os rótulos em espanhol somam uns 105px a mais que os do português ("Presupuesto", "Iniciar
    sesión", "Tutoriales"), e o cabeçalho tem 1010px úteis. No espanhol, o seletor sai do
-   cabeçalho do desktop (fica no rodapé e no menu do celular; o cabeçalho em português o mantém,
-   e é por ele que um espanhol chega aqui) e os links ficam um pouco mais juntos. */
+   cabeçalho do desktop (fica no rodapé e no menu do celular) e os links ficam um pouco mais
+   juntos. O cabeçalho em português mantém o seletor, e é por ele que um espanhol chega aqui;
+   só com "Tour real" no menu (data-long-nav, em global.css) ele sai também do português, e no
+   desktop fica só no rodapé. */
 @media (min-width: 1024px) {
   .site-header .desktop-language:lang(es) {
     display: none;
