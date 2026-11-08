@@ -61,6 +61,12 @@ window.addEventListener('resize', () => isOpen() && place(), { passive: true });
 matchMedia('(max-width: 1023px)').addEventListener('change', (event) => {
   if (event.matches) setPanel(false);
 });
+// Na home, o cabeçalho sai de cena quando a pessoa desce a página (site.ts): o painel fecha junto,
+// para não voltar aberto no meio da página.
+if (header)
+  new MutationObserver(() => {
+    if (header.dataset.headerHidden === 'true' && isOpen()) setPanel(false);
+  }).observe(header, { attributeFilter: ['data-header-hidden'] });
 
 const mobileToggle = document.querySelector<HTMLButtonElement>('.mobile-products-toggle');
 const mobileList = document.querySelector<HTMLElement>('#mobile-products-list');

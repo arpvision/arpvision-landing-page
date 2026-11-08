@@ -159,6 +159,81 @@ try {
   }
   results.push('Menu do desktop destaca a seção visível OK');
 
+  // Na home, depois da abertura, o cabeçalho volta quando a pessoa sobe a página. Sobre a faixa
+  // final, escura, a escrita e o logo ficam brancos, também no link da seção da vez.
+  // Cada rolagem espera o evento e dois quadros, como no opening-check: duas rolagens no mesmo
+  // quadro chegariam ao site como uma só.
+  const scrollHome = (top) =>
+    page.evaluate(
+      (y) =>
+        new Promise((resolve) => {
+          addEventListener(
+            'scroll',
+            () => requestAnimationFrame(() => requestAnimationFrame(resolve)),
+            { once: true },
+          );
+          scrollTo({ top: y, behavior: 'instant' });
+        }),
+      top,
+    );
+  const headerState = () =>
+    page.locator('.site-header').evaluate((header) => ({
+      hidden: header.dataset.headerHidden,
+      surface: header.dataset.headerSurface,
+    }));
+  const pageEnd = await page.evaluate(() => document.documentElement.scrollHeight - innerHeight);
+  await scrollHome(pageEnd);
+  assert.equal((await headerState()).hidden, 'true', 'cabeçalho fora de cena no fim da home');
+  await scrollHome(
+    await page
+      .locator('.final-cta')
+      .evaluate((strip) => strip.getBoundingClientRect().top + scrollY + 100),
+  );
+  assert.deepEqual(
+    await headerState(),
+    { hidden: 'false', surface: 'dark' },
+    'cabeçalho de volta ao subir, sobre a faixa final',
+  );
+  // Logo abaixo da faixa vem a seção Dúvidas, e o link dela é o da seção da vez.
+  await page.waitForFunction(
+    () =>
+      document.querySelector('.desktop-nav [aria-current="location"]')?.textContent.trim() ===
+      'Dúvidas',
+  );
+  assert.deepEqual(
+    await page
+      .locator('.site-header .desktop-nav')
+      .evaluate((nav) => [
+        ...new Set(
+          [...nav.querySelectorAll('a, button')].map((item) => getComputedStyle(item).color),
+        ),
+      ]),
+    ['rgb(255, 255, 255)'],
+    'menu branco sobre a faixa final',
+  );
+  assert.match(
+    await page
+      .locator('.site-header .brand img')
+      .evaluateAll((images) => images.find((image) => image.checkVisibility())?.src),
+    /white/,
+    'logo branco sobre a faixa final',
+  );
+  await page.screenshot({ path: '.artifacts/cabecalho-faixa-final.png' });
+  // O painel Produtos aberto fecha quando o cabeçalho sai de cena.
+  await scrollHome(0);
+  await page.locator('.products-toggle').click();
+  assert.equal(await page.locator('.products-toggle').getAttribute('aria-expanded'), 'true');
+  await scrollHome(pageEnd);
+  assert.equal((await headerState()).hidden, 'true');
+  assert.equal(
+    await page.locator('.products-toggle').getAttribute('aria-expanded'),
+    'false',
+    'o painel Produtos fecha quando o cabeçalho sai',
+  );
+  results.push(
+    'Home: o cabeçalho volta ao subir, fica branco sobre a faixa final (menu, seção da vez e logo) e fecha o painel Produtos ao sair OK',
+  );
+
   // "Produtos ▾" no lugar de "Como funciona", nos dois idiomas: abre e fecha pelo clique, pelo
   // teclado e pelo clique fora, e mostra um link por produto no ar.
   for (const [locale, route] of [
@@ -460,9 +535,17 @@ try {
   await phone.locator('.menu-toggle').click();
   assert.equal(await phone.locator('#mobile-nav').isVisible(), true);
   assert.equal(await phone.evaluate(() => getComputedStyle(document.body).overflow), 'hidden');
+  // Aberto no topo da home, o menu empurra a abertura para baixo: a maior parte do cabeçalho
+  // fica sobre o fundo claro, e a escrita volta à cor de sempre.
+  await phone.waitForFunction(
+    () => document.querySelector('.site-header').dataset.headerSurface === '',
+  );
   // Toque fora do menu num ponto sem link (o título da hero), para não navegar.
   await phone.locator('.hero h1').click({ position: { x: 10, y: 10 } });
   assert.equal(await phone.locator('#mobile-nav').isVisible(), false, 'toque fora fecha o menu');
+  await phone.waitForFunction(
+    () => document.querySelector('.site-header').dataset.headerSurface === 'dark',
+  );
   await phone.locator('.menu-toggle').click();
   // O grupo Produtos abre dentro do menu, com os produtos do painel e toques de 44px.
   const productsToggle = phone.locator('.mobile-products-toggle');

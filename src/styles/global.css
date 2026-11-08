@@ -373,6 +373,20 @@ p {
 .site-header[data-header-bounded] {
   transform: translateY(var(--header-shift, 0px));
 }
+/* Na home, depois da abertura, ele entra e sai deslizando; ao sair, só some no fim do movimento. */
+.site-header[data-header-revealed] {
+  transition:
+    transform 0.25s ease,
+    visibility 0s;
+}
+.site-header[data-header-revealed][data-header-hidden='true'] {
+  transition-delay: 0s, 0.25s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-header[data-header-revealed] {
+    transition: none;
+  }
+}
 .site-header[data-header-hidden='true'] {
   visibility: hidden;
   pointer-events: none;
@@ -390,15 +404,29 @@ p {
     inset 0 -2px 4px color-mix(in srgb, var(--surface) 45%, transparent),
     0 16px 44px color-mix(in srgb, var(--ink) 10%, transparent);
 }
-.site-header[data-header-surface='opening'] {
+/* Sobre a abertura e as outras seções escuras, a escrita e o logo ficam brancos. "opening" é o
+   que o Header.astro põe na home antes da primeira pintura; depois, o site.ts mede o que está
+   atrás do cabeçalho e põe "dark" ou nada. */
+.site-header[data-header-surface='opening'],
+.site-header[data-header-surface='dark'] {
   --header-ink: var(--white);
   --header-fallback: var(--ink);
 }
-.site-header[data-header-surface='opening'] .brand-logo-light {
+.site-header[data-header-surface='opening'] .brand-logo-light,
+.site-header[data-header-surface='dark'] .brand-logo-light {
   display: none;
 }
-.site-header[data-header-surface='opening'] .brand-logo-dark {
+.site-header[data-header-surface='opening'] .brand-logo-dark,
+.site-header[data-header-surface='dark'] .brand-logo-dark {
   display: inline-block;
+}
+/* Ali, o azul do link sob o ponteiro ou da seção da vez sumiria: ele continua branco, marcado só
+   pelo traço embaixo. */
+.site-header[data-header-surface='opening'] .desktop-nav a:hover,
+.site-header[data-header-surface='opening'] .desktop-nav a[aria-current],
+.site-header[data-header-surface='dark'] .desktop-nav a:hover,
+.site-header[data-header-surface='dark'] .desktop-nav a[aria-current] {
+  color: inherit;
 }
 .site-header:not([data-header-enhanced]) .header-capsule {
   background: var(--surface);
