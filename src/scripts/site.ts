@@ -149,7 +149,7 @@ if (floating) {
     floating.classList.toggle('is-hidden', visible.size > 0);
   });
   document
-    .querySelectorAll('.hero-actions, .quote-actions, .final-cta, .site-footer')
+    .querySelectorAll('.hero-actions, .quote-actions, .in-person-actions, .final-cta, .site-footer')
     .forEach((element) => observer.observe(element));
 }
 

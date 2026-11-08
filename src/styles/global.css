@@ -2545,6 +2545,62 @@ input[type='number']::-webkit-outer-spin-button {
     gap: 26px;
   }
 }
+/* O menu em português tem o Presencial, que só existe em português, e de 1280px para cima o
+   cabeçalho ainda leva o seletor PT | ES: com os espaços de sempre, os itens quebrariam linha.
+   De 1024 a 1099px (menos ainda com a barra de rolagem clássica do Windows), o botão também
+   perde a seta, como nos celulares estreitos. */
+@media (min-width: 1024px) and (max-width: 1099px) {
+  .site-header .desktop-nav:lang(pt) {
+    gap: 16px;
+  }
+  .site-header .header-actions:lang(pt) {
+    gap: 12px;
+  }
+  .site-header .header-actions:lang(pt) .button svg {
+    display: none;
+  }
+  /* Com "Tour real" no menu (data-long-nav), nem assim: logo do celular e espaços menores. */
+  .site-header[data-long-nav] .header-inner:lang(pt) {
+    gap: 12px;
+    padding-inline: 20px;
+  }
+  .site-header[data-long-nav] .brand img:lang(pt) {
+    width: 134px;
+  }
+  .site-header[data-long-nav] .desktop-nav:lang(pt) {
+    gap: 12px;
+  }
+  .site-header[data-long-nav] .header-actions:lang(pt) {
+    gap: 8px;
+  }
+}
+@media (min-width: 1280px) {
+  .site-header .header-inner:lang(pt) {
+    gap: 12px;
+  }
+  .site-header .desktop-nav:lang(pt) {
+    gap: 16px;
+  }
+  .site-header .header-actions:lang(pt) {
+    gap: 12px;
+  }
+}
+/* Com "Tour real", o menu em português tem seis itens e o cabeçalho fica compacto em todo o
+   desktop; o seletor PT | ES fica no rodapé e no menu do celular, como no espanhol. Só no
+   português (:lang(pt)): o espanhol tem as próprias regras em language.css, e uma regra sem
+   idioma empataria com elas e valeria pela ordem dos arquivos. */
+@media (min-width: 1100px) {
+  .site-header[data-long-nav] .desktop-nav:lang(pt) {
+    gap: 16px;
+  }
+  .site-header[data-long-nav] .header-actions:lang(pt) {
+    gap: 12px;
+  }
+  .site-header[data-long-nav] .header-actions:lang(pt) .button svg,
+  .site-header[data-long-nav] .desktop-language:lang(pt) {
+    display: none;
+  }
+}
 @media (max-width: 1023px) {
   .desktop-nav,
   .login-link,

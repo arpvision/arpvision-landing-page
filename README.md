@@ -63,7 +63,7 @@ QR codes de todas as demos são gerados no build e acompanham a seleção das ab
 
 ## Idiomas
 
-O português é a fonte e mora na raiz; o espanhol da Espanha (es-ES) mora em `/es`, com endereços em espanhol. O i18n nativo do Astro (`i18n` em `astro.config.mjs`) dá o idioma de cada página (`Astro.currentLocale`). Ninguém é redirecionado pelo idioma do navegador: o seletor PT | ES do rodapé, do menu do celular e do cabeçalho (no desktop a partir de 1280px) leva à mesma página no outro idioma.
+O português é a fonte e mora na raiz; o espanhol da Espanha (es-ES) mora em `/es`, com endereços em espanhol. O i18n nativo do Astro (`i18n` em `astro.config.mjs`) dá o idioma de cada página (`Astro.currentLocale`). Ninguém é redirecionado pelo idioma do navegador: o seletor PT | ES do rodapé, do menu do celular e do cabeçalho (no desktop a partir de 1280px, só em português e sem tour de demonstração) leva à mesma página no outro idioma.
 
 Onde mora cada coisa:
 
@@ -75,7 +75,7 @@ Onde mora cada coisa:
 - Números, preços e prazos vêm de `site.ts` e entram no texto pelas funções do dicionário (`trial(credits, days)`), para os idiomas nunca divergirem.
 - O texto que o script do navegador escreve depois da carga (menu, vídeo, cotação, carrossel, tour) vai na própria página, em atributos `data-*`, no idioma dela; os scripts não carregam os dicionários.
 
-O espanhol segue o glossário e o estilo de `docs/produto/idiomas.md`, no repositório do app (tú, móvil, enlace, estancia, mejorar; sem "IA"). Todo texto novo, ou mudado, entra nos dois dicionários no mesmo PR.
+O espanhol segue o glossário e o estilo de `docs/produto/idiomas.md`, no repositório do app (tú, móvil, enlace, estancia, mejorar; sem "IA"). Todo texto novo, ou mudado, entra nos dois dicionários no mesmo PR, menos uma parte que só existe em português (um serviço local, como o ARP Vision Presencial): ela vai em `onlyInPortuguese({ ... })` no `pt.ts` e vale `null` no `es.ts`, marcada com `DIFERENTE`; o componente não mostra nada com `null`, e a chave entra nas diferenças permitidas de `tests/i18n.test.ts`.
 
 Para acrescentar um idioma (ex.: `en`):
 
@@ -95,7 +95,7 @@ npm run build
 npm run check:site
 ```
 
-Os testes verificam recomendação e dados dos planos, compartilhamento dos números entre superfícies, cenários acima do limite e UTMs; e, nos idiomas, as mesmas chaves no português e no espanhol, nenhuma letra ou palavra do português no espanhol, nenhum "IA", os endereços em `/es`, o `idioma=es` nos links do app e o texto de cada tutorial nos dois idiomas, com o aviso em espanhol de que os vídeos são narrados em português. A checagem de saída verifica as rotas dos dois idiomas, `lang`, arquivos locais, metadados, canonical apontando para a própria página, hreflang com `x-default`, `og:locale`, sitemap com as duas versões e robots no mesmo domínio, JSON-LD no idioma da página (e o FAQPage igual ao FAQ dela; o VideoObject dos tutoriais leva o idioma da narração, pt-BR), os links dos tutoriais no idioma da página, a 404, nenhum texto em português nas páginas `/es`, nenhum iframe inicial além do tour da hero e orçamento de JavaScript.
+Os testes verificam recomendação e dados dos planos, compartilhamento dos números entre superfícies, cenários acima do limite e UTMs; e, nos idiomas, as mesmas chaves no português e no espanhol (menos as partes só em português), nenhuma letra ou palavra do português no espanhol, nenhum "IA", os endereços em `/es`, o `idioma=es` nos links do app e o texto de cada tutorial nos dois idiomas, com o aviso em espanhol de que os vídeos são narrados em português. A checagem de saída verifica as rotas dos dois idiomas, `lang`, arquivos locais, metadados, canonical apontando para a própria página, hreflang com `x-default`, `og:locale`, sitemap com as duas versões e robots no mesmo domínio, JSON-LD no idioma da página (e o FAQPage igual ao FAQ dela; o VideoObject dos tutoriais leva o idioma da narração, pt-BR), os links dos tutoriais no idioma da página, a 404, nenhum texto em português nas páginas `/es`, nenhum iframe inicial além do tour da hero e orçamento de JavaScript.
 
 Para ler o site como o Googlebot (robots → sitemap → cada página, sem seguir redirecionamentos), com a prévia no ar ou contra a produção depois do deploy:
 

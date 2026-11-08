@@ -259,6 +259,32 @@ if (!pricesShown)
       `${home}: botão da cotação abre o WhatsApp com mensagem pronta`,
     );
   }
+// ARP Vision Presencial, só em português (atende Porto Alegre e região): seção na Home, item no
+// menu (com destaque pela rolagem) e WhatsApp com a mensagem do serviço. Vale com ou sem preços.
+for (const locale of locales) {
+  const home = pathOf(locale.pages.home);
+  const html = await readFile(path.join('dist', locale.pages.home), 'utf8');
+  const inPerson = html.match(/<section[^>]+id="presencial"[\s\S]*?<\/section>/)?.[0];
+  if (locale.code === 'pt') {
+    assert.ok(inPerson, `${home}: seção Presencial`);
+    assert.match(
+      html,
+      /<a href="#presencial" data-spy="presencial">/,
+      `${home}: menu leva ao Presencial`,
+    );
+    assert.equal(
+      decodeURIComponent(inPerson.match(/href="https:\/\/wa\.me\/\d+\?text=([^"]+)"/)?.[1] ?? ''),
+      'Olá! Vim pelo site e quero saber do ARP Vision Presencial.',
+      `${home}: botão do Presencial abre o WhatsApp com a mensagem do serviço`,
+    );
+  } else assert.ok(!inPerson && !html.includes('#presencial'), `${home}: sem o Presencial`);
+  // Com "Tour real" o menu só cabe no cabeçalho compacto, ligado por data-long-nav.
+  assert.equal(
+    /<header[^>]+data-long-nav/.test(html),
+    html.includes('data-spy="tour-real"'),
+    `${home}: cabeçalho compacto exatamente quando o menu tem "Tour real"`,
+  );
+}
 // Página 404: fala os dois idiomas, fica fora do índice e não aponta canonical.
 const notFound = await readFile('dist/404.html', 'utf8');
 assert.match(notFound, /name="robots" content="noindex/, '404 fora do índice');
