@@ -970,10 +970,20 @@
   font-size: var(--fs-label);
 }
 .post-art-whatsapp {
+  display: grid;
+  gap: 1px;
+  font-weight: 600;
+}
+.post-art-whatsapp-label {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-weight: 600;
+}
+/* O número vai inteiro na linha de baixo: nunca quebra no hífen nem nos espaços. */
+.post-art-number {
+  font-size: var(--fs-note);
+  font-weight: 650;
+  white-space: nowrap;
 }
 .post-art-footer {
   display: flex;

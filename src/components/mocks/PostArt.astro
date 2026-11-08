@@ -17,7 +17,7 @@ interface Props {
   story?: boolean;
   /** A arte anuncia um imóvel: leva os dados dele e, no espanhol, a calificación energética. */
   listing?: boolean;
-  /** O WhatsApp escrito na arte: o story não leva link clicável. */
+  /** O WhatsApp escrito na arte (o story não leva link clicável): o número numa linha só. */
   whatsapp?: boolean;
 }
 const {
@@ -69,8 +69,11 @@ const license = mock.licenseOnEveryPost || listing;
     {listing && <span class="post-art-details">{mock.details}</span>}
     {whatsapp && (
       <span class="post-art-whatsapp">
-        <Icon name="message" size={14} />
-        {mock.whatsapp}
+        <span class="post-art-whatsapp-label">
+          <Icon name="message" size={14} />
+          {mock.whatsapp}
+        </span>
+        <span class="post-art-number">{mock.whatsappNumber}</span>
       </span>
     )}
   </span>

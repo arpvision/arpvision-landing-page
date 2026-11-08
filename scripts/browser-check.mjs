@@ -174,6 +174,45 @@ const stepScreensOverflow = (target) =>
       return out;
     }),
   );
+// Os trechos da frase da dor ficam empilhados, e o título reserva a altura do maior: cada um cabe
+// numa linha, e assim não sobra linha vazia embaixo dos outros. As linhas de um trecho são os topos
+// diferentes dos retângulos do texto dele.
+const painPhraseLines = (target) =>
+  target.locator('[data-rotating-phrase]').evaluate((phrase) => {
+    const lines = (element) => {
+      const range = document.createRange();
+      range.selectNodeContents(element);
+      return new Set([...range.getClientRects()].map((rect) => Math.round(rect.top))).size;
+    };
+    return {
+      longer: [...phrase.children]
+        .filter((part) => lines(part) !== 1)
+        .map((part) => part.textContent),
+      reserved: Math.round(
+        phrase.getBoundingClientRect().height / parseFloat(getComputedStyle(phrase).lineHeight),
+      ),
+    };
+  });
+// O número de WhatsApp escrito no story: do primeiro ao último algarismo, numa linha só e dentro da
+// arte (que corta o que passa dela).
+const storyNumber = (target) =>
+  target.locator('.post-art-story .post-art-whatsapp').evaluate((line) => {
+    const art = line.closest('.post-art').getBoundingClientRect();
+    const nodes = [];
+    const walker = document.createTreeWalker(line, NodeFilter.SHOW_TEXT);
+    for (let node = walker.nextNode(); node; node = walker.nextNode())
+      if (/\d/.test(node.textContent)) nodes.push(node);
+    const [first, last] = [nodes[0], nodes[nodes.length - 1]];
+    const range = document.createRange();
+    range.setStart(first, first.textContent.search(/[(+\d]/));
+    range.setEnd(last, last.textContent.search(/\d\D*$/) + 1);
+    const rects = [...range.getClientRects()].filter((rect) => rect.width > 0);
+    return {
+      number: range.toString(),
+      lines: new Set(rects.map((rect) => Math.round(rect.top))).size,
+      inside: rects.every((rect) => rect.left >= art.left - 0.5 && rect.right <= art.right + 0.5),
+    };
+  });
 const checkExampleScreens = (screens, example, scene) => {
   assert.ok(screens.length > 0, `${scene}: telas de exemplo`);
   for (const screen of screens) {
@@ -584,6 +623,7 @@ try {
   const instagram = {
     pt: {
       example: 'Exemplo',
+      whatsappNumber: '(00) 00000-0000',
       contact:
         'Olá! Vim pelo site e quero saber do Piloto automático para Instagram da ARP Vision.',
       choices: ['21 a 100', '3', 'Este mês'],
@@ -597,6 +637,7 @@ try {
     },
     es: {
       example: 'Ejemplo',
+      whatsappNumber: '600 000 000',
       contact:
         '¡Hola! Vengo de la web y quiero saber más del Piloto automático para Instagram de ARP Vision.',
       choices: ['21 a 100', '3', 'Este mes'],
@@ -630,13 +671,19 @@ try {
       { role: 'list', screens: [1, 1, 1] },
       `${route}: uma tela em cada passo`,
     );
-    // Nos cartões mais estreitos (de 1024 a 1199px, os três lado a lado) e no desktop largo.
+    // Nos cartões mais estreitos (de 1024 a 1199px, os três lado a lado) e no desktop largo, onde
+    // o story é mais estreito que os posts.
     for (const width of [1024, 1100, 1440]) {
       await page.setViewportSize({ width, height: 1000 });
       assert.deepEqual(
         await stepScreensOverflow(page),
         [],
         `${route}, ${width}px: telas dos passos`,
+      );
+      assert.deepEqual(
+        await storyNumber(page),
+        { number: expected.whatsappNumber, lines: 1, inside: true },
+        `${route}, ${width}px: o número de WhatsApp do story numa linha só`,
       );
     }
     await page.screenshot({ path: `.artifacts/produto-instagram-${locale}-desktop.png` });
@@ -805,12 +852,12 @@ try {
       reducedMotion === 'reduce'
         ? Array(10).fill('vendeu uma casa.')
         : [
-            'captou dois apartamentos.',
-            'alugou uma sala comercial.',
+            'captou dois imóveis.',
+            'alugou uma sala.',
             'assinou no cartório.',
             'vendeu uma casa.',
-            'captou dois apartamentos.',
-            'alugou uma sala comercial.',
+            'captou dois imóveis.',
+            'alugou uma sala.',
             'assinou no cartório.',
             'vendeu uma casa.',
             'vendeu uma casa.',
@@ -821,7 +868,7 @@ try {
     await context.close();
   }
   results.push(
-    'Piloto automático para Instagram (pt e es): 1 h1; 13 telas de exemplo (uma em cada passo) com a etiqueta visível, aria-hidden, inert e a descrição "Exemplo:"; a lista dos passos com role="list" e nada para fora das telas dos passos a 1024, 1100 e 1440px; nada do tour na cotação e na faixa; dúvidas sem título de grupo; o produto nos 5 botões de WhatsApp; a mensagem e os eventos da cotação; o menu marca o produto; Cotação e Dúvidas na página; a frase da dor troca 2 voltas e para no primeiro trecho, e não troca com movimento reduzido OK',
+    'Piloto automático para Instagram (pt e es): 1 h1; 13 telas de exemplo (uma em cada passo) com a etiqueta visível, aria-hidden, inert e a descrição "Exemplo:"; a lista dos passos com role="list" e nada para fora das telas dos passos a 1024, 1100 e 1440px; o número de WhatsApp do story numa linha só nessas larguras; nada do tour na cotação e na faixa; dúvidas sem título de grupo; o produto nos 5 botões de WhatsApp; a mensagem e os eventos da cotação; o menu marca o produto; Cotação e Dúvidas na página; a frase da dor troca 2 voltas e para no primeiro trecho, e não troca com movimento reduzido OK',
   );
 
   for (const route of pricesShown ? ['/', '/planos'] : ['/']) {
@@ -1116,10 +1163,28 @@ try {
   const phoneScreens = await exampleScreens(phone);
   assert.equal(phoneScreens.length, 13, '360px, Piloto: treze telas de exemplo');
   checkExampleScreens(phoneScreens, 'Exemplo', '360px, Piloto');
-  for (const width of [390, 360]) {
-    await phone.setViewportSize({ width, height: 800 });
-    assert.deepEqual(await stepScreensOverflow(phone), [], `${width}px, Piloto: telas dos passos`);
+  // A 390 e a 360 px, nos dois idiomas: nada sai das telas dos passos, cada trecho da frase da dor
+  // cabe numa linha (sem linha vazia reservada embaixo dele) e o número do story não quebra.
+  for (const [locale, expected] of Object.entries(instagram)) {
+    await phone.goto(base + localeRoutes[locale].pages.productInstagram);
+    await phone.evaluate(() => document.fonts.ready);
+    for (const width of [390, 360]) {
+      await phone.setViewportSize({ width, height: 800 });
+      const scene = `${width}px, Piloto em ${locale}`;
+      assert.deepEqual(await stepScreensOverflow(phone), [], `${scene}: telas dos passos`);
+      assert.deepEqual(
+        await painPhraseLines(phone),
+        { longer: [], reserved: 1 },
+        `${scene}: cada trecho da frase da dor numa linha`,
+      );
+      assert.deepEqual(
+        await storyNumber(phone),
+        { number: expected.whatsappNumber, lines: 1, inside: true },
+        `${scene}: o número de WhatsApp do story numa linha só`,
+      );
+    }
   }
+  await phone.goto(base + localeRoutes.pt.pages.productInstagram);
   assert.deepEqual(
     await phone
       .locator('.calendar-week')
@@ -1220,7 +1285,7 @@ try {
     'sem círculo de hover no botão do menu depois do toque',
   );
   results.push(
-    '360px: as 13 telas do Piloto marcadas, nada para fora das telas dos passos (390 e 360px) e o calendário com uma semana só; menu aberto numa cápsula opaca com contraste AA (topo da home e faixa azul de /tutoriais e do Piloto, com o produto marcado, nos dois temas); fechado, volta ao vidro da abertura, sem o círculo de hover preso no botão OK',
+    '360px: as 13 telas do Piloto marcadas e o calendário com uma semana só; a 390 e 360px, em pt e es, nada para fora das telas dos passos, cada trecho da frase da dor numa linha e o número do story numa linha só; menu aberto numa cápsula opaca com contraste AA (topo da home e faixa azul de /tutoriais e do Piloto, com o produto marcado, nos dois temas); fechado, volta ao vidro da abertura, sem o círculo de hover preso no botão OK',
   );
   // Toque fora do menu num ponto sem link (o título da hero), para não navegar.
   await phone.locator('.menu-toggle').click();

@@ -99,11 +99,12 @@ export const pt = {
       pain: {
         eyebrow: 'PARECE FAMILIAR?',
         before: 'Este mês você',
-        // O fim do título troca sozinho entre estes trechos e para no primeiro.
+        // O fim do título troca sozinho entre estes trechos e para no primeiro. Cada um cabe numa
+        // linha a 360 px: o título reserva a altura do maior.
         phrases: [
           'vendeu uma casa.',
-          'captou dois apartamentos.',
-          'alugou uma sala comercial.',
+          'captou dois imóveis.',
+          'alugou uma sala.',
           'assinou no cartório.',
         ],
         after: 'E nada disso chegou ao Instagram.',
@@ -296,7 +297,9 @@ export const pt = {
         license: 'CRECI 00000-J',
         licenseOnEveryPost: true,
         details: '3 quartos · 240 m²',
-        whatsapp: 'WhatsApp (00) 00000-0000',
+        // O WhatsApp escrito no story: o rótulo numa linha e o número inteiro na de baixo.
+        whatsapp: 'WhatsApp',
+        whatsappNumber: '(00) 00000-0000',
       },
     },
   },

@@ -85,12 +85,13 @@ export const es: Dictionary = {
       },
       pain: {
         eyebrow: '¿TE SUENA?',
-        before: 'Este mes',
+        // O "has" fica no começo, que não troca: assim cada trecho cabe numa linha a 360 px.
+        before: 'Este mes has',
         phrases: [
-          'has vendido una casa.',
-          'has captado dos pisos.',
-          'has alquilado un local.',
-          'has firmado en la notaría.',
+          'vendido una casa.',
+          'captado dos pisos.',
+          'alquilado un local.',
+          'firmado en la notaría.',
         ],
         after: 'Y nada de eso ha llegado a Instagram.',
         text: 'Mantener el perfil al día entre una visita y otra es difícil.',
@@ -279,7 +280,8 @@ export const es: Dictionary = {
         license: 'Calificación energética: E',
         licenseOnEveryPost: false,
         details: '3 dormitorios · 240 m²',
-        whatsapp: 'WhatsApp 600 000 000',
+        whatsapp: 'WhatsApp',
+        whatsappNumber: '600 000 000',
       },
     },
   },
