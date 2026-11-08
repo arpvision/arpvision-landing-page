@@ -155,6 +155,7 @@ try {
   // Menu do desktop acompanha a seção visível.
   for (const [id, label] of [
     ['como-funciona', 'Como funciona'],
+    ['presencial', 'Presencial'],
     pricesShown ? ['planos', 'Planos'] : ['cotacao', 'Cotação'],
     ['duvidas', 'Dúvidas'],
   ]) {
@@ -170,6 +171,53 @@ try {
     );
   }
   results.push('Menu do desktop destaca a seção visível OK');
+
+  // Cabeçalho do desktop em português (com o Presencial e, de 1280px para cima, o seletor
+  // PT | ES) em uma linha de 1024 a 1440px, também com "Tour real", que só entra com tour de
+  // demonstração (aqui simulado, com o data-long-nav que o Header.astro põe).
+  for (const tour of [false, true]) {
+    await page.goto(base + '/termos-de-uso');
+    // Medido com a fonte de reserva, o cabeçalho tem outra largura e a guarda falha por acaso.
+    await page.evaluate(() => document.fonts.ready);
+    if (tour)
+      await page.evaluate(() => {
+        const header = document.querySelector('.site-header');
+        const link = Object.assign(document.createElement('a'), {
+          href: '/#tour-real',
+          textContent: 'Tour real',
+        });
+        link.dataset.spy = 'tour-real';
+        header.setAttribute('data-long-nav', '');
+        header.querySelector('.desktop-nav a').after(link);
+      });
+    for (const width of [1024, 1100, 1200, 1280, 1440]) {
+      await page.setViewportSize({ width, height: 1000 });
+      await page.waitForFunction((size) => innerWidth === size, width);
+      // O innerWidth muda antes de todas as media queries valerem; dois quadros depois, valem.
+      await page.evaluate(
+        () => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))),
+      );
+      const wrapped = await page.evaluate(() => {
+        const found = [];
+        const walker = document.createTreeWalker(
+          document.querySelector('.header-inner'),
+          NodeFilter.SHOW_TEXT,
+        );
+        for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+          const element = node.parentElement;
+          if (!node.textContent.trim() || !element.checkVisibility() || element.closest('.sr-only'))
+            continue;
+          const range = document.createRange();
+          range.selectNodeContents(node);
+          if (range.getClientRects().length > 1) found.push(node.textContent.trim());
+        }
+        return found;
+      });
+      assert.deepEqual(wrapped, [], `${width}px${tour ? ' com Tour real' : ''}: cabeçalho quebrou`);
+    }
+  }
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  results.push('Cabeçalho do desktop em uma linha de 1024 a 1440px, também com "Tour real" OK');
 
   for (const route of pricesShown ? ['/', '/planos'] : ['/']) {
     await page.goto(base + route);
@@ -617,7 +665,7 @@ try {
   );
 
   // Seletor de idioma: leva à mesma página nos outros idiomas e nada troca sozinho. No rodapé e
-  // no menu do celular, PT | ES | EN; no cabeçalho do desktop (a partir de 1100px, fora do
+  // no menu do celular, PT | ES | EN; no cabeçalho do desktop (a partir de 1280px, fora do
   // espanhol), o compacto: o globo e o código do idioma atual abrem a lista.
   const selector = await browser.newContext({
     viewport: { width: 1440, height: 1000 },
@@ -701,10 +749,11 @@ try {
   assert.equal(await choose.locator('html').getAttribute('lang'), 'en');
   assert.equal(await visibleCode(), 'EN');
   await choose.screenshot({ path: '.artifacts/en-terms-desktop.png' });
-  // Abaixo de 1100px o compacto sai do cabeçalho (fica no rodapé); em 1100px ele cabe.
+  // Abaixo de 1280px o compacto sai do cabeçalho (fica no rodapé); em 1280px ele cabe, também
+  // no português com "Presencial" no menu.
   for (const [width, visible] of [
-    [1099, false],
-    [1100, true],
+    [1279, false],
+    [1280, true],
   ]) {
     await choose.setViewportSize({ width, height: 900 });
     for (const route of ['/termos-de-uso', '/en/terms-of-use', '/es/terminos-de-uso']) {
@@ -724,7 +773,7 @@ try {
   assert.match(await choose.locator('main [lang="en"]').innerText(), /Page not found/);
   await selector.close();
   results.push(
-    'Seletor de idioma: PT | ES | EN no rodapé leva à mesma página e grava a escolha; compacto no cabeçalho (globo + código) abre pelo teclado, Escape devolve o foco, foco ou clique fora fecham, cada opção no próprio idioma; fora do cabeçalho abaixo de 1100px e no espanhol; 404 nos três idiomas OK',
+    'Seletor de idioma: PT | ES | EN no rodapé leva à mesma página e grava a escolha; compacto no cabeçalho (globo + código) abre pelo teclado, Escape devolve o foco, foco ou clique fora fecham, cada opção no próprio idioma; fora do cabeçalho abaixo de 1280px e no espanhol; 404 nos três idiomas OK',
   );
 
   // Contraste nos dois temas, nas páginas dos outros idiomas, na 404 e com a lista do seletor

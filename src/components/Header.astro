@@ -31,9 +31,15 @@ const plans = site.pricing.showPrices
       label: t.header.quote,
       current: undefined,
     };
+// Com tour de demonstração, "Tour real" entra no menu e ele só cabe no cabeçalho compacto
+// (data-long-nav, em global.css).
 ---
 
-<header class="site-header" data-home={isHome ? 'true' : undefined}>
+<header
+  class="site-header"
+  data-home={isHome ? 'true' : undefined}
+  data-long-nav={available.tour ? '' : undefined}
+>
   <GlassSurface class="header-capsule" liquid clear>
     <div class="header-inner">
       <Brand />
@@ -44,6 +50,11 @@ const plans = site.pricing.showPrices
         {available.tour && (
           <a href={anchor('realTour')} data-spy={anchorId(locale, 'realTour')}>
             {t.header.realTour}
+          </a>
+        )}
+        {t.inPerson && (
+          <a href={anchor('inPerson')} data-spy={anchorId(locale, 'inPerson')}>
+            {t.inPerson.nav}
           </a>
         )}
         <a href={plans.href} data-spy={plans.spy} aria-current={plans.current}>
@@ -96,6 +107,7 @@ const plans = site.pricing.showPrices
     <nav id="mobile-nav" class="mobile-nav" aria-label={t.header.mobileNav} hidden>
       <a href={anchor('howItWorks')}>{t.header.howItWorks}</a>
       {available.tour && <a href={anchor('realTour')}>{t.header.realTour}</a>}
+      {t.inPerson && <a href={anchor('inPerson')}>{t.inPerson.nav}</a>}
       <a href={plans.href} aria-current={plans.current}>
         {plans.label}
       </a>

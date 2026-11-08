@@ -4,8 +4,9 @@
  * live (tours no ar), property, company, credits, free trial, sign in, phone. Sem "AI".
  *
  * Tradução do português, com as mesmas exceções do espanhol: aqui não entra promessa de
- * funcionalidade que o app não tem, e a página de tutoriais avisa que os vídeos são narrados
- * em português. Os pontos em que o texto diverge do português estão marcados com DIFERENTE.
+ * funcionalidade que o app não tem, nem serviço local (o ARP Vision Presencial, que só atende
+ * Porto Alegre e região), e a página de tutoriais avisa que os vídeos são narrados em
+ * português. Os pontos em que o texto diverge do português estão marcados com DIFERENTE.
  */
 import type { Dictionary } from './pt';
 
@@ -242,6 +243,9 @@ export const en: Dictionary = {
       },
     },
   },
+  // DIFERENTE: o ARP Vision Presencial só atende Porto Alegre e região; no inglês não há seção
+  // nem menu.
+  inPerson: null,
   quote: {
     eyebrow: 'CUSTOM PRICING',
     title: 'Every business has its own size. So does your proposal.',
@@ -251,6 +255,8 @@ export const en: Dictionary = {
         title: 'A proposal for your volume.',
         text: 'You pay per finished room, not per photo.',
       },
+      // DIFERENTE: o português oferece também o celular da equipe da ARP Vision ("ou com a
+      // nossa"), do Presencial, que só atende Porto Alegre e região.
       phone: {
         title: 'No 360° camera, no photographer.',
         text: 'The phone you already have does the tour.',

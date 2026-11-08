@@ -40,6 +40,10 @@
   color: var(--text-strong);
   font-weight: 600;
 }
+/* "pretty" evita uma palavra sozinha na última linha do benefício ("nossa.", "decidir."). */
+.quote-benefits li > span:last-child {
+  text-wrap: pretty;
+}
 .quote-card {
   background: var(--surface);
   border: 1px solid var(--border);

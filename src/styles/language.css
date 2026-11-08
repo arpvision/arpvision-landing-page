@@ -101,11 +101,11 @@
   color: var(--brand-blue-dark);
   font-weight: 700;
 }
-/* No cabeçalho, o seletor aparece a partir de 1100px. Abaixo disso ele não cabe sem apertar os
-   outros itens (em 1024px sobram 66px no português e 52px no inglês; o seletor pede 74px com o
-   espaço entre os itens), e fica no rodapé e na faixa de sugestão. Em 1100px sobram ~50px no
-   inglês, já descontada a barra de rolagem do Windows. */
-@media (max-width: 1099px) {
+/* No cabeçalho, o seletor aparece a partir de 1280px, onde o cabeçalho em português (com
+   "Presencial" no menu) já tem os espaços apertados para ele em global.css. Abaixo disso ele não
+   cabe sem quebrar a linha (o seletor pede uns 74px com o espaço entre os itens), e fica no
+   rodapé e na faixa de sugestão. */
+@media (max-width: 1279px) {
   .desktop-language {
     display: none;
   }
@@ -114,7 +114,8 @@
    sesión", "Tutoriales"), e o cabeçalho tem 1010px úteis: com o botão longo sobram 31px, menos
    que o seletor compacto. No espanhol, o seletor sai do cabeçalho do desktop (fica no rodapé e
    no menu do celular, e a faixa de sugestão de idioma traz quem prefere outro idioma) e os
-   links ficam um pouco mais juntos. */
+   links ficam um pouco mais juntos. O cabeçalho em português mantém o seletor; só com "Tour
+   real" no menu (data-long-nav, em global.css) ele sai também do português. */
 @media (min-width: 1024px) {
   .site-header .desktop-language:lang(es) {
     display: none;

@@ -50,15 +50,20 @@ const translated = locales.filter((locale) => locale !== 'pt');
 
 test('espanhol e inglês têm as mesmas chaves e funções do português, e nenhum texto vazio a mais', () => {
   const pt = shape(translations('pt')) as Record<string, unknown>;
-  // A conversa do WhatsApp é imagem em português e HTML nos outros idiomas: é a única diferença.
+  // As únicas diferenças: a conversa do WhatsApp, imagem em português e HTML nos outros idiomas,
+  // e o ARP Vision Presencial, que só existe em português (o teste abaixo).
+  const onlyInOne = (path: string) =>
+    path.startsWith('sharing.conversationImage') || path.startsWith('inPerson');
   delete (pt.sharing as Record<string, unknown>).conversationImage;
+  delete pt.inPerson;
   const ptTexts = new Map(texts('pt'));
   const ptList = walk(translations('pt'))
     .map(([path]) => path)
-    .filter((path) => !path.startsWith('sharing.conversationImage'));
+    .filter((path) => !onlyInOne(path));
   for (const locale of translated) {
     const other = shape(translations(locale)) as Record<string, unknown>;
     delete (other.sharing as Record<string, unknown>).conversationImage;
+    delete other.inPerson;
     assert.deepEqual(other, pt, locale);
     for (const [path, value] of texts(locale)) {
       if (ptTexts.get(path) === '') continue;
@@ -68,11 +73,16 @@ test('espanhol e inglês têm as mesmas chaves e funções do português, e nenh
     assert.deepEqual(
       walk(translations(locale))
         .map(([path]) => path)
-        .filter((path) => !path.startsWith('sharing.conversationImage')),
+        .filter((path) => !onlyInOne(path)),
       ptList,
       locale,
     );
   }
+});
+
+test('o ARP Vision Presencial só aparece em português (atende Porto Alegre e região)', () => {
+  assert.equal(translations('pt').inPerson?.nav, 'Presencial');
+  for (const locale of translated) assert.equal(translations(locale).inPerson, null, locale);
 });
 
 test('espanhol e inglês sem letras nem palavras do português', () => {
