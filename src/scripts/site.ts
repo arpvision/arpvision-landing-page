@@ -141,7 +141,7 @@ document.addEventListener('click', (event) => {
     if (target.dataset.contactPending === 'true') {
       event.preventDefault();
       contactDialog?.showModal();
-    } else track('cta_whatsapp');
+    } else track('cta_whatsapp', target.dataset.product ? { produto: target.dataset.product } : {});
   }
 });
 contactDialog

@@ -3,48 +3,91 @@ import Icon from './Icon.astro';
 import ContactLink from './ContactLink.astro';
 import { site } from '../config/site';
 import { appLink } from '../lib/business';
+import type { ProductId } from '../lib/products';
 import { pageLocale } from '../i18n';
 import { anchorId } from '../i18n/routes';
+
+interface QuoteQuestion {
+  id: string;
+  label: string;
+  summary: string;
+  options: string[];
+}
+// Sem props, é a cotação da Home. Cada página de produto traz o texto do produto, os benefícios
+// (ou nenhum, com `[]`), as perguntas e a saudação; `trial` liga a linha do teste grátis, que é
+// do tour. `product` vai no evento de analytics, do cartão e do botão.
+interface Props {
+  id?: string;
+  eyebrow?: string;
+  title?: string;
+  lead?: string;
+  benefits?: { icon: string; title: string; text: string }[];
+  questions?: QuoteQuestion[];
+  greeting?: string;
+  closing?: string;
+  /** Prefixo do `name` dos botões de rádio de cada pergunta. */
+  fieldPrefix?: string;
+  trial?: boolean;
+  product?: ProductId;
+}
 
 // Cotação pelo WhatsApp enquanto os preços não são públicos (site.pricing.showPrices).
 // Três toques montam uma mensagem pronta, no idioma da página; a pessoa vê o texto e só
 // precisa enviar. Sem JS, o botão abre o WhatsApp com a mensagem padrão.
 const { locale, t } = pageLocale(Astro);
 const text = t.quote;
-const questions = (['perfil', 'volume', 'prazo'] as const).map((id) => ({
-  id,
-  ...text.questions[id],
-}));
-const greeting = text.greeting;
-const benefits = [
-  { icon: 'target', ...text.benefits.volume },
-  { icon: 'phone', ...text.benefits.phone },
-  { icon: 'message', ...text.benefits.team },
-];
+const {
+  id = anchorId(locale, 'quote'),
+  eyebrow = text.eyebrow,
+  title = text.title,
+  lead = text.lead,
+  benefits = [
+    { icon: 'target', ...text.benefits.volume },
+    { icon: 'phone', ...text.benefits.phone },
+    { icon: 'message', ...text.benefits.team },
+  ],
+  questions = (['perfil', 'volume', 'prazo'] as const).map((key) => ({
+    id: key,
+    ...text.questions[key],
+  })),
+  greeting = text.greeting,
+  closing = text.closing,
+  fieldPrefix = 'cotacao',
+  trial = true,
+  product,
+} = Astro.props;
 ---
 
-<section class="section quote-section" id={anchorId(locale, 'quote')} aria-labelledby="quote-title">
+<section class="section quote-section" id={id} aria-labelledby="quote-title">
   <div class="container quote-layout">
     <div class="quote-copy">
       <span class="eyebrow">
-        <span class="eyebrow-line"></span> {text.eyebrow}
+        <span class="eyebrow-line"></span> {eyebrow}
       </span>
-      <h2 id="quote-title">{text.title}</h2>
-      <p class="quote-lead">{text.lead}</p>
-      <ul class="quote-benefits">
-        {benefits.map((benefit) => (
-          <li>
-            <span class="icon-tile">
-              <Icon name={benefit.icon} size={20} />
-            </span>
-            <span>
-              <strong>{benefit.title}</strong> {benefit.text}
-            </span>
-          </li>
-        ))}
-      </ul>
+      <h2 id="quote-title">{title}</h2>
+      <p class="quote-lead">{lead}</p>
+      {benefits.length > 0 && (
+        <ul class="quote-benefits">
+          {benefits.map((benefit) => (
+            <li>
+              <span class="icon-tile">
+                <Icon name={benefit.icon} size={20} />
+              </span>
+              <span>
+                <strong>{benefit.title}</strong> {benefit.text}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
-    <div class="quote-card" data-quote data-greeting={greeting} data-closing={text.closing}>
+    <div
+      class="quote-card"
+      data-quote
+      data-greeting={greeting}
+      data-closing={closing}
+      data-product={product}
+    >
       {questions.map((question, index) => (
         <fieldset class="quote-question" data-summary={question.summary}>
           <legend>
@@ -56,7 +99,7 @@ const benefits = [
           <div class="quote-options">
             {question.options.map((option) => (
               <label class="quote-option">
-                <input type="radio" name={`cotacao-${question.id}`} value={option} />
+                <input type="radio" name={`${fieldPrefix}-${question.id}`} value={option} />
                 <span>{option}</span>
               </label>
             ))}
@@ -70,19 +113,25 @@ const benefits = [
         </p>
       </div>
       <div class="quote-actions">
-        <ContactLink class="button button-primary quote-submit" message={greeting}>
+        <ContactLink
+          class="button button-primary quote-submit"
+          message={greeting}
+          product={product}
+        >
           <Icon name="message" size={19} /> {text.submit}
         </ContactLink>
         <p class="quote-note">{text.note}</p>
       </div>
     </div>
   </div>
-  <p class="container quote-trial">
-    {text.trial(site.pricing.freeTrialCredits, site.pricing.freeTrialDays)}{' '}
-    <a href={appLink('cotacao-teste', 'register', locale)} data-cta="cotacao-teste">
-      {text.signup}
-    </a>
-  </p>
+  {trial && (
+    <p class="container quote-trial">
+      {text.trial(site.pricing.freeTrialCredits, site.pricing.freeTrialDays)}{' '}
+      <a href={appLink('cotacao-teste', 'register', locale)} data-cta="cotacao-teste">
+        {text.signup}
+      </a>
+    </p>
+  )}
 </section>
 <script>
   import '../scripts/quote';

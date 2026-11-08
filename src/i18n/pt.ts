@@ -45,6 +45,8 @@ export const pt = {
   },
   // Menu "Produtos" do cabeçalho: os grupos e, de cada produto, o nome e uma linha.
   products: {
+    // O público dos dados estruturados (`Service`) de cada produto.
+    audience: 'Imobiliárias',
     groups: {
       show: 'Mostrar o imóvel',
       promote: 'Divulgar e atender',
@@ -73,6 +75,7 @@ export const pt = {
   },
   footer: {
     taglineLines: ['O espaço por inteiro.', 'O celular é só o começo.'],
+    products: 'Produtos',
     discover: 'Conheça',
     howItWorks: 'Como funciona',
     realTour: 'Tour real',

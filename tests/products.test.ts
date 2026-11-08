@@ -13,6 +13,7 @@ import {
   products,
   productSlug,
   productsFor,
+  productText,
   sectionHref,
 } from '../src/lib/products';
 
@@ -57,6 +58,22 @@ test('links dos produtos', () => {
   );
   assert.equal(productHref('pt', by('training'), '/'), '#presencial');
   assert.equal(productHref('pt', by('training'), '/produtos/autochat'), '/#presencial');
+});
+
+test('productText: o nome e a linha do idioma; o Presencial só existe em português', () => {
+  assert.deepEqual(productText('pt', 'autochat'), {
+    name: 'Autochat',
+    line: 'Atende no WhatsApp e passa ao corretor.',
+  });
+  assert.equal(productText('es', 'tour')?.name, 'Tour virtual 360°');
+  assert.equal(productText('pt', 'training')?.name, 'Treinamento da equipe');
+  assert.equal(productText('pt', 'readyTour')?.name, 'Tour Pronto');
+  assert.equal(productText('es', 'training'), undefined);
+  assert.equal(productText('es', 'readyTour'), undefined);
+  // Todo produto de um idioma tem texto nele.
+  for (const locale of locales)
+    for (const product of productsFor(locale, { inPerson: true }))
+      assert.ok(productText(locale, product.id), `${locale}/${product.id}`);
 });
 
 test('o Presencial tem a mesma âncora nos dois idiomas', () => {

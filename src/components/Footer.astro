@@ -5,10 +5,24 @@ import Icon from './Icon.astro';
 import LanguageSwitch from './LanguageSwitch.astro';
 import { site, available } from '../config/site';
 import { appLink } from '../lib/business';
+import { liveProductsFor, productHref, productText, type ProductId } from '../lib/products';
 import { pageLocale } from '../i18n';
-import { anchorId, pagePath, sectionPath } from '../i18n/routes';
+import { anchorId, pagePath, publishedPageIds, sectionPath } from '../i18n/routes';
+// A mensagem e o produto da página: o link de WhatsApp do rodapé e o botão flutuante falam dele.
+interface Props {
+  whatsappMessage?: string;
+  product?: ProductId;
+}
+const { whatsappMessage, product } = Astro.props;
 const { locale, t } = pageLocale(Astro);
 const { freeTrialCredits, freeTrialDays } = site.pricing;
+// A coluna Produtos mostra o que está no ar, como o menu, e o "Ver todos" quando /produtos existe.
+const path = Astro.url.pathname;
+const productLinks = liveProductsFor(locale).flatMap((item) => {
+  const text = productText(locale, item.id);
+  return text ? [{ href: productHref(locale, item, path), name: text.name }] : [];
+});
+const allProducts = publishedPageIds.includes('products') ? pagePath(locale, 'products') : null;
 ---
 
 <footer class="site-footer" id={anchorId(locale, 'contact')}>
@@ -20,6 +34,13 @@ const { freeTrialCredits, freeTrialDays } = site.pricing;
         <br />
         {t.footer.taglineLines[1]}
       </p>
+    </div>
+    <div class="footer-products">
+      <h2>{t.footer.products}</h2>
+      {productLinks.map((link) => (
+        <a href={link.href}>{link.name}</a>
+      ))}
+      {allProducts && <a href={allProducts}>{t.header.viewAllProducts}</a>}
     </div>
     <div>
       <h2>{t.footer.discover}</h2>
@@ -45,7 +66,9 @@ const { freeTrialCredits, freeTrialDays } = site.pricing;
         <h2>{t.footer.talk}</h2>
         {available.email && <a href={`mailto:${site.contact.email}`}>{site.contact.email}</a>}
         {available.whatsapp && (
-          <ContactLink>{t.footer.whatsapp(site.contact.whatsapp)}</ContactLink>
+          <ContactLink message={whatsappMessage} product={product}>
+            {t.footer.whatsapp(site.contact.whatsapp)}
+          </ContactLink>
         )}
         <span class="footer-note">{t.footer.note}</span>
       </div>
@@ -65,7 +88,12 @@ const { freeTrialCredits, freeTrialDays } = site.pricing;
 </footer>
 {available.whatsapp && (
   <aside aria-label={t.footer.quickContact}>
-    <ContactLink class="floating-whatsapp" label={t.footer.floatingWhatsapp}>
+    <ContactLink
+      class="floating-whatsapp"
+      label={t.footer.floatingWhatsapp}
+      message={whatsappMessage}
+      product={product}
+    >
       <Icon name="message" size={25} />
     </ContactLink>
   </aside>

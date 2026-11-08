@@ -3,7 +3,7 @@
  * saem desta lista, para nenhum esquecer um produto. O tour e o ARP Vision Presencial não têm
  * página própria e levam à home.
  */
-import { locales, type Locale } from '../i18n';
+import { locales, translations, type Locale } from '../i18n';
 import { available } from '../config/site';
 import {
   anchorId,
@@ -121,6 +121,18 @@ export function isLive(product: Product): boolean {
 /** Os produtos de `productsFor` que já estão no ar: é essa a lista que o visitante vê. */
 export function liveProductsFor(locale: Locale, options?: { inPerson?: boolean }): Product[] {
   return productsFor(locale, options).filter(isLive);
+}
+
+/**
+ * O nome e a linha do produto no idioma. O ARP Vision Presencial só tem texto em português, então
+ * no espanhol o retorno é `undefined` (ele também não entra em `productsFor('es')`).
+ */
+export function productText(
+  locale: Locale,
+  id: ProductId,
+): { name: string; line: string } | undefined {
+  const { items, inPerson } = translations(locale).products;
+  return id === 'training' || id === 'readyTour' ? inPerson?.[id] : items[id];
 }
 
 /**

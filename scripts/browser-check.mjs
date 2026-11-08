@@ -144,7 +144,33 @@ try {
         ),
       0,
     );
-    results.push(`Rota ${route}: HTML, imagens e carregamento inicial sem iframe extra OK`);
+    // Rodapé: a coluna Produtos tem um link por produto no ar (os mesmos do menu) e o "Ver todos"
+    // só quando /produtos está publicada. Cada destino responde.
+    const locale = esRoutes.includes(route) ? 'es' : 'pt';
+    const footerProducts = page.locator('footer .footer-products');
+    assert.equal(await footerProducts.count(), 1, `${route}: coluna Produtos no rodapé`);
+    assert.equal(
+      await footerProducts.locator('h2').innerText(),
+      locale === 'es' ? 'Productos' : 'Produtos',
+      `${route}: título da coluna Produtos do rodapé`,
+    );
+    const footerLinks = await footerProducts
+      .locator('a')
+      .evaluateAll((links) => links.map((link) => link.getAttribute('href')));
+    assert.deepEqual(
+      [...footerLinks].sort(),
+      [
+        ...productLinks(locale),
+        ...(allProductsLinks ? [localeRoutes[locale].pages.products] : []),
+      ].sort(),
+      `${route}: um link por produto no ar no rodapé`,
+    );
+    if (route === '/' || route === '/es')
+      for (const href of footerLinks)
+        assert.equal((await fetch(base + href)).status, 200, `${route}: ${href} existe`);
+    results.push(
+      `Rota ${route}: HTML, imagens, carregamento inicial sem iframe extra e produtos no rodapé OK`,
+    );
   }
   // Tutoriais, nos dois idiomas: o cartão leva ao YouTube; com JavaScript, abre o player no
   // diálogo. Cabeçalho, menu do celular e rodapé levam à página do idioma (o seletor PT | ES,
@@ -500,6 +526,49 @@ try {
     ].join('\n');
     assert.equal(await message(), filled, 'respostas entram na mensagem');
     assert.equal(await quote.locator('[data-quote-preview]').textContent(), filled, 'prévia igual');
+    // Analytics: o site não carrega o Plausible, então o teste ocupa `window.plausible` e anota as
+    // chamadas. O clique não segue o link (o WhatsApp abriria numa aba nova). O evento da cotação
+    // leva as respostas e o produto (a Home é do tour), e o do botão de WhatsApp leva o produto
+    // só quando o elemento tem data-product, como o das páginas de produto.
+    const clickEvents = () =>
+      submit.evaluate((link) => {
+        const events = [];
+        window.plausible = (name, options) => events.push([name, options?.props]);
+        const stay = (event) => event.preventDefault();
+        document.addEventListener('click', stay, true);
+        link.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+        document.removeEventListener('click', stay, true);
+        return events;
+      });
+    const answers = {
+      'Como trabalho': 'Tenho uma equipe',
+      'Espaços por mês': '6 a 15',
+      'Para quando': 'Este mês',
+    };
+    assert.deepEqual(
+      await clickEvents(),
+      [
+        ['cotacao_whatsapp', { ...answers, produto: 'tour' }],
+        ['cta_whatsapp', {}],
+      ],
+      'eventos da cotação da Home: produto tour, e o botão sem produto',
+    );
+    await quote.evaluate((section) => {
+      section.querySelector('[data-quote]').dataset.product = 'autochat';
+      section.querySelector('.quote-submit').dataset.product = 'autochat';
+    });
+    assert.deepEqual(
+      await clickEvents(),
+      [
+        ['cotacao_whatsapp', { ...answers, produto: 'autochat' }],
+        ['cta_whatsapp', { produto: 'autochat' }],
+      ],
+      'eventos da cotação com data-product: o produto vai nos dois',
+    );
+    await quote.evaluate((section) => {
+      delete section.querySelector('[data-quote]').dataset.product;
+      delete section.querySelector('.quote-submit').dataset.product;
+    });
     // Teclado: as setas trocam a escolha dentro da mesma pergunta.
     await quote.locator('input[value="Este mês"]').press('ArrowRight');
     assert.match(await message(), /• Para quando: Ainda pesquisando/);
@@ -516,7 +585,7 @@ try {
     await page.goto(base + '/planos');
     await page.waitForURL(/\/#cotacao$/);
     results.push(
-      'Preços ocultos: cotação pelo WhatsApp com mensagem pronta, sem valores nem ofertas; /planos leva à cotação OK',
+      'Preços ocultos: cotação pelo WhatsApp com mensagem pronta e eventos com o produto, sem valores nem ofertas; /planos leva à cotação OK',
     );
   } else {
     await page.goto(base + '/planos');

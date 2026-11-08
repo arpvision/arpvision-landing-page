@@ -9,7 +9,7 @@ import {
   productGroups,
   productHref,
   productOfPage,
-  type ProductId,
+  productText,
 } from '../lib/products';
 interface Props {
   /** A lista aparece duas vezes na página: a variante separa os ids dos títulos dos grupos. */
@@ -20,14 +20,12 @@ const { locale, t } = pageLocale(Astro);
 const path = Astro.url.pathname;
 const page = pageAt(locale, path);
 const current = productOfPage(page);
-// O nome e a linha do Presencial só existem em português (no espanhol, `inPerson` é null).
-const textOf = (id: ProductId) =>
-  id === 'training' || id === 'readyTour' ? t.products.inPerson?.[id] : t.products.items[id];
 const groups = productGroups
   .map((group) => ({
     group,
     items: liveProductsFor(locale).flatMap((product) => {
-      const text = textOf(product.id);
+      // O Presencial só tem texto em português: no espanhol, `productText` não devolve nada.
+      const text = productText(locale, product.id);
       return product.group === group && text ? [{ product, text }] : [];
     }),
   }))

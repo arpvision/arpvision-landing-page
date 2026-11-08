@@ -41,6 +41,7 @@ export const es: Dictionary = {
     close: 'Cerrar',
   },
   products: {
+    audience: 'Inmobiliarias',
     groups: {
       show: 'Mostrar el inmueble',
       promote: 'Difundir y atender',
@@ -63,6 +64,7 @@ export const es: Dictionary = {
   },
   footer: {
     taglineLines: ['Todo el espacio, por dentro.', 'El móvil es solo el principio.'],
+    products: 'Productos',
     discover: 'Descubre',
     howItWorks: 'Cómo funciona',
     realTour: 'Tour real',

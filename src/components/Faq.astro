@@ -3,20 +3,36 @@ import Icon from './Icon.astro';
 import { pageLocale } from '../i18n';
 import { anchorId } from '../i18n/routes';
 import { faqGroups } from '../lib/content';
-// O mesmo FAQ na Home e em /planos: uma lista só, separada por assunto.
+// O mesmo FAQ na Home e em /planos: uma lista só, separada por assunto. A página de um produto
+// passa os grupos e o cabeçalho dela.
+interface Props {
+  groups?: { title: string; items: { question: string; answer: string }[] }[];
+  eyebrow?: string;
+  title1?: string;
+  title2?: string;
+  lead1?: string;
+  lead2?: string;
+}
 const { locale, t } = pageLocale(Astro);
-const groups = faqGroups(locale);
+const {
+  groups = faqGroups(locale),
+  eyebrow = t.faq.eyebrow,
+  title1 = t.faq.title1,
+  title2 = t.faq.title2,
+  lead1 = t.faq.lead1,
+  lead2 = t.faq.lead2,
+} = Astro.props;
 ---
 
 <section class="section faq-section" id={anchorId(locale, 'faq')} aria-labelledby="faq-title">
   <div class="container faq-layout">
     <div>
-      <span class="eyebrow">{t.faq.eyebrow}</span>
-      <h2 id="faq-title">{t.faq.title1}<br />{t.faq.title2}</h2>
+      <span class="eyebrow">{eyebrow}</span>
+      <h2 id="faq-title">{title1}<br />{title2}</h2>
       <p>
-        {t.faq.lead1}
+        {lead1}
         <br />
-        {t.faq.lead2}
+        {lead2}
       </p>
     </div>
     <div class="faq-groups">

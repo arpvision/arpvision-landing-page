@@ -27,11 +27,12 @@ document.querySelectorAll<HTMLElement>('[data-quote]').forEach((card) => {
     link.href = `${link.href.split('?')[0]}?text=${encodeURIComponent(message)}`;
   };
   card.addEventListener('change', update);
+  // O produto vem do cartão (data-product); a cotação da Home, sem ele, é a do tour.
   link.addEventListener('click', () =>
-    track(
-      'cotacao_whatsapp',
-      Object.fromEntries(answers().map(([label, value]) => [label, value])),
-    ),
+    track('cotacao_whatsapp', {
+      ...Object.fromEntries(answers().map(([label, value]) => [label, value])),
+      produto: card.dataset.product ?? 'tour',
+    }),
   );
   // O navegador pode restaurar as escolhas ao voltar para a página.
   update();
