@@ -530,6 +530,84 @@ try {
     );
     assert.deepEqual(smallTargets, [], `${route}: alvos de toque abaixo do mínimo`);
   }
+  // Fora da home, o menu aberto também pode ficar sobre a faixa azul: com ela atrás da maior
+  // parte do cabeçalho, a superfície é escura e o menu inteiro fica branco, inclusive o item da
+  // página, marcado só pelo peso. A página não rola pelo toque com o menu aberto, mas rola pelo
+  // script: a faixa vai para o topo do cabeçalho (evento de rolagem e dois quadros, como no
+  // scrollHome).
+  await phone.goto(base + localeRoutes.pt.pages.tutorials);
+  await phone.locator('.menu-toggle').click();
+  await phone.evaluate(
+    () =>
+      new Promise((resolve) => {
+        const header = document.querySelector('.site-header');
+        const top =
+          document.querySelector('.final-cta').getBoundingClientRect().top +
+          scrollY -
+          parseFloat(getComputedStyle(header).top);
+        addEventListener(
+          'scroll',
+          () => requestAnimationFrame(() => requestAnimationFrame(resolve)),
+          { once: true },
+        );
+        scrollTo({ top, behavior: 'instant' });
+      }),
+  );
+  assert.equal(
+    await phone.locator('.site-header').getAttribute('data-header-surface'),
+    'dark',
+    'menu aberto em /tutoriais com a faixa azul atrás da maior parte dele',
+  );
+  // O botão Produtos só ganha is-current nas páginas de produto (Tarefa 6); aqui a classe entra
+  // à mão.
+  const mobileInk = await phone.locator('#mobile-nav').evaluate(async (nav) => {
+    // Com movimento reduzido, toda troca de cor vira uma transição de 0,01 ms, que pode levar
+    // alguns quadros para começar e puxar outras nos filhos: cada leitura espera o menu parar.
+    const settle = async () => {
+      for (let round = 0; round < 10; round++) {
+        const running = nav.getAnimations({ subtree: true });
+        if (!running.length) return;
+        await Promise.allSettled(running.map((animation) => animation.finished));
+      }
+    };
+    const ink = (item) => `${getComputedStyle(item).color} ${getComputedStyle(item).fontWeight}`;
+    const page = nav.querySelector('a[aria-current="page"]');
+    const products = nav.querySelector('.mobile-products-toggle');
+    const read = async () => {
+      await settle();
+      return {
+        colors: [
+          ...new Set(
+            [...nav.querySelectorAll('a, button')].map((item) => getComputedStyle(item).color),
+          ),
+        ],
+        page: ink(page),
+        products: ink(products),
+      };
+    };
+    products.classList.add('is-current');
+    const light = await read();
+    document.documentElement.dataset.theme = 'dark';
+    const dark = await read();
+    delete document.documentElement.dataset.theme;
+    products.classList.remove('is-current');
+    await settle();
+    return { light, dark };
+  });
+  await phone.screenshot({ path: '.artifacts/tutoriais-menu-faixa-mobile.png' });
+  const whiteMenu = {
+    colors: ['rgb(255, 255, 255)'],
+    page: 'rgb(255, 255, 255) 600',
+    products: 'rgb(255, 255, 255) 600',
+  };
+  assert.deepEqual(
+    mobileInk,
+    { light: whiteMenu, dark: whiteMenu },
+    'menu do celular branco sobre a faixa azul, com o item atual marcado pelo peso, nos dois temas',
+  );
+  results.push(
+    '360px: em /tutoriais, com o menu aberto sobre a faixa azul, a superfície é dark e o menu fica branco nos dois temas, inclusive o item da página e o botão Produtos marcado (peso 600) OK',
+  );
   await phone.goto(base);
   await phone.screenshot({ path: '.artifacts/home-mobile.png' });
   await phone.locator('.menu-toggle').click();

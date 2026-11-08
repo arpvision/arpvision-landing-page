@@ -420,12 +420,14 @@ p {
 .site-header[data-header-surface='dark'] .brand-logo-dark {
   display: inline-block;
 }
-/* Ali, o azul do link sob o ponteiro ou da seção da vez sumiria: ele continua branco, marcado só
-   pelo traço embaixo. */
+/* Ali, o azul do link sob o ponteiro ou da página e da seção da vez sumiria: ele continua branco,
+   marcado só pelo traço embaixo (no menu do celular, só pelo peso). */
 .site-header[data-header-surface='opening'] .desktop-nav a:hover,
 .site-header[data-header-surface='opening'] .desktop-nav a[aria-current],
+.site-header[data-header-surface='opening'] .mobile-nav a[aria-current],
 .site-header[data-header-surface='dark'] .desktop-nav a:hover,
-.site-header[data-header-surface='dark'] .desktop-nav a[aria-current] {
+.site-header[data-header-surface='dark'] .desktop-nav a[aria-current],
+.site-header[data-header-surface='dark'] .mobile-nav a[aria-current] {
   color: inherit;
 }
 .site-header:not([data-header-enhanced]) .header-capsule {
