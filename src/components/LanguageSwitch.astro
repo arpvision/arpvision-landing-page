@@ -1,32 +1,78 @@
 ---
+import Icon from './Icon.astro';
 import { localeInfo, locales, pageLocale } from '../i18n';
 import { pageAt, pagePath } from '../i18n/routes';
-// Seletor PT | ES: leva à mesma página no outro idioma. Nunca troca sozinho pelo idioma do
-// navegador; quem escolhe é a pessoa.
+// Seletor de idioma: leva à mesma página em cada idioma, cada opção no próprio idioma (o nome
+// dela e o lang dela). Nunca troca sozinho; a escolha fica guardada no navegador
+// (data-language-choice), e a faixa de sugestão de idioma deixa de aparecer.
+// - Em linha (PT | ES | EN): rodapé e menu do celular.
+// - Compacto (`compact`): no cabeçalho do desktop, o globo e o código do idioma atual abrem a
+//   lista; os três códigos lado a lado não cabem no cabeçalho. É um <details>: funciona sem
+//   JavaScript, e o script fecha a lista com Escape, com um clique fora ou quando o foco sai.
 interface Props {
   class?: string;
   /** Só um seletor por página vira região de navegação (o do rodapé); os outros são grupos. */
   landmark?: boolean;
+  compact?: boolean;
 }
-const { class: className, landmark = false } = Astro.props;
+const { class: className, landmark = false, compact = false } = Astro.props;
 const { locale, t } = pageLocale(Astro);
 const page = pageAt(locale, Astro.url.pathname) ?? 'home';
+// `id` é o idioma ("pt"); `code` é o rótulo que aparece ("PT").
+const options = locales.map((id) => ({
+  id,
+  ...localeInfo[id],
+  href: pagePath(id, page),
+  current: id === locale ? ('true' as const) : undefined,
+}));
 const Tag = landmark ? 'nav' : 'div';
 ---
 
-<Tag
-  class:list={['language-switch', className]}
-  role={landmark ? undefined : 'group'}
-  aria-label={t.language.label}
->
-  {locales.map((code) => (
-    <a
-      href={pagePath(code, page)}
-      hreflang={localeInfo[code].lang}
-      lang={localeInfo[code].lang}
-      aria-current={code === locale ? 'true' : undefined}
+{
+  compact ? (
+    <details class:list={['language-menu', className]} data-language-menu>
+      <summary>
+        <Icon name="globe" size={18} />
+        {localeInfo[locale].code}
+        <span class="sr-only">{`, ${t.language.label}: ${localeInfo[locale].name}`}</span>
+      </summary>
+      <ul class="language-menu-list" role="list">
+        {options.map((option) => (
+          <li>
+            <a
+              href={option.href}
+              hreflang={option.lang}
+              lang={option.lang}
+              data-language-choice={option.id}
+              aria-current={option.current}
+            >
+              {option.name}
+              {option.current && <Icon name="check" size={18} />}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </details>
+  ) : (
+    <Tag
+      class:list={['language-switch', className]}
+      role={landmark ? undefined : 'group'}
+      aria-label={t.language.label}
     >
-      {localeInfo[code].code} <span class="sr-only">{localeInfo[code].name}</span>
-    </a>
-  ))}
-</Tag>
+      {options.map((option) => (
+        <a
+          href={option.href}
+          hreflang={option.lang}
+          lang={option.lang}
+          data-language-choice={option.id}
+          aria-current={option.current}
+        >
+          {option.code} <span class="sr-only">{option.name}</span>
+        </a>
+      ))}
+    </Tag>
+  )
+}
+<script>
+  import '../scripts/language-menu';
+</script>

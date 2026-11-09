@@ -51,7 +51,7 @@ for (const loc of locs) {
   );
   assert.ok(title?.includes('ARP Vision'), `${loc}: título com a marca`);
   assert.ok(description && description.length <= 160, `${loc}: description até 160 caracteres`);
-  // A Home de cada idioma: / e /es.
+  // A Home de cada idioma: /, /es e /en.
   if (/^\/(?:[a-z]{2})?$/.test(new URL(loc).pathname))
     assert.ok(description.length >= 140, `${loc}: description da Home com 140+ caracteres`);
   const alternates = Object.fromEntries(

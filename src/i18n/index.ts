@@ -1,29 +1,23 @@
 /**
  * Idiomas do site. O português é a fonte e mora na raiz (/); o espanhol da Espanha mora em
- * /es. Não há redirecionamento pelo idioma do navegador: quem escolhe é a pessoa, pelo
- * seletor PT | ES do cabeçalho e do rodapé.
+ * /es e o inglês em /en. Ninguém é redirecionado pelo idioma do navegador: quem escolhe é a
+ * pessoa, pelo seletor de idioma do cabeçalho, do menu do celular e do rodapé. Quando o
+ * navegador prefere outro idioma do site, uma faixa sugere a mesma página nele
+ * (`suggestion.ts`), sem trocar nada sozinha.
  *
  * Para acrescentar um idioma: o dicionário (`xx.ts`, tipado por `Dictionary`), uma entrada
- * em `locales`, `localeInfo` e `dictionaries`, os caminhos em `routes.ts`, as páginas em
- * `src/pages/xx/` e o idioma em `astro.config.mjs`. O README tem o passo a passo.
+ * em `locales.ts` e em `dictionaries`, os caminhos em `routes.ts`, o texto da faixa em
+ * `suggestion.ts`, as páginas em `src/pages/xx/` e o idioma em `astro.config.mjs`. O README
+ * tem o passo a passo.
  */
 import { pt, type Dictionary } from './pt';
 import { es } from './es';
+import { en } from './en';
+import { defaultLocale, locales, type Locale } from './locales';
 
-export type Locale = 'pt' | 'es';
-export const locales: readonly Locale[] = ['pt', 'es'];
-export const defaultLocale: Locale = 'pt';
+export { defaultLocale, localeInfo, locales, type Locale } from './locales';
 
-/** Como cada idioma aparece no HTML, no Open Graph, nos links do app e no seletor. */
-export const localeInfo: Record<
-  Locale,
-  { lang: string; ogLocale: string; code: string; name: string }
-> = {
-  pt: { lang: 'pt-BR', ogLocale: 'pt_BR', code: 'PT', name: 'Português' },
-  es: { lang: 'es-ES', ogLocale: 'es_ES', code: 'ES', name: 'Español' },
-};
-
-const dictionaries: Record<Locale, Dictionary> = { pt, es };
+const dictionaries: Record<Locale, Dictionary> = { pt, es, en };
 
 /** O idioma da página a partir de `Astro.currentLocale` (o i18n do Astro deduz pelo caminho). */
 export const toLocale = (value: string | undefined): Locale =>

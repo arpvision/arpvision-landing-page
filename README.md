@@ -1,6 +1,6 @@
 # ARP Vision — site de marketing
 
-Landing page em português do Brasil e espanhol da Espanha. Astro gera HTML estático para `/`, `/planos`, `/tutoriais`, `/termos-de-uso` e `/politica-de-privacidade`, as mesmas páginas em espanhol em `/es`, `/es/planes`, `/es/tutoriales`, `/es/terminos-de-uso` e `/es/politica-de-privacidad`, e uma página 404 nos dois idiomas. Sem framework JavaScript no cliente: interações pequenas em TypeScript e CSS com os tokens da marca.
+Landing page em português do Brasil, espanhol da Espanha e inglês. Astro gera HTML estático para `/`, `/planos`, `/tutoriais`, `/termos-de-uso` e `/politica-de-privacidade`, as mesmas páginas em espanhol em `/es`, `/es/planes`, `/es/tutoriales`, `/es/terminos-de-uso` e `/es/politica-de-privacidad`, em inglês em `/en`, `/en/plans`, `/en/tutorials`, `/en/terms-of-use` e `/en/privacy-policy`, e uma página 404 nos três idiomas. Sem framework JavaScript no cliente: interações pequenas em TypeScript e CSS com os tokens da marca.
 
 ## Executar
 
@@ -18,7 +18,7 @@ npm run build
 npm run preview
 ```
 
-Hospede o conteúdo de `dist/` em um servidor estático que resolva `/planos` para `/planos/index.html` (e `/es` para `/es/index.html`) e sirva `404.html` para os endereços que não existem. Não configure fallback global para a Home: cada rota tem seu próprio HTML, título, descrição, canonical e dados estruturados.
+Hospede o conteúdo de `dist/` em um servidor estático que resolva `/planos` para `/planos/index.html` (e `/es` e `/en` para o `index.html` de cada pasta) e sirva `404.html` para os endereços que não existem. Não configure fallback global para a Home: cada rota tem seu próprio HTML, título, descrição, canonical e dados estruturados.
 
 ## Configuração
 
@@ -31,7 +31,7 @@ Os **dados** ficam em **`src/config/site.ts`**: links, contatos, mídias, tours,
 - Os botões de conta usam `arpvision.app` com UTMs; não existe checkout local. Este repositório não concede créditos, bloqueia publicações, gerencia assinaturas nem envia e-mails.
 - `contact.whatsapp` alimenta os links de WhatsApp (o número é usado só com os dígitos). Vazio, os botões abrem um aviso de contato em preparação.
 - O FAQ é um só (`faqGroups` em `src/lib/content.ts`), exibido na Home e em `/planos`. O mesmo arquivo monta a tabela de recursos (`featureGroups`) e as condições comerciais (`policies`): a estrutura é uma só, e o texto vem do dicionário do idioma.
-- Os vídeos de `/tutoriais` e `/es/tutoriales` são os mesmos, narrados em português (a página em espanhol avisa na abertura), e moram no YouTube (Shorts não listados). Ficam em `tutorials`, na ordem do app: o id do YouTube, a duração em segundos, a data de publicação e a seção. Para publicar um: acrescente a entrada (o id dela entra em `TutorialId`); escreva o título e a descrição em `tutorials.videos.<id>` nos dois dicionários; ponha um quadro do vídeo, em pé, em `public/images/tutoriais/<id>-source.jpg`; e rode `node scripts/prepare-images.mjs <id>-360 <id>-720` para gerar as capas WebP. O app tem a mesma lista em `inner-view-client/src/app/tutoriais`. O player só carrega no clique, no diálogo, e o cartão sem JavaScript abre o YouTube.
+- Os vídeos de `/tutoriais`, `/es/tutoriales` e `/en/tutorials` são os mesmos, narrados em português (as páginas em espanhol e em inglês avisam na abertura), e moram no YouTube (Shorts não listados). Ficam em `tutorials`, na ordem do app: o id do YouTube, a duração em segundos, a data de publicação e a seção. Para publicar um: acrescente a entrada (o id dela entra em `TutorialId`); escreva o título e a descrição em `tutorials.videos.<id>` nos três dicionários; ponha um quadro do vídeo, em pé, em `public/images/tutoriais/<id>-source.jpg`; e rode `node scripts/prepare-images.mjs <id>-360 <id>-720` para gerar as capas WebP. O app tem a mesma lista em `inner-view-client/src/app/tutoriais`. O player só carrega no clique, no diálogo, e o cartão sem JavaScript abre o YouTube.
 - A ativação de analytics exige `analytics.scriptUrl` e `analytics.domain`, de uma instalação Plausible sem cookies. Sem esses campos, nenhum script de analytics é carregado. Eventos não incluem dados pessoais.
 
 ## Mídia real e estados pendentes
@@ -63,25 +63,31 @@ QR codes de todas as demos são gerados no build e acompanham a seleção das ab
 
 ## Idiomas
 
-O português é a fonte e mora na raiz; o espanhol da Espanha (es-ES) mora em `/es`, com endereços em espanhol. O i18n nativo do Astro (`i18n` em `astro.config.mjs`) dá o idioma de cada página (`Astro.currentLocale`). Ninguém é redirecionado pelo idioma do navegador: o seletor PT | ES do rodapé, do menu do celular e do cabeçalho (no desktop a partir de 1280px, só em português e sem tour de demonstração) leva à mesma página no outro idioma.
+O português é a fonte e mora na raiz; o espanhol da Espanha (es-ES) mora em `/es` e o inglês em `/en`, cada um com endereços no próprio idioma. O i18n nativo do Astro (`i18n` em `astro.config.mjs`) dá o idioma de cada página (`Astro.currentLocale`).
+
+Ninguém é redirecionado pelo idioma do navegador: um redirecionamento automático levaria também o robô do Google, que lê como um navegador em inglês, e tiraria o português do índice. No lugar dele:
+
+- **Seletor de idioma** (`LanguageSwitch.astro`): PT | ES | EN no rodapé e no menu do celular; no cabeçalho do desktop, a partir de 1280px, um seletor compacto (globo e código do idioma, que abre a lista; `src/scripts/language-menu.ts`). No espanhol ele fica fora do cabeçalho, porque os rótulos longos não deixam espaço; no português, também quando o menu tem "Tour real" (`data-long-nav`). Leva à mesma página no outro idioma.
+- **Faixa de sugestão** (`LanguageSuggestion.astro`, `src/scripts/language-suggestion.ts`, texto em `src/i18n/suggestion.ts`): quando o primeiro idioma do navegador que o site tem (pt, es ou en; inglês se nenhum) difere do idioma da página, uma faixa discreta no pé da tela, escrita no idioma oferecido, leva à página equivalente. Ela só existe no navegador: o HTML do servidor não a tem. Some para sempre quando a pessoa usa o seletor, o link da faixa ou o fechar, que gravam a escolha em `localStorage` (`arpvision-idioma`). Não aparece na 404 nem para robôs.
 
 Onde mora cada coisa:
 
 - `src/i18n/pt.ts`: todo o texto em português. O tipo `Dictionary` sai daqui.
-- `src/i18n/es.ts`: o espanhol, tipado como `Dictionary`: se faltar uma chave, `npm run build` (astro check) falha, e `npm test` confere que as listas têm o mesmo tamanho. Os pontos em que o espanhol diverge de propósito do português estão marcados com `DIFERENTE`.
-- `src/i18n/routes.ts`: os endereços das páginas e as âncoras (`#cotacao`, `#cotizacion`) de cada idioma.
-- `src/i18n/index.ts`: os idiomas, o `lang` e o `og:locale` de cada um, e o parâmetro `idioma` que os links do app e o tour embutido levam fora do português (`?idioma=es`).
-- `src/components/pages/`: o conteúdo de cada página, igual para todos os idiomas; os arquivos de `src/pages/` e `src/pages/es/` só escolhem a página.
+- `src/i18n/es.ts` e `src/i18n/en.ts`: o espanhol e o inglês, tipados como `Dictionary`: se faltar uma chave, `npm run build` (astro check) falha, e `npm test` confere que as listas têm o mesmo tamanho. Os pontos em que eles divergem de propósito do português estão marcados com `DIFERENTE`.
+- `src/i18n/locales.ts`: os idiomas, o `lang`, o `og:locale`, o código e o nome de cada um (fora de `index.ts` porque o script da faixa também usa esta lista).
+- `src/i18n/routes.ts`: os endereços das páginas e as âncoras (`#cotacao`, `#cotizacion`, `#quote`) de cada idioma.
+- `src/i18n/index.ts`: os dicionários e o parâmetro `idioma` que os links do app e o tour embutido levam fora do português (`?idioma=es`, `?idioma=en`).
+- `src/components/pages/`: o conteúdo de cada página, igual para todos os idiomas; os arquivos de `src/pages/`, `src/pages/es/` e `src/pages/en/` só escolhem a página.
 - Números, preços e prazos vêm de `site.ts` e entram no texto pelas funções do dicionário (`trial(credits, days)`), para os idiomas nunca divergirem.
 - O texto que o script do navegador escreve depois da carga (menu, vídeo, cotação, carrossel, tour) vai na própria página, em atributos `data-*`, no idioma dela; os scripts não carregam os dicionários.
 
-O espanhol segue o glossário e o estilo de `docs/produto/idiomas.md`, no repositório do app (tú, móvil, enlace, estancia, mejorar; sem "IA"). Todo texto novo, ou mudado, entra nos dois dicionários no mesmo PR, menos uma parte que só existe em português (um serviço local, como o ARP Vision Presencial): ela vai em `onlyInPortuguese({ ... })` no `pt.ts` e vale `null` no `es.ts`, marcada com `DIFERENTE`; o componente não mostra nada com `null`, e a chave entra nas diferenças permitidas de `tests/i18n.test.ts`.
+O espanhol segue o glossário e o estilo de `docs/produto/idiomas.md`, no repositório do app (tú, móvil, enlace, estancia, mejorar; sem "IA"); o inglês segue a terminologia do inglês do app (`en.json`: room, enhance, tours live; sem "AI"). Todo texto novo, ou mudado, entra nos três dicionários no mesmo PR, menos uma parte que só existe em português (um serviço local, como o ARP Vision Presencial): ela vai em `onlyInPortuguese({ ... })` no `pt.ts` e vale `null` no `es.ts` e no `en.ts`, marcada com `DIFERENTE`; o componente não mostra nada com `null`, e a chave entra nas diferenças permitidas de `tests/i18n.test.ts`.
 
-Para acrescentar um idioma (ex.: `en`):
+Para acrescentar um idioma (ex.: `fr`):
 
-1. Crie `src/i18n/en.ts` com `export const en: Dictionary = { ... }` e registre-o em `src/i18n/index.ts` (`Locale`, `locales`, `localeInfo` e `dictionaries`).
-2. Acrescente os endereços e as âncoras em `src/i18n/routes.ts` e o idioma em `i18n.locales` de `astro.config.mjs`.
-3. Crie `src/pages/en/` com os mesmos arquivos de `src/pages/es/`, nos endereços do idioma.
+1. Crie `src/i18n/fr.ts` com `export const fr: Dictionary = { ... }`, registre o idioma em `src/i18n/locales.ts` (`Locale`, `locales`, `localeInfo`) e o dicionário em `dictionaries` de `src/i18n/index.ts`.
+2. Acrescente os endereços e as âncoras em `src/i18n/routes.ts`, o texto da faixa em `src/i18n/suggestion.ts` e o idioma em `i18n.locales` de `astro.config.mjs`.
+3. Crie `src/pages/fr/` com os mesmos arquivos de `src/pages/en/`, nos endereços do idioma.
 4. Gere o cartão Open Graph do idioma em `scripts/prepare-images.mjs` e aponte-o no dicionário (`home.ogImage`, `plansPage.ogImage`).
 5. Nos testes, acrescente o idioma em `scripts/check-site.mjs` (`locales`) e nas checagens de navegador.
 
@@ -95,7 +101,7 @@ npm run build
 npm run check:site
 ```
 
-Os testes verificam recomendação e dados dos planos, compartilhamento dos números entre superfícies, cenários acima do limite e UTMs; e, nos idiomas, as mesmas chaves no português e no espanhol (menos as partes só em português), nenhuma letra ou palavra do português no espanhol, nenhum "IA", os endereços em `/es`, o `idioma=es` nos links do app e o texto de cada tutorial nos dois idiomas, com o aviso em espanhol de que os vídeos são narrados em português. A checagem de saída verifica as rotas dos dois idiomas, `lang`, arquivos locais, metadados, canonical apontando para a própria página, hreflang com `x-default`, `og:locale`, sitemap com as duas versões e robots no mesmo domínio, JSON-LD no idioma da página (e o FAQPage igual ao FAQ dela; o VideoObject dos tutoriais leva o idioma da narração, pt-BR), os links dos tutoriais no idioma da página, a 404, nenhum texto em português nas páginas `/es`, nenhum iframe inicial além do tour da hero e orçamento de JavaScript.
+Os testes verificam recomendação e dados dos planos, compartilhamento dos números entre superfícies, cenários acima do limite e UTMs; e, nos idiomas, as mesmas chaves no português, no espanhol e no inglês (menos as partes só em português), nenhuma letra ou palavra do português no espanhol e no inglês, nenhum "IA"/"AI", os endereços em `/es` e `/en`, o `idioma=es`/`idioma=en` nos links do app, o texto de cada tutorial nos três idiomas (com o aviso, no espanhol e no inglês, de que os vídeos são narrados em português) e a escolha da faixa de sugestão. A checagem de saída verifica as rotas dos três idiomas, `lang`, arquivos locais, metadados, canonical apontando para a própria página, hreflang com `x-default`, `og:locale`, sitemap com as três versões e robots no mesmo domínio, JSON-LD no idioma da página (e o FAQPage igual ao FAQ dela; o VideoObject dos tutoriais leva o idioma da narração, pt-BR), os links dos tutoriais no idioma da página, a 404, o seletor, a faixa de sugestão só no navegador, nenhum texto em português nas páginas `/es` e `/en`, nenhum iframe inicial além do tour da hero e orçamento de JavaScript.
 
 Para ler o site como o Googlebot (robots → sitemap → cada página, sem seguir redirecionamentos), com a prévia no ar ou contra a produção depois do deploy:
 
@@ -114,7 +120,7 @@ npm run test:showcase
 node scripts/lighthouse.mjs
 ```
 
-As checagens de navegador cobrem também o espanhol: texto visível sem português, cotação com a mensagem em espanhol, seletor PT | ES, 404, contraste nos dois temas, tour da demo com `idioma=es`, o player dos tutoriais em `/es/tutoriales` e as larguras de 320 a 1440px sem estouro (com o cabeçalho numa linha).
+As checagens de navegador cobrem também o espanhol e o inglês: texto visível sem português, cotação com a mensagem no idioma, seletor PT | ES | EN (o compacto do cabeçalho pelo teclado), 404, contraste nos dois temas, tour da demo com `idioma=es`/`idioma=en`, o player dos tutoriais em `/es/tutoriales` e `/en/tutorials`, a faixa de sugestão (quando aparece, para onde leva, que não volta depois da escolha, que não cobre o cabeçalho nem o WhatsApp) e as larguras de 320 a 1440px sem estouro (com o cabeçalho numa linha). Cada contexto do navegador define o idioma da página que testa, para o resultado não depender do idioma do Chrome da máquina.
 
 Relatórios e capturas são salvos em `.artifacts/` (ignorado pelo Git). Lighthouse usa emulação móvel; resultados de laboratório não substituem medições de usuários reais.
 
