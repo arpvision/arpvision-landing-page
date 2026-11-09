@@ -13,6 +13,17 @@ const pricesShown = !(await readFile('dist/planos/index.html', 'utf8')).includes
 );
 // O arquivo de cada endereço no build: "/" é index.html, "/es/planes" é es/planes/index.html.
 const fileOf = (route) => `${route.slice(1)}/index.html`.replace(/^\//, '');
+// Os títulos (h1 a h6) abertos dentro de um <span>, que só aceita texto e elementos de frase (HTML
+// inválido). Os scripts ficam de fora: um "<span" num texto do script não abre nada.
+const headingsInSpan = (html) => {
+  let depth = 0;
+  const found = [];
+  const markup = html.replace(/<script\b[\s\S]*?<\/script>/gi, '');
+  for (const [tag, closing, name] of markup.matchAll(/<(\/?)(span|h[1-6])\b[^>]*>/gi))
+    if (name.toLowerCase() === 'span') depth += closing ? -1 : 1;
+    else if (!closing && depth > 0) found.push(tag);
+  return found;
+};
 // Cada página existe em cada idioma, com os endereços de src/i18n/routes.ts; o português mora
 // na raiz, o espanhol em /es e o inglês em /en. A imagem de compartilhamento das páginas de
 // produto (e da com todos eles) é a da home do idioma.
@@ -109,6 +120,7 @@ for (const { locale, page, file } of routes) {
   const html = await readFile(path.join('dist', file), 'utf8');
   assert.match(html, new RegExp(`<html[^>]+lang="${locale.lang}"`), `${route}: lang`);
   assert.equal((html.match(/<h1[ >]/g) || []).length, 1, `${route}: exatamente um h1`);
+  assert.deepEqual(headingsInSpan(html), [], `${route}: nenhum título dentro de <span>`);
   for (const meta of ['description', 'og:title', 'og:description', 'og:image', 'twitter:card'])
     assert.ok(html.includes(`="${meta}"`), `${route}: ${meta}`);
   const canonical = html.match(/<link rel="canonical" href="([^"]+)"/)?.[1];

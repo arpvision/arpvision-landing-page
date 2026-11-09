@@ -65,7 +65,7 @@ const groups = liveProductGroups(locale).map(({ group, items }) => ({
                     loading={groupIndex === 0 ? 'eager' : 'lazy'}
                     decoding="async"
                   />
-                  <span class="product-card-body">
+                  <div class="product-card-body">
                     <h3 class="products-name">
                       {name}
                       {product.isNew && <span class="products-badge">{t.header.newBadge}</span>}
@@ -75,7 +75,7 @@ const groups = liveProductGroups(locale).map(({ group, items }) => ({
                       {text.cta}
                       <Icon name="arrow" size={16} />
                     </span>
-                  </span>
+                  </div>
                 </a>
               </li>
             ))}

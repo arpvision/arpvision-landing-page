@@ -166,7 +166,7 @@ Os testes (`tests/*.test.ts`) verificam:
 A checagem de saída (`check:site`) verifica:
 
 - as páginas do `dist` contra as publicadas em `src/i18n/routes.ts`, e o sitemap contra as mesmas rotas, sem tirar as esperadas do próprio sitemap;
-- `lang`, arquivos locais, metadados, canonical apontando para a própria página, hreflang com `x-default`, `og:locale`, a imagem de compartilhamento do idioma nas páginas de produto e na de todos os produtos, sitemap com as três versões e robots no mesmo domínio;
+- `lang`, um `h1` só e nenhum título (h1 a h6) dentro de `<span>`, arquivos locais, metadados, canonical apontando para a própria página, hreflang com `x-default`, `og:locale`, a imagem de compartilhamento do idioma nas páginas de produto e na de todos os produtos, sitemap com as três versões e robots no mesmo domínio;
 - JSON-LD no idioma da página: o `FAQPage` igual às dúvidas dela (também nas páginas de produto), o `Service` nelas, o `ItemList` de `/produtos` e o `VideoObject` dos tutoriais com o idioma da narração (pt-BR);
 - com os preços ocultos, nenhum `offers` e nenhuma moeda com número no HTML (`scripts/lib/prices.mjs`: R$, US$, $, € e £, antes ou depois do número, com espaço comum ou `&nbsp;`);
 - nas páginas `/en`, as regras de texto do inglês (`scripts/lib/english-rules.mjs`) e, nas `/es` e `/en`, nenhum texto em português;
