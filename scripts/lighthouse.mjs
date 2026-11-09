@@ -17,12 +17,13 @@ try {
     ['home', '/'],
     ['planos', '/planos'],
     ['home-es', '/es'],
-    // A página com todos os produtos, a do Piloto e a dos Vídeos, só depois de publicadas
+    // A página com todos os produtos e a de cada produto, só depois de publicadas
     // (src/i18n/routes.ts).
     ...[
       ['produtos', 'products'],
       ['produto-instagram', 'productInstagram'],
       ['produto-videos', 'productVideos'],
+      ['produto-autochat', 'productAutochat'],
     ]
       .filter(([, page]) => publishedPageIds.includes(page))
       .map(([name, page]) => [name, routes.pt.pages[page]]),

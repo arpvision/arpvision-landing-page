@@ -2,7 +2,8 @@
 // "Como funciona" de uma página de produto: os passos, em ordem, cada um com o número, o título, o
 // texto e uma tela de exemplo pequena. A página passa a tela de cada passo pelo slot dele (`step-1`,
 // `step-2`...), e um passo sem tela para o build. No HTML, a tela vem depois do texto (o leitor de
-// tela ouve o passo antes da descrição da tela); na página, ela aparece em cima.
+// tela ouve o passo antes da descrição da tela); na página, ela aparece em cima. Com quatro passos
+// (o Autochat), o desktop mostra os quatro lado a lado, em cartões mais estreitos.
 interface Props {
   title: string;
   items: { title: string; text: string }[];
@@ -19,7 +20,7 @@ if (missing.length)
     <div class="section-heading center">
       <h2 id="steps-title">{title}</h2>
     </div>
-    <ol class="product-steps" role="list">
+    <ol class:list={['product-steps', { 'is-in-fours': items.length === 4 }]} role="list">
       {items.map((item, index) => (
         <li>
           <span class="product-step-number" aria-hidden="true">

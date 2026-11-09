@@ -1248,6 +1248,88 @@ try {
     'Vídeos a partir de fotos (pt e es): 1 h1; uma tela de exemplo em cada passo (etiqueta visível, aria-hidden, inert e a descrição "Exemplo:") e nada para fora delas a 1024, 1100 e 1440px; os dois vídeos do idioma sem som, em laço, sem pré-carga, fora do leitor de tela, com a descrição e o botão; nada do tour na cotação e na faixa; o produto nos 5 botões de WhatsApp; a mensagem ("6 a 20", "Os dois", "Este mês") e os eventos da cotação; o menu marca o produto. A 390px: o pôster é o primeiro quadro e o selo tem 10px ou mais; com movimento reduzido nada toca sozinho e o play à mão continua quando o outro vídeo entra na tela; sem ele cada vídeo toca quando aparece e a pausa à mão continua. A 1440px, sem movimento reduzido, os dois aparecem juntos e tocam OK',
   );
 
+  // A página do Autochat, nos dois idiomas: a conversa do topo, uma tela de exemplo em cada um dos
+  // quatro passos, as distâncias e o resumo para a corretora, todas marcadas; toda distância que
+  // aparece vem "em linha reta"; e o que toda página de produto confere (com o "Cotação" do topo
+  // levando à cotação da própria página).
+  const autochatPage = {
+    pt: {
+      example: 'Exemplo',
+      straight: 'em linha reta',
+      contact: 'Olá! Vim pelo site e quero saber do Autochat da ARP Vision.',
+      choices: ['4 a 10', '100 a 500', 'Este mês'],
+      message: [
+        'Olá! Vim pelo site e quero uma cotação do Autochat da ARP Vision.',
+        '• Corretores: 4 a 10',
+        '• Contatos por mês: 100 a 500',
+        '• Para quando: Este mês',
+        'Pode me mandar uma proposta?',
+      ],
+    },
+    es: {
+      example: 'Ejemplo',
+      straight: 'en línea recta',
+      contact: '¡Hola! Vengo de la web y quiero saber más del Autochat de ARP Vision.',
+      choices: ['4 a 10', '100 a 500', 'Este mes'],
+      message: [
+        '¡Hola! Vengo de la web y quiero un presupuesto del Autochat de ARP Vision.',
+        '• Agentes: 4 a 10',
+        '• Contactos al mes: 100 a 500',
+        '• Para cuándo: Este mes',
+        '¿Me puedes enviar una propuesta?',
+      ],
+    },
+  };
+  // As linhas do texto da página que falam de uma distância ("450 m", "1,2 km"; não "68 m²"), as
+  // das telas de exemplo também.
+  const distanceLines = (target) =>
+    target
+      .locator('main')
+      .evaluate((main) =>
+        main.innerText
+          .split('\n')
+          .filter((line) => /\d+(?:[.,]\d+)?\s*k?m(?![²\p{L}])/u.test(line)),
+      );
+  for (const [locale, expected] of Object.entries(autochatPage)) {
+    const route = localeRoutes[locale].pages.productAutochat;
+    await page.goto(base + route);
+    await page.evaluate(() => document.fonts.ready);
+    assert.equal(await page.locator('h1').count(), 1, `${route}: um h1`);
+    // A conversa do topo (com o resumo ao lado), uma tela em cada passo, as distâncias e o resumo.
+    const screens = await exampleScreens(page);
+    assert.equal(screens.length, 7, `${route}: sete telas de exemplo`);
+    checkExampleScreens(screens, expected.example, route);
+    assert.deepEqual(
+      await page.locator('.product-steps').evaluate((list) => ({
+        role: list.getAttribute('role'),
+        screens: [...list.children].map((step) => step.querySelectorAll('.example-screen').length),
+      })),
+      { role: 'list', screens: [1, 1, 1, 1] },
+      `${route}: uma tela em cada passo`,
+    );
+    // Toda distância que aparece é aproximada e em linha reta, no texto e nas telas.
+    const lines = await distanceLines(page);
+    assert.ok(lines.length > 0, `${route}: distâncias na página`);
+    assert.deepEqual(
+      lines.filter((line) => !line.includes(expected.straight)),
+      [],
+      `${route}: distância sem "${expected.straight}"`,
+    );
+    for (const width of [1024, 1100, 1440]) {
+      await page.setViewportSize({ width, height: 1000 });
+      assert.deepEqual(
+        await stepScreensOverflow(page),
+        [],
+        `${route}, ${width}px: telas dos passos`,
+      );
+    }
+    await page.screenshot({ path: `.artifacts/produto-autochat-${locale}-desktop.png` });
+    await checkProductPage(page, locale, 'autochat', expected);
+  }
+  results.push(
+    'Autochat (pt e es): 1 h1; 7 telas de exemplo (a conversa do topo, uma em cada um dos 4 passos, as distâncias e o resumo) com a etiqueta visível, aria-hidden, inert e a descrição "Exemplo:"; nada para fora das telas dos passos a 1024, 1100 e 1440px; toda distância da página "em linha reta"; nada do tour na cotação e na faixa; o produto nos 5 botões de WhatsApp; a mensagem ("4 a 10", "100 a 500", "Este mês") e os eventos da cotação; o menu marca o produto; Cotação e Dúvidas na página OK',
+  );
+
   for (const route of pricesShown ? ['/', '/planos'] : ['/']) {
     await page.goto(base + route);
     const text = await page.locator('body').innerText();
@@ -1450,6 +1532,7 @@ try {
       '/',
       localeRoutes.pt.pages.productInstagram,
       localeRoutes.pt.pages.productVideos,
+      localeRoutes.pt.pages.productAutochat,
       pricesShown ? '/planos' : '/termos-de-uso',
     ]) {
       await themed.goto(base + route);
@@ -1584,6 +1667,20 @@ try {
       assert.deepEqual(await stepScreensOverflow(phone), [], `${scene}: telas dos passos`);
     }
   }
+  // O mesmo no Autochat: as sete telas continuam marcadas, e nada sai das dos passos.
+  for (const [locale, expected] of Object.entries(autochatPage)) {
+    await phone.goto(base + localeRoutes[locale].pages.productAutochat);
+    await phone.evaluate(() => document.fonts.ready);
+    for (const width of [390, 360]) {
+      await phone.setViewportSize({ width, height: 800 });
+      const scene = `${width}px, Autochat em ${locale}`;
+      const screens = await exampleScreens(phone);
+      assert.equal(screens.length, 7, `${scene}: sete telas de exemplo`);
+      checkExampleScreens(screens, expected.example, scene);
+      assert.deepEqual(await stepScreensOverflow(phone), [], `${scene}: telas dos passos`);
+    }
+    await phone.screenshot({ path: `.artifacts/produto-autochat-${locale}-mobile.png` });
+  }
   // Aberto, o menu do celular fica numa cápsula opaca, na cor do tema: as linhas dele passam por
   // fundos misturados. Fora da home, ele pode ficar sobre a faixa azul, o título dela desfocado e
   // o rodapé. A página não rola pelo toque com o menu aberto, mas rola pelo script: a faixa vai
@@ -1677,7 +1774,7 @@ try {
     'sem círculo de hover no botão do menu depois do toque',
   );
   results.push(
-    '360px: as 13 telas do Piloto marcadas e o calendário com uma semana só; a 390 e 360px, em pt e es, nada para fora das telas dos passos, cada trecho da frase da dor numa linha e o número do story numa linha só; as 3 telas dos Vídeos marcadas e nada para fora delas; menu aberto numa cápsula opaca com contraste AA (topo da home e faixa azul de /tutoriais e do Piloto, com o produto marcado, nos dois temas); fechado, volta ao vidro da abertura, sem o círculo de hover preso no botão OK',
+    '360px: as 13 telas do Piloto marcadas e o calendário com uma semana só; a 390 e 360px, em pt e es, nada para fora das telas dos passos, cada trecho da frase da dor numa linha e o número do story numa linha só; as 3 telas dos Vídeos e as 7 do Autochat marcadas e nada para fora das dos passos; menu aberto numa cápsula opaca com contraste AA (topo da home e faixa azul de /tutoriais e do Piloto, com o produto marcado, nos dois temas); fechado, volta ao vidro da abertura, sem o círculo de hover preso no botão OK',
   );
   // Toque fora do menu num ponto sem link (o título da hero), para não navegar.
   await phone.locator('.menu-toggle').click();
@@ -1898,6 +1995,7 @@ try {
       '/es',
       localeRoutes.es.pages.productInstagram,
       localeRoutes.es.pages.productVideos,
+      localeRoutes.es.pages.productAutochat,
       '/es/terminos-de-uso',
       '/pagina-que-nao-existe',
     ]) {

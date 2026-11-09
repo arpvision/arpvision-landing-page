@@ -1,0 +1,30 @@
+---
+// "Quando passa para uma pessoa", seção própria do Autochat: os casos em que ele chama o corretor,
+// cada um com um ícone (na ordem dos itens; listas de tamanhos diferentes param o build), e o fecho,
+// que deixa claro que quem negocia é o corretor.
+import Icon from '../Icon.astro';
+import { pageLocale } from '../../i18n';
+import { pairByPosition } from '../../lib/products';
+const { t } = pageLocale(Astro);
+const { handoff } = t.productPages.autochat;
+const cases = pairByPosition('HandoffList', handoff.items, ['user', 'audit', 'info', 'clock']);
+---
+
+<section class="section product-handoff" aria-labelledby="handoff-title">
+  <div class="container">
+    <div class="section-heading center">
+      <h2 id="handoff-title">{handoff.title}</h2>
+    </div>
+    <ul class="handoff-list" role="list">
+      {cases.map(([item, icon]) => (
+        <li>
+          <span class="icon-tile">
+            <Icon name={icon} size={20} />
+          </span>
+          <p>{item}</p>
+        </li>
+      ))}
+    </ul>
+    <p class="handoff-closing">{handoff.closing}</p>
+  </div>
+</section>

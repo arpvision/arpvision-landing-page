@@ -1,0 +1,44 @@
+---
+// "Perto do que importa": o imóvel de exemplo e a distância aproximada, em linha reta, até uma
+// escola, um hospital e uma estação (`proximity.examples`). É tela de exemplo: fica fora do leitor
+// de tela, que ouve a descrição antes dela.
+import Icon from '../Icon.astro';
+import ExampleTag from './ExampleTag.astro';
+import { site } from '../../config/site';
+import { pageLocale } from '../../i18n';
+const { t } = pageLocale(Astro);
+const { proximity, mock } = t.productPages.autochat;
+const photo = site.media.productPhotos['cozinha-16x9'];
+---
+
+<div class="example-figure">
+  <p class="sr-only">{mock.distancesDescription}</p>
+  <div class="example-screen distance-mock" aria-hidden="true" inert>
+    <span class="distance-head">
+      <img
+        src={photo.src}
+        width={photo.width}
+        height={photo.height}
+        alt=""
+        loading="lazy"
+        decoding="async"
+      />
+      <span class="distance-listing">
+        <strong>{mock.listing}</strong>
+        <span>{mock.listingDetails}</span>
+      </span>
+      <ExampleTag />
+    </span>
+    <span class="distance-list">
+      {proximity.examples.map((example) => (
+        <span class="distance-row">
+          <span class="distance-icon">
+            <Icon name="pin" size={16} />
+          </span>
+          <strong>{example.place}</strong>
+          <span class="distance-value">{example.distance}</span>
+        </span>
+      ))}
+    </span>
+  </div>
+</div>

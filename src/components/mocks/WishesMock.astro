@@ -1,0 +1,33 @@
+---
+// Passo 2 do Autochat, "O Autochat entende o que ele procura": as fichas do que a cliente procura,
+// o negócio primeiro (aluguel), depois a região, os quartos, o preço e o que ela quer perto. É tela
+// de exemplo: fica fora do leitor de tela, que ouve a descrição antes dela.
+import Icon from '../Icon.astro';
+import ExampleTag from './ExampleTag.astro';
+import { pageLocale } from '../../i18n';
+const { t } = pageLocale(Astro);
+const { mock } = t.productPages.autochat;
+---
+
+<div class="example-figure">
+  <p class="sr-only">{mock.wishesDescription}</p>
+  <div class="example-screen step-mock wishes-mock" aria-hidden="true" inert>
+    <span class="step-mock-head">
+      <ExampleTag />
+    </span>
+    <span class="step-mock-body">
+      <span class="step-mock-title">
+        <Icon name="target" size={16} />
+        {mock.wishesTitle}
+      </span>
+      <span class="wish-chips">
+        {[mock.deal, ...mock.wishes].map((wish) => (
+          <span class="wish-chip">
+            <Icon name="check" size={12} />
+            {wish}
+          </span>
+        ))}
+      </span>
+    </span>
+  </div>
+</div>

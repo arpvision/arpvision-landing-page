@@ -303,6 +303,249 @@ export const pt = {
         whatsappNumber: '(00) 00000-0000',
       },
     },
+    // O Autochat atende só no WhatsApp da imobiliária e se apresenta como atendimento automático.
+    // Toda distância é aproximada e vem com "em linha reta" (o teste de catálogo confere).
+    autochat: {
+      meta: {
+        title: 'Autochat: atendimento no WhatsApp para imobiliárias | ARP Vision',
+        description:
+          'O Autochat atende no WhatsApp da sua imobiliária, encontra imóveis por região, preço, quartos e o que tem perto, e passa o cliente ao corretor com um resumo.',
+      },
+      hero: {
+        eyebrow: 'AUTOCHAT',
+        title: 'Cliente respondido na hora, mesmo fora do expediente.',
+        lead: 'O Autochat atende no WhatsApp da sua imobiliária, entende o que o cliente procura (região, preço, quartos, perto de escola ou hospital), mostra os imóveis que combinam e passa a conversa para o corretor com um resumo pronto.',
+        button: 'Quero uma cotação no WhatsApp',
+        note: 'O cliente pode pedir um corretor a qualquer momento.',
+        mockDescription:
+          'Exemplo: conversa no WhatsApp da Imobiliária Exemplo. O atendimento automático se apresenta, a cliente pede um apartamento de 2 quartos para alugar no Centro, perto de escola, até 2.500 por mês, e recebe um imóvel a uns 450 m de uma escola, em linha reta, com o botão Ver o tour 360°. Ao lado, o resumo para a corretora.',
+      },
+      // O título fica parado: não tem trecho que troca, como o do Piloto.
+      pain: {
+        eyebrow: 'PARECE FAMILIAR?',
+        title: 'O cliente chamou às 22h. Às 9h, já tinha falado com outra imobiliária.',
+        text: 'Quem procura imóvel escreve para várias imobiliárias ao mesmo tempo. Quem responde primeiro, e responde bem, sai na frente.',
+      },
+      steps: {
+        title: 'Da primeira mensagem ao corretor, em quatro passos.',
+        items: [
+          {
+            title: 'O cliente chama no WhatsApp',
+            text: 'No WhatsApp da sua imobiliária, a qualquer hora.',
+          },
+          {
+            title: 'O Autochat entende o que ele procura',
+            text: 'Compra ou aluguel, região, faixa de preço, quartos, vagas, pet e o que precisa ter perto.',
+          },
+          {
+            title: 'Mostra os imóveis que combinam',
+            text: 'Só da sua carteira, com foto, preço e link. Quando o imóvel tem tour 360°, o cliente já olha por dentro.',
+          },
+          {
+            title: 'Passa para o corretor',
+            text: 'Com um resumo da conversa e os horários em que o cliente prefere visitar.',
+          },
+        ],
+      },
+      // "Perto do que importa". As três distâncias são as do imóvel de exemplo (DistanceListMock).
+      proximity: {
+        title: 'Perto do que importa',
+        text: 'O cliente escreve “perto de escola”, “perto do hospital” ou “perto da estação”, e o Autochat procura na sua carteira os imóveis que ficam perto, com a distância aproximada, em linha reta.',
+        coverage:
+          'A distância vem de bases públicas de escolas, hospitais e estações, e a cobertura muda de cidade para cidade.',
+        examples: [
+          { place: 'Escola', distance: 'cerca de 450 m em linha reta' },
+          { place: 'Hospital', distance: 'cerca de 1,2 km em linha reta' },
+          { place: 'Estação', distance: 'cerca de 800 m em linha reta' },
+        ],
+      },
+      // "O que o corretor recebe": o que vai no resumo, na ordem do cartão de exemplo.
+      broker: {
+        title: 'O corretor recebe o cliente já explicado.',
+        fields: [
+          'O nome e o WhatsApp do cliente',
+          'Se é compra ou aluguel',
+          'O que ele procura',
+          'Os imóveis que viu e de quais gostou',
+          'Quando quer visitar',
+          'A conversa inteira',
+        ],
+      },
+      // "Quando passa para uma pessoa".
+      handoff: {
+        title: 'O Autochat chama o corretor nestes casos:',
+        items: [
+          'Quando o cliente pede para falar com uma pessoa, a qualquer momento.',
+          'Quando o assunto é proposta, negociação, documentos ou financiamento.',
+          'Quando a pergunta não está no cadastro do imóvel.',
+          'Fora do horário, ele avisa quando a equipe volta e deixa o resumo pronto.',
+        ],
+        closing: 'O Autochat não negocia nem fecha nada: quem negocia é o corretor.',
+      },
+      included: {
+        title: 'O que está incluído',
+        items: [
+          {
+            title: 'A qualquer hora',
+            text: 'Responde assim que o cliente escreve, também fora do horário.',
+          },
+          {
+            title: 'Atendimento automático',
+            text: 'Diz logo na primeira mensagem que é o atendimento automático da imobiliária.',
+          },
+          {
+            title: 'As perguntas que importam',
+            text: 'Compra ou aluguel, região, faixa de preço, quartos, vagas e pet.',
+          },
+          {
+            title: 'Só a sua carteira',
+            text: 'Mostra só imóveis da sua imobiliária, com foto, preço e link.',
+          },
+          {
+            title: 'Tour 360° na conversa',
+            text: 'Quando o imóvel tem tour, o cliente já olha por dentro.',
+          },
+          {
+            title: 'O que tem perto',
+            text: 'A distância aproximada, em linha reta, até escola, hospital e estação.',
+          },
+          {
+            title: 'Resumo para o corretor',
+            text: 'Com o que o cliente procura e a conversa inteira.',
+          },
+          { title: 'Sem documentos', text: 'Não pede documento, CPF nem dado de saúde.' },
+        ],
+      },
+      // A resposta escolhida entra na mensagem do WhatsApp como está escrita aqui; o `id` só
+      // nomeia o campo do formulário.
+      quote: {
+        eyebrow: 'PREÇO SOB MEDIDA',
+        title: 'Uma proposta para o tamanho da sua equipe.',
+        lead: 'Responda 3 perguntas rápidas e receba pelo WhatsApp uma proposta para a sua equipe e as conversas que chegam, sem compromisso.',
+        questions: [
+          {
+            id: 'brokers',
+            label: 'Quantos corretores atendem?',
+            summary: 'Corretores',
+            options: ['1 a 3', '4 a 10', 'Mais de 10'],
+          },
+          {
+            id: 'contacts',
+            label: 'Quantos contatos chegam por mês?',
+            summary: 'Contatos por mês',
+            options: ['Até 100', '100 a 500', 'Mais de 500', 'Não sei'],
+          },
+          {
+            id: 'timing',
+            label: 'Para quando?',
+            summary: 'Para quando',
+            options: ['Este mês', 'Próximo mês', 'Ainda pesquisando'],
+          },
+        ],
+        greeting: 'Olá! Vim pelo site e quero uma cotação do Autochat da ARP Vision.',
+        closing: 'Pode me mandar uma proposta?',
+      },
+      faq: {
+        eyebrow: 'DÚVIDAS FREQUENTES',
+        title1: 'Você pergunta.',
+        title2: 'A gente explica.',
+        lead1: 'Sem letras miúdas.',
+        lead2: 'Entenda cada parte do Autochat.',
+        items: [
+          {
+            question: 'É um robô?',
+            answer:
+              'Sim. É um atendimento automático, e ele se apresenta assim logo na primeira mensagem. O cliente pode pedir um corretor quando quiser.',
+          },
+          {
+            question: 'Funciona à noite e no fim de semana?',
+            answer: 'Sim. Ele responde a qualquer hora e deixa o resumo pronto para o corretor.',
+          },
+          {
+            question: 'Usa o WhatsApp da imobiliária?',
+            answer:
+              'Sim. O Autochat usa o caminho oficial do WhatsApp para atendimento automático. Pode ser o número que vocês já usam ou um número novo, e a ARP Vision explica antes o que muda no celular da equipe.',
+          },
+          {
+            question: 'De onde vêm as respostas sobre os imóveis?',
+            answer:
+              'Do cadastro dos seus imóveis. O que não está lá, ele passa para o corretor. Preço e condições, o corretor confirma antes de qualquer proposta.',
+          },
+          {
+            question: 'Como funciona a busca por perto de escola ou hospital?',
+            answer:
+              'Pela distância aproximada, em linha reta, entre o imóvel e o lugar. O caminho a pé ou de carro, e o que não estiver na base, o cliente confirma com o corretor.',
+          },
+          {
+            question: 'Ele pede documentos ou CPF?',
+            answer: 'Não. Documentos e dados financeiros ficam com o corretor.',
+          },
+          {
+            question: 'E os dados dos meus clientes?',
+            answer:
+              'A imobiliária é a controladora dos dados dos clientes dela, e a ARP Vision é a operadora: trata as conversas só para fazer o atendimento, em nome da imobiliária e seguindo as instruções dela.',
+          },
+          {
+            question: 'Quanto custa?',
+            answer:
+              'Depende do tamanho da equipe e de quantas conversas chegam. A proposta vem pelo WhatsApp e explica também como é paga a tarifa que a Meta cobra por mensagem, quando houver.',
+          },
+        ],
+      },
+      finalCta: {
+        title: 'Atendimento na hora, corretor com o resumo pronto.',
+        lead: 'Fale com a ARP Vision e receba uma proposta para a sua imobiliária.',
+        button: 'Quero uma cotação no WhatsApp',
+      },
+      // A mensagem do rodapé e do botão flutuante; os botões de cotação usam a saudação da cotação.
+      whatsappMessage: 'Olá! Vim pelo site e quero saber do Autochat da ARP Vision.',
+      // O texto fictício das telas de exemplo: a conversa do topo, o que a cliente procura, o
+      // cartão do imóvel, o resumo para a corretora e as distâncias. A licença é a da imobiliária
+      // (no espanhol, a calificación energética do imóvel).
+      mock: {
+        agency: 'Imobiliária Exemplo',
+        automated: 'Atendimento automático',
+        // A conversa, na ordem: a apresentação, o pedido da cliente e o imóvel que combina.
+        intro:
+          'Olá! Sou o atendimento automático da Imobiliária Exemplo. Se preferir, chamo um corretor.',
+        request:
+          'Procuro apartamento de 2 quartos para alugar no Centro, perto de escola, até 2.500 por mês.',
+        found: 'Achei 3 opções. Esta fica a uns 450 m de uma escola, em linha reta:',
+        // O cartão do imóvel, na conversa e no passo 3.
+        listing: 'Apartamento no Centro',
+        listingDetails: '2 quartos · 68 m²',
+        listingPrice: '2.400 por mês',
+        listingDistance: 'A uns 450 m de uma escola, em linha reta',
+        license: 'CRECI 00000-J',
+        tour: 'Ver o tour 360°',
+        // O que a cliente procura: o negócio e o resto, nas fichas do passo 2 e no resumo.
+        wishesTitle: 'O que a cliente procura',
+        deal: 'Aluguel',
+        wishes: ['Centro', '2 quartos', 'até 2.500 por mês', 'perto de escola'],
+        // O resumo para a corretora, no topo, no passo 4 e em "O que o corretor recebe".
+        summary: 'Resumo para a corretora',
+        client: 'Mariana Souza',
+        // O WhatsApp da cliente: o rótulo e o número, que vai inteiro, sem quebrar no meio.
+        whatsapp: 'WhatsApp',
+        clientPhone: '(00) 00000-0000',
+        seen: 'Viu 3 imóveis e gostou do apartamento no Centro',
+        visit: 'Quer visitar no sábado de manhã',
+        conversation: 'Conversa inteira',
+        // As telas dos passos, das distâncias e do resumo.
+        requestDescription:
+          'Exemplo: a conversa com a Imobiliária Exemplo no WhatsApp e a mensagem da cliente, às 22h04, pedindo um apartamento de 2 quartos para alugar no Centro.',
+        wishesDescription:
+          'Exemplo: o que a cliente procura: aluguel, Centro, 2 quartos, até 2.500 por mês e perto de escola.',
+        listingDescription:
+          'Exemplo: o cartão de um apartamento no Centro, com foto, preço, a distância até uma escola, em linha reta, e o botão Ver o tour 360°.',
+        summaryStartDescription:
+          'Exemplo: o começo do resumo para a corretora, com o nome e o WhatsApp da cliente e o que ela procura.',
+        summaryDescription:
+          'Exemplo: o resumo para a corretora, com o nome e o WhatsApp da cliente, o aluguel, o que ela procura, os imóveis que viu e de qual gostou, quando quer visitar e a conversa inteira.',
+        distancesDescription:
+          'Exemplo: um apartamento no Centro e as distâncias aproximadas, em linha reta, até uma escola (cerca de 450 m), um hospital (cerca de 1,2 km) e uma estação (cerca de 800 m).',
+      },
+    },
     // Os dois vídeos de exemplo do topo são arquivos (`site.media.exampleVideos`), um par por
     // idioma, com o selo, os dados do imóvel e o cartão final gravados na imagem.
     videos: {

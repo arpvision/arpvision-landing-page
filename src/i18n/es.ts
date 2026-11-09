@@ -288,6 +288,235 @@ export const es: Dictionary = {
         whatsappNumber: '600 000 000',
       },
     },
+    // DIFERENTE: no cartão do imóvel da conversa, a calificación energética no lugar do CRECI; o
+    // DNI no lugar do CPF; e os termos do RGPD na dúvida dos dados. A conversa fala em aluguel de
+    // até 1.200 por mês, como na Espanha, sem moeda.
+    autochat: {
+      meta: {
+        title: 'Autochat: atención por WhatsApp para inmobiliarias | ARP Vision',
+        description:
+          'El Autochat atiende en el WhatsApp de tu inmobiliaria, busca inmuebles por zona, precio, dormitorios y lo que hay cerca, y lo deriva al agente con un resumen.',
+      },
+      hero: {
+        eyebrow: 'AUTOCHAT',
+        title: 'Cliente respondido al momento, incluso fuera de horario.',
+        lead: 'El Autochat atiende en el WhatsApp de tu inmobiliaria, entiende lo que busca el cliente (zona, precio, dormitorios, cerca de un colegio o de un hospital), muestra los inmuebles que encajan y pasa la conversación al agente inmobiliario con un resumen listo.',
+        button: 'Quiero un presupuesto por WhatsApp',
+        note: 'El cliente puede pedir un agente inmobiliario en cualquier momento.',
+        mockDescription:
+          'Ejemplo: conversación en el WhatsApp de la Inmobiliaria Ejemplo. La atención automática se presenta, la clienta pide un piso de 2 dormitorios de alquiler en el Centro, cerca de un colegio, hasta 1.200 al mes, y recibe un inmueble a unos 450 m de un colegio, en línea recta, con el botón Ver el tour 360°. Al lado, el resumen para la agente.',
+      },
+      pain: {
+        eyebrow: '¿TE SUENA?',
+        title:
+          'El cliente escribió a las 22:00. A las 9:00, ya había hablado con otra inmobiliaria.',
+        text: 'Quien busca un inmueble escribe a varias inmobiliarias a la vez. Quien responde primero, y responde bien, toma la delantera.',
+      },
+      steps: {
+        title: 'Del primer mensaje al agente, en cuatro pasos.',
+        items: [
+          {
+            title: 'El cliente escribe por WhatsApp',
+            text: 'Al WhatsApp de tu inmobiliaria, a cualquier hora.',
+          },
+          {
+            title: 'El Autochat entiende lo que busca',
+            text: 'Compra o alquiler, zona, rango de precio, dormitorios, plaza de garaje, mascota y lo que necesita tener cerca.',
+          },
+          {
+            title: 'Muestra los inmuebles que encajan',
+            text: 'Solo de tu cartera, con foto, precio y enlace. Cuando el inmueble tiene tour 360°, el cliente ya lo ve por dentro.',
+          },
+          {
+            title: 'Lo pasa al agente inmobiliario',
+            text: 'Con un resumen de la conversación y los horarios en los que el cliente prefiere visitar.',
+          },
+        ],
+      },
+      proximity: {
+        title: 'Cerca de lo que importa',
+        text: 'El cliente escribe «cerca de un colegio», «cerca del hospital» o «cerca de la estación», y el Autochat busca en tu cartera los inmuebles que quedan cerca, con la distancia aproximada, en línea recta.',
+        coverage:
+          'La distancia sale de bases de datos públicas de colegios, hospitales y estaciones, y la cobertura cambia de una ciudad a otra.',
+        examples: [
+          { place: 'Colegio', distance: 'a unos 450 m en línea recta' },
+          { place: 'Hospital', distance: 'a unos 1,2 km en línea recta' },
+          { place: 'Estación', distance: 'a unos 800 m en línea recta' },
+        ],
+      },
+      broker: {
+        title: 'El agente recibe al cliente con todo ya explicado.',
+        fields: [
+          'El nombre y el WhatsApp del cliente',
+          'Si es compra o alquiler',
+          'Lo que busca',
+          'Los inmuebles que ha visto y cuáles le han gustado',
+          'Cuándo quiere visitar',
+          'La conversación completa',
+        ],
+      },
+      handoff: {
+        title: 'El Autochat llama al agente inmobiliario en estos casos:',
+        items: [
+          'Cuando el cliente pide hablar con una persona, en cualquier momento.',
+          'Cuando el tema es una oferta, la negociación, los documentos o la financiación.',
+          'Cuando la pregunta no está en la ficha del inmueble.',
+          'Fuera de horario, avisa de cuándo vuelve el equipo y deja el resumen listo.',
+        ],
+        closing: 'El Autochat no negocia ni cierra nada: quien negocia es el agente inmobiliario.',
+      },
+      included: {
+        title: 'Qué incluye',
+        items: [
+          {
+            title: 'A cualquier hora',
+            text: 'Responde en cuanto el cliente escribe, también fuera de horario.',
+          },
+          {
+            title: 'Atención automática',
+            text: 'Dice en el primer mensaje que es la atención automática de la inmobiliaria.',
+          },
+          {
+            title: 'Las preguntas que importan',
+            text: 'Compra o alquiler, zona, rango de precio, dormitorios, garaje y mascota.',
+          },
+          {
+            title: 'Solo tu cartera',
+            text: 'Muestra solo inmuebles de tu inmobiliaria, con foto, precio y enlace.',
+          },
+          {
+            title: 'Tour 360° en la conversación',
+            text: 'Cuando el inmueble tiene tour, el cliente ya lo ve por dentro.',
+          },
+          {
+            title: 'Lo que hay cerca',
+            text: 'La distancia aproximada, en línea recta, a colegios, hospitales y estaciones.',
+          },
+          {
+            title: 'Resumen para el agente',
+            text: 'Con lo que busca el cliente y la conversación completa.',
+          },
+          { title: 'Sin documentos', text: 'No pide documentos, DNI ni datos de salud.' },
+        ],
+      },
+      quote: {
+        eyebrow: 'PRECIO A MEDIDA',
+        title: 'Una propuesta para el tamaño de tu equipo.',
+        lead: 'Responde 3 preguntas rápidas y recibe por WhatsApp una propuesta para tu equipo y las conversaciones que llegan, sin compromiso.',
+        questions: [
+          {
+            id: 'brokers',
+            label: '¿Cuántos agentes atienden?',
+            summary: 'Agentes',
+            options: ['1 a 3', '4 a 10', 'Más de 10'],
+          },
+          {
+            id: 'contacts',
+            label: '¿Cuántos contactos llegan al mes?',
+            summary: 'Contactos al mes',
+            options: ['Hasta 100', '100 a 500', 'Más de 500', 'No lo sé'],
+          },
+          {
+            id: 'timing',
+            label: '¿Para cuándo?',
+            summary: 'Para cuándo',
+            options: ['Este mes', 'El mes que viene', 'Aún me estoy informando'],
+          },
+        ],
+        greeting: '¡Hola! Vengo de la web y quiero un presupuesto del Autochat de ARP Vision.',
+        closing: '¿Me puedes enviar una propuesta?',
+      },
+      faq: {
+        eyebrow: 'PREGUNTAS FRECUENTES',
+        title1: 'Tú preguntas.',
+        title2: 'Nosotros te lo explicamos.',
+        lead1: 'Sin letra pequeña.',
+        lead2: 'Entiende cada parte del Autochat.',
+        items: [
+          {
+            question: '¿Es un robot?',
+            answer:
+              'Sí. Es una atención automática, y se presenta así desde el primer mensaje. El cliente puede pedir un agente inmobiliario cuando quiera.',
+          },
+          {
+            question: '¿Funciona de noche y el fin de semana?',
+            answer: 'Sí. Responde a cualquier hora y deja el resumen listo para el agente.',
+          },
+          {
+            question: '¿Usa el WhatsApp de la inmobiliaria?',
+            answer:
+              'Sí. El Autochat usa la vía oficial de WhatsApp para la atención automática. Puede ser el número que ya usáis o uno nuevo, y ARP Vision explica antes qué cambia en el móvil del equipo.',
+          },
+          {
+            question: '¿De dónde salen las respuestas sobre los inmuebles?',
+            answer:
+              'De la ficha de tus inmuebles. Lo que no está ahí, se lo pasa al agente. El precio y las condiciones los confirma el agente antes de cualquier oferta.',
+          },
+          {
+            question: '¿Cómo funciona la búsqueda cerca de un colegio o de un hospital?',
+            answer:
+              'Por la distancia aproximada, en línea recta, entre el inmueble y el lugar. El camino a pie o en coche, y lo que no esté en la base, el cliente lo confirma con el agente.',
+          },
+          {
+            question: '¿Pide documentos o el DNI?',
+            answer: 'No. Los documentos y los datos financieros quedan en manos del agente.',
+          },
+          {
+            question: '¿Y los datos de mis clientes?',
+            answer:
+              'La inmobiliaria es la responsable del tratamiento de los datos de sus clientes, y ARP Vision, la encargada: trata las conversaciones solo para hacer la atención, en nombre de la inmobiliaria y siguiendo sus instrucciones.',
+          },
+          {
+            question: '¿Cuánto cuesta?',
+            answer:
+              'Depende del tamaño del equipo y de cuántas conversaciones llegan. La propuesta llega por WhatsApp y explica también cómo se paga la tarifa que Meta cobra por mensaje, cuando la haya.',
+          },
+        ],
+      },
+      finalCta: {
+        title: 'Atención al momento, agente con el resumen listo.',
+        lead: 'Habla con ARP Vision y recibe una propuesta para tu inmobiliaria.',
+        button: 'Quiero un presupuesto por WhatsApp',
+      },
+      whatsappMessage: '¡Hola! Vengo de la web y quiero saber más del Autochat de ARP Vision.',
+      mock: {
+        agency: 'Inmobiliaria Ejemplo',
+        automated: 'Atención automática',
+        intro:
+          '¡Hola! Soy la atención automática de la Inmobiliaria Ejemplo. Si lo prefieres, llamo a un agente.',
+        request:
+          'Busco un piso de 2 dormitorios de alquiler en el Centro, cerca de un colegio, hasta 1.200 al mes.',
+        found: 'He encontrado 3 opciones. Este está a unos 450 m de un colegio, en línea recta:',
+        listing: 'Piso en el Centro',
+        listingDetails: '2 dormitorios · 68 m²',
+        listingPrice: '1.150 al mes',
+        listingDistance: 'A unos 450 m de un colegio, en línea recta',
+        license: 'Calificación energética: E',
+        tour: 'Ver el tour 360°',
+        wishesTitle: 'Lo que busca la clienta',
+        deal: 'Alquiler',
+        wishes: ['Centro', '2 dormitorios', 'hasta 1.200 al mes', 'cerca de un colegio'],
+        summary: 'Resumen para la agente',
+        client: 'Lucía Martín',
+        whatsapp: 'WhatsApp',
+        clientPhone: '600 000 000',
+        seen: 'Ha visto 3 inmuebles y le ha gustado el piso del Centro',
+        visit: 'Quiere visitarlo el sábado por la mañana',
+        conversation: 'Conversación completa',
+        requestDescription:
+          'Ejemplo: la conversación con la Inmobiliaria Ejemplo en WhatsApp y el mensaje de la clienta, a las 22:04, pidiendo un piso de 2 dormitorios de alquiler en el Centro.',
+        wishesDescription:
+          'Ejemplo: lo que busca la clienta: alquiler, Centro, 2 dormitorios, hasta 1.200 al mes y cerca de un colegio.',
+        listingDescription:
+          'Ejemplo: la ficha de un piso en el Centro, con foto, precio, la distancia a un colegio, en línea recta, y el botón Ver el tour 360°.',
+        summaryStartDescription:
+          'Ejemplo: el principio del resumen para la agente, con el nombre y el WhatsApp de la clienta y lo que busca.',
+        summaryDescription:
+          'Ejemplo: el resumen para la agente, con el nombre y el WhatsApp de la clienta, el alquiler, lo que busca, los inmuebles que ha visto y cuál le ha gustado, cuándo quiere visitar y la conversación completa.',
+        distancesDescription:
+          'Ejemplo: un piso en el Centro y las distancias aproximadas, en línea recta, a un colegio (a unos 450 m), un hospital (a unos 1,2 km) y una estación (a unos 800 m).',
+      },
+    },
     // DIFERENTE: a calificación energética no lugar do CRECI, no topo, no incluído, na dúvida e no
     // cartão final dos vídeos.
     videos: {

@@ -1,0 +1,27 @@
+---
+// "O que o corretor recebe", seção própria do Autochat: o que vai no resumo, em lista, e ao lado o
+// resumo de exemplo para a corretora, com os mesmos itens na mesma ordem. No desktop, o resumo fica
+// à esquerda, para alternar com "Perto do que importa".
+import Icon from '../Icon.astro';
+import SummaryCardMock from '../mocks/SummaryCardMock.astro';
+import { pageLocale } from '../../i18n';
+const { t } = pageLocale(Astro);
+const { broker } = t.productPages.autochat;
+---
+
+<section class="section product-feature" aria-labelledby="broker-title">
+  <div class="container product-feature-grid is-reversed">
+    <div class="product-feature-copy">
+      <h2 id="broker-title">{broker.title}</h2>
+      <ul class="product-feature-list" role="list">
+        {broker.fields.map((field) => (
+          <li>
+            <Icon name="check" size={18} />
+            {field}
+          </li>
+        ))}
+      </ul>
+    </div>
+    <SummaryCardMock />
+  </div>
+</section>

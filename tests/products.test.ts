@@ -252,6 +252,44 @@ test('as páginas de produto em espanhol não têm português nem CRECI', () => 
     }
 });
 
+test('o Autochat tem 4 passos, 3 distâncias, 6 campos no resumo, 4 casos, 8 itens e 8 dúvidas', () => {
+  for (const locale of locales) {
+    const page = translations(locale).productPages.autochat;
+    assert.deepEqual(
+      {
+        steps: page.steps.items.length,
+        distances: page.proximity.examples.length,
+        fields: page.broker.fields.length,
+        handoff: page.handoff.items.length,
+        included: page.included.items.length,
+        faq: page.faq.items.length,
+      },
+      { steps: 4, distances: 3, fields: 6, handoff: 4, included: 8, faq: 8 },
+      locale,
+    );
+  }
+});
+
+// Uma distância escrita no texto: "450 m", "1,2 km" (e não "68 m²", nem "12 mensagens").
+const distance = /\d+(?:[.,]\d+)?\s*k?m(?![²\p{L}])/u;
+
+test('no Autochat, toda distância vem com "em linha reta" (es: "en línea recta")', () => {
+  const straight = { pt: 'em linha reta', es: 'en línea recta' };
+  for (const locale of locales) {
+    const withDistance = leaves(translations(locale).productPages.autochat).filter(([, text]) =>
+      distance.test(text),
+    );
+    assert.ok(withDistance.length > 0, `${locale}: distâncias no Autochat`);
+    for (const [path, text] of withDistance)
+      assert.ok(text.includes(straight[locale]), `${locale}/autochat.${path}: "${text}"`);
+  }
+  // O padrão pega a distância e deixa de fora a área e as palavras com "m" depois do número.
+  assert.match('a uns 450 m de uma escola', distance);
+  assert.match('cerca de 1,2 km', distance);
+  assert.doesNotMatch('2 quartos · 68 m²', distance);
+  assert.doesNotMatch('12 mensagens', distance);
+});
+
 test('o Piloto em português leva o CRECI', () => {
   assert.match(JSON.stringify(translations('pt').productPages.instagram), /CRECI/);
 });
@@ -331,6 +369,7 @@ test('cada página de produto publicada tem texto nos dois idiomas', () => {
   const published = productPageIds.filter((page) => publishedPageIds.includes(page));
   assert.ok(published.includes('productInstagram'), 'o Piloto está publicado');
   assert.ok(published.includes('productVideos'), 'os Vídeos estão publicados');
+  assert.ok(published.includes('productAutochat'), 'o Autochat está publicado');
   for (const locale of locales)
     for (const page of published)
       assert.ok(productPageText(locale, productOfPage(page)!.id), `${locale}: ${page}`);

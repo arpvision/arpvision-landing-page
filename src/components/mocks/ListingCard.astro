@@ -1,0 +1,43 @@
+---
+// O cartão de um imóvel como o Autochat o manda na conversa: a foto, o nome, os dados com o preço,
+// a licença e o "Ver o tour 360°", que é `span`. Entra dentro de telas de exemplo (a conversa do
+// topo e a tela do passo 3), que já ficam fora do leitor de tela. Com `distance`, ele leva a
+// distância até a escola, em linha reta; na conversa, ela já vem na mensagem de cima.
+import Icon from '../Icon.astro';
+import { site } from '../../config/site';
+import { pageLocale } from '../../i18n';
+interface Props {
+  distance?: boolean;
+}
+const { distance = false } = Astro.props;
+const { t } = pageLocale(Astro);
+const { mock } = t.productPages.autochat;
+const photo = site.media.productPhotos['cozinha-16x9'];
+---
+
+<span class="listing-card">
+  <img
+    src={photo.src}
+    width={photo.width}
+    height={photo.height}
+    alt=""
+    loading="lazy"
+    decoding="async"
+  />
+  <span class="listing-body">
+    <strong class="listing-title">{mock.listing}</strong>
+    <span class="listing-details">{mock.listingDetails}</span>
+    <span class="listing-price">{mock.listingPrice}</span>
+    {distance && (
+      <span class="listing-distance">
+        <Icon name="pin" size={14} />
+        {mock.listingDistance}
+      </span>
+    )}
+    <span class="listing-license">{mock.license}</span>
+    <span class="step-button listing-tour">
+      {mock.tour}
+      <Icon name="arrow" size={14} />
+    </span>
+  </span>
+</span>
