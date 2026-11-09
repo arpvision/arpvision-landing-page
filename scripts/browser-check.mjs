@@ -190,7 +190,7 @@ const exampleScreens = (target) =>
   );
 // As telas dos passos são pequenas: nada pode sair da caixa delas, e o endereço do campo do site
 // aparece inteiro (ele não quebra linha; sem espaço, seria cortado).
-const stepScreensOverflow = (target) =>
+const measureStepScreens = (target) =>
   target.locator('.product-steps .example-screen').evaluateAll((screens) =>
     screens.flatMap((screen) => {
       const box = screen.getBoundingClientRect();
@@ -212,6 +212,17 @@ const stepScreensOverflow = (target) =>
       return out;
     }),
   );
+// Logo depois de mudar a largura da janela a página ainda assenta: o cartão do imóvel do Autochat
+// já passou 1px da borda na primeira medida, e 500ms depois estava no lugar. A medida se repete por
+// até 2s, e só reprova o que continua fora da caixa.
+const stepScreensOverflow = async (target) => {
+  let outside = await measureStepScreens(target);
+  for (let waited = 0; outside.length && waited < 2000; waited += 100) {
+    await target.waitForTimeout(100);
+    outside = await measureStepScreens(target);
+  }
+  return outside;
+};
 // Os trechos da frase da dor ficam empilhados, e o título reserva a altura do maior: cada um cabe
 // numa linha, e assim não sobra linha vazia embaixo dos outros. As linhas de um trecho são os topos
 // diferentes dos retângulos do texto dele.
