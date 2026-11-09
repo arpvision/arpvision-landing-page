@@ -2008,15 +2008,31 @@
   .post-gallery {
     --gallery-gap: 12px;
     --gallery-columns: 2;
-    align-items: flex-start;
+    align-items: stretch;
   }
-  /* Com duas colunas, o story estreito não caberia na altura do post: fica com a largura dele. */
-  .post-gallery > li:has(.post-art-story) {
+  /* Com duas colunas, cada arte fica com a largura da coluna e cresce com o próprio texto: no
+     celular estreito, o rodapé (a imobiliária e o CRECI) não cabe no 4:5 e seria cortado pela borda.
+     O formato vira a altura mínima, pela largura do item (100cqi): o post fica com 4:5 ou mais, e o
+     story, com a largura do post, com 9:16 ou mais. Com aspect-ratio e overflow: hidden a arte não
+     cresce, e com overflow: clip o WebKit ainda corta o story do espanhol a 320 px. As artes de uma
+     linha ficam com a altura da maior; o story, mais alto, e o post ao lado dele (a última linha)
+     ficam cada um com a sua. */
+  .post-gallery > li {
     aspect-ratio: auto;
+    container-type: inline-size;
+  }
+  .post-gallery > li:has(> .post-art-story),
+  .post-gallery > li:has(+ li > .post-art-story) {
+    align-self: flex-start;
+  }
+  .post-gallery .post-art {
+    height: auto;
+    min-height: calc(100cqi * 5 / 4);
   }
   .post-gallery .post-art-story {
     width: 100%;
-    height: auto;
+    aspect-ratio: auto;
+    min-height: calc(100cqi * 16 / 9);
   }
   .post-art {
     padding: 10px;

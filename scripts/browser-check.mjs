@@ -273,6 +273,35 @@ const storyNumber = (target) =>
       inside: rects.every((rect) => rect.left >= art.left - 0.5 && rect.right <= art.right + 0.5),
     };
   });
+// As artes de "Assim ficam os seus posts" cortam o que passa da borda delas. No celular, cada uma
+// cresce com o próprio texto: o rodapé (a imobiliária e o CRECI, a calificación energética ou a
+// licença) fica inteiro dentro dela, e nenhuma fica mais baixa que o formato (o post 4:5 e o story
+// 9:16). Devolve o que falha.
+const postArtsOut = (target) =>
+  target.locator('.post-gallery .post-art').evaluateAll((arts) =>
+    arts.flatMap((art) => {
+      const box = art.getBoundingClientRect();
+      const kind = art.querySelector('.post-art-kind').textContent.trim();
+      const out = [...art.querySelectorAll('.post-art-footer > span')]
+        .filter((line) => {
+          const range = document.createRange();
+          range.selectNodeContents(line);
+          return [...range.getClientRects()].some(
+            (rect) =>
+              rect.width > 0 &&
+              (rect.top < box.top - 0.5 ||
+                rect.bottom > box.bottom + 0.5 ||
+                rect.left < box.left - 0.5 ||
+                rect.right > box.right + 0.5),
+          );
+        })
+        .map((line) => `${kind}: "${line.textContent.trim()}" fora da arte`);
+      const format = art.classList.contains('post-art-story') ? 16 / 9 : 5 / 4;
+      if (box.height / box.width < format - 0.01)
+        out.push(`${kind}: ${Math.round(box.width)}x${Math.round(box.height)}, abaixo do formato`);
+      return out;
+    }),
+  );
 const checkExampleScreens = (screens, example, scene) => {
   assert.ok(screens.length > 0, `${scene}: telas de exemplo`);
   for (const screen of screens) {
@@ -2077,14 +2106,27 @@ try {
   const phoneScreens = await exampleScreens(phone);
   assert.equal(phoneScreens.length, 13, '360px, Piloto: treze telas de exemplo');
   checkExampleScreens(phoneScreens, 'Exemplo', '360px, Piloto');
-  // A 390 e a 360 px, nos três idiomas: nada sai das telas dos passos, cada trecho da frase da dor
-  // cabe numa linha (sem linha vazia reservada embaixo dele) e o número do story não quebra.
+  // De 320 a 390 px, nos três idiomas, as artes de "Assim ficam os seus posts" crescem com o texto,
+  // e o rodapé de cada uma fica inteiro dentro dela (a 375 px é o iPhone SE e o mini; a 320 px, o
+  // Android estreito). A 390 e a 360 px: nada sai das telas dos passos, cada trecho da frase da dor
+  // cabe numa linha (sem linha vazia reservada embaixo dele) e o número do story não quebra. As
+  // telas dos passos não se medem a 320 px: lá o campo do endereço do passo 1 passa um pouco da
+  // borda do cartão, sem cortar nada (estacionado na revisão final).
   for (const [locale, expected] of Object.entries(instagram)) {
     await phone.goto(base + localeRoutes[locale].pages.productInstagram);
     await phone.evaluate(() => document.fonts.ready);
+    for (const width of [320, 375]) {
+      await resize(phone, width, 800);
+      assert.deepEqual(
+        await postArtsOut(phone),
+        [],
+        `${width}px, Piloto em ${locale}: o rodapé das artes dentro delas`,
+      );
+    }
     for (const width of [390, 360]) {
       await resize(phone, width, 800);
       const scene = `${width}px, Piloto em ${locale}`;
+      assert.deepEqual(await postArtsOut(phone), [], `${scene}: o rodapé das artes dentro delas`);
       assert.deepEqual(await stepScreensOverflow(phone), [], `${scene}: telas dos passos`);
       assert.deepEqual(
         await painPhraseLines(phone),
@@ -2227,7 +2269,7 @@ try {
     'sem círculo de hover no botão do menu depois do toque',
   );
   results.push(
-    '360px: as 13 telas do Piloto marcadas e o calendário com uma semana só; a 390 e 360px, em pt, es e en, nada para fora das telas dos passos, cada trecho da frase da dor numa linha e o número do story numa linha só; as 3 telas dos Vídeos e as 7 do Autochat marcadas e nada para fora das dos passos; menu aberto numa cápsula opaca com contraste AA (topo da home e faixa azul de /tutoriais e do Piloto, com o produto marcado, nos dois temas); fechado, volta ao vidro da abertura, sem o círculo de hover preso no botão OK',
+    '360px: as 13 telas do Piloto marcadas e o calendário com uma semana só; de 320 a 390px, em pt, es e en, as artes do Piloto com o rodapé dentro delas e sem ficar abaixo do formato; a 390 e 360px, nada para fora das telas dos passos, cada trecho da frase da dor numa linha e o número do story numa linha só; as 3 telas dos Vídeos e as 7 do Autochat marcadas e nada para fora das dos passos; menu aberto numa cápsula opaca com contraste AA (topo da home e faixa azul de /tutoriais e do Piloto, com o produto marcado, nos dois temas); fechado, volta ao vidro da abertura, sem o círculo de hover preso no botão OK',
   );
   // Toque fora do menu num ponto sem link (o título da hero), para não navegar.
   await phone.locator('.menu-toggle').click();
