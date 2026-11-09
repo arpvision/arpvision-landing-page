@@ -304,6 +304,46 @@ const postArtsOut = (target) =>
       return out;
     }),
   );
+// O rodapé na largura `width`: numa coluna, o texto de um link fica a pelo menos 12 px do texto do
+// seguinte (sem isso, um nome de duas linhas e o de baixo parecem um item só); abaixo de 1024 px,
+// o bloco de contato ocupa a linha inteira do grid, com o e-mail e o WhatsApp numa linha cada.
+// Devolve o que falha.
+const footerLayout = (target, width) =>
+  target.locator('.footer-grid').evaluate((grid, width) => {
+    // O começo e o fim do texto e as linhas dele, pelas caixas do texto.
+    const text = (element) => {
+      const range = document.createRange();
+      range.selectNodeContents(element);
+      const rects = [...range.getClientRects()].filter((rect) => rect.width > 0);
+      const tops = [];
+      for (const rect of rects)
+        if (!tops.some((top) => Math.abs(top - rect.top) < 4)) tops.push(rect.top);
+      return {
+        label: element.textContent.trim().replace(/\s+/g, ' '),
+        top: Math.min(...rects.map((rect) => rect.top)),
+        bottom: Math.max(...rects.map((rect) => rect.bottom)),
+        lines: tops.length,
+      };
+    };
+    const out = [];
+    for (const column of grid.children) {
+      const links = [...column.querySelectorAll(':scope > a:not(.brand)')].map(text);
+      for (let index = 1; index < links.length; index++) {
+        const gap = links[index].top - links[index - 1].bottom;
+        if (gap < 12)
+          out.push(`"${links[index - 1].label}" e "${links[index].label}" a ${Math.round(gap)}px`);
+      }
+    }
+    const contact = grid.querySelector('a[href^="mailto:"]')?.parentElement;
+    if (width < 1024 && contact) {
+      const [own, all] = [contact, grid].map((element) => element.getBoundingClientRect().width);
+      if (Math.abs(own - all) > 1)
+        out.push(`contato com ${Math.round(own)}px de ${Math.round(all)}px da linha`);
+      for (const { label, lines } of [...contact.querySelectorAll(':scope > a')].map(text))
+        if (lines > 1) out.push(`"${label}" em ${lines} linhas`);
+    }
+    return out;
+  }, width);
 const checkExampleScreens = (screens, example, scene) => {
   assert.ok(screens.length > 0, `${scene}: telas de exemplo`);
   for (const screen of screens) {
@@ -2787,6 +2827,33 @@ try {
     results.push(`Avisos (problemas que o português também tem): ${knownIssues.join('; ')}`);
   results.push(
     `Três idiomas e 404 de 320 a 1440px (com 1040 e 1100px): ${routes.length} rotas sem estouro e com o cabeçalho numa linha (cápsula de até 1060px), com Produtos só a partir de 1024px; menu do celular com PT | ES | EN OK`,
+  );
+
+  // O rodapé da home, nos três idiomas, a 1024, 768, 390 e 320 px (as larguras que a spec manda
+  // conferir, e a do Android estreito): os links de cada coluna separados, também os nomes de duas
+  // linhas, e, abaixo de 1024 px, o contato na linha inteira, com o e-mail e o WhatsApp numa linha
+  // cada.
+  for (const width of [1024, 768, 390, 320]) {
+    for (const locale of Object.keys(localeRoutes)) {
+      const context = await newContext(
+        {
+          viewport: { width, height: 900 },
+          reducedMotion: 'reduce',
+          isMobile: width < 768,
+          hasTouch: width < 768,
+        },
+        locale,
+      );
+      const tab = await context.newPage();
+      tab.on('pageerror', (error) => errors.push(error.message));
+      await tab.goto(base + localeRoutes[locale].pages.home);
+      await tab.evaluate(() => document.fonts.ready);
+      assert.deepEqual(await footerLayout(tab, width), [], `${locale} ${width}px: o rodapé`);
+      await context.close();
+    }
+  }
+  results.push(
+    'Rodapé da home nos três idiomas a 1024, 768, 390 e 320px: os links de cada coluna separados e, abaixo de 1024px, o contato na linha inteira, com o e-mail e o WhatsApp numa linha cada OK',
   );
 
   // Faixa de sugestão de idioma: aparece só no navegador, quando ele prefere outro idioma do

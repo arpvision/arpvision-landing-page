@@ -62,7 +62,7 @@ const allProducts = publishedPageIds.includes('products') ? pagePath(locale, 'pr
       <a href={appLink('rodape', 'login', locale)}>{t.footer.login}</a>
     </div>
     {(available.email || available.whatsapp) && (
-      <div>
+      <div class="footer-contact">
         <h2>{t.footer.talk}</h2>
         {available.email && <a href={`mailto:${site.contact.email}`}>{site.contact.email}</a>}
         {available.whatsapp && (

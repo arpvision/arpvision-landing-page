@@ -2043,10 +2043,14 @@ input[type='number']::-webkit-outer-spin-button {
   letter-spacing: 0;
   font-weight: 650;
 }
+/* O respiro em cima e embaixo separa os nomes de duas linhas (de 1024 a ~1075px, os longos da
+   coluna Produtos quebram): sem ele, um nome e o de baixo pareciam um item só. Os de uma linha não
+   mudam, por causa do min-height. */
 .footer-grid > div > a:not(.brand) {
   display: flex;
   align-items: center;
   min-height: 44px;
+  padding-block: 6px;
   font-size: var(--fs-small);
   color: var(--text-secondary);
 }
@@ -2824,6 +2828,11 @@ input[type='number']::-webkit-outer-spin-button {
   }
   .footer-grid > div > a:not(.brand) {
     font-size: var(--fs-small);
+  }
+  /* Em duas colunas, o contato sobra sozinho na última linha: ocupa a linha inteira, e o e-mail e o
+     WhatsApp cabem numa linha cada, até 320px. */
+  .footer-contact {
+    grid-column: 1 / -1;
   }
   .alternatives-table th,
   .alternatives-table td {
