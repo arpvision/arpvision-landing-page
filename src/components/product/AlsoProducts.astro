@@ -1,42 +1,17 @@
 ---
 // "Conheça também", no fim de uma página de produto: os outros produtos no ar, como no menu
-// Produtos (o tour leva à home). Sem nenhum outro produto no ar, a seção não aparece.
-import Icon from '../Icon.astro';
+// Produtos (o tour leva à home), nos cartões de ProductCards. Sem nenhum outro produto no ar, a
+// seção não aparece.
+import ProductCards from './ProductCards.astro';
 import { pageLocale } from '../../i18n';
-import { liveProductsWithText, productHref, type ProductId } from '../../lib/products';
+import { liveProductsWithText, type ProductId } from '../../lib/products';
 interface Props {
   /** O produto da página, que fica de fora. */
   current: ProductId;
 }
 const { current } = Astro.props;
 const { locale, t } = pageLocale(Astro);
-const path = Astro.url.pathname;
 const others = liveProductsWithText(locale).filter(({ product }) => product.id !== current);
 ---
 
-{others.length > 0 && (
-  <section class="section also-products" aria-labelledby="also-title">
-    <div class="container">
-      <h2 id="also-title">{t.products.also}</h2>
-      <ul class="also-list" role="list">
-        {others.map(({ product, text }) => (
-          <li>
-            <a class="also-card" href={productHref(locale, product, path)}>
-              <span class="products-icon">
-                <Icon name={product.icon} size={20} />
-              </span>
-              <span class="also-text">
-                <span class="products-name">
-                  {text.name}
-                  {product.isNew && <span class="products-badge">{t.header.newBadge}</span>}
-                </span>
-                <span class="products-line">{text.line}</span>
-              </span>
-              <Icon name="arrow" size={18} />
-            </a>
-          </li>
-        ))}
-      </ul>
-    </div>
-  </section>
-)}
+<ProductCards items={others} title={t.products.also} titleId="also-title" class="also-products" />

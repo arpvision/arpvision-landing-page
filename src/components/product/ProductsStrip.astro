@@ -1,39 +1,18 @@
 ---
-// A faixa da home com os produtos que têm página própria no ar (os três novos), nos cartões do
-// "Conheça também" das páginas de produto: o nome, com o selo "Novo", a linha e o link da página.
-// O tour é a própria home, e o Presencial tem a seção dele logo acima: nenhum dos dois entra. Sem
-// nenhum produto com página no ar, a faixa não aparece.
-import Icon from '../Icon.astro';
+// A faixa da home com os produtos que têm página própria no ar (os três novos), nos mesmos cartões
+// do "Conheça também" (ProductCards): o nome, com o selo "Novo", a linha e o link da página. O tour
+// é a própria home, e o Presencial tem a seção dele logo acima: nenhum dos dois entra. Sem nenhum
+// produto com página no ar, a faixa não aparece.
+import ProductCards from './ProductCards.astro';
 import { pageLocale } from '../../i18n';
-import { liveProductsWithText, productHref } from '../../lib/products';
+import { liveProductsWithText } from '../../lib/products';
 const { locale, t } = pageLocale(Astro);
-const path = Astro.url.pathname;
 const items = liveProductsWithText(locale).filter(({ product }) => product.page !== null);
 ---
 
-{items.length > 0 && (
-  <section class="section products-strip" aria-labelledby="products-strip-title">
-    <div class="container">
-      <h2 id="products-strip-title">{t.productsStrip.title}</h2>
-      <ul class="also-list" role="list">
-        {items.map(({ product, text }) => (
-          <li>
-            <a class="also-card" href={productHref(locale, product, path)}>
-              <span class="products-icon">
-                <Icon name={product.icon} size={20} />
-              </span>
-              <span class="also-text">
-                <span class="products-name">
-                  {text.name}
-                  {product.isNew && <span class="products-badge">{t.header.newBadge}</span>}
-                </span>
-                <span class="products-line">{text.line}</span>
-              </span>
-              <Icon name="arrow" size={18} />
-            </a>
-          </li>
-        ))}
-      </ul>
-    </div>
-  </section>
-)}
+<ProductCards
+  items={items}
+  title={t.productsStrip.title}
+  titleId="products-strip-title"
+  class="products-strip"
+/>

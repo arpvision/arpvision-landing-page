@@ -1,0 +1,47 @@
+---
+// Os cartões de produto num componente só, para o "Conheça também" (no fim das páginas de produto)
+// e para a faixa da home: cada cartão tem o ícone, o nome com o selo "Novo", a linha do menu
+// Produtos e o link. Quem chama escolhe os produtos, o título e a classe da seção, que dá o fundo e
+// o espaçamento (products.css). Sem nenhum produto, a seção não aparece.
+import Icon from '../Icon.astro';
+import { pageLocale } from '../../i18n';
+import { productHref, type LiveProduct } from '../../lib/products';
+interface Props {
+  /** Os produtos dos cartões, já filtrados por quem chama. */
+  items: LiveProduct[];
+  title: string;
+  /** O id do título, que a seção usa no `aria-labelledby`. */
+  titleId: string;
+  class?: string;
+}
+const { items, title, titleId, class: className } = Astro.props;
+const { locale, t } = pageLocale(Astro);
+const path = Astro.url.pathname;
+---
+
+{items.length > 0 && (
+  <section class:list={['section', className]} aria-labelledby={titleId}>
+    <div class="container">
+      <h2 id={titleId}>{title}</h2>
+      <ul class="also-list" role="list">
+        {items.map(({ product, text }) => (
+          <li>
+            <a class="also-card" href={productHref(locale, product, path)}>
+              <span class="products-icon">
+                <Icon name={product.icon} size={20} />
+              </span>
+              <span class="also-text">
+                <span class="products-name">
+                  {text.name}
+                  {product.isNew && <span class="products-badge">{t.header.newBadge}</span>}
+                </span>
+                <span class="products-line">{text.line}</span>
+              </span>
+              <Icon name="arrow" size={18} />
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+)}
