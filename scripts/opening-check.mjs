@@ -131,13 +131,28 @@ const verifyHeaderBoundary = async (page) => {
     const rect = el.getBoundingClientRect();
     return { top: rect.top + scrollY, bottom: rect.bottom + scrollY };
   });
+  // Cada rolagem espera o evento e dois quadros, como o scrollPage do browser-check. Sem ter para
+  // onde rolar (o alvo é a posição de agora, ou passa do fim da página e ela já está lá), não há
+  // evento a esperar; e um evento que não vem reprova em 5 s, em vez de travar a checagem.
   const scroll = async (top) => {
     await page.evaluate(
       (y) =>
-        new Promise((resolve) => {
+        new Promise((resolve, reject) => {
+          const end = document.documentElement.scrollHeight - innerHeight;
+          if (Math.abs(Math.min(Math.max(y, 0), end) - scrollY) < 1) return resolve();
+          const timer = setTimeout(
+            () => reject(new Error(`rolagem até ${y}px: nenhum evento de scroll em 5 s`)),
+            5000,
+          );
           window.addEventListener(
             'scroll',
-            () => requestAnimationFrame(() => requestAnimationFrame(resolve)),
+            () =>
+              requestAnimationFrame(() =>
+                requestAnimationFrame(() => {
+                  clearTimeout(timer);
+                  resolve();
+                }),
+              ),
             { once: true },
           );
           scrollTo({ top: y, behavior: 'instant' });

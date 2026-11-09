@@ -71,6 +71,16 @@ const wrappedHeader = (page) =>
       .filter((element) => element.getBoundingClientRect().height > 50)
       .map((element) => element.textContent.trim()),
   );
+// Toda troca de largura da janela espera a página assentar: o innerWidth muda antes de todas as
+// media queries valerem, e dois quadros depois elas valem. Uma medida logo depois da troca lia o
+// layout da largura anterior (a arte do story do Piloto com a largura de 1440 px, já a 1024 px).
+const resize = async (target, width, height) => {
+  await target.setViewportSize({ width, height });
+  await target.waitForFunction((size) => innerWidth === size, width);
+  await target.evaluate(
+    () => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))),
+  );
+};
 // Cada rolagem espera o evento e dois quadros, como no opening-check: duas rolagens no mesmo quadro
 // chegariam ao site como uma só. Sem ter para onde rolar, não há evento a esperar.
 const scrollPage = (target, top) =>
@@ -189,8 +199,9 @@ const exampleScreens = (target) =>
     }),
   );
 // As telas dos passos são pequenas: nada pode sair da caixa delas, e o endereço do campo do site
-// aparece inteiro (ele não quebra linha; sem espaço, seria cortado).
-const measureStepScreens = (target) =>
+// aparece inteiro (ele não quebra linha; sem espaço, seria cortado). Uma medida só: a troca de
+// largura (resize) já espera a página assentar.
+const stepScreensOverflow = (target) =>
   target.locator('.product-steps .example-screen').evaluateAll((screens) =>
     screens.flatMap((screen) => {
       const box = screen.getBoundingClientRect();
@@ -212,17 +223,6 @@ const measureStepScreens = (target) =>
       return out;
     }),
   );
-// Logo depois de mudar a largura da janela a página ainda assenta: o cartão do imóvel do Autochat
-// já passou 1px da borda na primeira medida, e 500ms depois estava no lugar. A medida se repete por
-// até 2s, e só reprova o que continua fora da caixa.
-const stepScreensOverflow = async (target) => {
-  let outside = await measureStepScreens(target);
-  for (let waited = 0; outside.length && waited < 2000; waited += 100) {
-    await target.waitForTimeout(100);
-    outside = await measureStepScreens(target);
-  }
-  return outside;
-};
 // Os trechos da frase da dor ficam empilhados, e o título reserva a altura do maior: cada um cabe
 // numa linha, e assim não sobra linha vazia embaixo dos outros. As linhas de um trecho são os topos
 // diferentes dos retângulos do texto dele.
@@ -391,20 +391,25 @@ const withDeadline = async (promise, label, ms = 15000) => {
     clearTimeout(timer);
   }
 };
-// Espera o primeiro aviso, com o elemento na tela, de um IntersectionObserver novo. Os observadores
-// avisam na ordem em que foram criados: quando este avisa, o da página já tratou o elemento.
-const untilOnScreen = (locator, label) =>
+// Espera o primeiro aviso, com o elemento na tela, de um IntersectionObserver novo, com o limiar
+// (`threshold`) do observador da página que ele acompanha. Os observadores avisam na ordem em que
+// foram criados: quando este avisa, o da página já tratou o elemento.
+const untilOnScreen = (locator, label, threshold = 0) =>
   withDeadline(
     locator.evaluate(
-      (element) =>
+      (element, limit) =>
         new Promise((resolve) => {
-          const observer = new IntersectionObserver((entries) => {
-            if (!entries.some((entry) => entry.isIntersecting)) return;
-            observer.disconnect();
-            resolve();
-          });
+          const observer = new IntersectionObserver(
+            (entries) => {
+              if (!entries.some((entry) => entry.isIntersecting)) return;
+              observer.disconnect();
+              resolve();
+            },
+            { threshold: limit },
+          );
           observer.observe(element);
         }),
+      threshold,
     ),
     label,
   );
@@ -755,12 +760,7 @@ try {
         header.querySelector('.desktop-nav > .products-toggle').after(link);
       });
     for (const width of [1024, 1100, 1200, 1280, 1440]) {
-      await page.setViewportSize({ width, height: 1000 });
-      await page.waitForFunction((size) => innerWidth === size, width);
-      // O innerWidth muda antes de todas as media queries valerem; dois quadros depois, valem.
-      await page.evaluate(
-        () => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))),
-      );
+      await resize(page, width, 1000);
       const wrapped = await page.evaluate(() => {
         const found = [];
         const walker = document.createTreeWalker(
@@ -780,7 +780,7 @@ try {
       assert.deepEqual(wrapped, [], `${width}px${tour ? ' com Tour real' : ''}: cabeçalho quebrou`);
     }
   }
-  await page.setViewportSize({ width: 1440, height: 1000 });
+  await resize(page, 1440, 1000);
   results.push('Cabeçalho do desktop em uma linha de 1024 a 1440px, também com "Tour real" OK');
 
   // Na home, depois da abertura, o cabeçalho volta quando a pessoa sobe a página, numa cápsula
@@ -884,7 +884,7 @@ try {
     );
     // Fora da home ele fica sempre na tela: em /tutoriais, sobre a faixa azul do fim. A janela é
     // baixa para a faixa chegar ao cabeçalho.
-    await home.setViewportSize({ width: 1440, height: 640 });
+    await resize(home, 1440, 640);
     await home.goto(base + localeRoutes.pt.pages.tutorials);
     await home.evaluate(() => document.fonts.ready);
     readings.push(
@@ -1130,7 +1130,7 @@ try {
     // Nos cartões mais estreitos (de 1024 a 1199px, os três lado a lado) e no desktop largo, onde
     // o story é mais estreito que os posts.
     for (const width of [1024, 1100, 1440]) {
-      await page.setViewportSize({ width, height: 1000 });
+      await resize(page, width, 1000);
       assert.deepEqual(
         await stepScreensOverflow(page),
         [],
@@ -1187,22 +1187,14 @@ try {
     assert.deepEqual(await shown(), ['vendeu uma casa.']);
     await title.scrollIntoViewIfNeeded();
     // O IntersectionObserver avisa em tempo real, fora do relógio do teste. Um segundo observador no
-    // mesmo trecho, com o mesmo limiar, recebe o primeiro aviso na mesma entrega que o da página, ou
-    // depois dela: quando ele avisa, a troca já começou (o requestAnimationFrame não serviria aqui,
-    // porque o relógio do teste o para).
-    await title.locator('[data-rotating-phrase]').evaluate(
-      (phrase) =>
-        new Promise((resolve) => {
-          const observer = new IntersectionObserver(
-            (entries) => {
-              if (!entries.some((entry) => entry.isIntersecting)) return;
-              observer.disconnect();
-              resolve();
-            },
-            { threshold: 0.6 },
-          );
-          observer.observe(phrase);
-        }),
+    // mesmo trecho, com o mesmo limiar (0,6, o de rotating-phrase.ts), recebe o primeiro aviso na
+    // mesma entrega que o da página, ou depois dela: quando ele avisa, a troca já começou (o
+    // requestAnimationFrame não serviria aqui, porque o relógio do teste o para). O prazo do
+    // untilOnScreen corre no relógio do Node, que o da página não para.
+    await untilOnScreen(
+      title.locator('[data-rotating-phrase]'),
+      `movimento ${reducedMotion}: a frase da dor na tela`,
+      0.6,
     );
     const seen = [];
     for (let step = 0; step < 10; step++) {
@@ -1336,7 +1328,7 @@ try {
       `${route}: com movimento reduzido, os vídeos não tocam sozinhos`,
     );
     for (const width of [1024, 1100, 1440]) {
-      await page.setViewportSize({ width, height: 1000 });
+      await resize(page, width, 1000);
       assert.deepEqual(
         await stepScreensOverflow(page),
         [],
@@ -1571,7 +1563,7 @@ try {
       `${route}: distância sem "${expected.straight}"`,
     );
     for (const width of [1024, 1100, 1440]) {
-      await page.setViewportSize({ width, height: 1000 });
+      await resize(page, width, 1000);
       assert.deepEqual(
         await stepScreensOverflow(page),
         [],
@@ -1981,7 +1973,7 @@ try {
     await phone.goto(base + localeRoutes[locale].pages.productInstagram);
     await phone.evaluate(() => document.fonts.ready);
     for (const width of [390, 360]) {
-      await phone.setViewportSize({ width, height: 800 });
+      await resize(phone, width, 800);
       const scene = `${width}px, Piloto em ${locale}`;
       assert.deepEqual(await stepScreensOverflow(phone), [], `${scene}: telas dos passos`);
       assert.deepEqual(
@@ -2010,7 +2002,7 @@ try {
     await phone.goto(base + localeRoutes[locale].pages.productVideos);
     await phone.evaluate(() => document.fonts.ready);
     for (const width of [390, 360]) {
-      await phone.setViewportSize({ width, height: 800 });
+      await resize(phone, width, 800);
       const scene = `${width}px, Vídeos em ${locale}`;
       const screens = await exampleScreens(phone);
       assert.equal(screens.length, 3, `${scene}: três telas de exemplo`);
@@ -2023,7 +2015,7 @@ try {
     await phone.goto(base + localeRoutes[locale].pages.productAutochat);
     await phone.evaluate(() => document.fonts.ready);
     for (const width of [390, 360]) {
-      await phone.setViewportSize({ width, height: 800 });
+      await resize(phone, width, 800);
       const scene = `${width}px, Autochat em ${locale}`;
       const screens = await exampleScreens(phone);
       assert.equal(screens.length, 7, `${scene}: sete telas de exemplo`);
@@ -2456,7 +2448,7 @@ try {
     [1279, false],
     [1280, true],
   ]) {
-    await choose.setViewportSize({ width, height: 900 });
+    await resize(choose, width, 900);
     for (const route of ['/termos-de-uso', '/en/terms-of-use', '/es/terminos-de-uso']) {
       await choose.goto(base + route);
       assert.equal(
