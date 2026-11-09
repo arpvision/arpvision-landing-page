@@ -1,14 +1,19 @@
 import { chromium } from '@playwright/test';
 import assert from 'node:assert/strict';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import sharp from 'sharp';
+import { browserLocale, chooseLanguage } from './language-choice.mjs';
 
 const base = process.env.SITE_URL || 'http://127.0.0.1:4321';
 await mkdir('.artifacts', { recursive: true });
 const browser = await chromium.launch({ channel: 'chrome', headless: true });
 const errors = [];
 const results = [];
-const setup = async (options) => {
-  const context = await browser.newContext(options);
+// Cada contexto no idioma do navegador da página que testa e com a escolha de idioma gravada:
+// a faixa de sugestão de idioma não entra nesta checagem.
+const setup = async (options, locale = 'pt') => {
+  const context = await browser.newContext({ locale: browserLocale[locale], ...options });
+  await chooseLanguage(context, locale);
   const page = await context.newPage();
   page.on('pageerror', (error) => errors.push(error.message));
   // A resposta remota não faz parte desta revisão de composição/interação.
@@ -26,6 +31,100 @@ const dimensions = (page) =>
     scroll: document.documentElement.scrollWidth,
     layout: innerWidth,
   }));
+// Contraste WCAG entre duas cores [r, g, b] de 0 a 255.
+const luminance = (rgb) =>
+  rgb
+    .map((value) => value / 255)
+    .map((c) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4))
+    .reduce((sum, c, index) => sum + c * [0.2126, 0.7152, 0.0722][index], 0);
+const contrast = (a, b) => {
+  const [light, dark] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (light + 0.05) / (dark + 0.05);
+};
+// A tela em pixels CSS: (x, y) → [r, g, b].
+const capture = async (page) => {
+  const { data, info } = await sharp(await page.screenshot({ scale: 'css' }))
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  return (x, y) => {
+    const index = (y * info.width + x) * info.channels;
+    return [...data.subarray(index, index + 3)];
+  };
+};
+// Escrita, ícone do menu e logo do cabeçalho contra o que está de fato atrás deles. O axe não
+// calcula o fundo do vidro (deixa esses textos como incompletos): o fundo vem da própria tela,
+// capturada de novo com a escrita, os ícones e o logo escondidos.
+const verifyHeaderContrast = async (page, label) => {
+  // Com movimento reduzido, cada troca de cor vira uma transição de 0,01ms, que desce em cascata
+  // pelos filhos. Sem transições, as cores lidas são as finais.
+  const still = await page.addStyleTag({
+    content: `.site-header, .site-header *, .site-header *::before, .site-header *::after {
+      transition: none !important;
+    }`,
+  });
+  const items = await page.locator('.header-capsule').evaluate((capsule) => {
+    const paint = document.createElement('canvas').getContext('2d', { willReadFrequently: true });
+    // Qualquer cor do CSS em [r, g, b, a].
+    const rgba = (color) => {
+      paint.clearRect(0, 0, 1, 1);
+      paint.fillStyle = color;
+      paint.fillRect(0, 0, 1, 1);
+      return [...paint.getImageData(0, 0, 1, 1).data];
+    };
+    const items = [];
+    const walker = document.createTreeWalker(capsule, NodeFilter.SHOW_TEXT);
+    for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+      const element = node.parentElement;
+      // Fora os textos escondidos visualmente (caixa de 1px), como o rótulo "Menu" no celular.
+      if (!node.textContent.trim() || !element.checkVisibility()) continue;
+      if (element.getBoundingClientRect().width <= 1) continue;
+      const range = document.createRange();
+      range.selectNodeContents(node);
+      const color = rgba(getComputedStyle(element).color);
+      for (const rect of range.getClientRects())
+        items.push({ name: node.textContent.trim(), color, rect: rect.toJSON(), minimum: 4.5 });
+    }
+    const visible = (selector) =>
+      [...capsule.querySelectorAll(selector)].find((element) => element.checkVisibility());
+    const icon = visible('.menu-toggle svg');
+    const logo = visible('.brand img');
+    items.push(
+      {
+        name: 'ícone do menu',
+        color: rgba(getComputedStyle(icon).color),
+        rect: icon.getBoundingClientRect().toJSON(),
+        minimum: 3,
+      },
+      { name: 'logo', rect: logo.getBoundingClientRect().toJSON(), minimum: 3 },
+    );
+    return items;
+  });
+  const shown = await capture(page);
+  const hide = await page.addStyleTag({
+    content: `.site-header *, .site-header *::before, .site-header *::after {
+      color: transparent !important;
+    }
+    .site-header img, .site-header svg { visibility: hidden !important; }`,
+  });
+  const behind = await capture(page);
+  await Promise.all([still, hide].map((style) => style.evaluate((element) => element.remove())));
+  const low = items.flatMap(({ name, color, rect, minimum }) => {
+    // Escrita e ícone: a cor deles contra o pior pixel de fundo. Logo: o pixel que mais se destaca.
+    let ratio = color ? Infinity : 0;
+    for (let y = Math.ceil(rect.top); y < Math.floor(rect.bottom); y++)
+      for (let x = Math.ceil(rect.left); x < Math.floor(rect.right); x++) {
+        const background = behind(x, y);
+        if (!color) ratio = Math.max(ratio, contrast(shown(x, y), background));
+        else {
+          const alpha = color[3] / 255;
+          const ink = background.map((value, index) => color[index] * alpha + value * (1 - alpha));
+          ratio = Math.min(ratio, contrast(ink, background));
+        }
+      }
+    return ratio >= minimum ? [] : [`${name}: ${ratio.toFixed(2)}:1`];
+  });
+  assert.deepEqual(low, [], `${label}: contraste medido na tela`);
+};
 const verifyHeaderBoundary = async (page) => {
   const header = page.locator('.site-header');
   const boundary = await page.locator('.opening').evaluate((el) => {
@@ -290,33 +389,35 @@ try {
   );
   await context.close();
 
-  // A abertura em espanhol: mesma composição, com os nomes dos ambientes traduzidos.
-  {
-    const { context, page } = await setup({
-      viewport: { width: 1440, height: 900 },
-      reducedMotion: 'reduce',
-      colorScheme: 'light',
-    });
-    await page.goto(base + '/es', { waitUntil: 'domcontentloaded' });
-    assert.deepEqual(await page.locator('.fan-room-link').allTextContents(), [
-      'Suite',
-      'Dormitorio',
-      'Salón',
-      'Invitados',
-      'Patio',
-    ]);
-    assert.equal(
-      await page
-        .locator('.opening + #compartilhamento + #como-funciona + .presentation + #creditos')
-        .count(),
-      1,
-      'mesma sequência de seções em espanhol',
+  // A abertura em espanhol e em inglês: mesma composição, com os nomes dos ambientes traduzidos.
+  for (const [code, rooms, ids] of [
+    [
+      'es',
+      ['Suite', 'Dormitorio', 'Salón', 'Invitados', 'Patio'],
+      '.opening + #compartilhamento + #como-funciona + .presentation + #creditos',
+    ],
+    [
+      'en',
+      ['Suite', 'Bedroom', 'Living room', 'Guest room', 'Backyard'],
+      '.opening + #compartilhamento + #how-it-works + .presentation + #creditos',
+    ],
+  ]) {
+    const { context, page } = await setup(
+      {
+        viewport: { width: 1440, height: 900 },
+        reducedMotion: 'reduce',
+        colorScheme: 'light',
+      },
+      code,
     );
+    await page.goto(`${base}/${code}`, { waitUntil: 'domcontentloaded' });
+    assert.deepEqual(await page.locator('.fan-room-link').allTextContents(), rooms);
+    assert.equal(await page.locator(ids).count(), 1, `mesma sequência de seções em /${code}`);
     assert.ok(
       (await page.locator('.site-header').boundingBox()).width <= 1060,
-      'cabeçalho estreito em espanhol',
+      `cabeçalho estreito em /${code}`,
     );
-    await page.screenshot({ path: '.artifacts/opening-es-desktop.png' });
+    await page.screenshot({ path: `.artifacts/opening-${code}-desktop.png` });
     await context.close();
   }
 
@@ -329,14 +430,17 @@ try {
     [390, 844],
     [360, 800],
     [320, 740],
-  ].flatMap((size) => ['', '/es'].map((path) => [...size, path]))) {
-    const { context, page } = await setup({
-      viewport: { width, height },
-      reducedMotion: 'reduce',
-      colorScheme: 'light',
-      isMobile: width < 768,
-      hasTouch: width < 768,
-    });
+  ].flatMap((size) => ['', '/es', '/en'].map((path) => [...size, path]))) {
+    const { context, page } = await setup(
+      {
+        viewport: { width, height },
+        reducedMotion: 'reduce',
+        colorScheme: 'light',
+        isMobile: width < 768,
+        hasTouch: width < 768,
+      },
+      path.slice(1) || 'pt',
+    );
     await page.goto(base + path, { waitUntil: 'domcontentloaded' });
     await page.evaluate(() => document.fonts.ready);
     const initial = await page.locator('.fan-card').evaluateAll((cards) => ({
@@ -396,8 +500,13 @@ try {
       await page.evaluate(() => scrollTo(0, 0));
       await page.locator('.menu-toggle').click();
       assert.equal(await page.locator('#mobile-nav').isVisible(), true);
+      // Aberto, o cabeçalho cresce e empurra a abertura: atrás do menu fica a página.
+      await verifyHeaderContrast(page, `${width}px${path}: menu aberto`);
       await page.keyboard.press('Escape');
       assert.equal(await page.locator('#mobile-nav').isVisible(), false);
+      // Fechado, e com o ponteiro fora do botão, volta a escrita branca sobre o fundo escuro.
+      await page.mouse.move(0, 0);
+      await verifyHeaderContrast(page, `${width}px${path}: menu fechado`);
       assert.equal(
         await page.locator('.menu-toggle').evaluate((el) => el === document.activeElement),
         true,
@@ -423,7 +532,7 @@ try {
     await context.close();
   }
   results.push(
-    '320–1440px, em português e em espanhol: sem cortes/overflow; controles ao toque, menu, Escape, foco, contraste e movimento reduzido.',
+    '320–1440px, em português, espanhol e inglês: sem cortes/overflow; controles ao toque, menu (contraste medido na tela, aberto e fechado), Escape, foco, contraste e movimento reduzido.',
   );
 
   const dark = await setup({

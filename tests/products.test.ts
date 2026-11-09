@@ -352,8 +352,12 @@ test('o Autochat tem 4 passos, 3 distâncias, 6 campos no resumo, 4 casos, 8 ite
 // Uma distância escrita no texto: "450 m", "1,2 km" (e não "68 m²", nem "12 mensagens").
 const distance = /\d+(?:[.,]\d+)?\s*k?m(?![²\p{L}])/u;
 
-test('no Autochat, toda distância vem com "em linha reta" (es: "en línea recta")', () => {
-  const straight = { pt: 'em linha reta', es: 'en línea recta' };
+test('no Autochat, toda distância vem com "em linha reta" (es: "en línea recta", en: "in a straight line")', () => {
+  const straight: Record<(typeof locales)[number], string> = {
+    pt: 'em linha reta',
+    es: 'en línea recta',
+    en: 'in a straight line',
+  };
   for (const locale of locales) {
     const withDistance = leaves(translations(locale).productPages.autochat).filter(([, text]) =>
       distance.test(text),
@@ -370,11 +374,12 @@ test('no Autochat, toda distância vem com "em linha reta" (es: "en línea recta
 });
 
 test('no Autochat, a descrição do passo 1 diz a hora do pedido que a tela mostra', () => {
-  // Na tela, a hora vai como no WhatsApp (22:04); no texto corrido do português, como 22h04. Um
-  // idioma novo diz aqui como escreve a hora na descrição (o tipo pede a entrada dele).
+  // Na tela, a hora vai como no WhatsApp (22:04, 10:04 PM); no texto corrido do português, como
+  // 22h04. Um idioma novo diz aqui como escreve a hora na descrição (o tipo pede a entrada dele).
   const written: Record<(typeof locales)[number], (time: string) => string> = {
     pt: (time) => time.replace(':', 'h'),
     es: (time) => time,
+    en: (time) => time,
   };
   for (const locale of locales) {
     const { times, requestDescription } = translations(locale).productPages.autochat.mock;

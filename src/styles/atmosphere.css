@@ -70,6 +70,14 @@
     radial-gradient(ellipse 36% 64% at 5% 50%, var(--atmosphere-teal), transparent 80%);
   background: var(--bg-base);
 }
+/* Azul do lado do treinamento e verde do lado do Tour Pronto, nos tons dos cartões. O azul fica
+   longe do quadrado do ícone do treinamento: os dois têm quase a mesma cor e ele sumiria. */
+[data-atmosphere='in-person'] {
+  --atmosphere-spots:
+    radial-gradient(ellipse 30% 40% at 0% 72%, var(--atmosphere-blue), transparent 78%),
+    radial-gradient(ellipse 38% 60% at 97% 46%, var(--atmosphere-teal), transparent 78%),
+    radial-gradient(ellipse 60% 52% at 50% 24%, var(--atmosphere-neutral), transparent 76%);
+}
 [data-atmosphere='closing'] {
   --atmosphere-blue: color-mix(in srgb, var(--brand-blue) 28%, transparent);
   --atmosphere-teal: color-mix(in srgb, var(--brand-teal) 18%, transparent);
@@ -105,5 +113,12 @@
       radial-gradient(ellipse 90% 460px at 96% 380px, var(--atmosphere-blue), transparent 78%),
       radial-gradient(ellipse 94% 580px at 0% 72%, var(--atmosphere-neutral), transparent 76%),
       radial-gradient(ellipse 88% 410px at 100% 91%, var(--atmosphere-teal), transparent 78%);
+  }
+  /* Cartões empilhados: cada luz fica atrás do seu cartão, do lado oposto ao ícone e longe do
+     botão e da nota. */
+  [data-atmosphere='in-person'] {
+    --atmosphere-spots:
+      radial-gradient(ellipse 80% 300px at 100% 38%, var(--atmosphere-blue), transparent 78%),
+      radial-gradient(ellipse 80% 300px at 100% 64%, var(--atmosphere-teal), transparent 78%);
   }
 }

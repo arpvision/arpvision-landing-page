@@ -1,8 +1,10 @@
 /**
  * Endereços de cada idioma: as páginas e as âncoras que aparecem na barra do navegador.
- * O espanhol tem endereços em espanhol; o tipo obriga cada idioma a ter todos.
+ * O espanhol e o inglês têm endereços no próprio idioma; o tipo obriga cada idioma a ter
+ * todos. O script da faixa de sugestão de idioma também lê este mapa (para levar à página e
+ * à âncora equivalentes), então ele não importa nada além de tipos.
  */
-import type { Locale } from '.';
+import type { Locale } from './locales';
 
 export type PageId =
   | 'home'
@@ -18,12 +20,12 @@ export type AnchorId =
   | 'content'
   | 'howItWorks'
   | 'realTour'
+  | 'inPerson'
   | 'plans'
   | 'quote'
   | 'faq'
   | 'contact'
-  | 'compare'
-  | 'inPerson';
+  | 'compare';
 
 interface LocaleRoutes {
   pages: Record<PageId, string>;
@@ -47,12 +49,12 @@ export const routes: Record<Locale, LocaleRoutes> = {
       content: 'conteudo',
       howItWorks: 'como-funciona',
       realTour: 'tour-real',
+      inPerson: 'presencial',
       plans: 'planos',
       quote: 'cotacao',
       faq: 'duvidas',
       contact: 'contato',
       compare: 'comparar',
-      inPerson: 'presencial',
     },
   },
   es: {
@@ -71,12 +73,38 @@ export const routes: Record<Locale, LocaleRoutes> = {
       content: 'contenido',
       howItWorks: 'como-funciona',
       realTour: 'tour-real',
+      // Sem a seção no espanhol (o Presencial é só de Porto Alegre e região); o tipo pede a âncora.
+      inPerson: 'presencial',
       plans: 'planes',
       quote: 'cotizacion',
       faq: 'preguntas',
       contact: 'contacto',
       compare: 'comparar',
+    },
+  },
+  en: {
+    pages: {
+      home: '/en',
+      plans: '/en/plans',
+      tutorials: '/en/tutorials',
+      terms: '/en/terms-of-use',
+      privacy: '/en/privacy-policy',
+      products: '/en/products',
+      productInstagram: '/en/products/autopilot-for-instagram',
+      productAutochat: '/en/products/autochat',
+      productVideos: '/en/products/videos-from-photos',
+    },
+    anchors: {
+      content: 'content',
+      howItWorks: 'how-it-works',
+      realTour: 'real-tour',
+      // Sem a seção no inglês (o Presencial é só de Porto Alegre e região); o tipo pede a âncora.
       inPerson: 'presencial',
+      plans: 'plans',
+      quote: 'quote',
+      faq: 'faq',
+      contact: 'contact',
+      compare: 'compare',
     },
   },
 };
@@ -101,7 +129,7 @@ export const publishedPageIds: readonly PageId[] = [
 
 export const pagePath = (locale: Locale, page: PageId) => routes[locale].pages[page];
 export const anchorId = (locale: Locale, anchor: AnchorId) => routes[locale].anchors[anchor];
-/** Seção de uma página a partir de qualquer outra: "/#cotacao", "/es#cotizacion". */
+/** Seção de uma página a partir de qualquer outra: "/#cotacao", "/es#cotizacion", "/en#quote". */
 export const sectionPath = (locale: Locale, page: PageId, anchor: AnchorId) =>
   `${pagePath(locale, page)}#${anchorId(locale, anchor)}`;
 /** A página em que se está, pelo caminho do Astro (`Astro.url.pathname`). */

@@ -1,0 +1,19 @@
+---
+import Icon from './Icon.astro';
+// Molde da faixa de sugestão de idioma, sem texto: o script só a põe na página, já com o texto
+// do idioma oferecido, quando o navegador prefere outro idioma do site. O estilo está em
+// language.css. A página 404 não tem a faixa.
+---
+
+<template id="language-suggestion">
+  <aside class="language-suggestion">
+    <p data-suggestion-text></p>
+    <a data-suggestion-link></a>
+    <button type="button" class="icon-button" data-suggestion-close>
+      <Icon name="close" size={20} />
+    </button>
+  </aside>
+</template>
+<script>
+  import '../scripts/language-suggestion';
+</script>

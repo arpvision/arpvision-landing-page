@@ -1,7 +1,7 @@
 import { readFile, readdir, stat } from 'node:fs/promises';
 import path from 'node:path';
 import assert from 'node:assert/strict';
-import { portugueseWords } from './portuguese-words.mjs';
+import { portugueseWordsIn } from './portuguese-words.mjs';
 import { pricePattern } from './lib/prices.mjs';
 import { publishedPageIds, routes as localeRoutes } from '../src/i18n/routes.ts';
 // Sem preços públicos (site.pricing.showPrices), /planos é só um redirecionamento.
@@ -11,10 +11,11 @@ const pricesShown = !(await readFile('dist/planos/index.html', 'utf8')).includes
 // O arquivo de cada endereço no build: "/" é index.html, "/es/planes" é es/planes/index.html.
 const fileOf = (route) => `${route.slice(1)}/index.html`.replace(/^\//, '');
 // Cada página existe em cada idioma, com os endereços de src/i18n/routes.ts; o português mora
-// na raiz e o espanhol em /es.
+// na raiz, o espanhol em /es e o inglês em /en.
 const locales = [
   { code: 'pt', lang: 'pt-BR', ogLocale: 'pt_BR' },
   { code: 'es', lang: 'es-ES', ogLocale: 'es_ES' },
+  { code: 'en', lang: 'en', ogLocale: 'en_US' },
 ].map((locale) => ({
   ...locale,
   quote: localeRoutes[locale.code].anchors.quote,
@@ -22,6 +23,16 @@ const locales = [
     Object.entries(localeRoutes[locale.code].pages).map(([page, route]) => [page, fileOf(route)]),
   ),
 }));
+// O texto da faixa de sugestão de idioma só entra na página pelo navegador: nenhum HTML que o
+// servidor entrega pode tê-lo (src/i18n/suggestion.ts).
+const suggestionTexts = [
+  'Esta página também está em português.',
+  'Ver em português',
+  'Esta página también está en español.',
+  'Ver en español',
+  'This page is also available in English.',
+  'View in English',
+];
 // Só as páginas publicadas, na ordem de routes.ts; /planos só com preços públicos.
 const pageIds = Object.keys(localeRoutes.pt.pages).filter(
   (page) => publishedPageIds.includes(page) && (pricesShown || page !== 'plans'),
@@ -181,7 +192,7 @@ for (const { locale, page, file } of routes) {
   const schemas = [
     ...html.matchAll(/<script[^>]+type="application\/ld\+json"[^>]*>(.*?)<\/script>/gs),
   ].flatMap((match) => JSON.parse(match[1]));
-  // O VideoObject dos tutoriais leva o idioma do vídeo, narrado em português nos dois idiomas.
+  // O VideoObject dos tutoriais leva o idioma do vídeo, narrado em português em todos os idiomas.
   for (const item of schemas.filter((item) => 'inLanguage' in item))
     assert.equal(
       item.inLanguage,
@@ -225,8 +236,8 @@ for (const { locale, page, file } of routes) {
       `${route}: VideoObject de cada cartão`,
     );
   }
-  // Cabeçalho, menu do celular e rodapé levam aos tutoriais do idioma da página; os do outro
-  // idioma só aparecem no seletor PT | ES, que leva hreflang.
+  // Cabeçalho, menu do celular e rodapé levam aos tutoriais do idioma da página; os dos outros
+  // idiomas só aparecem no seletor de idioma, que leva hreflang.
   for (const other of locales)
     assert.equal(
       html.match(new RegExp(`<a href="${pathOf(other.pages.tutorials)}"(?! hreflang)`, 'g'))
@@ -236,13 +247,30 @@ for (const { locale, page, file } of routes) {
     );
   if (locale.code !== 'pt')
     for (const text of readableText(html))
-      assert.doesNotMatch(text, portugueseWords, `${route}: português na página: "${text}"`);
-  // Seletor de idioma: leva à mesma página em cada idioma.
+      assert.doesNotMatch(
+        text,
+        portugueseWordsIn(locale.code),
+        `${route}: português na página: "${text}"`,
+      );
+  // Seletor de idioma: leva à mesma página em cada idioma, cada opção com o lang dela, no
+  // cabeçalho (compacto), no menu do celular e no rodapé.
   for (const other of locales)
-    assert.ok(
-      html.includes(`href="${pathOf(other.pages[page])}" hreflang="${other.lang}"`),
+    assert.equal(
+      html.split(
+        `href="${pathOf(other.pages[page])}" hreflang="${other.lang}" lang="${other.lang}" data-language-choice="${other.code}"`,
+      ).length - 1,
+      3,
       `${route}: seletor leva a ${other.lang}`,
     );
+  assert.equal(
+    (html.match(/<details class="language-menu desktop-language" data-language-menu>/g) || [])
+      .length,
+    1,
+    `${route}: seletor compacto no cabeçalho`,
+  );
+  for (const text of suggestionTexts)
+    assert.ok(!html.includes(text), `${route}: texto da faixa de sugestão no HTML: ${text}`);
+  assert.ok(html.includes('<template id="language-suggestion">'), `${route}: molde da faixa`);
   if (!pricesShown) {
     assert.doesNotMatch(html, pricePattern, `${route}: nenhum preço em reais ou em euros`);
     assert.ok(!html.includes('"offers"'), `${route}: JSON-LD sem ofertas com preço`);
@@ -283,13 +311,54 @@ assert.deepEqual(
   routes.map(({ file }) => file).sort(),
   'as páginas do build são as publicadas em src/i18n/routes.ts',
 );
-// Página 404: fala os dois idiomas, fica fora do índice e não aponta canonical.
+// ARP Vision Presencial, só em português (atende Porto Alegre e região): seção na Home, item no
+// menu (com destaque pela rolagem) e WhatsApp com a mensagem do serviço. Vale com ou sem preços.
+for (const locale of locales) {
+  const home = pathOf(locale.pages.home);
+  const html = await readFile(path.join('dist', locale.pages.home), 'utf8');
+  const inPerson = html.match(/<section[^>]+id="presencial"[\s\S]*?<\/section>/)?.[0];
+  if (locale.code === 'pt') {
+    assert.ok(inPerson, `${home}: seção Presencial`);
+    assert.match(
+      html,
+      /<a href="#presencial" data-spy="presencial">/,
+      `${home}: menu leva ao Presencial`,
+    );
+    assert.equal(
+      decodeURIComponent(inPerson.match(/href="https:\/\/wa\.me\/\d+\?text=([^"]+)"/)?.[1] ?? ''),
+      'Olá! Vim pelo site e quero saber do ARP Vision Presencial.',
+      `${home}: botão do Presencial abre o WhatsApp com a mensagem do serviço`,
+    );
+  } else assert.ok(!inPerson && !html.includes('#presencial'), `${home}: sem o Presencial`);
+  // Com "Tour real" o menu só cabe no cabeçalho compacto, ligado por data-long-nav.
+  assert.equal(
+    /<header[^>]+data-long-nav/.test(html),
+    html.includes('data-spy="tour-real"'),
+    `${home}: cabeçalho compacto exatamente quando o menu tem "Tour real"`,
+  );
+}
+// Página 404: fala os três idiomas, fica fora do índice, não aponta canonical e não tem a
+// faixa de sugestão de idioma.
 const notFound = await readFile('dist/404.html', 'utf8');
 assert.match(notFound, /name="robots" content="noindex/, '404 fora do índice');
 assert.ok(!notFound.includes('rel="canonical"'), '404 sem canonical');
 assert.equal((notFound.match(/<h1[ >]/g) || []).length, 1, '404: um h1');
-assert.ok(notFound.includes('Página não encontrada') && notFound.includes('Página no encontrada'));
+assert.ok(
+  notFound.includes('Página não encontrada') &&
+    notFound.includes('Página no encontrada') &&
+    notFound.includes('Page not found'),
+  '404 nos três idiomas',
+);
 assert.ok(notFound.includes('lang="es-ES"'), '404: o bloco em espanhol marcado como espanhol');
+assert.ok(notFound.includes('lang="en"'), '404: o bloco em inglês marcado como inglês');
+for (const locale of locales)
+  assert.ok(
+    notFound.includes(`href="${pathOf(locale.pages.home)}" hreflang="${locale.lang}"`),
+    `404: volta ao início em ${locale.lang}`,
+  );
+assert.ok(!notFound.includes('language-suggestion'), '404 sem a faixa de sugestão de idioma');
+for (const text of suggestionTexts)
+  assert.ok(!notFound.includes(text), `404: texto da faixa de sugestão no HTML: ${text}`);
 const files = await allFiles('dist/_astro');
 let jsBytes = 0;
 for (const file of files.filter((file) => file.endsWith('.js'))) jsBytes += (await stat(file)).size;
@@ -325,5 +394,5 @@ assert.ok(
   'robots aponta o sitemap do domínio canônico',
 );
 console.log(
-  `${routes.length} rotas HTML verificadas em ${locales.length} idiomas (as publicadas em src/i18n/routes.ts, ${pageIds.filter(isProductPage).length} de produto)${pricesShown ? '' : ' (preços ocultos: cotação na Home, /planos e /es/planes redirecionam)'}; ${verifiedLinks} referências locais válidas; ${(jsBytes / 1024).toFixed(1)} KB de JavaScript total (sem gzip). Sitemap, hreflang, robots, 404, metadados, schemas (FAQPage com perguntas e respostas na página, Service nos produtos), UTMs e idioma das páginas válidos.`,
+  `${routes.length} rotas HTML verificadas em ${locales.length} idiomas (as publicadas em src/i18n/routes.ts, ${pageIds.filter(isProductPage).length} de produto)${pricesShown ? '' : ` (preços ocultos: cotação na Home, ${locales.map((locale) => pathOf(locale.pages.plans)).join(', ')} redirecionam)`}; ${verifiedLinks} referências locais válidas; ${(jsBytes / 1024).toFixed(1)} KB de JavaScript total (sem gzip). Sitemap, hreflang, robots, 404, metadados, schemas (FAQPage com perguntas e respostas na página, Service nos produtos), UTMs, seletor, faixa de sugestão só no navegador e idioma das páginas válidos.`,
 );

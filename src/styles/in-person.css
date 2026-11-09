@@ -1,0 +1,98 @@
+/*
+ * ARP Vision Presencial (InPerson.astro): os dois serviços em cartões com o vidro dos
+ * benefícios da equipe logo acima (landing-polish.css) e o WhatsApp centralizado embaixo.
+ */
+.in-person-section {
+  background: var(--bg-base);
+}
+/* "pretty" evita uma palavra sozinha na última linha ("ela.", "você.", "região." no celular;
+   "trabalho." nos cartões, em todo o desktop). */
+.in-person-section h2,
+.in-person-section .section-heading p,
+.in-person-card p,
+.in-person-note {
+  text-wrap: pretty;
+}
+/* Sem o <br> (global.css o esconde abaixo de 768px), o título quebra no meio da segunda frase
+   de 409 a 745px, às vezes com o "Ou" no fim da primeira linha, como em 320px. De 322 a 399px
+   ele quebra bem sem o <br>, que só somaria uma linha até 361px. */
+@media (max-width: 321px), (min-width: 400px) {
+  .in-person-section .desktop-break {
+    display: inline;
+  }
+}
+/* Mesmas colunas dos benefícios da equipe (.benefits-grid): os cartões se alinham com os de cima. */
+.in-person-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 48px;
+  max-width: 980px;
+  margin-inline: auto;
+}
+.in-person-card.glass-surface {
+  padding: 32px;
+}
+.in-person-card .icon-tile {
+  margin-bottom: 22px;
+}
+/* O azul fica no treinamento; o verde marca o Tour Pronto, como nos benefícios da equipe. */
+.in-person-card-teal .icon-tile {
+  background: var(--brand-teal-soft);
+  color: var(--brand-teal-dark);
+}
+.in-person-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 44px;
+  text-align: center;
+}
+.in-person-actions .button {
+  max-width: 100%;
+  font-size: var(--fs-small);
+  text-wrap: balance;
+}
+.in-person-note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--fs-note);
+}
+@media (max-width: 1023px) {
+  .in-person-grid {
+    gap: 32px;
+  }
+  .in-person-card.glass-surface {
+    padding: 28px 24px;
+  }
+}
+@media (max-width: 767px) {
+  .in-person-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+  .in-person-card.glass-surface {
+    padding: 24px;
+  }
+  .in-person-card .icon-tile {
+    margin-bottom: 18px;
+  }
+  .in-person-actions {
+    margin-top: 32px;
+  }
+}
+@media (max-width: 479px) {
+  .in-person-actions .button {
+    width: 100%;
+  }
+}
+/* Até 374px o botão quebraria em duas linhas, com o ícone longe do texto centralizado: menos
+   folga o mantém numa linha a partir de 360px e, abaixo disso, o texto fica junto do ícone,
+   como no botão do WhatsApp da cotação. */
+@media (max-width: 374px) {
+  .in-person-actions .button {
+    padding-inline: 14px;
+    gap: 8px;
+    text-align: start;
+  }
+}

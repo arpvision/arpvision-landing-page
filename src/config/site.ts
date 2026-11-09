@@ -1,7 +1,7 @@
 /**
  * Única fonte dos dados comerciais, mídia e links, os mesmos em todos os idiomas: créditos,
- * dias de teste, preços e limites saem daqui para o português e o espanhol, para nunca
- * divergirem. O texto mora nos dicionários de `src/i18n/` (um por idioma).
+ * dias de teste, preços e limites saem daqui para o português, o espanhol e o inglês, para
+ * nunca divergirem. O texto mora nos dicionários de `src/i18n/` (um por idioma).
  * Os planos seguem as regras comerciais aprovadas, num documento interno fora deste repositório.
  * Campos ainda não decididos permanecem sem oferta na interface.
  */
@@ -71,8 +71,8 @@ export const site = {
     symbol: '/brand/arp-vision-symbol-blue-transparent.svg',
   },
   media: {
-    // O vídeo tem texto em português gravado na imagem; serve aos dois idiomas até existir
-    // uma versão em espanhol.
+    // O vídeo tem texto em português gravado na imagem; serve a todos os idiomas até existir
+    // uma versão em cada um.
     tutorial: '/video/tutorial-captura-360-v3.mp4',
     tutorialPoster: '/images/tutorial-720.webp',
     // Tour 360° da demonstração, protegido até a pessoa ativar.
@@ -155,6 +155,20 @@ export const site = {
         horizontal: {
           src: '/video/exemplo-horizontal-es.mp4',
           poster: '/images/produtos/exemplo-horizontal-es.webp',
+          width: 1280,
+          height: 720,
+        },
+      },
+      en: {
+        vertical: {
+          src: '/video/exemplo-vertical-en.mp4',
+          poster: '/images/produtos/exemplo-vertical-en.webp',
+          width: 720,
+          height: 1280,
+        },
+        horizontal: {
+          src: '/video/exemplo-horizontal-en.mp4',
+          poster: '/images/produtos/exemplo-horizontal-en.webp',
           width: 1280,
           height: 720,
         },
@@ -306,8 +320,9 @@ export const available = {
   inPerson: false,
 };
 
-// Preço como no app: sem centavos quando o valor é inteiro (R$ 249, R$ 23,25). Em espanhol
-// continua em reais e no formato do app ("R$ 249"), até existir cobrança em euro.
+// Preço como no app: sem centavos quando o valor é inteiro (R$ 249, R$ 23,25). Em espanhol e
+// em inglês continua em reais e no formato do app ("R$ 249"), até existir cobrança em outra
+// moeda.
 export const price = (value: number) =>
   new Intl.NumberFormat('pt-BR', {
     style: 'currency',
@@ -318,9 +333,9 @@ export const price = (value: number) =>
 /** Plano pelo id, para os textos que citam os valores de um plano específico. */
 export const planById = (id: PlanId) => site.pricing.plans.find((plan) => plan.id === id)!;
 
-// Os vídeos de /tutoriais e /es/tutoriales, na ordem do app (o app tem a mesma lista em
-// inner-view-client/src/app/tutoriais). Moram no YouTube, como Shorts não listados, e são
-// narrados em português nos dois idiomas. O título, a descrição e o nome da seção de cada
+// Os vídeos de /tutoriais, /es/tutoriales e /en/tutorials, na ordem do app (o app tem a mesma
+// lista em inner-view-client/src/app/tutoriais). Moram no YouTube, como Shorts não listados, e
+// são narrados em português em todos os idiomas. O título, a descrição e o nome da seção de cada
 // vídeo ficam nos dicionários (`tutorials`). A capa é <id>-source.jpg em
 // public/images/tutoriais, e `prepare-images` gera os WebP.
 export type TutorialId = 'do-novo-tour-a-publicacao' | 'app-na-tela-de-inicio';

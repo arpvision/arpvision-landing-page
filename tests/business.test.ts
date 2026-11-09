@@ -12,6 +12,7 @@ import {
 } from '../src/lib/business';
 import { site, tutorials } from '../src/config/site';
 import { featureGroups } from '../src/lib/content';
+import { locales } from '../src/i18n';
 
 test('configuração publica os quatro planos do app com 20% no anual e sem pacotes indefinidos', () => {
   const [individual, professional, business, enterprise] = site.pricing.plans;
@@ -47,7 +48,7 @@ test('configuração publica os quatro planos do app com 20% no anual e sem paco
   assert.ok(site.pricing.plans.every((plan) => plan.users === null));
   assert.equal(site.pricing.annualDiscount, 0.2);
   assert.deepEqual(site.pricing.extraCredits, []);
-  for (const locale of ['pt', 'es'] as const)
+  for (const locale of locales)
     assert.ok(
       featureGroups(locale).every((group) => group.rows.every((row) => row.values.length === 4)),
     );
@@ -64,7 +65,7 @@ test('estatísticas dos tours só no Business e no Enterprise, como no app', () 
       ['Enterprise', true],
     ],
   );
-  for (const locale of ['pt', 'es'] as const) {
+  for (const locale of locales) {
     const linha = featureGroups(locale)
       .flatMap((group) => group.rows)
       .find((row) => row.id === 'stats');

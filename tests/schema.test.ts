@@ -80,17 +80,31 @@ test('Service de um produto sem texto no idioma é erro, e não um JSON-LD vazio
 });
 
 test('cada produto com página tem um Service no idioma dela, sem oferta', () => {
-  const pages = {
-    videos: 'videos-a-partir-de-fotos',
-    instagram: 'piloto-automatico-para-instagram',
-    autochat: 'autochat',
+  // O endereço de cada página, pelo idioma: o inglês tem os próprios nomes.
+  type PageProduct = 'videos' | 'instagram' | 'autochat';
+  const addresses: Record<(typeof locales)[number], Record<PageProduct, string>> = {
+    pt: {
+      videos: '/produtos/videos-a-partir-de-fotos',
+      instagram: '/produtos/piloto-automatico-para-instagram',
+      autochat: '/produtos/autochat',
+    },
+    es: {
+      videos: '/es/productos/videos-a-partir-de-fotos',
+      instagram: '/es/productos/piloto-automatico-para-instagram',
+      autochat: '/es/productos/autochat',
+    },
+    en: {
+      videos: '/en/products/videos-from-photos',
+      instagram: '/en/products/autopilot-for-instagram',
+      autochat: '/en/products/autochat',
+    },
   };
   for (const locale of locales)
-    for (const [id, slug] of Object.entries(pages)) {
-      const s = serviceSchema(id as keyof typeof pages, locale);
+    for (const [id, address] of Object.entries(addresses[locale]) as [PageProduct, string][]) {
+      const s = serviceSchema(id, locale);
       // Com texto de página, o nome e a descrição saem dela; antes disso, do menu Produtos.
-      const meta = productPageText(locale, id as keyof typeof pages)?.meta;
-      const item = translations(locale).products.items[id as keyof typeof pages];
+      const meta = productPageText(locale, id)?.meta;
+      const item = translations(locale).products.items[id];
       assert.equal(
         s.name,
         meta ? meta.title.replace(/ \| ARP Vision$/, '') : item.name,
@@ -101,11 +115,7 @@ test('cada produto com página tem um Service no idioma dela, sem oferta', () =>
         meta ? meta.description : item.line,
         `${locale}/${id}: descrição`,
       );
-      assert.equal(
-        s.url,
-        `https://www.arpvision.com.br${locale === 'es' ? '/es/productos' : '/produtos'}/${slug}`,
-        `${locale}/${id}: endereço`,
-      );
+      assert.equal(s.url, `https://www.arpvision.com.br${address}`, `${locale}/${id}: endereço`);
       assert.doesNotMatch(JSON.stringify(s), /offers/, `${locale}/${id}`);
     }
 });

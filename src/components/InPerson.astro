@@ -1,0 +1,55 @@
+---
+import Icon from './Icon.astro';
+import ContactLink from './ContactLink.astro';
+import GlassSurface from './GlassSurface.astro';
+import { pageLocale } from '../i18n';
+import { anchorId } from '../i18n/routes';
+// ARP Vision Presencial: a equipe vai à imobiliária treinar os corretores ou ao imóvel fazer a
+// captura. Sem preço no site; a conversa segue pelo WhatsApp, com a mensagem pronta. Só existe
+// em português (t.inPerson é null nos outros idiomas).
+const { locale, t } = pageLocale(Astro);
+const text = t.inPerson;
+const services = text
+  ? [
+      { icon: 'users', tone: 'blue', ...text.services.training },
+      { icon: 'home', tone: 'teal', ...text.services.ready },
+    ]
+  : [];
+---
+
+{text && (
+  <section
+    class="section in-person-section"
+    id={anchorId(locale, 'inPerson')}
+    data-atmosphere="in-person"
+    aria-labelledby="in-person-title"
+  >
+    <div class="container">
+      <div class="section-heading center">
+        <span class="eyebrow">{text.eyebrow}</span>
+        <h2 id="in-person-title">
+          {text.title1}
+          <br class="desktop-break" /> {text.title2}
+        </h2>
+        <p>{text.lead}</p>
+      </div>
+      <div class="in-person-grid">
+        {services.map((service) => (
+          <GlassSurface as="article" class={`in-person-card in-person-card-${service.tone}`} clear>
+            <span class="icon-tile">
+              <Icon name={service.icon} size={24} />
+            </span>
+            <h3>{service.title}</h3>
+            <p>{service.text}</p>
+          </GlassSurface>
+        ))}
+      </div>
+      <div class="in-person-actions">
+        <ContactLink class="button button-primary" message={text.message}>
+          <Icon name="message" size={19} /> {text.button}
+        </ContactLink>
+        <p class="in-person-note">{text.note}</p>
+      </div>
+    </div>
+  </section>
+)}

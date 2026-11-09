@@ -1,7 +1,7 @@
 // Gera os WebPs e os cartões Open Graph (1200 × 630).
 // Uso: node scripts/prepare-images.mjs [nome ...]
 //   Sem nomes, gera tudo. Com nomes, só os arquivos citados (sem extensão), por exemplo
-//   `node scripts/prepare-images.mjs og-home-es og-planes-es`. Os PNGs em português no ar
+//   `node scripts/prepare-images.mjs og-home-en og-plans-en`. Os PNGs em português no ar
 //   (og-home, og-planos) foram preservados de uma redação anterior: regenerá-los troca o
 //   texto deles pelo daqui.
 import sharp from 'sharp';
@@ -72,6 +72,18 @@ const cards = [
     subtitle: 'Conoce los planes de ARP Vision.',
     note: 'Sin descargar apps. Sin equipo extra.',
   },
+  {
+    name: 'og-home-en',
+    lines: ['Your phone.', 'Your space.', 'In 360°.'],
+    subtitle: 'Virtual tours for your business.',
+    note: 'No app to download. No extra gear.',
+  },
+  {
+    name: 'og-plans-en',
+    lines: ['Your next', 'step starts', 'here.'],
+    subtitle: 'See the ARP Vision plans.',
+    note: 'No app to download. No extra gear.',
+  },
 ].filter((card) => wanted(card.name));
 const css = await readFile('src/styles/global.css', 'utf8');
 const color = (name) => css.match(new RegExp(`--${name}:\\s*(#[A-Fa-f0-9]+)`))[1];
@@ -96,5 +108,5 @@ for (const { name, lines, subtitle, note } of cards) {
 console.log(
   only.length
     ? `Prontos: ${only.join(', ')}.`
-    : 'Imagens WebP e cartões Open Graph 1200 × 630 (português e espanhol) prontos.',
+    : 'Imagens WebP e cartões Open Graph 1200 × 630 (português, espanhol e inglês) prontos.',
 );

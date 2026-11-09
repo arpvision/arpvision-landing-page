@@ -1,8 +1,10 @@
 /**
- * Português do Brasil: a fonte do texto do site. Todo texto novo, ou mudado, entra aqui e em
- * `es.ts` no mesmo PR; o tipo `Dictionary` sai deste arquivo, então o espanhol não compila
- * se faltar uma chave. Números, preços, links e mídia comum ficam em `src/config/site.ts`
- * e chegam aqui como parâmetros das funções.
+ * Português do Brasil: a fonte do texto do site. Todo texto novo, ou mudado, entra aqui, em
+ * `es.ts` e em `en.ts` no mesmo PR, menos uma parte que só existe em português (um serviço
+ * local, como o Presencial), que vai em `onlyInPortuguese` e vale null nos outros idiomas. O
+ * tipo `Dictionary` sai deste arquivo, então os outros idiomas não compilam se faltar uma
+ * chave. Números, preços, links e mídia comum ficam em `src/config/site.ts` e chegam aqui
+ * como parâmetros das funções.
  *
  * `{nome}` marca o valor que o script do navegador preenche (texto que muda depois da carga).
  * Linhas em lista viram linhas separadas por <br /> no componente.
@@ -11,6 +13,11 @@ import type { FanRoomId, PlanId, TutorialId, TutorialSectionId } from '../config
 
 /** "1 ambiente", "2 ambientes". */
 const rooms = (count: number) => `${count} ${count === 1 ? 'ambiente' : 'ambientes'}`;
+/**
+ * Parte que só existe em português: nos outros idiomas a chave vale null (marcada DIFERENTE) e
+ * ela não aparece. A chave entra nas diferenças permitidas de tests/i18n.test.ts.
+ */
+const onlyInPortuguese = <T>(value: T): T | null => value;
 
 export const pt = {
   meta: {
@@ -66,17 +73,15 @@ export const pt = {
       },
       autochat: { name: 'Autochat', line: 'Atende no WhatsApp e passa ao corretor.' },
     },
-    // O ARP Vision Presencial só existe em português, por enquanto: no espanhol, sem o grupo.
-    inPerson: {
+    // O grupo "Com a nossa equipe": o ARP Vision Presencial, que só existe em português (atende
+    // Porto Alegre e região). Os dois itens levam à seção dele na home.
+    inPerson: onlyInPortuguese({
       training: {
         name: 'Treinamento da equipe',
         line: 'Seus corretores aprendem a fazer tours com o celular.',
       },
       readyTour: { name: 'Tour Pronto', line: 'Nossa equipe vai até o imóvel e faz a captura.' },
-    } as {
-      training: { name: string; line: string };
-      readyTour: { name: string; line: string };
-    } | null,
+    }),
   },
   // As páginas dos produtos novos (/produtos/<produto>), uma por produto. As telas de exemplo usam
   // só nomes fictícios (Imobiliária Exemplo, suaimobiliaria, CRECI 00000-J) e nenhum preço.
@@ -825,7 +830,7 @@ export const pt = {
       visit: { title: 'Antes da visita', text: 'Quem chega já conhece o espaço e vem decidido.' },
     },
     // A conversa em português é uma imagem; sem ela, o componente monta a conversa em
-    // HTML com o texto de `chat` (é o que o espanhol usa).
+    // HTML com o texto de `chat` (é o que o espanhol e o inglês usam).
     conversationImage: {
       src: '/images/conversa-whatsapp.webp',
       alt: 'Simulação de um corretor enviando um tour de 9 ambientes no WhatsApp. A mensagem explica que o cliente pode abrir no computador ou no celular, sem baixar nada nem criar conta.',
@@ -943,6 +948,28 @@ export const pt = {
       },
     },
   },
+  // ARP Vision Presencial: a equipe vai até a imobiliária treinar os corretores ou até o imóvel
+  // fazer a captura. Atende Porto Alegre e região, por isso só existe em português.
+  inPerson: onlyInPortuguese({
+    nav: 'Presencial',
+    eyebrow: 'ARP VISION PRESENCIAL',
+    title1: 'Treinamos sua equipe.',
+    title2: 'Ou fazemos o tour por ela.',
+    lead: 'Para imobiliárias de Porto Alegre e região, a equipe da ARP Vision vai até você.',
+    services: {
+      training: {
+        title: 'Treinamento da equipe',
+        text: 'Seus corretores aprendem a fazer tours com o celular, na sua imobiliária e com prática num imóvel de verdade.',
+      },
+      ready: {
+        title: 'Tour Pronto',
+        text: 'Nossa equipe vai até o imóvel e faz a captura. O tour aparece na conta da sua imobiliária, pronto para compartilhar, e seus corretores poupam tempo e trabalho.',
+      },
+    },
+    message: 'Olá! Vim pelo site e quero saber do ARP Vision Presencial.',
+    button: 'Falar sobre o Presencial no WhatsApp',
+    note: 'Atendimento presencial em Porto Alegre e região.',
+  }),
   quote: {
     eyebrow: 'PREÇO SOB MEDIDA',
     title: 'Cada negócio tem um tamanho. A sua proposta também.',
@@ -953,8 +980,8 @@ export const pt = {
         text: 'Você paga por ambiente pronto, não por foto.',
       },
       phone: {
-        title: 'Sem câmera 360° e sem fotógrafo.',
-        text: 'O celular que você já tem faz o tour.',
+        title: 'Sem câmera 360°.',
+        text: 'Com o celular da sua equipe ou com a nossa.',
       },
       team: { title: 'Conversa direta com o time.', text: 'Tire as dúvidas antes de decidir.' },
     },

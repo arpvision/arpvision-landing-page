@@ -1,5 +1,5 @@
 ---
-// A Home de cada idioma (/ e /es): o mesmo conteúdo, com o texto do dicionário da página.
+// A Home de cada idioma (/, /es e /en): o mesmo conteúdo, com o texto do dicionário da página.
 import Layout from '../../layouts/Layout.astro';
 import Icon from '../Icon.astro';
 import Tour from '../Tour.astro';
@@ -12,6 +12,7 @@ import FanCards from '../FanCards.astro';
 import TourShowcase from '../TourShowcase.astro';
 import Sharing from '../Sharing.astro';
 import TeamBenefits from '../TeamBenefits.astro';
+import InPerson from '../InPerson.astro';
 import { site } from '../../config/site';
 import { pageLocale } from '../../i18n';
 import { anchorId } from '../../i18n/routes';
@@ -109,6 +110,8 @@ const roomCards = site.media.fanRooms.map((room, index) => ({
   <Credits />
   <Tour />
   <TeamBenefits />
+  {/* Só em português: o Presencial atende Porto Alegre e região. */}
+  <InPerson />
   {/* Com os preços ainda em definição, a cotação pelo WhatsApp ocupa o lugar dos planos. */}
   {site.pricing.showPrices ? (
     <section class="section plans-preview" id={anchorId(locale, 'plans')}>
