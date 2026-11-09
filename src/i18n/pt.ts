@@ -726,7 +726,9 @@ export const pt = {
     },
     eyebrow: 'PRODUTOS PARA IMOBILIÁRIAS',
     title: 'Do primeiro post ao cliente pronto para a visita.',
-    lead: 'Quatro produtos que trabalham juntos: mostram o imóvel, mantêm o Instagram em dia e atendem no WhatsApp enquanto o corretor está na rua.',
+    // Sem contar os produtos: a página mostra seis cartões no português (com o Presencial) e quatro
+    // nos outros idiomas.
+    lead: 'Produtos que trabalham juntos: mostram o imóvel, mantêm o Instagram em dia e atendem no WhatsApp enquanto o corretor está na rua.',
     // O fim de cada cartão.
     cta: 'Conhecer',
     finalCta: {

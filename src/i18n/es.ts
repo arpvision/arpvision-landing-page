@@ -688,7 +688,7 @@ export const es: Dictionary = {
     },
     eyebrow: 'PRODUCTOS PARA INMOBILIARIAS',
     title: 'Del primer post al cliente listo para la visita.',
-    lead: 'Cuatro productos que trabajan juntos: muestran el inmueble, mantienen el Instagram al día y atienden por WhatsApp mientras el agente inmobiliario está en la calle.',
+    lead: 'Productos que trabajan juntos: muestran el inmueble, mantienen el Instagram al día y atienden por WhatsApp mientras el agente inmobiliario está en la calle.',
     cta: 'Conocer',
     finalCta: {
       title: '¿Qué producto encaja con tu inmobiliaria?',

@@ -11,11 +11,12 @@ const pricesShown = !(await readFile('dist/planos/index.html', 'utf8')).includes
 // O arquivo de cada endereço no build: "/" é index.html, "/es/planes" é es/planes/index.html.
 const fileOf = (route) => `${route.slice(1)}/index.html`.replace(/^\//, '');
 // Cada página existe em cada idioma, com os endereços de src/i18n/routes.ts; o português mora
-// na raiz, o espanhol em /es e o inglês em /en.
+// na raiz, o espanhol em /es e o inglês em /en. A imagem de compartilhamento das páginas de
+// produto (e da com todos eles) é a da home do idioma.
 const locales = [
-  { code: 'pt', lang: 'pt-BR', ogLocale: 'pt_BR' },
-  { code: 'es', lang: 'es-ES', ogLocale: 'es_ES' },
-  { code: 'en', lang: 'en', ogLocale: 'en_US' },
+  { code: 'pt', lang: 'pt-BR', ogLocale: 'pt_BR', ogImage: 'og-home.png' },
+  { code: 'es', lang: 'es-ES', ogLocale: 'es_ES', ogImage: 'og-home-es.png' },
+  { code: 'en', lang: 'en', ogLocale: 'en_US', ogImage: 'og-home-en.png' },
 ].map((locale) => ({
   ...locale,
   quote: localeRoutes[locale.code].anchors.quote,
@@ -40,6 +41,11 @@ const pageIds = Object.keys(localeRoutes.pt.pages).filter(
 // As páginas de produto moram em /produtos/<produto>; /produtos é a lista com todos.
 const isProductPage = (page) =>
   localeRoutes.pt.pages[page].startsWith(`${localeRoutes.pt.pages.products}/`);
+// As regras de texto da spec no inglês (as do português e do espanhol estão no teste do catálogo, e
+// a moeda com número no pricePattern): nada de "intelligent", "smart", "generated", "algorithm",
+// "100% real" nem "unedited", e nada de "starting at", "from" ou "as low as" com preço.
+const englishRules =
+  /\bintelligen(?:t|ce)\b|\bsmart\b|\bgenerat(?:e|ed|es|ing)\b|\balgorithms?\b|100\s*%\s*real|\bunedited\b|\b(?:starting at|from|as low as)\s*(?:\$|€|£)/i;
 const pathOf = (file) => `/${file.replace(/\/?index\.html$/, '')}`;
 const routes = locales.flatMap((locale) =>
   pageIds.map((page) => ({ locale, page, file: locale.pages[page] })),
@@ -252,6 +258,16 @@ for (const { locale, page, file } of routes) {
         portugueseWordsIn(locale.code),
         `${route}: português na página: "${text}"`,
       );
+  if (locale.code === 'en')
+    for (const text of readableText(html))
+      assert.doesNotMatch(text, englishRules, `${route}: regra de texto do inglês: "${text}"`);
+  if (isProductPage(page) || page === 'products')
+    assert.ok(
+      html
+        .match(/property="og:image" content="([^"]+)"/)?.[1]
+        .endsWith(`/images/${locale.ogImage}`),
+      `${route}: imagem de compartilhamento do idioma (${locale.ogImage})`,
+    );
   // Seletor de idioma: leva à mesma página em cada idioma, cada opção com o lang dela, no
   // cabeçalho (compacto), no menu do celular e no rodapé.
   for (const other of locales)

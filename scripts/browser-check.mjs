@@ -991,7 +991,7 @@ try {
     'Menu Produtos no desktop (pt, es e en): primeiro item, clique, Esc com o foco de volta, Enter, Tab até o painel, clique fora e os produtos no ar; no pt, o grupo "Com a nossa equipe" com o treinamento e o Tour Pronto levando à seção do Presencial, e nada dele no es e no en OK',
   );
 
-  // A página do Piloto automático para Instagram, nos dois idiomas: as telas de exemplo marcadas,
+  // A página do Piloto automático para Instagram, nos três idiomas: as telas de exemplo marcadas,
   // nada do tour na cotação e na faixa azul, o produto em todo botão de WhatsApp, a mensagem da
   // cotação e o menu marcando o produto, com Cotação e Dúvidas na própria página.
   const instagram = {
@@ -1021,6 +1021,20 @@ try {
         '• Posts por semana: 3',
         '• Para cuándo: Este mes',
         '¿Me puedes enviar una propuesta?',
+      ],
+    },
+    en: {
+      example: 'Example',
+      whatsappNumber: '(000) 000-0000',
+      contact:
+        "Hi! I came from the website and I'd like to know more about ARP Vision's Autopilot for Instagram.",
+      choices: ['21 to 100', '3', 'This month'],
+      message: [
+        "Hi! I came from the website and I'd like a quote for ARP Vision's Autopilot for Instagram.",
+        '• Listed properties: 21 to 100',
+        '• Posts per week: 3',
+        '• When I need it: This month',
+        'Could you send me a proposal?',
       ],
     },
   };
@@ -1147,10 +1161,10 @@ try {
     await context.close();
   }
   results.push(
-    'Piloto automático para Instagram (pt e es): 1 h1; 13 telas de exemplo (uma em cada passo) com a etiqueta visível, aria-hidden, inert e a descrição "Exemplo:"; a lista dos passos com role="list" e nada para fora das telas dos passos a 1024, 1100 e 1440px; o número de WhatsApp do story numa linha só nessas larguras; nada do tour na cotação e na faixa; dúvidas sem título de grupo; o produto nos 5 botões de WhatsApp; a mensagem e os eventos da cotação; o menu marca o produto; Cotação e Dúvidas na página; a frase da dor troca 2 voltas e para no primeiro trecho, e não troca com movimento reduzido OK',
+    'Piloto automático para Instagram (pt, es e en): 1 h1; 13 telas de exemplo (uma em cada passo) com a etiqueta visível, aria-hidden, inert e a descrição "Exemplo:"; a lista dos passos com role="list" e nada para fora das telas dos passos a 1024, 1100 e 1440px; o número de WhatsApp do story numa linha só nessas larguras; nada do tour na cotação e na faixa; dúvidas sem título de grupo; o produto nos 5 botões de WhatsApp; a mensagem e os eventos da cotação; o menu marca o produto; Cotação e Dúvidas na página; a frase da dor troca 2 voltas e para no primeiro trecho, e não troca com movimento reduzido OK',
   );
 
-  // A página dos Vídeos a partir de fotos, nos dois idiomas: o par de vídeos do topo (os arquivos do
+  // A página dos Vídeos a partir de fotos, nos três idiomas: o par de vídeos do topo (os arquivos do
   // idioma, sem som, em laço, sem pré-carga, fora do leitor de tela, com a descrição "Exemplo:" e o
   // botão de cada um), uma tela de exemplo em cada passo e o que toda página de produto confere.
   // Com movimento reduzido (o contexto desta página), nenhum dos dois toca sozinho.
@@ -1186,6 +1200,23 @@ try {
         '• Formatos: Los dos',
         '• Para cuándo: Este mes',
         '¿Me puedes enviar una propuesta?',
+      ],
+    },
+    en: {
+      example: 'Example',
+      contact:
+        "Hi! I came from the website and I'd like to know more about ARP Vision's videos from photos.",
+      toggles: [
+        ['Play the vertical video', 'Pause the vertical video'],
+        ['Play the horizontal video', 'Pause the horizontal video'],
+      ],
+      choices: ['6 to 20', 'Both', 'This month'],
+      message: [
+        "Hi! I came from the website and I'd like a quote for ARP Vision's videos from photos.",
+        '• Properties per month: 6 to 20',
+        '• Formats: Both',
+        '• When I need it: This month',
+        'Could you send me a proposal?',
       ],
     },
   };
@@ -1263,7 +1294,7 @@ try {
     phoneVideos.on('pageerror', (error) => errors.push(error.message));
     if (reducedMotion === 'reduce') {
       const problems = [];
-      for (const locale of ['pt', 'es']) {
+      for (const locale of Object.keys(videoPage)) {
         await phoneVideos.goto(base + localeRoutes[locale].pages.productVideos);
         for (const [index, format] of ['vertical', 'horizontal'].entries()) {
           const video = phoneVideos.locator('video[data-autoplay]').nth(index);
@@ -1348,14 +1379,14 @@ try {
     await context.close();
   }
   // No desktop, o par fica lado a lado no topo, e os dois vídeos aparecem juntos. Sem movimento
-  // reduzido, os dois tocam quando aparecem, nos dois idiomas.
+  // reduzido, os dois tocam quando aparecem, nos três idiomas.
   const motionDesktop = await newContext({
     viewport: { width: 1440, height: 1000 },
     reducedMotion: 'no-preference',
   });
   const sideBySide = await motionDesktop.newPage();
   sideBySide.on('pageerror', (error) => errors.push(error.message));
-  for (const locale of ['pt', 'es']) {
+  for (const locale of Object.keys(videoPage)) {
     const route = localeRoutes[locale].pages.productVideos;
     await sideBySide.goto(base + route);
     const videos = sideBySide.locator('video[data-autoplay]');
@@ -1387,10 +1418,10 @@ try {
   }
   await motionDesktop.close();
   results.push(
-    'Vídeos a partir de fotos (pt e es): 1 h1; uma tela de exemplo em cada passo (etiqueta visível, aria-hidden, inert e a descrição "Exemplo:") e nada para fora delas a 1024, 1100 e 1440px; os dois vídeos do idioma sem som, em laço, sem pré-carga, fora do leitor de tela, com a descrição e o botão; nada do tour na cotação e na faixa; o produto nos 5 botões de WhatsApp; a mensagem ("6 a 20", "Os dois", "Este mês") e os eventos da cotação; o menu marca o produto. A 390px: o pôster é o primeiro quadro e o selo tem 10px ou mais; com movimento reduzido nada toca sozinho e o play à mão continua quando o outro vídeo entra na tela; sem ele cada vídeo toca quando aparece e a pausa à mão continua. A 1440px, sem movimento reduzido, os dois aparecem juntos e tocam OK',
+    'Vídeos a partir de fotos (pt, es e en): 1 h1; uma tela de exemplo em cada passo (etiqueta visível, aria-hidden, inert e a descrição "Exemplo:") e nada para fora delas a 1024, 1100 e 1440px; os dois vídeos do idioma sem som, em laço, sem pré-carga, fora do leitor de tela, com a descrição e o botão; nada do tour na cotação e na faixa; o produto nos 5 botões de WhatsApp; a mensagem ("6 a 20", "Os dois", "Este mês") e os eventos da cotação; o menu marca o produto. A 390px: o pôster é o primeiro quadro e o selo tem 10px ou mais; com movimento reduzido nada toca sozinho e o play à mão continua quando o outro vídeo entra na tela; sem ele cada vídeo toca quando aparece e a pausa à mão continua. A 1440px, sem movimento reduzido, os dois aparecem juntos e tocam OK',
   );
 
-  // A página do Autochat, nos dois idiomas: a conversa do topo, uma tela de exemplo em cada um dos
+  // A página do Autochat, nos três idiomas: a conversa do topo, uma tela de exemplo em cada um dos
   // quatro passos, as distâncias e o resumo para a corretora, todas marcadas; toda distância que
   // aparece vem "em linha reta"; e o que toda página de produto confere (com o "Cotação" do topo
   // levando à cotação da própria página).
@@ -1419,6 +1450,19 @@ try {
         '• Contactos al mes: 100 a 500',
         '• Para cuándo: Este mes',
         '¿Me puedes enviar una propuesta?',
+      ],
+    },
+    en: {
+      example: 'Example',
+      straight: 'in a straight line',
+      contact: "Hi! I came from the website and I'd like to know more about ARP Vision's Autochat.",
+      choices: ['4 to 10', '100 to 500', 'This month'],
+      message: [
+        "Hi! I came from the website and I'd like a quote for ARP Vision's Autochat.",
+        '• Agents: 4 to 10',
+        '• Inquiries per month: 100 to 500',
+        '• When I need it: This month',
+        'Could you send me a proposal?',
       ],
     },
   };
@@ -1469,10 +1513,10 @@ try {
     await checkProductPage(page, locale, 'autochat', expected);
   }
   results.push(
-    'Autochat (pt e es): 1 h1; 7 telas de exemplo (a conversa do topo, uma em cada um dos 4 passos, as distâncias e o resumo) com a etiqueta visível, aria-hidden, inert e a descrição "Exemplo:"; nada para fora das telas dos passos a 1024, 1100 e 1440px; toda distância da página "em linha reta"; nada do tour na cotação e na faixa; o produto nos 5 botões de WhatsApp; a mensagem ("4 a 10", "100 a 500", "Este mês") e os eventos da cotação; o menu marca o produto; Cotação e Dúvidas na página OK',
+    'Autochat (pt, es e en): 1 h1; 7 telas de exemplo (a conversa do topo, uma em cada um dos 4 passos, as distâncias e o resumo) com a etiqueta visível, aria-hidden, inert e a descrição "Exemplo:"; nada para fora das telas dos passos a 1024, 1100 e 1440px; toda distância da página "em linha reta"; nada do tour na cotação e na faixa; o produto nos 5 botões de WhatsApp; a mensagem ("4 a 10", "100 a 500", "Este mês") e os eventos da cotação; o menu marca o produto; Cotação e Dúvidas na página OK',
   );
 
-  // A página com todos os produtos, nos dois idiomas: um cartão por produto no ar (os links do
+  // A página com todos os produtos, nos três idiomas: um cartão por produto no ar (os links do
   // menu), cada um com a foto 16:9 e o "Conhecer", e o do tour leva à home. Cada destino responde.
   // Sem dúvidas próprias, Cotação e Dúvidas do topo levam às da home, e a faixa azul pede a
   // cotação pelo WhatsApp com a mensagem geral dos produtos, sem o cadastro.
@@ -1484,6 +1528,10 @@ try {
     es: {
       cta: 'Conocer',
       message: '¡Hola! Vengo de la web y quiero un presupuesto de los productos de ARP Vision.',
+    },
+    en: {
+      cta: 'Discover',
+      message: "Hi! I came from the website and I'd like a quote for ARP Vision's products.",
     },
   };
   for (const [locale, expected] of Object.entries(allProductsPage)) {
@@ -1561,7 +1609,7 @@ try {
     await page.screenshot({ path: `.artifacts/produtos-${locale}-desktop.png` });
   }
   results.push(
-    'Todos os produtos (pt e es): um cartão por produto no ar, com a foto 16:9 e "Conhecer", nos grupos do menu (painel e celular); o do tour leva à home; cada destino responde; sem dúvidas, Cotação e Dúvidas levam à home; a faixa azul pede a cotação dos produtos pelo WhatsApp OK',
+    'Todos os produtos (pt, es e en): um cartão por produto no ar, com a foto 16:9 e "Conhecer" no idioma, nos grupos do menu (painel e celular); o do tour leva à home; cada destino responde; sem dúvidas, Cotação e Dúvidas levam à home; a faixa azul pede a cotação dos produtos pelo WhatsApp OK',
   );
 
   for (const route of pricesShown ? ['/', '/planos'] : ['/']) {
@@ -1858,7 +1906,7 @@ try {
   const phoneScreens = await exampleScreens(phone);
   assert.equal(phoneScreens.length, 13, '360px, Piloto: treze telas de exemplo');
   checkExampleScreens(phoneScreens, 'Exemplo', '360px, Piloto');
-  // A 390 e a 360 px, nos dois idiomas: nada sai das telas dos passos, cada trecho da frase da dor
+  // A 390 e a 360 px, nos três idiomas: nada sai das telas dos passos, cada trecho da frase da dor
   // cabe numa linha (sem linha vazia reservada embaixo dele) e o número do story não quebra.
   for (const [locale, expected] of Object.entries(instagram)) {
     await phone.goto(base + localeRoutes[locale].pages.productInstagram);
@@ -1887,7 +1935,7 @@ try {
     [true, false],
     '360px: o calendário do Piloto mostra uma semana só',
   );
-  // A 390 e a 360 px, nos dois idiomas, as telas dos passos dos Vídeos continuam marcadas, e nada
+  // A 390 e a 360 px, nos três idiomas, as telas dos passos dos Vídeos continuam marcadas, e nada
   // sai delas.
   for (const [locale, expected] of Object.entries(videoPage)) {
     await phone.goto(base + localeRoutes[locale].pages.productVideos);
@@ -2008,7 +2056,7 @@ try {
     'sem círculo de hover no botão do menu depois do toque',
   );
   results.push(
-    '360px: as 13 telas do Piloto marcadas e o calendário com uma semana só; a 390 e 360px, em pt e es, nada para fora das telas dos passos, cada trecho da frase da dor numa linha e o número do story numa linha só; as 3 telas dos Vídeos e as 7 do Autochat marcadas e nada para fora das dos passos; menu aberto numa cápsula opaca com contraste AA (topo da home e faixa azul de /tutoriais e do Piloto, com o produto marcado, nos dois temas); fechado, volta ao vidro da abertura, sem o círculo de hover preso no botão OK',
+    '360px: as 13 telas do Piloto marcadas e o calendário com uma semana só; a 390 e 360px, em pt, es e en, nada para fora das telas dos passos, cada trecho da frase da dor numa linha e o número do story numa linha só; as 3 telas dos Vídeos e as 7 do Autochat marcadas e nada para fora das dos passos; menu aberto numa cápsula opaca com contraste AA (topo da home e faixa azul de /tutoriais e do Piloto, com o produto marcado, nos dois temas); fechado, volta ao vidro da abertura, sem o círculo de hover preso no botão OK',
   );
   // Toque fora do menu num ponto sem link (o título da hero), para não navegar.
   await phone.locator('.menu-toggle').click();
@@ -2627,12 +2675,23 @@ try {
     assert.equal(await banner(suggested).count(), 0);
     await context.close();
   }
+  // Numa página de produto (ou na de todos), a faixa leva à página do mesmo produto no outro
+  // idioma, com a seção equivalente.
   for (const [locale, route, offered] of [
     ['pt-BR', '/', null],
     ['pt-PT', '/en/tutorials', '/tutoriais'],
     ['es-AR', '/en/privacy-policy', '/es/politica-de-privacidad'],
     ['de-DE', '/', '/en'],
     ['de-DE', '/en', null],
+    ['en-US', '/produtos/autochat', '/en/products/autochat'],
+    ['en-GB', '/produtos/videos-a-partir-de-fotos#duvidas', '/en/products/videos-from-photos#faq'],
+    [
+      'es-ES',
+      '/en/products/autopilot-for-instagram#quote',
+      '/es/productos/piloto-automatico-para-instagram#cotizacion',
+    ],
+    ['pt-BR', '/en/products', '/produtos'],
+    ['en-US', '/es/productos', '/en/products'],
   ]) {
     const context = await suggestionContext(locale);
     const suggested = await context.newPage();
@@ -2782,7 +2841,7 @@ try {
       await context.close();
     }
   results.push(
-    'Faixa de sugestão de idioma: fora do HTML do servidor; navegador es-ES no / oferece o /es, en no /es oferece o /en, de-DE oferece o inglês, nada quando o idioma bate, na 404 e para robôs; âncora equivalente; fechar e o seletor gravam a escolha e ela não volta; sem localStorage não quebra; sem animação com movimento reduzido; de 320 a 1440px sem estouro, cabeçalho numa linha, sem cobrir cabeçalho nem WhatsApp; contraste nos dois temas OK',
+    'Faixa de sugestão de idioma: fora do HTML do servidor; navegador es-ES no / oferece o /es, en no /es oferece o /en, de-DE oferece o inglês, nada quando o idioma bate, na 404 e para robôs; âncora equivalente; na página de produto, a do mesmo produto no outro idioma; fechar e o seletor gravam a escolha e ela não volta; sem localStorage não quebra; sem animação com movimento reduzido; de 320 a 1440px sem estouro, cabeçalho numa linha, sem cobrir cabeçalho nem WhatsApp; contraste nos dois temas OK',
   );
   results.push(`Menor contraste do texto do cabeçalho, medido na imagem: ${readings.join('; ')}`);
   assert.deepEqual(errors, []);

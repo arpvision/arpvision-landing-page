@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { portugueseWords } from '../scripts/portuguese-words.mjs';
+import { portugueseWordsIn } from '../scripts/portuguese-words.mjs';
 import { locales, translations } from '../src/i18n';
 import { anchorId, publishedPageIds, routes, type PageId } from '../src/i18n/routes';
 import {
@@ -24,12 +24,17 @@ import {
 
 const by = (id: string) => products.find((p) => p.id === id)!;
 
-test('cada página de produto tem caminho nos dois idiomas e o mesmo endereço final', () => {
+test('cada página de produto tem caminho nos três idiomas: o espanhol com o endereço final do português, o inglês com o próprio', () => {
   for (const page of productPageIds) {
     assert.match(routes.pt.pages[page], /^\/produtos\/[a-z0-9-]+$/);
     assert.match(routes.es.pages[page], /^\/es\/productos\/[a-z0-9-]+$/);
+    assert.match(routes.en.pages[page], /^\/en\/products\/[a-z0-9-]+$/);
     assert.equal(productSlug('pt', page), productSlug('es', page));
   }
+  assert.deepEqual(
+    productPageIds.map((page) => productSlug('en', page)),
+    ['autopilot-for-instagram', 'autochat', 'videos-from-photos'],
+  );
 });
 
 test('o grupo da equipe (o Presencial) entra onde o dicionário tem a seção dele: hoje, só no pt', () => {
@@ -83,17 +88,24 @@ test('productText: o nome e a linha do idioma; o Presencial só existe em portug
     line: 'Atende no WhatsApp e passa ao corretor.',
   });
   assert.equal(productText('es', 'tour')?.name, 'Tour virtual 360°');
+  // No inglês, os nomes da seção Inglês da spec ("for Instagram" só descreve).
+  assert.deepEqual(
+    (['tour', 'videos', 'instagram', 'autochat'] as const).map((id) => productText('en', id)?.name),
+    ['360° virtual tour', 'Videos from photos', 'Autopilot for Instagram', 'Autochat'],
+  );
   assert.equal(productText('pt', 'training')?.name, 'Treinamento da equipe');
   assert.equal(productText('pt', 'readyTour')?.name, 'Tour Pronto');
-  assert.equal(productText('es', 'training'), undefined);
-  assert.equal(productText('es', 'readyTour'), undefined);
+  for (const locale of ['es', 'en'] as const) {
+    assert.equal(productText(locale, 'training'), undefined, locale);
+    assert.equal(productText(locale, 'readyTour'), undefined, locale);
+  }
   // Todo produto de um idioma tem texto nele.
   for (const locale of locales)
     for (const product of productsFor(locale))
       assert.ok(productText(locale, product.id), `${locale}/${product.id}`);
 });
 
-test('o Presencial tem a mesma âncora nos dois idiomas', () => {
+test('o Presencial tem a mesma âncora em todos os idiomas', () => {
   for (const locale of locales) assert.equal(anchorId(locale, 'inPerson'), 'presencial');
 });
 
@@ -265,7 +277,7 @@ test('liveProductGroups: os grupos do menu e de /produtos, com o texto do idioma
   }
 });
 
-// As páginas de produto: cada bloco de `productPages` do dicionário, nos dois idiomas.
+// As páginas de produto: cada bloco de `productPages` do dicionário, em cada idioma.
 type Leaf = [path: string, text: string];
 const leaves = (value: unknown, path = ''): Leaf[] => {
   if (typeof value === 'string') return [[path, value]];
@@ -285,10 +297,11 @@ const newPagesOf = (locale: (typeof locales)[number]): [string, unknown][] => [
   ['productsPage', translations(locale).productsPage],
 ];
 // As regras de texto da spec: sem "IA" nem o que a pasta de marketing proíbe, sem preço e sem o
-// nome do site de referência. Cada regra vale também no espanhol: "generado", o euro com número
-// e "desde" com preço.
+// nome do site de referência. Cada regra vale também no espanhol ("generado", o euro com número e
+// "desde" com preço) e no inglês ("intelligent", "smart", "generated", "algorithm", "unedited",
+// dólar e libra com número e "starting at", "from" ou "as low as" com preço).
 const forbidden =
-  /\bIA\b|\bAI\b|intelig[eê]ncia artificial|inteligente|gerad[oa]s?\b|generad[oa]s?\b|algoritmo|100% real|sem edição|sin edición|R\$\s*\d|€\s*\d|\d\s*€|(?:a partir de|desde)\s*(?:R\$|€)|\bPedra\b/i;
+  /\bIA\b|\bAI\b|intelig[eê]ncia artificial|inteligente|\bintelligen(?:t|ce)\b|\bsmart\b|gerad[oa]s?\b|generad[oa]s?\b|\bgenerat(?:e|ed|es|ing)\b|algoritmo|\balgorithms?\b|100% real|sem edição|sin edición|\bunedited\b|\$\s*\d|€\s*\d|\d\s*€|£\s*\d|\d\s*£|(?:a partir de|desde|starting at|from|as low as)\s*(?:\$|R\$|US\$|€|£)|\bPedra\b/i;
 
 test('as regras de texto pegam também os equivalentes do espanhol', () => {
   // "generado", o euro com número (antes ou depois dele) e "a partir de" ou "desde" com preço.
@@ -311,6 +324,47 @@ test('as regras de texto pegam também os equivalentes do espanhol', () => {
     '3 dormitorios · 240 m²',
   ])
     assert.doesNotMatch(text, forbidden, text);
+});
+
+test('as regras de texto pegam também os equivalentes do inglês', () => {
+  // "intelligent", "smart", "generated", "algorithm", "100% real", "unedited", moeda com número
+  // ($, US$, €, £, R$) e "starting at", "from" ou "as low as" com preço.
+  for (const text of [
+    'An intelligent assistant answers your clients',
+    'Smart replies, day and night',
+    'Videos generated from your photos',
+    'Our algorithm picks the best photos',
+    '100% real photos',
+    'Unedited footage of the property',
+    'Plans for $99 a month',
+    'US$ 29 per video',
+    '£19 a month',
+    'Starting at €49',
+    'From $49',
+    'As low as R$ 99',
+  ])
+    assert.match(text, forbidden, text);
+  // O que o texto em inglês já usa continua valendo: "from" sem preço, número sem moeda e a licença.
+  for (const text of [
+    'From the first post to a client ready to visit.',
+    'From your website or the photos you send',
+    'up to 2,500 a month',
+    'License #00000',
+    '3 bedrooms · 240 m²',
+    'Get a quote on WhatsApp',
+  ])
+    assert.doesNotMatch(text, forbidden, text);
+});
+
+test('o apoio da página com todos os produtos não conta os produtos (são seis no pt e quatro nos outros)', () => {
+  assert.deepEqual(
+    locales.map((locale) => translations(locale).productsPage.lead.split(':')[0]),
+    [
+      'Produtos que trabalham juntos',
+      'Productos que trabajan juntos',
+      'Products that work together',
+    ],
+  );
 });
 
 test('páginas de produto: título com a marca, descrição de até 160 e as mensagens com o nome do produto', () => {
@@ -347,6 +401,7 @@ test('a página com todos os produtos: publicada, título com a marca, descriç�
   }
   assert.equal(translations('pt').productsPage.cta, 'Conhecer');
   assert.equal(translations('es').productsPage.cta, 'Conocer');
+  assert.equal(translations('en').productsPage.cta, 'Discover');
 });
 
 test('o texto das páginas de produto e o da página com todos eles seguem as regras da spec', () => {
@@ -356,12 +411,26 @@ test('o texto das páginas de produto e o da página com todos eles seguem as re
         assert.doesNotMatch(text, forbidden, `${locale}/${id}.${path}: "${text}"`);
 });
 
-test('as páginas de produto e a com todos eles, em espanhol, não têm português nem CRECI', () => {
-  for (const [id, page] of newPagesOf('es'))
-    for (const [path, text] of leaves(page)) {
-      assert.doesNotMatch(text, portugueseWords, `es/${id}.${path}: "${text}"`);
-      assert.doesNotMatch(text, /CRECI/, `es/${id}.${path}: "${text}"`);
-    }
+test('as páginas de produto e a com todos eles, em espanhol e em inglês, não têm português nem CRECI', () => {
+  for (const locale of ['es', 'en'] as const)
+    for (const [id, page] of newPagesOf(locale))
+      for (const [path, text] of leaves(page)) {
+        assert.doesNotMatch(text, portugueseWordsIn(locale), `${locale}/${id}.${path}: "${text}"`);
+        assert.doesNotMatch(text, /CRECI/, `${locale}/${id}.${path}: "${text}"`);
+      }
+});
+
+test('no inglês, o número da licença no lugar do CRECI e os nomes fictícios da spec', () => {
+  const { instagram, autochat } = translations('en').productPages;
+  for (const mock of [instagram.mock, autochat.mock]) {
+    assert.equal(mock.agency, 'Example Realty');
+    assert.equal(mock.license, 'License #00000');
+  }
+  assert.equal(instagram.mock.siteAddress, 'youragency.net');
+  assert.ok(
+    instagram.gallery.arts.some((art) => art.title.includes('Example Neighborhood')),
+    'o bairro fictício nas artes',
+  );
 });
 
 test('o Autochat tem 4 passos, 3 distâncias, 6 campos no resumo, 4 casos, 8 itens e 8 dúvidas', () => {
@@ -431,6 +500,7 @@ test('o Piloto em português leva o CRECI', () => {
 test('a descrição de cada tela de exemplo começa por "Exemplo:" no idioma', () => {
   assert.equal(translations('pt').products.example, 'Exemplo');
   assert.equal(translations('es').products.example, 'Ejemplo');
+  assert.equal(translations('en').products.example, 'Example');
   for (const locale of locales) {
     const { example } = translations(locale).products;
     for (const [id, page] of productPagesOf(locale)) {
@@ -475,14 +545,15 @@ test('pairByPosition junta pela posição e recusa listas de tamanhos diferentes
   assert.throws(() => pairByPosition('Incluído', ['Posts'], ['calendar', 'star']), /Incluído/);
 });
 
-test('as artes do Piloto têm ids únicos, os mesmos e na mesma ordem nos dois idiomas', () => {
+test('as artes do Piloto têm ids únicos, os mesmos e na mesma ordem em todos os idiomas', () => {
   const ids = (locale: (typeof locales)[number]) =>
     translations(locale).productPages.instagram.gallery.arts.map((art) => art.id);
   assert.equal(new Set(ids('pt')).size, ids('pt').length);
   assert.deepEqual(ids('es'), ids('pt'));
+  assert.deepEqual(ids('en'), ids('pt'));
 });
 
-test('os formatos dos Vídeos são vertical, horizontal e o final, nessa ordem, nos dois idiomas', () => {
+test('os formatos dos Vídeos são vertical, horizontal e o final, nessa ordem, em todos os idiomas', () => {
   for (const locale of locales)
     assert.deepEqual(
       translations(locale).productPages.videos.formats.cards.map((card) => card.id),
@@ -499,7 +570,7 @@ test('a tabela de comparação tem um valor por coluna em cada linha', () => {
   }
 });
 
-test('cada página de produto publicada tem texto nos dois idiomas', () => {
+test('cada página de produto publicada tem texto em todos os idiomas', () => {
   const published = productPageIds.filter((page) => publishedPageIds.includes(page));
   assert.ok(published.includes('productInstagram'), 'o Piloto está publicado');
   assert.ok(published.includes('productVideos'), 'os Vídeos estão publicados');

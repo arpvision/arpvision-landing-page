@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { portugueseWords } from '../scripts/portuguese-words.mjs';
+import { portugueseWords, portugueseWordsIn } from '../scripts/portuguese-words.mjs';
 import { locales, translations } from '../src/i18n';
 import { publishedPageIds, type PageId } from '../src/i18n/routes';
 import { faq, faqSchema } from '../src/lib/content';
@@ -74,8 +74,25 @@ test('Service do Piloto em es: o texto da página em espanhol', () => {
   for (const text of readable(s)) assert.doesNotMatch(text, portugueseWords, `es: "${text}"`);
 });
 
+test('Service do Autochat em en: público e idioma do inglês', () => {
+  const s = serviceSchema('autochat', 'en');
+  assert.equal(s['@type'], 'Service');
+  assert.equal(s.name, 'Autochat: WhatsApp customer service for real estate agencies');
+  assert.equal(s.inLanguage, 'en');
+  assert.equal(s.url, 'https://www.arpvision.com.br/en/products/autochat');
+  assert.deepEqual(s.provider, { '@id': 'https://www.arpvision.com.br/#organization' });
+  assert.deepEqual(s.audience, {
+    '@type': 'BusinessAudience',
+    audienceType: 'Real estate agencies',
+  });
+  for (const text of readable(s))
+    assert.doesNotMatch(text, portugueseWordsIn('en'), `en: "${text}"`);
+  assert.doesNotMatch(JSON.stringify(s), /offers/);
+});
+
 test('Service de um produto sem texto no idioma é erro, e não um JSON-LD vazio', () => {
   assert.throws(() => serviceSchema('training', 'es'), /training/);
+  assert.throws(() => serviceSchema('readyTour', 'en'), /readyTour/);
 });
 
 test('cada produto com página tem um Service no idioma dela, sem oferta', () => {
