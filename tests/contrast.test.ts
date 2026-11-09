@@ -1,6 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { contrastRatio, lowestContrast, over, parseColor } from '../scripts/lib/contrast.mjs';
+import {
+  contrastRatio,
+  insideArea,
+  lowestContrast,
+  over,
+  parseColor,
+} from '../scripts/lib/contrast.mjs';
 
 test('o contraste segue a fórmula do WCAG: preto e branco dão 21:1, em qualquer ordem', () => {
   assert.equal(contrastRatio([0, 0, 0], [255, 255, 255]), 21);
@@ -48,4 +54,17 @@ test('no retângulo do texto, o pior pixel do fundo é o que vale', () => {
     lowestContrast(image, { x: 9, y: 0, width: 2, height: 2 }, 'rgb(0, 0, 0)'),
     Infinity,
   );
+});
+
+test('só conta o texto inteiro dentro da área que rola: o cortado pela borda é lido depois de rolar', () => {
+  // A área visível do menu do celular aberto, que rola por dentro quando passa da altura da tela.
+  const area = { x: 0, y: 66, width: 336, height: 684 };
+  assert.equal(insideArea({ x: 21, y: 600, width: 80, height: 50 }, area), true);
+  // "Dúvidas" com a metade de baixo abaixo da borda da área: fica de fora.
+  assert.equal(insideArea({ x: 21, y: 716.7, width: 80, height: 50 }, area), false);
+  // E a que passa da borda de cima, ou dos lados.
+  assert.equal(insideArea({ x: 21, y: 40, width: 80, height: 50 }, area), false);
+  assert.equal(insideArea({ x: 300, y: 600, width: 80, height: 50 }, area), false);
+  // Meio pixel de arredondamento não tira o texto da área.
+  assert.equal(insideArea({ x: -0.4, y: 65.6, width: 80, height: 684.6 }, area), true);
 });

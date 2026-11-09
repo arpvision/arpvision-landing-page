@@ -63,11 +63,6 @@ const plans = site.pricing.showPrices
             {t.header.realTour}
           </a>
         )}
-        {t.inPerson && (
-          <a href={anchor('inPerson')} data-spy={anchorId(locale, 'inPerson')}>
-            {t.inPerson.nav}
-          </a>
-        )}
         <a href={plans.href} data-spy={plans.spy} aria-current={plans.current}>
           {plans.label}
         </a>
@@ -132,7 +127,6 @@ const plans = site.pricing.showPrices
         </div>
       </div>
       {available.tour && <a href={anchor('realTour')}>{t.header.realTour}</a>}
-      {t.inPerson && <a href={anchor('inPerson')}>{t.inPerson.nav}</a>}
       <a href={plans.href} aria-current={plans.current}>
         {plans.label}
       </a>

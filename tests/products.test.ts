@@ -1,7 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { portugueseWords } from '../scripts/portuguese-words.mjs';
-import { available } from '../src/config/site';
 import { locales, translations } from '../src/i18n';
 import { anchorId, publishedPageIds, routes, type PageId } from '../src/i18n/routes';
 import {
@@ -33,26 +32,38 @@ test('cada página de produto tem caminho nos dois idiomas e o mesmo endereço f
   }
 });
 
-test('o grupo da equipe só aparece no pt e com o Presencial ligado', () => {
+test('o grupo da equipe (o Presencial) entra onde o dicionário tem a seção dele: hoje, só no pt', () => {
   assert.deepEqual(
-    productsFor('pt', { inPerson: false }).map((p) => p.id),
-    ['tour', 'videos', 'instagram', 'autochat'],
-  );
-  assert.deepEqual(
-    productsFor('pt', { inPerson: true }).map((p) => p.id),
+    productsFor('pt').map((p) => p.id),
     ['tour', 'videos', 'instagram', 'autochat', 'training', 'readyTour'],
   );
-  assert.deepEqual(
-    productsFor('es', { inPerson: true }).map((p) => p.id),
-    ['tour', 'videos', 'instagram', 'autochat'],
-  );
+  for (const locale of ['es', 'en'] as const)
+    assert.deepEqual(
+      productsFor(locale).map((p) => p.id),
+      ['tour', 'videos', 'instagram', 'autochat'],
+      locale,
+    );
 });
 
-test('sem a opção inPerson, o grupo da equipe segue available.inPerson', () => {
-  const hasTeam = (list: { group: string }[]) => list.some((p) => p.group === 'team');
-  assert.equal(hasTeam(productsFor('pt')), available.inPerson);
-  assert.equal(hasTeam(productsFor('pt', {})), available.inPerson);
-  assert.equal(hasTeam(productsFor('es')), false);
+// O Presencial com a seção da home num idioma que hoje não a tem (o espanhol), pelo tempo do teste.
+const withInPersonInSpanish = (check: () => void) => {
+  const es = translations('es');
+  const original = es.inPerson;
+  es.inPerson = translations('pt').inPerson;
+  try {
+    check();
+  } finally {
+    es.inPerson = original;
+  }
+};
+
+test('com a seção do Presencial no dicionário de um idioma, o grupo da equipe entra nele', () => {
+  withInPersonInSpanish(() =>
+    assert.deepEqual(
+      productsFor('es').map((p) => p.id),
+      ['tour', 'videos', 'instagram', 'autochat', 'training', 'readyTour'],
+    ),
+  );
 });
 
 test('links dos produtos', () => {
@@ -78,7 +89,7 @@ test('productText: o nome e a linha do idioma; o Presencial só existe em portug
   assert.equal(productText('es', 'readyTour'), undefined);
   // Todo produto de um idioma tem texto nele.
   for (const locale of locales)
-    for (const product of productsFor(locale, { inPerson: true }))
+    for (const product of productsFor(locale))
       assert.ok(productText(locale, product.id), `${locale}/${product.id}`);
 });
 
@@ -160,76 +171,98 @@ test('isLive: sem página própria está no ar, e com página só depois de publ
 test('liveProductsFor tira o que não está publicado e mantém a ordem e o idioma', () => {
   withPublished(['home', 'productVideos', 'productAutochat'], () => {
     assert.deepEqual(
-      liveProductsFor('pt', { inPerson: false }).map((p) => p.id),
-      ['tour', 'videos', 'autochat'],
-    );
-    assert.deepEqual(
-      liveProductsFor('pt', { inPerson: true }).map((p) => p.id),
+      liveProductsFor('pt').map((p) => p.id),
       ['tour', 'videos', 'autochat', 'training', 'readyTour'],
     );
-    assert.deepEqual(
-      liveProductsFor('es', { inPerson: true }).map((p) => p.id),
-      ['tour', 'videos', 'autochat'],
-    );
+    for (const locale of ['es', 'en'] as const)
+      assert.deepEqual(
+        liveProductsFor(locale).map((p) => p.id),
+        ['tour', 'videos', 'autochat'],
+        locale,
+      );
   });
 });
 
 test('liveProductsWithText: só entra quem tem texto no idioma', () => {
-  // O Presencial ligado também no espanhol, mas ainda sem texto nele: fica de fora, sem nome vazio.
-  const training = by('training');
-  const original = training.locales;
-  training.locales = ['pt', 'es'];
-  try {
+  // O Presencial com a seção também no espanhol, mas ainda sem o texto do menu dele
+  // (products.inPerson): os dois itens ficam de fora, sem nome vazio.
+  withInPersonInSpanish(() =>
     withPublished(['home', 'productVideos', 'productAutochat'], () => {
-      assert.ok(liveProductsFor('es', { inPerson: true }).includes(training));
+      assert.ok(liveProductsFor('es').includes(by('training')));
       assert.deepEqual(
-        liveProductsWithText('es', { inPerson: true }).map(({ product }) => product.id),
+        liveProductsWithText('es').map(({ product }) => product.id),
         ['tour', 'videos', 'autochat'],
       );
-    });
-  } finally {
-    training.locales = original;
-  }
+    }),
+  );
+});
+
+test('o menu Produtos tem 6 itens no pt (com o treinamento e o Tour Pronto) e 4 no es e no en', () => {
+  const counts = (locale: (typeof locales)[number]) =>
+    liveProductGroups(locale).map(({ group, items }) => [group, items.length]);
+  withPublished(
+    ['home', 'productVideos', 'productInstagram', 'productAutochat', 'products'],
+    () => {
+      assert.deepEqual(counts('pt'), [
+        ['show', 2],
+        ['promote', 2],
+        ['team', 2],
+      ]);
+      for (const locale of ['es', 'en'] as const)
+        assert.deepEqual(
+          counts(locale),
+          [
+            ['show', 2],
+            ['promote', 2],
+          ],
+          locale,
+        );
+    },
+  );
 });
 
 test('liveProductGroups: os grupos do menu e de /produtos, com o texto do idioma e sem grupo vazio', () => {
-  const groupsOf = (locale: (typeof locales)[number], inPerson: boolean) =>
-    liveProductGroups(locale, { inPerson }).map(({ group, items }) => [
+  const groupsOf = (locale: (typeof locales)[number]) =>
+    liveProductGroups(locale).map(({ group, items }) => [
       group,
       items.map(({ product }) => product.id),
     ]);
   withPublished(['home', 'productVideos', 'productAutochat'], () => {
-    assert.deepEqual(groupsOf('pt', false), [
-      ['show', ['tour', 'videos']],
-      ['promote', ['autochat']],
-    ]);
-    // Com o Presencial ligado, o grupo da equipe entra no fim, e só no português.
-    assert.deepEqual(groupsOf('pt', true), [
+    // O grupo da equipe entra no fim, e só no português.
+    assert.deepEqual(groupsOf('pt'), [
       ['show', ['tour', 'videos']],
       ['promote', ['autochat']],
       ['team', ['training', 'readyTour']],
     ]);
-    assert.deepEqual(groupsOf('es', true), [
-      ['show', ['tour', 'videos']],
-      ['promote', ['autochat']],
-    ]);
+    for (const locale of ['es', 'en'] as const)
+      assert.deepEqual(
+        groupsOf(locale),
+        [
+          ['show', ['tour', 'videos']],
+          ['promote', ['autochat']],
+        ],
+        locale,
+      );
   });
   // Sem nenhum produto de divulgar e atender no ar, o grupo não aparece vazio.
   withPublished(['home', 'productVideos'], () => {
-    assert.deepEqual(groupsOf('pt', false), [['show', ['tour', 'videos']]]);
+    assert.deepEqual(groupsOf('pt'), [
+      ['show', ['tour', 'videos']],
+      ['team', ['training', 'readyTour']],
+    ]);
+    assert.deepEqual(groupsOf('es'), [['show', ['tour', 'videos']]]);
   });
   // Os grupos juntos são a lista no ar, na mesma ordem, e cada produto leva o texto do idioma.
-  for (const locale of locales)
-    for (const inPerson of [false, true]) {
-      const items = liveProductGroups(locale, { inPerson }).flatMap(({ items }) => items);
-      assert.deepEqual(
-        items.map(({ product }) => product),
-        liveProductsFor(locale, { inPerson }),
-        `${locale}, Presencial ${inPerson ? 'ligado' : 'desligado'}`,
-      );
-      for (const { product, text } of items)
-        assert.deepEqual(text, productText(locale, product.id), `${locale}/${product.id}`);
-    }
+  for (const locale of locales) {
+    const items = liveProductGroups(locale).flatMap(({ items }) => items);
+    assert.deepEqual(
+      items.map(({ product }) => product),
+      liveProductsFor(locale),
+      locale,
+    );
+    for (const { product, text } of items)
+      assert.deepEqual(text, productText(locale, product.id), `${locale}/${product.id}`);
+  }
 });
 
 // As páginas de produto: cada bloco de `productPages` do dicionário, nos dois idiomas.

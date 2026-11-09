@@ -86,7 +86,7 @@ test('espanhol e inglês têm as mesmas chaves e funções do português, e nenh
 });
 
 test('o ARP Vision Presencial só aparece em português (atende Porto Alegre e região)', () => {
-  assert.equal(translations('pt').inPerson?.nav, 'Presencial');
+  assert.equal(translations('pt').inPerson?.eyebrow, 'ARP VISION PRESENCIAL');
   assert.equal(translations('pt').products.inPerson?.training.name, 'Treinamento da equipe');
   assert.equal(translations('pt').products.inPerson?.readyTour.name, 'Tour Pronto');
   for (const locale of translated) {

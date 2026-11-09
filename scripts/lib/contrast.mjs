@@ -69,10 +69,23 @@ export const lowestContrast = ({ data, info }, rect, color) => {
 };
 
 /**
+ * O retângulo inteiro dentro da área, com meio pixel de folga para o arredondamento.
+ * @param {{ x: number, y: number, width: number, height: number }} rect
+ * @param {{ x: number, y: number, width: number, height: number }} area
+ */
+export const insideArea = (rect, area) =>
+  rect.x >= area.x - 0.5 &&
+  rect.y >= area.y - 0.5 &&
+  rect.x + rect.width <= area.x + area.width + 0.5 &&
+  rect.y + rect.height <= area.y + area.height + 0.5;
+
+/**
  * Menor contraste de cada texto visível do elemento contra o fundo atrás dele. O fundo vem de uma
  * captura com o texto apagado: assim o pixel medido é o que fica por trás das letras. A captura é
  * da página, recortada na caixa do elemento: a do próprio elemento rola a página até ele, e num
- * cabeçalho grudado isso muda o que passa por trás.
+ * cabeçalho grudado isso muda o que passa por trás. O texto cortado pela borda de uma área que rola
+ * por dentro (o menu do celular aberto, quando passa da altura da tela) fica de fora: ali só se vê
+ * parte dele, e o retângulo inteiro pegaria a borda e o que está fora; ele é lido depois de rolar.
  * @param {import('@playwright/test').Locator} locator um elemento inteiro na tela
  * @returns {Promise<{ text: string, color: string, ratio: number }[]>}
  */
@@ -107,7 +120,25 @@ export const textContrast = async (locator) => {
         width: rect.width,
         height: rect.height,
       }));
-      found.push({ text: node.textContent.trim(), color: getComputedStyle(element).color, rects });
+      // A área visível da caixa que rola por dentro mais próxima, dentro do elemento.
+      let area = null;
+      for (let parent = element; parent && root.contains(parent); parent = parent.parentElement)
+        if (/auto|scroll/.test(getComputedStyle(parent).overflowY)) {
+          const scroller = parent.getBoundingClientRect();
+          area = {
+            x: scroller.x + parent.clientLeft - x,
+            y: scroller.y + parent.clientTop - y,
+            width: parent.clientWidth,
+            height: parent.clientHeight,
+          };
+          break;
+        }
+      found.push({
+        text: node.textContent.trim(),
+        color: getComputedStyle(element).color,
+        rects,
+        area,
+      });
     }
     // O texto some sem transição, e a captura mostra só o fundo.
     const style = document.createElement('style');
@@ -135,6 +166,7 @@ export const textContrast = async (locator) => {
   });
   const image = await sharp(png).raw().toBuffer({ resolveWithObject: true });
   return items
+    .filter(({ rects, area }) => !area || rects.every((rect) => insideArea(rect, area)))
     .map(({ text, color, rects }) => ({
       text,
       color,

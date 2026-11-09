@@ -33,14 +33,22 @@ const langOf = { pt: 'pt-BR', es: 'es-ES', en: 'en' };
 const localeOf = (route) =>
   Object.keys(routesOf).find((locale) => routesOf[locale].includes(route));
 // O menu Produtos mostra só o que está no ar: o tour (na home), uma página por produto publicado
-// e o "Ver todos" quando /produtos estiver publicada.
+// e o "Ver todos" quando /produtos estiver publicada. O ARP Vision Presencial só existe em
+// português: lá, o grupo "Com a nossa equipe" leva o treinamento e o Tour Pronto à seção dele na
+// home ("#presencial" na própria home, "/#presencial" das outras páginas).
 const productPages = publishedPageIds.filter((page) =>
   localeRoutes.pt.pages[page].startsWith(`${localeRoutes.pt.pages.products}/`),
 );
-const productLinks = (locale) =>
+const inPersonLocales = ['pt'];
+const inPersonHref = (locale, route) => {
+  const { pages, anchors } = localeRoutes[locale];
+  return `${route === pages.home ? '' : pages.home}#${anchors.inPerson}`;
+};
+const productLinks = (locale, route) =>
   [
     localeRoutes[locale].pages.home,
     ...productPages.map((page) => localeRoutes[locale].pages[page]),
+    ...(inPersonLocales.includes(locale) ? Array(2).fill(inPersonHref(locale, route)) : []),
   ].sort();
 const allProductsLinks = publishedPageIds.includes('products') ? 1 : 0;
 // Contexto das checagens que não são da faixa de sugestão: a escolha de idioma já gravada.
@@ -541,10 +549,18 @@ try {
     assert.deepEqual(
       [...footerLinks].sort(),
       [
-        ...productLinks(locale),
+        ...productLinks(locale, route),
         ...(allProductsLinks ? [localeRoutes[locale].pages.products] : []),
       ].sort(),
       `${route}: um link por produto no ar no rodapé`,
+    );
+    // O Presencial aparece uma vez só no rodapé, na coluna Produtos (e só em português).
+    assert.deepEqual(
+      await page
+        .locator(`footer a[href$="#${localeRoutes[locale].anchors.inPerson}"]`)
+        .evaluateAll((links) => links.map((link) => !!link.closest('.footer-products'))),
+      inPersonLocales.includes(locale) ? [true, true] : [],
+      `${route}: o Presencial só na coluna Produtos do rodapé`,
     );
     if (route === routesOf[locale][0])
       for (const href of footerLinks)
@@ -637,9 +653,16 @@ try {
   assert.equal(await page.locator('[data-tour-host] iframe').count(), 0);
   results.push('Reduções, seções removidas, compartilhamento, dois benefícios e demo oculta OK');
 
-  // Menu do desktop acompanha a seção visível.
+  // Menu do desktop acompanha a seção visível. O Presencial não está mais no topo: fica no menu
+  // Produtos.
+  assert.equal(
+    await page
+      .locator('.desktop-nav a[href$="#presencial"], #mobile-nav > a[href$="#presencial"]')
+      .count(),
+    0,
+    'o Presencial fora do topo e do menu do celular',
+  );
   for (const [id, label] of [
-    ['presencial', 'Presencial'],
     pricesShown ? ['planos', 'Planos'] : ['cotacao', 'Cotação'],
     ['duvidas', 'Dúvidas'],
   ]) {
@@ -656,9 +679,9 @@ try {
   }
   results.push('Menu do desktop destaca a seção visível OK');
 
-  // Cabeçalho do desktop em português (com o Presencial e, de 1280px para cima, o seletor
-  // PT | ES) em uma linha de 1024 a 1440px, também com "Tour real", que só entra com tour de
-  // demonstração (aqui simulado, com o data-long-nav que o Header.astro põe).
+  // Cabeçalho do desktop em português (de 1280px para cima, com o seletor de idioma) em uma linha
+  // de 1024 a 1440px, também com "Tour real", que só entra com tour de demonstração (aqui
+  // simulado logo depois do botão Produtos, com o data-long-nav que o Header.astro põe).
   for (const tour of [false, true]) {
     await page.goto(base + '/termos-de-uso');
     // Medido com a fonte de reserva, o cabeçalho tem outra largura e a guarda falha por acaso.
@@ -672,7 +695,7 @@ try {
         });
         link.dataset.spy = 'tour-real';
         header.setAttribute('data-long-nav', '');
-        header.querySelector('.desktop-nav a').after(link);
+        header.querySelector('.desktop-nav > .products-toggle').after(link);
       });
     for (const width of [1024, 1100, 1200, 1280, 1440]) {
       await page.setViewportSize({ width, height: 1000 });
@@ -893,7 +916,7 @@ try {
           .locator('a[data-product]')
           .evaluateAll((links) => links.map((link) => link.getAttribute('href')))
       ).sort(),
-      productLinks(locale),
+      productLinks(locale, route),
       `${route}: um link por produto no ar`,
     );
     assert.equal(await panel.locator('a.products-all').count(), allProductsLinks);
@@ -921,9 +944,51 @@ try {
     await page.locator('.hero h1').click({ position: { x: 10, y: 10 } });
     assert.equal(await panel.isVisible(), false, `${route}: clique fora fecha`);
     assert.equal(await toggle.getAttribute('aria-expanded'), 'false');
+    // O ARP Vision Presencial: em português, o grupo "Com a nossa equipe" tem o treinamento e o
+    // Tour Pronto, e os dois levam à seção dele na home; nos outros idiomas, nem grupo nem seção.
+    const team = await panel.locator('.products-group').evaluateAll((groups) =>
+      groups
+        .filter((group) => group.querySelector('[data-product="training"]'))
+        .map((group) => ({
+          title: group.querySelector('.products-group-title').textContent.trim(),
+          items: [...group.querySelectorAll('a[data-product]')].map((link) => [
+            link.querySelector('.products-name').textContent.trim(),
+            link.getAttribute('href'),
+          ]),
+        })),
+    );
+    if (locale === 'pt') {
+      assert.deepEqual(
+        team,
+        [
+          {
+            title: 'Com a nossa equipe',
+            items: [
+              ['Treinamento da equipe', '#presencial'],
+              ['Tour Pronto', '#presencial'],
+            ],
+          },
+        ],
+        `${route}: o grupo do Presencial no menu Produtos`,
+      );
+      await toggle.click();
+      await panel.locator('a[data-product="readyTour"]').click();
+      await page.waitForFunction(() => location.hash === '#presencial');
+      assert.equal(await panel.isVisible(), false, `${route}: escolher o item fecha o painel`);
+      assert.equal(
+        await page
+          .locator('#presencial')
+          .evaluate((section) => section.getBoundingClientRect().top < innerHeight),
+        true,
+        `${route}: o Tour Pronto leva à seção do Presencial`,
+      );
+    } else {
+      assert.deepEqual(team, [], `${route}: sem o grupo do Presencial`);
+      assert.equal(await page.locator('#presencial').count(), 0, `${route}: sem a seção`);
+    }
   }
   results.push(
-    'Menu Produtos no desktop (pt, es e en): primeiro item, clique, Esc com o foco de volta, Enter, Tab até o painel, clique fora e os produtos no ar OK',
+    'Menu Produtos no desktop (pt, es e en): primeiro item, clique, Esc com o foco de volta, Enter, Tab até o painel, clique fora e os produtos no ar; no pt, o grupo "Com a nossa equipe" com o treinamento e o Tour Pronto levando à seção do Presencial, e nada dele no es e no en OK',
   );
 
   // A página do Piloto automático para Instagram, nos dois idiomas: as telas de exemplo marcadas,
@@ -1435,7 +1500,7 @@ try {
     );
     assert.deepEqual(
       cards.map((card) => card.href).sort(),
-      productLinks(locale),
+      productLinks(locale, route),
       `${route}: um cartão por produto no ar, com os links do menu`,
     );
     assert.equal(
@@ -1971,10 +2036,10 @@ try {
   );
   assert.deepEqual(
     productItems.flatMap((item) => (item.href ? [item.href] : [])).sort(),
-    productLinks('pt'),
+    productLinks('pt', '/'),
     'grupo Produtos com os produtos no ar',
   );
-  assert.equal(productItems.length, productLinks('pt').length + allProductsLinks);
+  assert.equal(productItems.length, productLinks('pt', '/').length + allProductsLinks);
   for (const item of productItems)
     assert.ok(item.visible && item.height >= 44, `item do grupo Produtos: ${JSON.stringify(item)}`);
   await phone.screenshot({ path: '.artifacts/produtos-menu-mobile.png' });
@@ -2260,8 +2325,8 @@ try {
   assert.equal(await choose.locator('html').getAttribute('lang'), 'en');
   assert.equal(await visibleCode(), 'EN');
   await choose.screenshot({ path: '.artifacts/en-terms-desktop.png' });
-  // Abaixo de 1280px o compacto sai do cabeçalho (fica no rodapé); em 1280px ele cabe, também
-  // no português com "Presencial" no menu.
+  // Abaixo de 1280px o compacto sai do cabeçalho (fica no rodapé); em 1280px ele cabe, no
+  // português e no inglês.
   for (const [width, visible] of [
     [1279, false],
     [1280, true],

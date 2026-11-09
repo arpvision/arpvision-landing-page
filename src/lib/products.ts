@@ -3,8 +3,7 @@
  * saem desta lista, para nenhum esquecer um produto. O tour e o ARP Vision Presencial não têm
  * página própria e levam à home.
  */
-import { locales, translations, type Dictionary, type Locale } from '../i18n';
-import { available } from '../config/site';
+import { translations, type Dictionary, type Locale } from '../i18n';
 import {
   anchorId,
   pageAt,
@@ -31,8 +30,6 @@ export interface Product {
   page: ProductPageId | null;
   /** Aonde o item leva, com a seção da página quando houver. */
   target: { page: PageId; anchor?: AnchorId };
-  /** Os idiomas em que o produto aparece. */
-  locales: readonly Locale[];
 }
 
 export const productGroups: readonly ProductGroupId[] = ['show', 'promote', 'team'];
@@ -46,7 +43,6 @@ export const products: readonly Product[] = [
     isNew: false,
     page: null,
     target: { page: 'home' },
-    locales,
   },
   {
     id: 'videos',
@@ -55,7 +51,6 @@ export const products: readonly Product[] = [
     isNew: true,
     page: 'productVideos',
     target: { page: 'productVideos' },
-    locales,
   },
   {
     id: 'instagram',
@@ -64,7 +59,6 @@ export const products: readonly Product[] = [
     isNew: true,
     page: 'productInstagram',
     target: { page: 'productInstagram' },
-    locales,
   },
   {
     id: 'autochat',
@@ -73,7 +67,6 @@ export const products: readonly Product[] = [
     isNew: true,
     page: 'productAutochat',
     target: { page: 'productAutochat' },
-    locales,
   },
   {
     id: 'training',
@@ -82,7 +75,6 @@ export const products: readonly Product[] = [
     isNew: false,
     page: null,
     target: { page: 'home', anchor: 'inPerson' },
-    locales: ['pt'],
   },
   {
     id: 'readyTour',
@@ -91,7 +83,6 @@ export const products: readonly Product[] = [
     isNew: false,
     page: null,
     target: { page: 'home', anchor: 'inPerson' },
-    locales: ['pt'],
   },
 ];
 
@@ -103,14 +94,13 @@ export const productPageIds: readonly ProductPageId[] = [
 ];
 
 /**
- * Os produtos de um idioma, na ordem do catálogo. O grupo da equipe só entra com o Presencial
- * ligado (`available.inPerson`, a menos que `options.inPerson` diga o contrário).
+ * Os produtos de um idioma, na ordem do catálogo. O grupo da equipe é o ARP Vision Presencial:
+ * ele entra onde o dicionário tem a seção dele na home (`inPerson`, que hoje só o português tem),
+ * como a própria seção.
  */
-export function productsFor(locale: Locale, options: { inPerson?: boolean } = {}): Product[] {
-  const inPerson = options.inPerson ?? available.inPerson;
-  return products.filter(
-    (product) => product.locales.includes(locale) && (inPerson || product.group !== 'team'),
-  );
+export function productsFor(locale: Locale): Product[] {
+  const inPerson = translations(locale).inPerson !== null;
+  return products.filter((product) => inPerson || product.group !== 'team');
 }
 
 /** No ar: o produto sem página própria (tour, Presencial) ou com a página já publicada. */
@@ -119,8 +109,8 @@ export function isLive(product: Product): boolean {
 }
 
 /** Os produtos de `productsFor` que já estão no ar: é essa a lista que o visitante vê. */
-export function liveProductsFor(locale: Locale, options?: { inPerson?: boolean }): Product[] {
-  return productsFor(locale, options).filter(isLive);
+export function liveProductsFor(locale: Locale): Product[] {
+  return productsFor(locale).filter(isLive);
 }
 
 /** O nome e a linha de um produto no menu Produtos. */
@@ -131,7 +121,7 @@ export interface ProductText {
 
 /**
  * O nome e a linha do produto no idioma. O ARP Vision Presencial só tem texto em português, então
- * no espanhol o retorno é `undefined` (ele também não entra em `productsFor('es')`).
+ * nos outros idiomas o retorno é `undefined` (ele também não entra em `productsFor('es')`).
  */
 export function productText(locale: Locale, id: ProductId): ProductText | undefined {
   const { items, inPerson } = translations(locale).products;
@@ -147,13 +137,10 @@ export interface LiveProduct {
 /**
  * Os produtos no ar que têm texto no idioma, na ordem do catálogo. É a lista que o menu, a página
  * /produtos, o rodapé, o "Conheça também" e a ItemList mostram: só entra quem tem texto no idioma
- * (o Presencial, por exemplo, não tem no espanhol).
+ * (o Presencial, por exemplo, não tem no espanhol nem no inglês).
  */
-export function liveProductsWithText(
-  locale: Locale,
-  options?: { inPerson?: boolean },
-): LiveProduct[] {
-  return liveProductsFor(locale, options).flatMap((product) => {
+export function liveProductsWithText(locale: Locale): LiveProduct[] {
+  return liveProductsFor(locale).flatMap((product) => {
     const text = productText(locale, product.id);
     return text ? [{ product, text }] : [];
   });
@@ -166,9 +153,8 @@ export function liveProductsWithText(
  */
 export function liveProductGroups(
   locale: Locale,
-  options?: { inPerson?: boolean },
 ): { group: ProductGroupId; items: LiveProduct[] }[] {
-  const live = liveProductsWithText(locale, options);
+  const live = liveProductsWithText(locale);
   return productGroups
     .map((group) => ({ group, items: live.filter(({ product }) => product.group === group) }))
     .filter(({ items }) => items.length > 0);

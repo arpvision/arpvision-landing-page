@@ -311,25 +311,44 @@ assert.deepEqual(
   routes.map(({ file }) => file).sort(),
   'as páginas do build são as publicadas em src/i18n/routes.ts',
 );
-// ARP Vision Presencial, só em português (atende Porto Alegre e região): seção na Home, item no
-// menu (com destaque pela rolagem) e WhatsApp com a mensagem do serviço. Vale com ou sem preços.
+// ARP Vision Presencial, só em português (atende Porto Alegre e região). Em toda página, o
+// treinamento e o Tour Pronto ficam no grupo "Com a nossa equipe" do menu Produtos (no painel do
+// desktop e no grupo do celular) e levam à seção dele na Home; o item "Presencial" saiu do topo.
+// Nos outros idiomas, nada dele. Vale com ou sem preços.
+for (const { locale, page, file } of routes) {
+  const html = await readFile(path.join('dist', file), 'utf8');
+  const inPersonItems = [
+    ...html.matchAll(
+      /<a class="products-item" href="([^"]*)" data-product="(training|readyTour)"/g,
+    ),
+  ].map((match) => `${match[2]} ${match[1]}`);
+  if (locale.code === 'pt') {
+    const section = page === 'home' ? '#presencial' : `${pathOf(locale.pages.home)}#presencial`;
+    assert.deepEqual(
+      inPersonItems,
+      ['training', 'readyTour', 'training', 'readyTour'].map((id) => `${id} ${section}`),
+      `${file}: o Presencial no menu Produtos leva à seção dele`,
+    );
+  } else
+    assert.ok(
+      !inPersonItems.length && !html.includes('#presencial') && !html.includes('id="presencial"'),
+      `${file}: sem o Presencial`,
+    );
+  assert.ok(!html.includes('data-spy="presencial"'), `${file}: o Presencial fora do topo`);
+}
+// A seção na Home, com o WhatsApp levando a mensagem do serviço.
 for (const locale of locales) {
   const home = pathOf(locale.pages.home);
   const html = await readFile(path.join('dist', locale.pages.home), 'utf8');
   const inPerson = html.match(/<section[^>]+id="presencial"[\s\S]*?<\/section>/)?.[0];
   if (locale.code === 'pt') {
     assert.ok(inPerson, `${home}: seção Presencial`);
-    assert.match(
-      html,
-      /<a href="#presencial" data-spy="presencial">/,
-      `${home}: menu leva ao Presencial`,
-    );
     assert.equal(
       decodeURIComponent(inPerson.match(/href="https:\/\/wa\.me\/\d+\?text=([^"]+)"/)?.[1] ?? ''),
       'Olá! Vim pelo site e quero saber do ARP Vision Presencial.',
       `${home}: botão do Presencial abre o WhatsApp com a mensagem do serviço`,
     );
-  } else assert.ok(!inPerson && !html.includes('#presencial'), `${home}: sem o Presencial`);
+  } else assert.ok(!inPerson, `${home}: sem a seção do Presencial`);
   // Com "Tour real" o menu só cabe no cabeçalho compacto, ligado por data-long-nav.
   assert.equal(
     /<header[^>]+data-long-nav/.test(html),

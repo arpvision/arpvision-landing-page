@@ -951,7 +951,6 @@ export const pt = {
   // ARP Vision Presencial: a equipe vai até a imobiliária treinar os corretores ou até o imóvel
   // fazer a captura. Atende Porto Alegre e região, por isso só existe em português.
   inPerson: onlyInPortuguese({
-    nav: 'Presencial',
     eyebrow: 'ARP VISION PRESENCIAL',
     title1: 'Treinamos sua equipe.',
     title2: 'Ou fazemos o tour por ela.',

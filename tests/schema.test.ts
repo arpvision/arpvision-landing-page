@@ -1,7 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { portugueseWords } from '../scripts/portuguese-words.mjs';
-import { available } from '../src/config/site';
 import { locales, translations } from '../src/i18n';
 import { publishedPageIds, type PageId } from '../src/i18n/routes';
 import { faq, faqSchema } from '../src/lib/content';
@@ -120,7 +119,7 @@ test('cada produto com página tem um Service no idioma dela, sem oferta', () =>
     }
 });
 
-test('ItemList do pt segue os produtos no ar e deixa o Presencial desligado de fora', () => {
+test('ItemList do pt segue os produtos no ar, com os dois itens do Presencial', () => {
   const list = itemListSchema('pt') as ItemList;
   assert.equal(list['@type'], 'ItemList');
   const live = liveProductsFor('pt');
@@ -136,10 +135,14 @@ test('ItemList do pt segue os produtos no ar e deixa o Presencial desligado de f
     live.map((product) => productText('pt', product.id)?.name),
     'nomes na ordem do menu',
   );
-  // Os dois itens do Presencial só entram com ele ligado (`available.inPerson`).
+  // O português tem a seção do Presencial, e os dois itens dele entram, levando a ela.
   const presencial = translations('pt').products.inPerson!;
-  assert.equal(names.includes(presencial.training.name), available.inPerson);
-  assert.equal(names.includes(presencial.readyTour.name), available.inPerson);
+  for (const name of [presencial.training.name, presencial.readyTour.name])
+    assert.equal(
+      list.itemListElement.find((item) => item.name === name)?.url,
+      'https://www.arpvision.com.br/#presencial',
+      name,
+    );
   for (const item of list.itemListElement) {
     assert.equal(item['@type'], 'ListItem');
     assert.match(item.url, /^https:\/\/www\.arpvision\.com\.br\//);
@@ -148,12 +151,7 @@ test('ItemList do pt segue os produtos no ar e deixa o Presencial desligado de f
   assert.equal(list.itemListElement[0].url, 'https://www.arpvision.com.br/');
 });
 
-test('ItemList com os três produtos publicados tem 4 itens, com endereços absolutos', () => {
-  assert.equal(
-    available.inPerson,
-    false,
-    'com o Presencial ligado a lista ganha os dois itens da equipe: atualize este teste',
-  );
+test('ItemList com os três produtos publicados: 6 itens no pt (com o Presencial) e 4 no es e no en', () => {
   withPublished(
     ['home', 'productVideos', 'productInstagram', 'productAutochat', 'products'],
     () => {
@@ -173,6 +171,8 @@ test('ItemList com os três produtos publicados tem 4 itens, com endereços abso
             'https://www.arpvision.com.br/produtos/piloto-automatico-para-instagram',
           ],
           [4, 'Autochat', 'https://www.arpvision.com.br/produtos/autochat'],
+          [5, 'Treinamento da equipe', 'https://www.arpvision.com.br/#presencial'],
+          [6, 'Tour Pronto', 'https://www.arpvision.com.br/#presencial'],
         ],
       );
       const es = itemListSchema('es') as ItemList;
@@ -186,15 +186,29 @@ test('ItemList com os três produtos publicados tem 4 itens, com endereços abso
         ],
       );
       for (const text of readable(es)) assert.doesNotMatch(text, portugueseWords, `es: "${text}"`);
+      const en = itemListSchema('en') as ItemList;
+      assert.deepEqual(
+        en.itemListElement.map(({ name, url }) => [name, url]),
+        [
+          ['360° virtual tour', 'https://www.arpvision.com.br/en'],
+          ['Videos from photos', 'https://www.arpvision.com.br/en/products/videos-from-photos'],
+          [
+            'Autopilot for Instagram',
+            'https://www.arpvision.com.br/en/products/autopilot-for-instagram',
+          ],
+          ['Autochat', 'https://www.arpvision.com.br/en/products/autochat'],
+        ],
+      );
     },
   );
 });
 
 test('ItemList não lista produto cuja página ainda não foi publicada', () => {
+  // O tour e o Presencial não têm página própria: estão sempre no ar.
   withPublished(['home', 'productAutochat'], () => {
     assert.deepEqual(
       (itemListSchema('pt') as ItemList).itemListElement.map((item) => item.name),
-      ['Tour virtual 360°', 'Autochat'],
+      ['Tour virtual 360°', 'Autochat', 'Treinamento da equipe', 'Tour Pronto'],
     );
   });
 });

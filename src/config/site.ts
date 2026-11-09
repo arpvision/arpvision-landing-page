@@ -315,9 +315,6 @@ export const available = {
   whatsapp: Boolean(site.contact.whatsapp),
   email: Boolean(site.contact.email),
   tour: site.tours.length > 0,
-  // O ARP Vision Presencial ainda não tem a sua seção na home. Ligue quando ela entrar: o grupo
-  // "Com a nossa equipe" passa a aparecer no menu de Produtos (só em português).
-  inPerson: false,
 };
 
 // Preço como no app: sem centavos quando o valor é inteiro (R$ 249, R$ 23,25). Em espanhol e

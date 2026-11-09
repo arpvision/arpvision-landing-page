@@ -46,7 +46,6 @@ const allProducts = publishedPageIds.includes('products') ? pagePath(locale, 'pr
       <h2>{t.footer.discover}</h2>
       <a href={sectionPath(locale, 'home', 'howItWorks')}>{t.footer.howItWorks}</a>
       {available.tour && <a href={sectionPath(locale, 'home', 'realTour')}>{t.footer.realTour}</a>}
-      {t.inPerson && <a href={sectionPath(locale, 'home', 'inPerson')}>{t.inPerson.nav}</a>}
       {site.pricing.showPrices ? (
         <a href={pagePath(locale, 'plans')}>{t.footer.plans}</a>
       ) : (
