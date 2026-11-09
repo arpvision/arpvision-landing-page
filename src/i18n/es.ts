@@ -845,9 +845,12 @@ export const es: Dictionary = {
     title1: 'Cada estancia se convierte en una',
     title2: 'imagen 360° de alta calidad.',
     lead: 'No pagas por foto ni por tour. Pagas por estancia terminada.',
-    // Tradução fiel do texto aprovado em português (medido no app: ~2 min por ambiente).
+    // Tradução fiel do português, sem tempo prometido na captura.
     flow: {
-      capture: { value: '30 segundos', text: 'Una sola vuelta con el móvil, en cada estancia.' },
+      capture: {
+        value: 'Una vuelta con el móvil',
+        text: 'En cada estancia, con la pantalla indicándote hacia dónde apuntar.',
+      },
       image: {
         value: '1 imagen 360°',
         text: 'Las fotos se convierten en una única imagen, en alta calidad.',
@@ -995,15 +998,15 @@ export const es: Dictionary = {
     duration: {
       question: '¿Cuánto se tarda en hacer un tour?',
       answer:
-        'Cada estancia es una sola vuelta, con 8 fotos. El 360° está listo en aproximadamente 1 minuto, en segundo plano, y mientras tanto capturas la siguiente estancia.',
+        'Cada estancia es una sola vuelta. El 360° está listo en aproximadamente 1 minuto, en segundo plano, y mientras tanto capturas la siguiente estancia.',
     },
-    // DIFERENTE: o português promete comparar a foto original antes de publicar (o app não
-    // tem isso) e um chão "completado" (hoje é um borrão com carimbo). Aqui fica só o que é
-    // verdade; o centro do teto e a foto original guardada não são citados.
+    // DIFERENTE: o chão é descrito como aparece (difuminado, com um selo), sem o nome da
+    // imobiliária, e a foto original guardada não é citada. O português a cita no lugar da
+    // comparação antes de publicar, uma promessa que só ele fazia.
     enhancement: {
       question: '¿La mejora cambia el inmueble?',
       answer:
-        'Iguala las uniones y la luz entre las fotos, sin crear muebles ni cambiar acabados. El suelo justo debajo del móvil, que ninguna foto alcanza, se muestra difuminado y con un sello.',
+        'Iguala las uniones y la luz entre las fotos. El suelo justo debajo del móvil, que ninguna foto alcanza, se muestra difuminado y con un sello.',
     },
     camera: {
       question: 'Ya tengo una cámara 360°. ¿Me sirve?',

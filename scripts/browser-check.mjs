@@ -638,7 +638,7 @@ try {
   assert.equal(await page.locator('.steps p').count(), 0);
   assert.equal(await page.locator('.team-benefit').count(), 2, 'somente benefícios já definidos');
   assert.equal(await page.locator('.credit-facts, .sharing-details').count(), 0);
-  assert.match(await page.locator('#creditos').innerText(), /30 segundos/);
+  assert.match(await page.locator('#creditos').innerText(), /Uma volta com o celular/);
   assert.match(
     await page.locator('.credit-example').innerText(),
     /5 ambientes, ou seja, 5 créditos/,
@@ -2170,6 +2170,7 @@ try {
       faq: 'preguntas',
       payment: '¿Cómo funciona el pago?',
       cost: /¿Cuánto cuesta\?/,
+      capture: /Una vuelta con el móvil/,
       greeting: '¡Hola! Vengo de la web y quiero un presupuesto de ARP Vision.',
       answers: ['Inmobiliaria con equipo', '6 a 15', 'Este mes'],
       filled: [
@@ -2190,6 +2191,7 @@ try {
       faq: 'faq',
       payment: 'How does payment work?',
       cost: /How much does it cost\?/,
+      capture: /One turn with your phone/,
       greeting: "Hi! I came from the website and I'd like a quote from ARP Vision.",
       answers: ['Agency with a team', '6 to 15', 'This month'],
       filled: [
@@ -2262,6 +2264,12 @@ try {
         .find((item) => item['@type'] === 'FAQPage')
         .mainEntity.some((item) => item.name === language.payment),
       `${home}: FAQPage no idioma`,
+    );
+    // A captura é uma volta com o celular, sem tempo prometido.
+    assert.match(
+      await localized.locator('#creditos').innerText(),
+      language.capture,
+      `${home}: captura`,
     );
     if (!pricesShown) {
       const quote = localized.locator(`#${language.quote}`);

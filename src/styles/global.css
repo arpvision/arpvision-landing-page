@@ -1198,12 +1198,14 @@ p {
 .credit-flow .icon-tile {
   margin-bottom: 10px;
 }
+/* "Uma volta com o celular" quebra em duas linhas parecidas, e não com o "o" no fim da primeira. */
 .credit-flow strong {
   font-size: 1.6rem;
   font-weight: 650;
   letter-spacing: -0.04em;
   line-height: 1.25;
   color: var(--accent);
+  text-wrap: balance;
 }
 .credit-flow li > span:last-child {
   max-width: 240px;

@@ -883,9 +883,12 @@ export const pt = {
     title1: 'Cada ambiente vira uma',
     title2: 'imagem 360° de alta qualidade.',
     lead: 'Você não paga por foto nem por tour. Paga por ambiente pronto.',
-    // O tempo de uma volta é o texto aprovado da landing (medido no app: ~2 min por ambiente).
+    // A captura sem tempo prometido: medida no app, a volta leva cerca de 2 min por ambiente.
     flow: {
-      capture: { value: '30 segundos', text: 'Uma volta só com o celular, em cada ambiente.' },
+      capture: {
+        value: 'Uma volta com o celular',
+        text: 'Em cada ambiente, com a tela mostrando para onde apontar.',
+      },
       image: {
         value: '1 imagem 360°',
         text: 'As fotos viram uma imagem única, em alta qualidade.',
@@ -1049,12 +1052,12 @@ export const pt = {
     duration: {
       question: 'Quanto tempo leva para fazer um tour?',
       answer:
-        'Cada ambiente é uma volta só, com 8 fotos. O 360° fica pronto em cerca de 1 minuto, em segundo plano, e você captura o próximo cômodo enquanto isso.',
+        'Cada ambiente é uma volta só. O 360° fica pronto em cerca de 1 minuto, em segundo plano, e você captura o próximo cômodo enquanto isso.',
     },
     enhancement: {
       question: 'O aprimoramento muda o imóvel?',
       answer:
-        'Ele deixa uniformes as emendas e a luz entre as fotos, sem criar móveis nem trocar acabamentos. O único trecho completado é o que nenhuma foto alcança: o chão logo abaixo do celular e o centro do teto, seguindo o piso e o teto que aparecem ao redor. A foto original fica guardada, e você compara as duas antes de publicar.',
+        'Ele deixa uniformes as emendas e a luz entre as fotos. No chão, o carimbo com o nome da sua imobiliária. A foto original fica guardada.',
     },
     camera: {
       question: 'Já tenho uma câmera 360°. Ela serve?',

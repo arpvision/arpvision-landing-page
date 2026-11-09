@@ -965,9 +965,12 @@ export const en: Dictionary = {
     title1: 'Each room becomes a',
     title2: 'high-quality 360° image.',
     lead: "You don't pay per photo or per tour. You pay per finished room.",
-    // Tradução fiel do texto aprovado em português (medido no app: ~2 min por ambiente).
+    // Tradução fiel do português, sem tempo prometido na captura.
     flow: {
-      capture: { value: '30 seconds', text: 'A single turn with your phone, in each room.' },
+      capture: {
+        value: 'One turn with your phone',
+        text: 'In each room, with the screen showing where to point.',
+      },
       image: {
         value: 'One 360° image',
         text: 'The photos become a single high-quality image.',
@@ -1115,15 +1118,14 @@ export const en: Dictionary = {
     duration: {
       question: 'How long does it take to make a tour?',
       answer:
-        'Each room is a single turn, with 8 photos. The 360° is ready in about 1 minute, in the background, and you capture the next room in the meantime.',
+        'Each room is a single turn. The 360° is ready in about 1 minute, in the background, and you capture the next room in the meantime.',
     },
-    // DIFERENTE: como no espanhol. O português promete comparar a foto original antes de
-    // publicar (o app não tem isso) e um chão "completado" (hoje é um borrão com carimbo).
-    // Aqui fica só o que é verdade; o centro do teto e a foto original guardada não são citados.
+    // DIFERENTE: a foto original guardada não é citada, como no espanhol. O português a cita no
+    // lugar da comparação antes de publicar, uma promessa que só ele fazia.
     enhancement: {
       question: 'Does the enhancement change the property?',
       answer:
-        'It evens out the seams and the lighting between the photos, without adding furniture or changing finishes. The floor right below the phone, which no photo reaches, is shown blurred, with a stamp.',
+        "It evens out the seams and the lighting between the photos. On the floor, a stamp with your agency's name.",
     },
     camera: {
       question: 'I already have a 360° camera. Can I use it?',

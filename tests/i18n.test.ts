@@ -137,19 +137,33 @@ const oldAudience: Record<Locale, RegExp> = {
   es: /\btu espacio\b|tu negocio|para empresas/i,
   en: /\byour space\b|your business\b|for (?:companies|businesses)\b|any business\b/i,
 };
-test('nenhum idioma fala com o público genérico de antes, só com imobiliárias', () => {
+// As promessas antigas da home: a volta não leva 30 segundos (medido no app, são cerca de 2 min
+// por ambiente), e as 8 fotos não são regra (são 12 na lente comum).
+const oldPromises: Record<Locale, RegExp> = {
+  pt: /\b30 segundos\b|com 8 fotos/,
+  es: /\b30 segundos\b|con 8 fotos/,
+  en: /\b30 seconds\b|with 8 photos/,
+};
+test('nenhum idioma fala com o público genérico de antes nem repete as promessas antigas', () => {
   for (const locale of locales)
-    for (const [path, value] of texts(locale))
+    for (const [path, value] of texts(locale)) {
       assert.doesNotMatch(value, oldAudience[locale], `${locale}.${path}: "${value}"`);
+      assert.doesNotMatch(value, oldPromises[locale], `${locale}.${path}: "${value}"`);
+    }
 });
 
-test('espanhol e inglês não prometem o que o app não faz (comparar a original, chão completado)', () => {
-  for (const locale of translated)
-    assert.doesNotMatch(translations(locale).faq.enhancement.answer, /original|compar|complet/i);
-  assert.match(translations('es').faq.enhancement.answer, /difuminado/);
-  assert.match(translations('en').faq.enhancement.answer, /blurred/);
-  // O português continua como está: a mudança é só acrescentar os idiomas.
-  assert.match(translations('pt').faq.enhancement.answer, /compara as duas antes de publicar/);
+test('o aprimoramento não promete o que o app não faz (comparar a original, chão completado, móveis)', () => {
+  const answer = (locale: Locale) => translations(locale).faq.enhancement.answer;
+  assert.doesNotMatch(
+    answer('pt'),
+    /compara as duas antes de publicar|completado|sem criar móveis/,
+  );
+  assert.match(answer('pt'), /A foto original fica guardada\./);
+  assert.match(answer('pt'), /No chão, o carimbo com o nome da sua imobiliária\./);
+  assert.doesNotMatch(answer('es'), /sin crear muebles|original|compar|complet/i);
+  assert.match(answer('es'), /difuminado/);
+  assert.doesNotMatch(answer('en'), /without adding furniture|changing finishes|compare/i);
+  assert.match(answer('en'), /On the floor, a stamp with your agency's name\./);
 });
 
 test('cada idioma tem todas as páginas e âncoras; o espanhol mora em /es e o inglês em /en', () => {
