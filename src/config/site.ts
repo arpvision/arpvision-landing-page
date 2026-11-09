@@ -121,6 +121,11 @@ export const site = {
       },
       'sala-2-16x9': { src: '/images/produtos/sala-2-16x9.webp', width: 960, height: 540 },
       'cozinha-16x9': { src: '/images/produtos/cozinha-16x9.webp', width: 960, height: 540 },
+      'quarto-com-suite-16x9': {
+        src: '/images/produtos/quarto-com-suite-16x9.webp',
+        width: 960,
+        height: 540,
+      },
     },
     // Os vídeos de exemplo de "Vídeos a partir de fotos" (public/video), um par por idioma: o
     // selo, os dados do imóvel e o cartão final estão gravados na imagem. O pôster de cada um

@@ -707,6 +707,26 @@ export const pt = {
       },
     },
   },
+  // A página com todos os produtos (/produtos): os cartões seguem os grupos do menu, e a faixa azul
+  // pede a cotação pelo WhatsApp com uma mensagem geral sobre os produtos.
+  productsPage: {
+    meta: {
+      title: 'Produtos para imobiliárias | ARP Vision',
+      description:
+        'Tour virtual 360°, vídeos a partir de fotos, Piloto automático para Instagram e Autochat: os produtos da ARP Vision para mostrar o imóvel, divulgar e atender.',
+    },
+    eyebrow: 'PRODUTOS PARA IMOBILIÁRIAS',
+    title: 'Do primeiro post ao cliente pronto para a visita.',
+    lead: 'Quatro produtos que trabalham juntos: mostram o imóvel, mantêm o Instagram em dia e atendem no WhatsApp enquanto o corretor está na rua.',
+    // O fim de cada cartão.
+    cta: 'Conhecer',
+    finalCta: {
+      title: 'Qual produto combina com a sua imobiliária?',
+      lead: 'Conte como vocês trabalham e receba pelo WhatsApp uma proposta com os produtos que você escolher.',
+      button: 'Quero uma cotação no WhatsApp',
+      message: 'Olá! Vim pelo site e quero uma cotação dos produtos da ARP Vision.',
+    },
+  },
   footer: {
     taglineLines: ['O espaço por inteiro.', 'O celular é só o começo.'],
     products: 'Produtos',

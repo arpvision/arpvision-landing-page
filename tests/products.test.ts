@@ -186,6 +186,11 @@ const leaves = (value: unknown, path = ''): Leaf[] => {
 };
 const productPagesOf = (locale: (typeof locales)[number]) =>
   Object.entries(translations(locale).productPages);
+// Todo texto das páginas novas: cada página de produto e a página com todos os produtos.
+const newPagesOf = (locale: (typeof locales)[number]): [string, unknown][] => [
+  ...productPagesOf(locale),
+  ['productsPage', translations(locale).productsPage],
+];
 // As regras de texto da spec: sem "IA" nem o que a pasta de marketing proíbe, sem preço e sem o
 // nome do site de referência. Cada regra vale também no espanhol: "generado", o euro com número
 // e "desde" com preço.
@@ -237,15 +242,29 @@ test('páginas de produto: título com a marca, descrição de até 160 e as men
   }
 });
 
-test('o texto das páginas de produto segue as regras da spec', () => {
+test('a página com todos os produtos: publicada, título com a marca, descrição de até 160 e "Conhecer"', () => {
+  assert.ok(publishedPageIds.includes('products'), 'a página com todos os produtos está publicada');
+  for (const locale of locales) {
+    const { meta } = translations(locale).productsPage;
+    assert.match(meta.title, /ARP Vision/, `${locale}: título`);
+    assert.ok(
+      meta.description.length <= 160,
+      `${locale}: descrição com ${meta.description.length} caracteres`,
+    );
+  }
+  assert.equal(translations('pt').productsPage.cta, 'Conhecer');
+  assert.equal(translations('es').productsPage.cta, 'Conocer');
+});
+
+test('o texto das páginas de produto e o da página com todos eles seguem as regras da spec', () => {
   for (const locale of locales)
-    for (const [id, page] of productPagesOf(locale))
+    for (const [id, page] of newPagesOf(locale))
       for (const [path, text] of leaves(page))
         assert.doesNotMatch(text, forbidden, `${locale}/${id}.${path}: "${text}"`);
 });
 
-test('as páginas de produto em espanhol não têm português nem CRECI', () => {
-  for (const [id, page] of productPagesOf('es'))
+test('as páginas de produto e a com todos eles, em espanhol, não têm português nem CRECI', () => {
+  for (const [id, page] of newPagesOf('es'))
     for (const [path, text] of leaves(page)) {
       assert.doesNotMatch(text, portugueseWords, `es/${id}.${path}: "${text}"`);
       assert.doesNotMatch(text, /CRECI/, `es/${id}.${path}: "${text}"`);

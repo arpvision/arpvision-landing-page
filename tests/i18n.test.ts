@@ -193,6 +193,7 @@ test('títulos e descrições cabem no resultado de busca', () => {
       t.tutorials.description,
       t.legal.terms.description,
       t.legal.privacy.description,
+      t.productsPage.meta.description,
       ...productMeta.map((meta) => meta.description),
     ])
       assert.ok(description.length <= 160, `${locale}: ${description}`);
@@ -202,6 +203,7 @@ test('títulos e descrições cabem no resultado de busca', () => {
       t.tutorials.title,
       t.legal.terms.title,
       t.legal.privacy.title,
+      t.productsPage.meta.title,
       ...productMeta.map((meta) => meta.title),
     ])
       assert.match(title, /ARP Vision/);

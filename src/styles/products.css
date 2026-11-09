@@ -1775,6 +1775,83 @@
   text-align: center;
 }
 
+/* A página com todos os produtos (/produtos): os grupos do menu, cada produto num cartão com a foto
+   16:9, e o cartão inteiro é o link. */
+.products-page {
+  padding-top: 65px;
+}
+.products-page .section-heading h1 {
+  margin: 15px 0 20px;
+  font-size: 3.4rem;
+}
+.products-page .eyebrow {
+  margin-bottom: 0;
+}
+.products-page-group + .products-page-group {
+  margin-top: 56px;
+}
+.products-page-group h2 {
+  margin-bottom: 20px;
+  font-size: 1.375rem;
+  letter-spacing: -0.02em;
+}
+.product-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.product-card {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  transition: border-color 0.18s;
+}
+.product-card:hover {
+  border-color: var(--accent);
+}
+.product-card img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+.product-card-body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 22px 24px 24px;
+}
+.product-card .products-name {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 620;
+  letter-spacing: -0.02em;
+}
+.product-card .products-line {
+  margin: 0;
+  font-size: var(--fs-small);
+}
+.product-card-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 12px;
+  color: var(--brand-blue-dark);
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+
 /* De 1024 a 1199px, os três passos ainda ficam lado a lado, em cartões estreitos: menos respiro em
    volta das telas, e o campo do site sem o ícone, para o endereço caber inteiro. */
 @media (min-width: 1024px) and (max-width: 1199px) {
@@ -2054,6 +2131,23 @@
   .summary-mock:not(.step-mock),
   .distance-mock {
     padding: 18px;
+  }
+  /* A página com todos os produtos: um cartão por linha. */
+  .products-page {
+    padding-top: 40px;
+  }
+  .products-page .section-heading h1 {
+    font-size: 2.6rem;
+  }
+  .products-page-group + .products-page-group {
+    margin-top: 40px;
+  }
+  .product-cards {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+  .product-card-body {
+    padding: 18px 20px 20px;
   }
 }
 

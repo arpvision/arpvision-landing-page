@@ -1,0 +1,107 @@
+---
+// /produtos e /es/productos: os produtos no ar, nos grupos do menu Produtos, cada um num cartão com
+// a foto 16:9, o nome (com o selo "Novo"), a linha e o "Conhecer". O tour e o Presencial levam à
+// home. A página não tem dúvidas próprias: a faixa azul pede a cotação pelo WhatsApp, com uma
+// mensagem geral sobre os produtos, e os dados estruturados são a ItemList dos mesmos produtos.
+import Layout from '../../layouts/Layout.astro';
+import Icon from '../Icon.astro';
+import FinalCta from '../FinalCta.astro';
+import { site } from '../../config/site';
+import { pageLocale } from '../../i18n';
+import {
+  liveProductsFor,
+  productGroups,
+  productHref,
+  productText,
+  type ProductId,
+} from '../../lib/products';
+import { itemListSchema } from '../../lib/schema';
+const { locale, t } = pageLocale(Astro);
+const text = t.productsPage;
+const photos = site.media.productPhotos;
+// A foto de cada produto: a sala no tour, a do exemplo da página nos produtos novos (a fachada que
+// abre o vídeo, a piscina da arte "À venda" e a cozinha do imóvel da conversa) e a suíte no
+// Presencial, que só aparece ligado.
+const photoOf = {
+  tour: 'sala-2-16x9',
+  videos: 'patio-fachada-16x9',
+  instagram: 'patio-piscina-16x9',
+  autochat: 'cozinha-16x9',
+  training: 'quarto-com-suite-16x9',
+  readyTour: 'quarto-com-suite-16x9',
+} satisfies Record<ProductId, keyof typeof photos>;
+const path = Astro.url.pathname;
+const groups = productGroups
+  .map((group) => ({
+    group,
+    items: liveProductsFor(locale).flatMap((product) => {
+      // O Presencial só tem texto em português: no espanhol, `productText` não devolve nada.
+      const name = productText(locale, product.id);
+      return product.group === group && name
+        ? [{ product, name, photo: photos[photoOf[product.id]] }]
+        : [];
+    }),
+  }))
+  .filter(({ items }) => items.length > 0);
+---
+
+<Layout
+  title={text.meta.title}
+  description={text.meta.description}
+  page="products"
+  schema={[itemListSchema(locale)]}
+>
+  <section class="section products-page" aria-labelledby="products-title">
+    <div class="container">
+      <div class="section-heading center">
+        <span class="eyebrow">{text.eyebrow}</span>
+        <h1 id="products-title">{text.title}</h1>
+        <p>{text.lead}</p>
+      </div>
+      {groups.map(({ group, items }, groupIndex) => (
+        <section class="products-page-group" aria-labelledby={`grupo-${group}`}>
+          <h2 id={`grupo-${group}`}>{t.products.groups[group]}</h2>
+          <ul class="product-cards" role="list">
+            {items.map(({ product, name, photo }) => (
+              <li>
+                <a
+                  class="product-card"
+                  href={productHref(locale, product, path)}
+                  data-product={product.id}
+                >
+                  <img
+                    src={photo.src}
+                    width={photo.width}
+                    height={photo.height}
+                    alt=""
+                    loading={groupIndex === 0 ? 'eager' : 'lazy'}
+                    decoding="async"
+                  />
+                  <span class="product-card-body">
+                    <h3 class="products-name">
+                      {name.name}
+                      {product.isNew && <span class="products-badge">{t.header.newBadge}</span>}
+                    </h3>
+                    <span class="products-line">{name.line}</span>
+                    <span class="product-card-cta" aria-hidden="true">
+                      {text.cta}
+                      <Icon name="arrow" size={16} />
+                    </span>
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+    </div>
+  </section>
+  <FinalCta
+    title={text.finalCta.title}
+    lead={text.finalCta.lead}
+    primary="whatsapp"
+    whatsappLabel={text.finalCta.button}
+    whatsappMessage={text.finalCta.message}
+    note={null}
+  />
+</Layout>

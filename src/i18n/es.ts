@@ -677,6 +677,23 @@ export const es: Dictionary = {
       },
     },
   },
+  productsPage: {
+    meta: {
+      title: 'Productos para inmobiliarias | ARP Vision',
+      description:
+        'Tour virtual 360°, vídeos a partir de fotos, Piloto automático para Instagram y Autochat: productos de ARP Vision para mostrar el inmueble, difundir y atender.',
+    },
+    eyebrow: 'PRODUCTOS PARA INMOBILIARIAS',
+    title: 'Del primer post al cliente listo para la visita.',
+    lead: 'Cuatro productos que trabajan juntos: muestran el inmueble, mantienen el Instagram al día y atienden por WhatsApp mientras el agente inmobiliario está en la calle.',
+    cta: 'Conocer',
+    finalCta: {
+      title: '¿Qué producto encaja con tu inmobiliaria?',
+      lead: 'Cuéntanos cómo trabajáis y recibe por WhatsApp una propuesta con los productos que elijas.',
+      button: 'Quiero un presupuesto por WhatsApp',
+      message: '¡Hola! Vengo de la web y quiero un presupuesto de los productos de ARP Vision.',
+    },
+  },
   footer: {
     taglineLines: ['Todo el espacio, por dentro.', 'El móvil es solo el principio.'],
     products: 'Productos',

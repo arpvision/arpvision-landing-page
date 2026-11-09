@@ -1330,6 +1330,73 @@ try {
     'Autochat (pt e es): 1 h1; 7 telas de exemplo (a conversa do topo, uma em cada um dos 4 passos, as distâncias e o resumo) com a etiqueta visível, aria-hidden, inert e a descrição "Exemplo:"; nada para fora das telas dos passos a 1024, 1100 e 1440px; toda distância da página "em linha reta"; nada do tour na cotação e na faixa; o produto nos 5 botões de WhatsApp; a mensagem ("4 a 10", "100 a 500", "Este mês") e os eventos da cotação; o menu marca o produto; Cotação e Dúvidas na página OK',
   );
 
+  // A página com todos os produtos, nos dois idiomas: um cartão por produto no ar (os links do
+  // menu), cada um com a foto 16:9 e o "Conhecer", e o do tour leva à home. Cada destino responde.
+  // Sem dúvidas próprias, Cotação e Dúvidas do topo levam às da home, e a faixa azul pede a
+  // cotação pelo WhatsApp com a mensagem geral dos produtos, sem o cadastro.
+  const allProductsPage = {
+    pt: {
+      cta: 'Conhecer',
+      message: 'Olá! Vim pelo site e quero uma cotação dos produtos da ARP Vision.',
+    },
+    es: {
+      cta: 'Conocer',
+      message: '¡Hola! Vengo de la web y quiero un presupuesto de los productos de ARP Vision.',
+    },
+  };
+  for (const [locale, expected] of Object.entries(allProductsPage)) {
+    const { pages, anchors } = localeRoutes[locale];
+    const route = pages.products;
+    await page.goto(base + route);
+    const cards = await page.locator('.product-card').evaluateAll((links) =>
+      links.map((link) => ({
+        product: link.dataset.product,
+        href: link.getAttribute('href'),
+        image: link.querySelector('img')?.getAttribute('src') ?? null,
+        cta: link.querySelector('.product-card-cta')?.textContent.trim() ?? null,
+      })),
+    );
+    assert.deepEqual(
+      cards.map((card) => card.href).sort(),
+      productLinks(locale),
+      `${route}: um cartão por produto no ar, com os links do menu`,
+    );
+    assert.equal(
+      cards.find((card) => card.product === 'tour')?.href,
+      pages.home,
+      `${route}: o cartão do tour leva à home`,
+    );
+    for (const card of cards) {
+      assert.equal((await fetch(base + card.href)).status, 200, `${route}: ${card.href} existe`);
+      assert.match(card.image ?? '', /^\/images\/produtos\/[\w-]+-16x9\.webp$/, `${route}: foto`);
+      assert.equal(card.cta, expected.cta, `${route}: "${expected.cta}" em ${card.product}`);
+    }
+    assert.equal(await page.locator('.faq-section').count(), 0, `${route}: sem dúvidas próprias`);
+    for (const anchor of pricesShown ? ['faq'] : ['quote', 'faq'])
+      assert.equal(
+        await page.locator(`.desktop-nav a[data-spy="${anchors[anchor]}"]`).getAttribute('href'),
+        `${pages.home}#${anchors[anchor]}`,
+        `${route}: ${anchor} leva à home`,
+      );
+    assert.deepEqual(
+      await page
+        .locator('.final-cta-actions a')
+        .evaluateAll((links) =>
+          links.map((link) => [
+            link.hasAttribute('data-whatsapp'),
+            link.dataset.cta ?? null,
+            new URL(link.href).searchParams.get('text'),
+          ]),
+        ),
+      [[true, null, expected.message]],
+      `${route}: a faixa azul pede a cotação dos produtos pelo WhatsApp, sem o cadastro`,
+    );
+    await page.screenshot({ path: `.artifacts/produtos-${locale}-desktop.png` });
+  }
+  results.push(
+    'Todos os produtos (pt e es): um cartão por produto no ar, com a foto 16:9 e "Conhecer"; o do tour leva à home; cada destino responde; sem dúvidas, Cotação e Dúvidas levam à home; a faixa azul pede a cotação dos produtos pelo WhatsApp OK',
+  );
+
   for (const route of pricesShown ? ['/', '/planos'] : ['/']) {
     await page.goto(base + route);
     const text = await page.locator('body').innerText();
@@ -1533,6 +1600,7 @@ try {
       localeRoutes.pt.pages.productInstagram,
       localeRoutes.pt.pages.productVideos,
       localeRoutes.pt.pages.productAutochat,
+      localeRoutes.pt.pages.products,
       pricesShown ? '/planos' : '/termos-de-uso',
     ]) {
       await themed.goto(base + route);
@@ -1996,6 +2064,7 @@ try {
       localeRoutes.es.pages.productInstagram,
       localeRoutes.es.pages.productVideos,
       localeRoutes.es.pages.productAutochat,
+      localeRoutes.es.pages.products,
       '/es/terminos-de-uso',
       '/pagina-que-nao-existe',
     ]) {
