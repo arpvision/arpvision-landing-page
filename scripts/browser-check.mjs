@@ -901,6 +901,18 @@ try {
     await page.goto(base + route);
     const toggle = page.locator('.desktop-nav > :first-child');
     const panel = page.locator('#products-panel');
+    // O topo: Produtos ▾ · Cotação · Dúvidas · Tutoriais, com os rótulos do idioma.
+    assert.deepEqual(
+      await page
+        .locator('.desktop-nav > :is(a, button)')
+        .evaluateAll((items) => items.map((item) => item.textContent.trim())),
+      {
+        pt: ['Produtos', pricesShown ? 'Planos' : 'Cotação', 'Dúvidas', 'Tutoriais'],
+        es: ['Productos', pricesShown ? 'Planes' : 'Presupuesto', 'Preguntas', 'Tutoriales'],
+        en: ['Products', pricesShown ? 'Plans' : 'Get a quote', 'FAQ', 'Tutorials'],
+      }[locale],
+      `${route}: os itens do topo`,
+    );
     assert.equal(
       await toggle.evaluate((element) => element.matches('button.products-toggle')),
       true,
@@ -988,7 +1000,7 @@ try {
     }
   }
   results.push(
-    'Menu Produtos no desktop (pt, es e en): primeiro item, clique, Esc com o foco de volta, Enter, Tab até o painel, clique fora e os produtos no ar; no pt, o grupo "Com a nossa equipe" com o treinamento e o Tour Pronto levando à seção do Presencial, e nada dele no es e no en OK',
+    'Menu Produtos no desktop (pt, es e en): o topo Produtos · Cotação · Dúvidas · Tutoriais no idioma, primeiro item, clique, Esc com o foco de volta, Enter, Tab até o painel, clique fora e os produtos no ar; no pt, o grupo "Com a nossa equipe" com o treinamento e o Tour Pronto levando à seção do Presencial, e nada dele no es e no en OK',
   );
 
   // A página do Piloto automático para Instagram, nos três idiomas: as telas de exemplo marcadas,
@@ -1164,10 +1176,10 @@ try {
     'Piloto automático para Instagram (pt, es e en): 1 h1; 13 telas de exemplo (uma em cada passo) com a etiqueta visível, aria-hidden, inert e a descrição "Exemplo:"; a lista dos passos com role="list" e nada para fora das telas dos passos a 1024, 1100 e 1440px; o número de WhatsApp do story numa linha só nessas larguras; nada do tour na cotação e na faixa; dúvidas sem título de grupo; o produto nos 5 botões de WhatsApp; a mensagem e os eventos da cotação; o menu marca o produto; Cotação e Dúvidas na página; a frase da dor troca 2 voltas e para no primeiro trecho, e não troca com movimento reduzido OK',
   );
 
-  // A página dos Vídeos a partir de fotos, nos três idiomas: o par de vídeos do topo (os arquivos do
-  // idioma, sem som, em laço, sem pré-carga, fora do leitor de tela, com a descrição "Exemplo:" e o
-  // botão de cada um), uma tela de exemplo em cada passo e o que toda página de produto confere.
-  // Com movimento reduzido (o contexto desta página), nenhum dos dois toca sozinho.
+  // A página dos Vídeos a partir de fotos, nos três idiomas: o par de vídeos do topo (os arquivos
+  // do idioma, sem som, em laço, sem pré-carga, fora do leitor de tela, com a descrição "Exemplo:"
+  // e o botão de cada um), uma tela de exemplo em cada passo e o que toda página de produto
+  // confere. Com movimento reduzido (o contexto desta página), nenhum dos dois toca sozinho.
   const videoPage = {
     pt: {
       example: 'Exemplo',
@@ -2451,9 +2463,9 @@ try {
     'Contraste AA nos dois temas em /es e /en (as páginas de produto também), na 404 e com a lista do seletor aberta OK',
   );
 
-  // Cabeçalho em uma linha, com Produtos só a partir de 1024px, e nada estourando, em todas as rotas
-  // dos três idiomas e na 404, inclusive de 1024 a 1100px, onde os rótulos do espanhol ficam mais
-  // apertados.
+  // Cabeçalho em uma linha, com Produtos só a partir de 1024px, e nada estourando, em todas as
+  // rotas dos três idiomas e na 404, inclusive de 1024 a 1100px, onde os rótulos do espanhol ficam
+  // mais apertados.
   for (const width of [320, 360, 390, 768, 1024, 1040, 1100, 1280, 1440]) {
     const context = await newContext({
       viewport: { width, height: 900 },
@@ -2472,6 +2484,7 @@ try {
           layout: innerWidth,
           scroll: document.documentElement.scrollWidth,
           products: document.querySelector('.products-toggle')?.checkVisibility() ?? false,
+          capsule: document.querySelector('.header-capsule')?.getBoundingClientRect().width ?? 0,
         }))),
         // Nenhum rótulo do cabeçalho quebra em duas linhas, o botão Produtos incluído.
         wrapped: await wrappedHeader(sized),
@@ -2485,6 +2498,10 @@ try {
       ptDimensions.set(route, dimensions);
       assert.deepEqual(dimensions.wrapped, [], `${route} ${width}px: cabeçalho em uma linha`);
       assert.equal(dimensions.products, width >= 1024, `${route} ${width}px: Produtos no desktop`);
+      assert.ok(
+        dimensions.capsule <= 1060,
+        `${route} ${width}px: cápsula com ${dimensions.capsule}px`,
+      );
     }
     for (const route of [...routesOf.es, ...routesOf.en, '/pagina-que-nao-existe']) {
       const dimensions = await measure(route);
@@ -2502,12 +2519,17 @@ try {
       else assert.ok(!overflows, `${route} ${width}px: sem overflow ${JSON.stringify(dimensions)}`);
       assert.deepEqual(dimensions.wrapped, [], `${route} ${width}px: cabeçalho em uma linha`);
       // A 404 não tem cabeçalho.
-      if (ptRoute)
+      if (ptRoute) {
         assert.equal(
           dimensions.products,
           width >= 1024,
           `${route} ${width}px: Produtos no desktop`,
         );
+        assert.ok(
+          dimensions.capsule <= 1060,
+          `${route} ${width}px: cápsula com ${dimensions.capsule}px`,
+        );
+      }
     }
     if (width === 360)
       for (const [route, close] of [
@@ -2526,7 +2548,7 @@ try {
   if (knownIssues.length)
     results.push(`Avisos (problemas que o português também tem): ${knownIssues.join('; ')}`);
   results.push(
-    `Três idiomas e 404 de 320 a 1440px (com 1040 e 1100px): ${routes.length} rotas sem estouro e com o cabeçalho numa linha, com Produtos só a partir de 1024px; menu do celular com PT | ES | EN OK`,
+    `Três idiomas e 404 de 320 a 1440px (com 1040 e 1100px): ${routes.length} rotas sem estouro e com o cabeçalho numa linha (cápsula de até 1060px), com Produtos só a partir de 1024px; menu do celular com PT | ES | EN OK`,
   );
 
   // Faixa de sugestão de idioma: aparece só no navegador, quando ele prefere outro idioma do
