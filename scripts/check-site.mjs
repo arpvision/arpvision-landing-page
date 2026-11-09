@@ -363,10 +363,11 @@ for (const locale of locales) {
       `${home}: botão do Presencial abre o WhatsApp com a mensagem do serviço`,
     );
   } else assert.ok(!inPerson, `${home}: sem a seção do Presencial`);
-  // Com "Tour real" o menu só cabe no cabeçalho compacto, ligado por data-long-nav.
+  // Com "Tour real" o menu só cabe no cabeçalho compacto, ligado por data-long-nav. O link leva a
+  // âncora do idioma (tour-real no português e no espanhol, real-tour no inglês).
   assert.equal(
     /<header[^>]+data-long-nav/.test(html),
-    html.includes('data-spy="tour-real"'),
+    html.includes(`data-spy="${localeRoutes[locale.code].anchors.realTour}"`),
     `${home}: cabeçalho compacto exatamente quando o menu tem "Tour real"`,
   );
 }
