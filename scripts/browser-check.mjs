@@ -168,6 +168,17 @@ const legibleAcross = async (target, selector, scene, before) => {
   }
   return lowest;
 };
+// O painel Produtos aberto também é vidro: o axe deixa o texto dele como "incomplete" (não acha a
+// cor do fundo), então o contraste de cada texto do painel é medido na imagem, no tema da página.
+const legiblePanel = async (target, scene) => {
+  const items = await textContrast(target.locator('#products-panel'));
+  assert.ok(items.length > 0, `${scene}: texto do painel Produtos medido`);
+  assert.deepEqual(
+    items.filter((item) => item.ratio < 4.5),
+    [],
+    `${scene}: texto do painel Produtos abaixo de 4,5:1`,
+  );
+};
 const readings = [];
 const reading = (scene, { light, dark }) =>
   `${scene}: claro ${light.toFixed(2)}:1, escuro ${dark.toFixed(2)}:1`;
@@ -949,7 +960,8 @@ try {
   );
 
   // "Produtos ▾" no lugar de "Como funciona", nos três idiomas: abre e fecha pelo clique, pelo
-  // teclado e pelo clique fora, e mostra um link por produto no ar.
+  // teclado (Enter, Espaço, Esc e Tab), pelo clique fora e ao passar para a largura do celular, e
+  // mostra um link por produto no ar, com o selo "Novo" nos novos.
   for (const [locale, route] of [
     ['pt', '/'],
     ['es', '/es'],
@@ -989,6 +1001,27 @@ try {
       `${route}: um link por produto no ar`,
     );
     assert.equal(await panel.locator('a.products-all').count(), allProductsLinks);
+    // O selo "Novo" fica nos produtos novos no ar, os três com página própria (Vídeos, Piloto e
+    // Autochat), com a palavra do idioma; o tour e o Presencial não o levam.
+    assert.deepEqual(
+      (
+        await panel
+          .locator('.products-badge')
+          .evaluateAll((badges) =>
+            badges.map((badge) => [
+              badge.closest('a[data-product]').getAttribute('href'),
+              badge.textContent.trim(),
+            ]),
+          )
+      ).sort(),
+      productPages
+        .map((id) => [
+          localeRoutes[locale].pages[id],
+          { pt: 'Novo', es: 'Nuevo', en: 'New' }[locale],
+        ])
+        .sort(),
+      `${route}: o selo nos produtos novos no ar`,
+    );
     await page.screenshot({ path: `.artifacts/produtos-menu-${locale}-desktop.png` });
     await page.keyboard.press('Escape');
     assert.equal(await panel.isVisible(), false, `${route}: Esc fecha`);
@@ -1000,7 +1033,8 @@ try {
     );
     await page.keyboard.press('Enter');
     assert.equal(await panel.isVisible(), true, `${route}: Enter reabre`);
-    // O painel vem depois da cápsula no HTML: o Tab leva do botão ao primeiro item dele.
+    // O painel vem depois da cápsula no HTML: o Tab leva do botão ao primeiro item dele, e o
+    // Shift+Tab do primeiro item volta ao botão, com o painel ainda aberto.
     await page.keyboard.press('Tab');
     assert.equal(
       await panel
@@ -1010,6 +1044,48 @@ try {
       true,
       `${route}: Tab do botão aberto vai ao painel`,
     );
+    await page.keyboard.press('Shift+Tab');
+    assert.equal(
+      await toggle.evaluate((element) => element === document.activeElement),
+      true,
+      `${route}: Shift+Tab do primeiro item volta ao botão`,
+    );
+    assert.equal(await panel.isVisible(), true, `${route}: o painel segue aberto`);
+    // Do último item, o Tab fecha o painel e segue para o item do topo depois do botão.
+    await panel.locator('a').last().focus();
+    await page.keyboard.press('Tab');
+    assert.equal(await panel.isVisible(), false, `${route}: Tab do último item fecha`);
+    assert.equal(await toggle.getAttribute('aria-expanded'), 'false');
+    assert.equal(
+      await page.evaluate(() =>
+        [...document.querySelectorAll('.desktop-nav > :is(a, button)')].indexOf(
+          document.activeElement,
+        ),
+      ),
+      1,
+      `${route}: Tab do último item vai ao item do topo depois do botão`,
+    );
+    // Espaço abre e fecha, como o clique.
+    await toggle.focus();
+    await page.keyboard.press('Space');
+    assert.equal(await panel.isVisible(), true, `${route}: Espaço abre`);
+    assert.equal(await toggle.getAttribute('aria-expanded'), 'true');
+    await page.keyboard.press('Space');
+    assert.equal(await panel.isVisible(), false, `${route}: Espaço fecha`);
+    assert.equal(await toggle.getAttribute('aria-expanded'), 'false');
+    // Aberto, o painel fecha quando a janela passa para a largura do celular, e não volta aberto.
+    await page.keyboard.press('Space');
+    assert.equal(await panel.isVisible(), true);
+    await resize(page, 900, 1000);
+    assert.equal(
+      await toggle.getAttribute('aria-expanded'),
+      'false',
+      `${route}: fecha na largura do celular`,
+    );
+    await resize(page, 1440, 1000);
+    assert.equal(await panel.isVisible(), false, `${route}: não volta aberto no desktop`);
+    await toggle.click();
+    assert.equal(await panel.isVisible(), true);
     await page.locator('.hero h1').click({ position: { x: 10, y: 10 } });
     assert.equal(await panel.isVisible(), false, `${route}: clique fora fecha`);
     assert.equal(await toggle.getAttribute('aria-expanded'), 'false');
@@ -1057,7 +1133,7 @@ try {
     }
   }
   results.push(
-    'Menu Produtos no desktop (pt, es e en): o topo Produtos · Cotação · Dúvidas · Tutoriais no idioma, primeiro item, clique, Esc com o foco de volta, Enter, Tab até o painel, clique fora e os produtos no ar; no pt, o grupo "Com a nossa equipe" com o treinamento e o Tour Pronto levando à seção do Presencial, e nada dele no es e no en OK',
+    'Menu Produtos no desktop (pt, es e en): o topo Produtos · Cotação · Dúvidas · Tutoriais no idioma, primeiro item, clique, Esc com o foco de volta, Enter, Tab até o painel, Shift+Tab do primeiro item de volta ao botão, Tab do último item fecha e segue para o topo, Espaço abre e fecha, fecha na largura do celular, clique fora, os produtos no ar e o selo Novo/Nuevo/New nos três novos; no pt, o grupo "Com a nossa equipe" com o treinamento e o Tour Pronto levando à seção do Presencial, e nada dele no es e no en OK',
   );
 
   // A página do Piloto automático para Instagram, nos três idiomas: as telas de exemplo marcadas,
@@ -1647,6 +1723,25 @@ try {
       assert.match(card.image ?? '', /^\/images\/produtos\/[\w-]+-16x9\.webp$/, `${route}: foto`);
       assert.equal(card.cta, expected.cta, `${route}: "${expected.cta}" em ${card.product}`);
     }
+    // O menu marca a página: o "Ver todos" leva aria-current, no painel e no grupo do celular, e os
+    // botões Produtos ganham só a marca visual (aria-current num botão que abre menu é lido errado).
+    for (const list of ['#products-panel', '#mobile-products-list'])
+      assert.equal(
+        await page.locator(`${list} a.products-all`).getAttribute('aria-current'),
+        'page',
+        `${route}: ${list} marca o "Ver todos"`,
+      );
+    for (const button of ['.products-toggle', '.mobile-products-toggle'])
+      assert.deepEqual(
+        await page
+          .locator(button)
+          .evaluate((element) => [
+            element.matches('.is-current'),
+            element.getAttribute('aria-current'),
+          ]),
+        [true, null],
+        `${route}: ${button} com a marca da página, sem aria-current`,
+      );
     assert.equal(await page.locator('.faq-section').count(), 0, `${route}: sem dúvidas próprias`);
     for (const anchor of pricesShown ? ['faq'] : ['quote', 'faq'])
       assert.equal(
@@ -1670,7 +1765,7 @@ try {
     await page.screenshot({ path: `.artifacts/produtos-${locale}-desktop.png` });
   }
   results.push(
-    'Todos os produtos (pt, es e en): um cartão por produto no ar, com a foto 16:9 e "Conhecer" no idioma, nos grupos do menu (painel e celular); o do tour leva à home; cada destino responde; sem dúvidas, Cotação e Dúvidas levam à home; a faixa azul pede a cotação dos produtos pelo WhatsApp OK',
+    'Todos os produtos (pt, es e en): um cartão por produto no ar, com a foto 16:9 e "Conhecer" no idioma, nos grupos do menu (painel e celular); o do tour leva à home; cada destino responde; o "Ver todos" com aria-current e os botões Produtos com a marca da página; sem dúvidas, Cotação e Dúvidas levam à home; a faixa azul pede a cotação dos produtos pelo WhatsApp OK',
   );
 
   for (const route of pricesShown ? ['/', '/planos'] : ['/']) {
@@ -1892,6 +1987,19 @@ try {
       .evaluateAll((images) => images.find((image) => image.checkVisibility())?.src);
     assert.match(visibleLogo, colorScheme === 'dark' ? /white/ : /blue/);
     await themed.screenshot({ path: `.artifacts/home-${colorScheme}.png` });
+    // O painel Produtos aberto, numa página de produto (com o item dela marcado): o axe na página
+    // e o texto do painel medido na imagem.
+    const panelRoute = localeRoutes.pt.pages.productAutochat;
+    await themed.goto(base + panelRoute);
+    await themed.evaluate(() => document.fonts.ready);
+    await themed.locator('.products-toggle').click();
+    await themed.addScriptTag({ content: axeSource });
+    assert.deepEqual(
+      await contrastOf(themed),
+      [],
+      `${colorScheme} ${panelRoute}: contraste com o painel Produtos aberto`,
+    );
+    await legiblePanel(themed, `${colorScheme} ${panelRoute}`);
     await context.close();
   }
   const toggleContext = await newContext({
@@ -1909,7 +2017,9 @@ try {
   assert.equal(await toggle.evaluate(() => document.documentElement.dataset.theme), 'dark');
   assert.equal(await themeButton.getAttribute('aria-pressed'), 'true');
   await toggleContext.close();
-  results.push('Temas claro e escuro: contraste AA, logo por tema e escolha salva OK');
+  results.push(
+    'Temas claro e escuro: contraste AA (também com o painel Produtos aberto, e o texto dele medido na imagem), logo por tema e escolha salva OK',
+  );
 
   const mobile = await newContext({
     ...devices['Pixel 7'],
@@ -2152,6 +2262,14 @@ try {
   for (const item of productItems)
     assert.ok(item.visible && item.height >= 44, `item do grupo Produtos: ${JSON.stringify(item)}`);
   await phone.screenshot({ path: '.artifacts/produtos-menu-mobile.png' });
+  // O segundo toque no grupo fecha a lista.
+  await productsToggle.tap();
+  assert.equal(
+    await productsToggle.getAttribute('aria-expanded'),
+    'false',
+    'o segundo toque fecha o grupo Produtos',
+  );
+  assert.equal(await productsList.isVisible(), false, 'o segundo toque esconde os produtos');
   // "Produtos" é um botão: o primeiro link de seção do menu leva à home e fecha o menu. Com preços
   // públicos, o primeiro link é "Planos" (/planos), que sai da home; o de seção é "Dúvidas".
   await phone.locator('#mobile-nav > a[href^="#"]').first().click();
@@ -2171,7 +2289,7 @@ try {
     await phone.locator('.faq-item').first().locator('summary').click();
     assert.equal(await phone.locator('.faq-item').first().getAttribute('open'), '');
     results.push(
-      `360px: ${routes.length} rotas (pt, es e en) sem overflow, texto < 12px ou alvo pequeno; menu, cotação e FAQ OK`,
+      `360px: ${routes.length} rotas (pt, es e en) sem overflow, texto < 12px ou alvo pequeno; menu (o grupo Produtos abre e fecha no toque), cotação e FAQ OK`,
     );
   } else {
     const status = phone.locator('#planos [data-carousel-status]');
@@ -2206,7 +2324,7 @@ try {
       /229 no Pix ou 12x de R\$\s*23,25/,
     );
     results.push(
-      `360px: ${routes.length} rotas (pt, es e en) sem overflow, texto < 12px ou alvo pequeno; menu, carrossel, FAQ e recursos por plano OK`,
+      `360px: ${routes.length} rotas (pt, es e en) sem overflow, texto < 12px ou alvo pequeno; menu (o grupo Produtos abre e fecha no toque), carrossel, FAQ e recursos por plano OK`,
     );
   }
 
@@ -2514,10 +2632,25 @@ try {
         `${colorScheme} ${route}: contraste com a lista do seletor aberta`,
       );
     }
+    // O painel Produtos aberto, na página com todos os produtos (com o "Ver todos" marcado): o axe
+    // na página e o texto do painel medido na imagem.
+    for (const locale of ['es', 'en']) {
+      const route = localeRoutes[locale].pages.products;
+      await themed.goto(base + route);
+      await themed.evaluate(() => document.fonts.ready);
+      await themed.locator('.products-toggle').click();
+      await themed.addScriptTag({ content: axeSource });
+      assert.deepEqual(
+        await contrastOf(themed),
+        [],
+        `${colorScheme} ${route}: contraste com o painel Produtos aberto`,
+      );
+      await legiblePanel(themed, `${colorScheme} ${route}`);
+    }
     await context.close();
   }
   results.push(
-    'Contraste AA nos dois temas em /es e /en (as páginas de produto também), na 404 e com a lista do seletor aberta OK',
+    'Contraste AA nos dois temas em /es e /en (as páginas de produto também), na 404, com a lista do seletor aberta e com o painel Produtos aberto (o texto dele medido na imagem) OK',
   );
 
   // Cabeçalho em uma linha, com Produtos só a partir de 1024px, e nada estourando, em todas as
