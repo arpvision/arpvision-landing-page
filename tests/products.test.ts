@@ -284,10 +284,19 @@ test('liveProductGroups: os grupos do menu e de /produtos, com o texto do idioma
   }
 });
 
-// As páginas de produto: cada bloco de `productPages` do dicionário, em cada idioma.
+// Valor de teste para as funções do dicionário (o mesmo de tests/i18n.test.ts): vira "1" em
+// qualquer texto e em qualquer campo.
+const any: unknown = new Proxy(
+  {},
+  { get: (_, key) => (key === Symbol.toPrimitive ? () => 1 : any) },
+);
+// Os textos de um bloco do dicionário, cada um com o seu caminho; uma função entra com o texto que
+// devolve.
 type Leaf = [path: string, text: string];
 const leaves = (value: unknown, path = ''): Leaf[] => {
   if (typeof value === 'string') return [[path, value]];
+  if (typeof value === 'function')
+    return leaves(value(...Array.from({ length: value.length }, () => any)), `${path}()`);
   if (Array.isArray(value))
     return value.flatMap((item, index) => leaves(item, `${path}[${index}]`));
   if (value && typeof value === 'object')
@@ -307,7 +316,8 @@ const newPagesOf = (locale: (typeof locales)[number]): [string, unknown][] => [
 // nome do site de referência. Cada regra vale também no espanhol ("generado", o euro com número e
 // "desde" com preço) e no inglês, pela mesma regra que o check-site aplica às páginas /en
 // (scripts/lib/english-rules.mjs: "intelligent", "smart", "generated", "algorithm", "unedited" e
-// "starting at", "from" ou "as low as" com preço).
+// "starting at", "from" ou "as low as" com preço). Elas valem para todo o texto do dicionário: o
+// das páginas novas e também o do menu Produtos, do cabeçalho, do rodapé e da faixa da home.
 const forbidden = new RegExp(
   [
     /\bIA\b|\bAI\b|intelig[eê]ncia artificial|inteligente|gerad[oa]s?\b|generad[oa]s?\b|algoritmo|100% real|sem edição|sin edición/,
@@ -426,11 +436,10 @@ test('a página com todos os produtos: publicada, título com a marca, descriç�
   assert.equal(translations('en').productsPage.cta, 'Discover');
 });
 
-test('o texto das páginas de produto e o da página com todos eles seguem as regras da spec', () => {
+test('todo o texto dos dicionários, nos três idiomas, segue as regras de texto da spec', () => {
   for (const locale of locales)
-    for (const [id, page] of newPagesOf(locale))
-      for (const [path, text] of leaves(page))
-        assert.doesNotMatch(text, forbidden, `${locale}/${id}.${path}: "${text}"`);
+    for (const [path, text] of leaves(translations(locale)))
+      assert.doesNotMatch(text, forbidden, `${locale}.${path}: "${text}"`);
 });
 
 test('as páginas de produto e a com todos eles, em espanhol e em inglês, não têm português nem CRECI', () => {
