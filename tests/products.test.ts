@@ -6,7 +6,9 @@ import { locales, translations } from '../src/i18n';
 import { anchorId, publishedPageIds, routes, type PageId } from '../src/i18n/routes';
 import {
   isLive,
+  liveProductGroups,
   liveProductsFor,
+  liveProductsWithText,
   pairById,
   pairByPosition,
   productGroups,
@@ -172,6 +174,64 @@ test('liveProductsFor tira o que não está publicado e mantém a ordem e o idio
   });
 });
 
+test('liveProductsWithText: só entra quem tem texto no idioma', () => {
+  // O Presencial ligado também no espanhol, mas ainda sem texto nele: fica de fora, sem nome vazio.
+  const training = by('training');
+  const original = training.locales;
+  training.locales = ['pt', 'es'];
+  try {
+    withPublished(['home', 'productVideos', 'productAutochat'], () => {
+      assert.ok(liveProductsFor('es', { inPerson: true }).includes(training));
+      assert.deepEqual(
+        liveProductsWithText('es', { inPerson: true }).map(({ product }) => product.id),
+        ['tour', 'videos', 'autochat'],
+      );
+    });
+  } finally {
+    training.locales = original;
+  }
+});
+
+test('liveProductGroups: os grupos do menu e de /produtos, com o texto do idioma e sem grupo vazio', () => {
+  const groupsOf = (locale: (typeof locales)[number], inPerson: boolean) =>
+    liveProductGroups(locale, { inPerson }).map(({ group, items }) => [
+      group,
+      items.map(({ product }) => product.id),
+    ]);
+  withPublished(['home', 'productVideos', 'productAutochat'], () => {
+    assert.deepEqual(groupsOf('pt', false), [
+      ['show', ['tour', 'videos']],
+      ['promote', ['autochat']],
+    ]);
+    // Com o Presencial ligado, o grupo da equipe entra no fim, e só no português.
+    assert.deepEqual(groupsOf('pt', true), [
+      ['show', ['tour', 'videos']],
+      ['promote', ['autochat']],
+      ['team', ['training', 'readyTour']],
+    ]);
+    assert.deepEqual(groupsOf('es', true), [
+      ['show', ['tour', 'videos']],
+      ['promote', ['autochat']],
+    ]);
+  });
+  // Sem nenhum produto de divulgar e atender no ar, o grupo não aparece vazio.
+  withPublished(['home', 'productVideos'], () => {
+    assert.deepEqual(groupsOf('pt', false), [['show', ['tour', 'videos']]]);
+  });
+  // Os grupos juntos são a lista no ar, na mesma ordem, e cada produto leva o texto do idioma.
+  for (const locale of locales)
+    for (const inPerson of [false, true]) {
+      const items = liveProductGroups(locale, { inPerson }).flatMap(({ items }) => items);
+      assert.deepEqual(
+        items.map(({ product }) => product),
+        liveProductsFor(locale, { inPerson }),
+        `${locale}, Presencial ${inPerson ? 'ligado' : 'desligado'}`,
+      );
+      for (const { product, text } of items)
+        assert.deepEqual(text, productText(locale, product.id), `${locale}/${product.id}`);
+    }
+});
+
 // As páginas de produto: cada bloco de `productPages` do dicionário, nos dois idiomas.
 type Leaf = [path: string, text: string];
 const leaves = (value: unknown, path = ''): Leaf[] => {
@@ -307,6 +367,23 @@ test('no Autochat, toda distância vem com "em linha reta" (es: "en línea recta
   assert.match('cerca de 1,2 km', distance);
   assert.doesNotMatch('2 quartos · 68 m²', distance);
   assert.doesNotMatch('12 mensagens', distance);
+});
+
+test('no Autochat, a descrição do passo 1 diz a hora do pedido que a tela mostra', () => {
+  // Na tela, a hora vai como no WhatsApp (22:04); no texto corrido do português, como 22h04. Um
+  // idioma novo diz aqui como escreve a hora na descrição (o tipo pede a entrada dele).
+  const written: Record<(typeof locales)[number], (time: string) => string> = {
+    pt: (time) => time.replace(':', 'h'),
+    es: (time) => time,
+  };
+  for (const locale of locales) {
+    const { times, requestDescription } = translations(locale).productPages.autochat.mock;
+    assert.match(times.request, /\d{1,2}:\d{2}/, `${locale}: hora do pedido`);
+    assert.ok(
+      requestDescription.includes(written[locale](times.request)),
+      `${locale}: "${requestDescription}" sem a hora ${times.request}`,
+    );
+  }
 });
 
 test('o Piloto em português leva o CRECI', () => {

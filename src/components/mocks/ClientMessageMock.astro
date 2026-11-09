@@ -1,7 +1,7 @@
 ---
 // Passo 1 do Autochat, "O cliente chama no WhatsApp": o cabeçalho da conversa com a Imobiliária
-// Exemplo e a mensagem da cliente, às 22h04. É tela de exemplo: fica fora do leitor de tela, que
-// ouve a descrição antes dela.
+// Exemplo e a mensagem da cliente, com a hora do dicionário (a mesma da conversa do topo). É tela
+// de exemplo: fica fora do leitor de tela, que ouve a descrição antes dela.
 import Icon from '../Icon.astro';
 import ExampleTag from './ExampleTag.astro';
 import { pageLocale } from '../../i18n';
@@ -27,7 +27,7 @@ const { mock } = t.productPages.autochat;
       </span>
       <span class="chat-mock-bubble is-client">
         {mock.request}
-        <span class="chat-mock-time">22:04</span>
+        <span class="chat-mock-time">{mock.times.request}</span>
       </span>
     </span>
   </div>

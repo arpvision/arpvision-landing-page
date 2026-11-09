@@ -3,7 +3,7 @@
 // Produtos (o tour leva à home). Sem nenhum outro produto no ar, a seção não aparece.
 import Icon from '../Icon.astro';
 import { pageLocale } from '../../i18n';
-import { liveProductsFor, productHref, productText, type ProductId } from '../../lib/products';
+import { liveProductsWithText, productHref, type ProductId } from '../../lib/products';
 interface Props {
   /** O produto da página, que fica de fora. */
   current: ProductId;
@@ -11,10 +11,7 @@ interface Props {
 const { current } = Astro.props;
 const { locale, t } = pageLocale(Astro);
 const path = Astro.url.pathname;
-const others = liveProductsFor(locale).flatMap((product) => {
-  const text = productText(locale, product.id);
-  return product.id !== current && text ? [{ product, text }] : [];
-});
+const others = liveProductsWithText(locale).filter(({ product }) => product.id !== current);
 ---
 
 {others.length > 0 && (

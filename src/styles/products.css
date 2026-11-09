@@ -1433,6 +1433,20 @@
   gap: 8px;
   padding: 12px 10px 14px;
 }
+/* A apresentação do atendimento automático, como na tela 2 aprovada: um aviso no alto da conversa,
+   centralizado e sem hora, como os do próprio WhatsApp, com o fundo translúcido sobre o da
+   conversa. Assim a imobiliária não parece escrever antes da cliente. */
+.chat-mock-notice {
+  justify-self: center;
+  max-width: 92%;
+  padding: 5px 10px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--border) 40%, transparent);
+  color: var(--text-secondary);
+  font-size: var(--fs-label);
+  line-height: 1.4;
+  text-align: center;
+}
 .chat-mock-bubble {
   display: grid;
   gap: 6px;

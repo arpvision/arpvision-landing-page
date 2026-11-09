@@ -3,7 +3,7 @@ import { localeInfo, translations, type Locale } from '../i18n';
 import { pagePath } from '../i18n/routes';
 import { appLink } from './business';
 import {
-  liveProductsFor,
+  liveProductsWithText,
   products,
   productHref,
   productPageText,
@@ -73,10 +73,10 @@ export function serviceSchema(product: ProductId, locale: Locale): Record<string
 
 /** A lista dos produtos que já estão no ar, na ordem do menu (a página com todos os produtos). */
 export function itemListSchema(locale: Locale): Record<string, unknown> {
-  const listed = liveProductsFor(locale).flatMap((product) => {
-    const text = productText(locale, product.id);
-    return text ? [{ name: text.name, url: productUrl(locale, product) }] : [];
-  });
+  const listed = liveProductsWithText(locale).map(({ product, text }) => ({
+    name: text.name,
+    url: productUrl(locale, product),
+  }));
   return {
     '@context': 'https://schema.org',
     '@type': 'ItemList',

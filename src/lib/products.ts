@@ -123,16 +123,55 @@ export function liveProductsFor(locale: Locale, options?: { inPerson?: boolean }
   return productsFor(locale, options).filter(isLive);
 }
 
+/** O nome e a linha de um produto no menu Produtos. */
+export interface ProductText {
+  name: string;
+  line: string;
+}
+
 /**
  * O nome e a linha do produto no idioma. O ARP Vision Presencial só tem texto em português, então
  * no espanhol o retorno é `undefined` (ele também não entra em `productsFor('es')`).
  */
-export function productText(
-  locale: Locale,
-  id: ProductId,
-): { name: string; line: string } | undefined {
+export function productText(locale: Locale, id: ProductId): ProductText | undefined {
   const { items, inPerson } = translations(locale).products;
   return id === 'training' || id === 'readyTour' ? inPerson?.[id] : items[id];
+}
+
+/** Um produto no ar com o seu texto no idioma. */
+export interface LiveProduct {
+  product: Product;
+  text: ProductText;
+}
+
+/**
+ * Os produtos no ar que têm texto no idioma, na ordem do catálogo. É a lista que o menu, a página
+ * /produtos, o rodapé, o "Conheça também" e a ItemList mostram: só entra quem tem texto no idioma
+ * (o Presencial, por exemplo, não tem no espanhol).
+ */
+export function liveProductsWithText(
+  locale: Locale,
+  options?: { inPerson?: boolean },
+): LiveProduct[] {
+  return liveProductsFor(locale, options).flatMap((product) => {
+    const text = productText(locale, product.id);
+    return text ? [{ product, text }] : [];
+  });
+}
+
+/**
+ * Os grupos do menu Produtos, na ordem de `productGroups`, cada um com os seus produtos no ar; o
+ * grupo sem nenhum fica de fora. O menu e a página /produtos saem desta lista, e assim os cartões
+ * da página seguem os grupos do menu.
+ */
+export function liveProductGroups(
+  locale: Locale,
+  options?: { inPerson?: boolean },
+): { group: ProductGroupId; items: LiveProduct[] }[] {
+  const live = liveProductsWithText(locale, options);
+  return productGroups
+    .map((group) => ({ group, items: live.filter(({ product }) => product.group === group) }))
+    .filter(({ items }) => items.length > 0);
 }
 
 type ProductPagesText = Dictionary['productPages'];

@@ -5,7 +5,7 @@ import Icon from './Icon.astro';
 import LanguageSwitch from './LanguageSwitch.astro';
 import { site, available } from '../config/site';
 import { appLink } from '../lib/business';
-import { liveProductsFor, productHref, productText, type ProductId } from '../lib/products';
+import { liveProductsWithText, productHref, type ProductId } from '../lib/products';
 import { pageLocale } from '../i18n';
 import { anchorId, pagePath, publishedPageIds, sectionPath } from '../i18n/routes';
 // A mensagem e o produto da página: o link de WhatsApp do rodapé e o botão flutuante falam dele.
@@ -18,10 +18,10 @@ const { locale, t } = pageLocale(Astro);
 const { freeTrialCredits, freeTrialDays } = site.pricing;
 // A coluna Produtos mostra o que está no ar, como o menu, e o "Ver todos" quando /produtos existe.
 const path = Astro.url.pathname;
-const productLinks = liveProductsFor(locale).flatMap((item) => {
-  const text = productText(locale, item.id);
-  return text ? [{ href: productHref(locale, item, path), name: text.name }] : [];
-});
+const productLinks = liveProductsWithText(locale).map((item) => ({
+  href: productHref(locale, item.product, path),
+  name: item.text.name,
+}));
 const allProducts = publishedPageIds.includes('products') ? pagePath(locale, 'products') : null;
 ---
 

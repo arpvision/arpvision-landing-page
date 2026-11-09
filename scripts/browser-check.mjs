@@ -1366,6 +1366,31 @@ try {
       pages.home,
       `${route}: o cartão do tour leva à home`,
     );
+    // Os cartões seguem os grupos do menu Produtos: os mesmos títulos, na mesma ordem, e os mesmos
+    // produtos em cada um, no painel do desktop e no grupo do celular. Nenhum cartão fica fora.
+    const groupsIn = (selector, title, item) =>
+      page
+        .locator(selector)
+        .evaluateAll(
+          (groups, [titleSelector, itemSelector]) =>
+            groups.map((group) => [
+              group.querySelector(titleSelector).textContent.trim(),
+              [...group.querySelectorAll(itemSelector)].map((link) => link.dataset.product),
+            ]),
+          [title, item],
+        );
+    const cardGroups = await groupsIn('.products-page-group', 'h2', '.product-card');
+    assert.deepEqual(
+      cardGroups.flatMap(([, ids]) => ids),
+      cards.map((card) => card.product),
+      `${route}: todo cartão num grupo`,
+    );
+    for (const menu of ['#products-panel', '#mobile-products-list'])
+      assert.deepEqual(
+        cardGroups,
+        await groupsIn(`${menu} .products-group`, '.products-group-title', '.products-item'),
+        `${route}: os cartões seguem os grupos do menu (${menu})`,
+      );
     for (const card of cards) {
       assert.equal((await fetch(base + card.href)).status, 200, `${route}: ${card.href} existe`);
       assert.match(card.image ?? '', /^\/images\/produtos\/[\w-]+-16x9\.webp$/, `${route}: foto`);
@@ -1394,7 +1419,7 @@ try {
     await page.screenshot({ path: `.artifacts/produtos-${locale}-desktop.png` });
   }
   results.push(
-    'Todos os produtos (pt e es): um cartão por produto no ar, com a foto 16:9 e "Conhecer"; o do tour leva à home; cada destino responde; sem dúvidas, Cotação e Dúvidas levam à home; a faixa azul pede a cotação dos produtos pelo WhatsApp OK',
+    'Todos os produtos (pt e es): um cartão por produto no ar, com a foto 16:9 e "Conhecer", nos grupos do menu (painel e celular); o do tour leva à home; cada destino responde; sem dúvidas, Cotação e Dúvidas levam à home; a faixa azul pede a cotação dos produtos pelo WhatsApp OK',
   );
 
   for (const route of pricesShown ? ['/', '/planos'] : ['/']) {

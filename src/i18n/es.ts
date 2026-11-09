@@ -487,6 +487,7 @@ export const es: Dictionary = {
         request:
           'Busco un piso de 2 dormitorios de alquiler en el Centro, cerca de un colegio, hasta 1.200 al mes.',
         found: 'He encontrado 3 opciones. Este está a unos 450 m de un colegio, en línea recta:',
+        times: { request: '22:04', found: '22:05' },
         listing: 'Piso en el Centro',
         listingDetails: '2 dormitorios · 68 m²',
         listingPrice: '1.150 al mes',

@@ -8,13 +8,7 @@ import Icon from '../Icon.astro';
 import FinalCta from '../FinalCta.astro';
 import { site } from '../../config/site';
 import { pageLocale } from '../../i18n';
-import {
-  liveProductsFor,
-  productGroups,
-  productHref,
-  productText,
-  type ProductId,
-} from '../../lib/products';
+import { liveProductGroups, productHref, type ProductId } from '../../lib/products';
 import { itemListSchema } from '../../lib/schema';
 const { locale, t } = pageLocale(Astro);
 const text = t.productsPage;
@@ -31,18 +25,11 @@ const photoOf = {
   readyTour: 'quarto-com-suite-16x9',
 } satisfies Record<ProductId, keyof typeof photos>;
 const path = Astro.url.pathname;
-const groups = productGroups
-  .map((group) => ({
-    group,
-    items: liveProductsFor(locale).flatMap((product) => {
-      // O Presencial só tem texto em português: no espanhol, `productText` não devolve nada.
-      const name = productText(locale, product.id);
-      return product.group === group && name
-        ? [{ product, name, photo: photos[photoOf[product.id]] }]
-        : [];
-    }),
-  }))
-  .filter(({ items }) => items.length > 0);
+// Os grupos do menu Produtos (`liveProductGroups`, a mesma lista do menu), com a foto de cada um.
+const groups = liveProductGroups(locale).map(({ group, items }) => ({
+  group,
+  items: items.map((item) => ({ ...item, photo: photos[photoOf[item.product.id]] })),
+}));
 ---
 
 <Layout
@@ -62,7 +49,7 @@ const groups = productGroups
         <section class="products-page-group" aria-labelledby={`grupo-${group}`}>
           <h2 id={`grupo-${group}`}>{t.products.groups[group]}</h2>
           <ul class="product-cards" role="list">
-            {items.map(({ product, name, photo }) => (
+            {items.map(({ product, text: { name, line }, photo }) => (
               <li>
                 <a
                   class="product-card"
@@ -79,10 +66,10 @@ const groups = productGroups
                   />
                   <span class="product-card-body">
                     <h3 class="products-name">
-                      {name.name}
+                      {name}
                       {product.isNew && <span class="products-badge">{t.header.newBadge}</span>}
                     </h3>
-                    <span class="products-line">{name.line}</span>
+                    <span class="products-line">{line}</span>
                     <span class="product-card-cta" aria-hidden="true">
                       {text.cta}
                       <Icon name="arrow" size={16} />

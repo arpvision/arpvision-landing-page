@@ -505,12 +505,16 @@ export const pt = {
       mock: {
         agency: 'Imobiliária Exemplo',
         automated: 'Atendimento automático',
-        // A conversa, na ordem: a apresentação, o pedido da cliente e o imóvel que combina.
+        // A conversa, na ordem: a apresentação (um aviso no alto, sem hora), o pedido da cliente e
+        // o imóvel que combina.
         intro:
           'Olá! Sou o atendimento automático da Imobiliária Exemplo. Se preferir, chamo um corretor.',
         request:
           'Procuro apartamento de 2 quartos para alugar no Centro, perto de escola, até 2.500 por mês.',
         found: 'Achei 3 opções. Esta fica a uns 450 m de uma escola, em linha reta:',
+        // A hora do pedido e a da resposta, como o WhatsApp mostra. A descrição do passo 1 diz a do
+        // pedido (o teste de catálogo confere).
+        times: { request: '22:04', found: '22:05' },
         // O cartão do imóvel, na conversa e no passo 3.
         listing: 'Apartamento no Centro',
         listingDetails: '2 quartos · 68 m²',
