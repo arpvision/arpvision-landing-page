@@ -109,10 +109,15 @@ test('o inglês segue o glossário: room, enhance, tours live, sign in', () => {
   assert.match(en.faq.enhancement.question, /enhancement/);
   assert.match(en.quote.trial(1, 7), /photograph 1 room and keep the tour live for 7 days/);
   assert.match(en.quote.trial(2, 30), /2 rooms .* 30 days/);
-  // "Real estate" voltou com os produtos para imobiliárias: "real estate agency" na primeira
-  // menção de cada página, depois "agency" (seção Inglês da spec dos produtos).
+  // "Real estate" voltou com os produtos para imobiliárias, mas só em "real estate agency" (ou
+  // "agencies"), que a seção Inglês da spec dos produtos pede na primeira menção de cada página.
+  // No resto, imóvel é "property".
   for (const [path, value] of texts('en'))
-    assert.doesNotMatch(value, /\b(?:environments?|cellphones?)\b/i, `en.${path}`);
+    assert.doesNotMatch(
+      value,
+      /\b(?:environments?|cellphones?)\b|\breal estate\b(?! agenc)/i,
+      `en.${path}`,
+    );
 });
 
 test('nenhum idioma fala em "IA" com o cliente', () => {

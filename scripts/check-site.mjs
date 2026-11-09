@@ -3,6 +3,9 @@ import path from 'node:path';
 import assert from 'node:assert/strict';
 import { portugueseWordsIn } from './portuguese-words.mjs';
 import { pricePattern } from './lib/prices.mjs';
+// As regras de texto do inglês, as mesmas do teste do catálogo (as do português e do espanhol
+// estão só nele, e a moeda com número fica no pricePattern).
+import { englishRules } from './lib/english-rules.mjs';
 import { publishedPageIds, routes as localeRoutes } from '../src/i18n/routes.ts';
 // Sem preços públicos (site.pricing.showPrices), /planos é só um redirecionamento.
 const pricesShown = !(await readFile('dist/planos/index.html', 'utf8')).includes(
@@ -41,11 +44,6 @@ const pageIds = Object.keys(localeRoutes.pt.pages).filter(
 // As páginas de produto moram em /produtos/<produto>; /produtos é a lista com todos.
 const isProductPage = (page) =>
   localeRoutes.pt.pages[page].startsWith(`${localeRoutes.pt.pages.products}/`);
-// As regras de texto da spec no inglês (as do português e do espanhol estão no teste do catálogo, e
-// a moeda com número no pricePattern): nada de "intelligent", "smart", "generated", "algorithm",
-// "100% real" nem "unedited", e nada de "starting at", "from" ou "as low as" com preço.
-const englishRules =
-  /\bintelligen(?:t|ce)\b|\bsmart\b|\bgenerat(?:e|ed|es|ing)\b|\balgorithms?\b|100\s*%\s*real|\bunedited\b|\b(?:starting at|from|as low as)\s*(?:\$|€|£)/i;
 const pathOf = (file) => `/${file.replace(/\/?index\.html$/, '')}`;
 const routes = locales.flatMap((locale) =>
   pageIds.map((page) => ({ locale, page, file: locale.pages[page] })),

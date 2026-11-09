@@ -3,6 +3,16 @@
  * docs/produto/idiomas.md e o en.json do app: room (ambiente), enhance (aprimorar), tours
  * live (tours no ar), property, company, credits, free trial, sign in, phone. Sem "AI".
  *
+ * Com imobiliárias, valem também os termos da seção Inglês da spec dos produtos: real estate
+ * agency na primeira menção de cada página e agency depois ("real estate" só nessa expressão;
+ * "marketing agency" é a agência de marketing), agent (corretor), property (imóvel), listing
+ * quando é o anúncio, your listings (carteira) e quote (cotação, "Get a quote"). Captação, em
+ * todo o site: "Owners" (no Piloto automático para Instagram, o tipo da arte e o título do item
+ * do incluído), que diz a quem o post fala; no verbo, "listed" ("listed two homes"). Não "listing
+ * leads": dentro da arte, que o seguidor da agência vê, seria jargão de corretor, e passa do
+ * comprimento de "Captação". O CRECI, que os mercados de língua inglesa não têm, dá lugar ao
+ * número da licença que a agência informar ("License #00000" nas telas de exemplo).
+ *
  * Tradução do português, com as mesmas exceções do espanhol: aqui não entra promessa de
  * funcionalidade que o app não tem, nem serviço local (o ARP Vision Presencial, que só atende
  * Porto Alegre e região), e a página de tutoriais avisa que os vídeos são narrados em
@@ -618,7 +628,7 @@ export const en: Dictionary = {
     // idioma, com o selo, os dados do imóvel e o cartão final gravados na imagem.
     videos: {
       meta: {
-        title: 'Real estate videos from photos | ARP Vision',
+        title: 'Property videos from photos | ARP Vision',
         // DIFERENTE: o número da licença no lugar do CRECI, que os mercados de língua inglesa não
         // têm.
         description:

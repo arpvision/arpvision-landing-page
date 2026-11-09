@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { englishRules } from '../scripts/lib/english-rules.mjs';
 import { portugueseWordsIn } from '../scripts/portuguese-words.mjs';
 import { locales, translations } from '../src/i18n';
 import { anchorId, publishedPageIds, routes, type PageId } from '../src/i18n/routes';
@@ -74,10 +75,13 @@ test('com a seção do Presencial no dicionário de um idioma, o grupo da equipe
 test('links dos produtos', () => {
   assert.equal(productHref('pt', by('tour'), '/produtos'), '/');
   assert.equal(productHref('es', by('tour'), '/es/productos'), '/es');
+  assert.equal(productHref('en', by('tour'), '/en/products'), '/en');
   assert.equal(
     productHref('pt', by('instagram'), '/'),
     '/produtos/piloto-automatico-para-instagram',
   );
+  assert.equal(productHref('en', by('instagram'), '/en'), '/en/products/autopilot-for-instagram');
+  assert.equal(productHref('en', by('videos'), '/en/products'), '/en/products/videos-from-photos');
   assert.equal(productHref('pt', by('training'), '/'), '#presencial');
   assert.equal(productHref('pt', by('training'), '/produtos/autochat'), '/#presencial');
 });
@@ -112,8 +116,10 @@ test('o Presencial tem a mesma âncora em todos os idiomas', () => {
 test('links de seção do cabeçalho: ficam na página quando ela tem a seção', () => {
   assert.equal(sectionHref('pt', 'quote', '/'), '#cotacao');
   assert.equal(sectionHref('es', 'faq', '/es'), '#preguntas');
+  assert.equal(sectionHref('en', 'quote', '/en'), '#quote');
   assert.equal(sectionHref('pt', 'quote', '/termos-de-uso'), '/#cotacao');
   assert.equal(sectionHref('es', 'quote', '/es/tutoriales'), '/es#cotizacion');
+  assert.equal(sectionHref('en', 'faq', '/en/tutorials'), '/en#faq');
   // A página de produto tem cotação e dúvidas próprias, com os ids da home; o resto é da home.
   for (const locale of locales)
     for (const page of productPageIds) {
@@ -128,6 +134,7 @@ test('links de seção do cabeçalho: ficam na página quando ela tem a seção'
   // A página com todos os produtos não tem essas seções.
   assert.equal(sectionHref('pt', 'quote', '/produtos'), '/#cotacao');
   assert.equal(sectionHref('es', 'faq', '/es/productos'), '/es#preguntas');
+  assert.equal(sectionHref('en', 'quote', '/en/products'), '/en#quote');
 });
 
 test('productOfPage devolve o dono da página, e cada página de produto tem um só dono', () => {
@@ -298,10 +305,22 @@ const newPagesOf = (locale: (typeof locales)[number]): [string, unknown][] => [
 ];
 // As regras de texto da spec: sem "IA" nem o que a pasta de marketing proíbe, sem preço e sem o
 // nome do site de referência. Cada regra vale também no espanhol ("generado", o euro com número e
-// "desde" com preço) e no inglês ("intelligent", "smart", "generated", "algorithm", "unedited",
-// dólar e libra com número e "starting at", "from" ou "as low as" com preço).
-const forbidden =
-  /\bIA\b|\bAI\b|intelig[eê]ncia artificial|inteligente|\bintelligen(?:t|ce)\b|\bsmart\b|gerad[oa]s?\b|generad[oa]s?\b|\bgenerat(?:e|ed|es|ing)\b|algoritmo|\balgorithms?\b|100% real|sem edição|sin edición|\bunedited\b|\$\s*\d|€\s*\d|\d\s*€|£\s*\d|\d\s*£|(?:a partir de|desde|starting at|from|as low as)\s*(?:\$|R\$|US\$|€|£)|\bPedra\b/i;
+// "desde" com preço) e no inglês, pela mesma regra que o check-site aplica às páginas /en
+// (scripts/lib/english-rules.mjs: "intelligent", "smart", "generated", "algorithm", "unedited" e
+// "starting at", "from" ou "as low as" com preço).
+const forbidden = new RegExp(
+  [
+    /\bIA\b|\bAI\b|intelig[eê]ncia artificial|inteligente|gerad[oa]s?\b|generad[oa]s?\b|algoritmo|100% real|sem edição|sin edición/,
+    // Moeda com número, antes ou depois dele (real, dólar, euro e libra), e "a partir de" ou
+    // "desde" com preço.
+    /\$\s*\d|€\s*\d|\d\s*€|£\s*\d|\d\s*£|(?:a partir de|desde)\s*(?:\$|R\$|US\$|€|£)/,
+    /\bPedra\b/,
+    englishRules,
+  ]
+    .map((rule) => rule.source)
+    .join('|'),
+  'i',
+);
 
 test('as regras de texto pegam também os equivalentes do espanhol', () => {
   // "generado", o euro com número (antes ou depois dele) e "a partir de" ou "desde" com preço.
@@ -342,6 +361,8 @@ test('as regras de texto pegam também os equivalentes do inglês', () => {
     'Starting at €49',
     'From $49',
     'As low as R$ 99',
+    'From R$ 249 a month',
+    'starting at US$ 29',
   ])
     assert.match(text, forbidden, text);
   // O que o texto em inglês já usa continua valendo: "from" sem preço, número sem moeda e a
