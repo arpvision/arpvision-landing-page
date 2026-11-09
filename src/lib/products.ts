@@ -1,7 +1,8 @@
 /**
- * Os produtos do site. O menu "Produtos", a página /produtos, o rodapé, o sitemap e os testes
- * saem desta lista, para nenhum esquecer um produto. O tour e o ARP Vision Presencial não têm
- * página própria e levam à home.
+ * Os produtos do site. O menu "Produtos", a página /produtos, o rodapé, a faixa da home, o
+ * "Conheça também", a ItemList e os testes saem desta lista, para nenhum esquecer um produto. O
+ * sitemap não: ele sai de `publishedPageIds` e das rotas, em routes.ts. O tour e o ARP Vision
+ * Presencial não têm página própria e levam à home.
  */
 import { translations, type Dictionary, type Locale } from '../i18n';
 import {
@@ -94,9 +95,10 @@ export const productPageIds: readonly ProductPageId[] = [
 ];
 
 /**
- * Os produtos de um idioma, na ordem do catálogo. O grupo da equipe é o ARP Vision Presencial:
- * ele entra onde o dicionário tem a seção dele na home (`inPerson`, que hoje só o português tem),
- * como a própria seção.
+ * Os produtos de um idioma, na ordem do catálogo, inclusive os que ainda não estão no ar (a lista
+ * que o visitante vê é a de `liveProductsFor`). O grupo da equipe é o ARP Vision Presencial: ele
+ * entra onde o dicionário tem a seção dele na home (`inPerson`, que hoje só o português tem), como
+ * a própria seção.
  */
 export function productsFor(locale: Locale): Product[] {
   const inPerson = translations(locale).inPerson !== null;
@@ -187,7 +189,10 @@ export function productHref(locale: Locale, product: Product, currentPath: strin
     : sectionPath(locale, page, anchor);
 }
 
-/** O último segmento do endereço da página, igual nos dois idiomas. */
+/**
+ * O último segmento do endereço da página: o mesmo no português e no espanhol, e o do inglês
+ * traduzido (`autopilot-for-instagram`, `videos-from-photos`).
+ */
 export function productSlug(locale: Locale, page: ProductPageId): string {
   const path = pagePath(locale, page);
   return path.slice(path.lastIndexOf('/') + 1);

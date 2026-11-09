@@ -83,9 +83,12 @@ export const insideArea = (rect, area) =>
  * Menor contraste de cada texto visível do elemento contra o fundo atrás dele. O fundo vem de uma
  * captura com o texto apagado: assim o pixel medido é o que fica por trás das letras. A captura é
  * da página, recortada na caixa do elemento: a do próprio elemento rola a página até ele, e num
- * cabeçalho grudado isso muda o que passa por trás. O texto cortado pela borda de uma área que rola
- * por dentro (o menu do celular aberto, quando passa da altura da tela) fica de fora: ali só se vê
- * parte dele, e o retângulo inteiro pegaria a borda e o que está fora; ele é lido depois de rolar.
+ * cabeçalho grudado isso muda o que passa por trás. Fica de fora da medida, sem aviso, o texto que
+ * não cabe inteiro na parte visível de uma área que rola por dentro (o menu do celular aberto,
+ * quando passa da altura da tela): ali só se vê parte dele, ou nada, e o retângulo inteiro pegaria
+ * a borda e o que está fora. Nada rola a área para medi-lo depois: quem chama mede esse texto numa
+ * cena em que ele caiba (no menu do celular com o grupo Produtos aberto, os itens de baixo ficam de
+ * fora; com o grupo fechado, cabem).
  * @param {import('@playwright/test').Locator} locator um elemento inteiro na tela
  * @returns {Promise<{ text: string, color: string, ratio: number }[]>}
  */

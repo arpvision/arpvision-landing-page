@@ -286,7 +286,7 @@ for (const { locale, page, file } of routes) {
     assert.ok(!html.includes(text), `${route}: texto da faixa de sugestão no HTML: ${text}`);
   assert.ok(html.includes('<template id="language-suggestion">'), `${route}: molde da faixa`);
   if (!pricesShown) {
-    assert.doesNotMatch(html, pricePattern, `${route}: nenhum preço em reais ou em euros`);
+    assert.doesNotMatch(html, pricePattern, `${route}: nenhum preço com moeda`);
     assert.ok(!html.includes('"offers"'), `${route}: JSON-LD sem ofertas com preço`);
     assert.ok(
       !html.includes(`href="${pathOf(locale.pages.plans)}"`),

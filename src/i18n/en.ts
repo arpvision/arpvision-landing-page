@@ -139,7 +139,7 @@ export const en: Dictionary = {
         ],
       },
       // As oito artes, nesta ordem. PostGallery.astro escolhe a foto e o formato de cada uma pelo
-      // `id`, que é o mesmo nos dois idiomas e não aparece na página; `kind` é o tipo de post, e
+      // `id`, que é o mesmo em todos os idiomas e não aparece na página; `kind` é o tipo de post, e
       // `title`, o texto principal da arte.
       gallery: {
         title: 'What your posts look like',

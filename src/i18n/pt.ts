@@ -133,7 +133,7 @@ export const pt = {
         ],
       },
       // As oito artes, nesta ordem. PostGallery.astro escolhe a foto e o formato de cada uma pelo
-      // `id`, que é o mesmo nos dois idiomas e não aparece na página; `kind` é o tipo de post, e
+      // `id`, que é o mesmo em todos os idiomas e não aparece na página; `kind` é o tipo de post, e
       // `title`, o texto principal da arte.
       gallery: {
         title: 'Assim ficam os seus posts',
@@ -570,7 +570,7 @@ export const pt = {
         button: 'Quero uma cotação no WhatsApp',
         note: 'Quando o imóvel tem tour 360°, o vídeo termina com o link do tour.',
       },
-      // VideoFormats.astro desenha o formato de cada cartão pelo `id`, o mesmo nos dois idiomas.
+      // VideoFormats.astro desenha o formato de cada cartão pelo `id`, o mesmo em todos os idiomas.
       formats: {
         title: 'Um conjunto de fotos, os formatos de que você precisa.',
         cards: [
