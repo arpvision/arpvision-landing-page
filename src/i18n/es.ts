@@ -15,7 +15,7 @@ const rooms = (count: number) => `${count} ${count === 1 ? 'estancia' : 'estanci
 export const es: Dictionary = {
   meta: {
     defaultDescription:
-      'Haz el tour virtual 360° de tu espacio solo con el móvil. Las uniones y la luz salen corregidas, y el cliente abre el tour por WhatsApp, sin crear una cuenta.',
+      'Haz el tour virtual 360° de tu inmueble solo con el móvil. Las uniones y la luz salen corregidas, y el cliente abre el tour por WhatsApp, sin crear una cuenta.',
   },
   layout: { skipLink: 'Saltar al contenido' },
   language: { label: 'Idioma' },
@@ -698,7 +698,7 @@ export const es: Dictionary = {
     },
   },
   footer: {
-    taglineLines: ['Todo el espacio, por dentro.', 'El móvil es solo el principio.'],
+    taglineLines: ['Todo el inmueble, por dentro.', 'El móvil es solo el principio.'],
     products: 'Productos',
     discover: 'Descubre',
     howItWorks: 'Cómo funciona',
@@ -712,7 +712,7 @@ export const es: Dictionary = {
     login: 'Iniciar sesión en mi cuenta',
     talk: 'Hablemos',
     whatsapp: (number: string) => `WhatsApp ${number}`,
-    note: 'Hecho para quien tiene espacios que mostrar.',
+    note: 'Hecho para quien tiene inmuebles que mostrar.',
     cnpj: 'CNPJ',
     terms: 'Términos de uso',
     privacy: 'Política de privacidad',
@@ -730,13 +730,13 @@ export const es: Dictionary = {
     title: 'Tour virtual 360° con el móvil | ARP Vision',
     // Entre 140 e 160 caracteres, como no português.
     description:
-      'Crea el tour virtual 360° de tu espacio solo con el móvil. Uniones y luz corregidas, enlace listo para WhatsApp y el cliente lo abre sin cuenta. Prueba gratis.',
+      'Crea el tour virtual 360° de tu inmueble solo con el móvil. Uniones y luz corregidas, enlace listo para WhatsApp y el cliente lo abre sin cuenta. Prueba gratis.',
     ogImage: '/images/og-home-es.png',
-    eyebrow: 'TOUR VIRTUAL 360° PARA TU NEGOCIO',
-    title1: 'Convierte tu espacio en una experiencia.',
+    eyebrow: 'TOUR VIRTUAL 360° PARA INMOBILIARIAS',
+    title1: 'Convierte tu inmueble en una experiencia.',
     title2: 'Solo con el móvil.',
     opening:
-      'Haz el tour virtual 360° de tu espacio solo con el móvil. Y el cliente abre el tour sin crear una cuenta.',
+      'Haz el tour virtual 360° de tu inmueble solo con el móvil. Y el cliente abre el tour sin crear una cuenta.',
     howTitle: 'La app hace las fotos por ti',
     howSubtitle: 'Abre la cámara y sigue las instrucciones',
     steps: [
@@ -750,7 +750,7 @@ export const es: Dictionary = {
     presentationLabel: 'Tour virtual y beneficios',
     plansEyebrow: 'EMPIEZA EN PEQUEÑO. MUÉSTRALO ENTERO.',
     plansTitle: 'Un plan para tu próximo paso.',
-    plansLead: '1 crédito = 1 estancia fotografiada con el móvil. El saldo es de tu empresa.',
+    plansLead: '1 crédito = 1 estancia fotografiada con el móvil. El saldo es de tu inmobiliaria.',
   },
   fan: {
     label: 'Estancias fotografiadas con el móvil',
@@ -785,7 +785,7 @@ export const es: Dictionary = {
     channels: {
       whatsapp: {
         title: 'Por WhatsApp',
-        text: 'El cliente abre el enlace sin crear una cuenta y ve el espacio entero.',
+        text: 'El cliente abre el enlace sin crear una cuenta y ve el inmueble entero.',
       },
       site: {
         title: 'En tu web',
@@ -793,7 +793,7 @@ export const es: Dictionary = {
       },
       visit: {
         title: 'Antes de la visita',
-        text: 'Quien llega ya conoce el espacio y viene decidido.',
+        text: 'Quien llega ya conoce el inmueble y viene decidido.',
       },
     },
     // A imagem da conversa tem o texto em português: aqui ela é montada em HTML.
@@ -803,7 +803,7 @@ export const es: Dictionary = {
       contact: 'Cliente',
       status: 'conversación de WhatsApp',
       message:
-        '¡Hola! Te paso el tour del espacio. Puedes verlo todo por dentro, estancia por estancia:',
+        '¡Hola! Te paso el tour del inmueble. Puedes verlo todo por dentro, estancia por estancia:',
       linkTitle: 'Tour 360° · 9 estancias',
       reply:
         'No tienes que descargar nada ni crear una cuenta. Puedes abrirlo en el ordenador o en el móvil.',
@@ -811,7 +811,7 @@ export const es: Dictionary = {
   },
   showcase: {
     frameTitle: 'Tour 360° de demostración de ARP Vision',
-    title: 'Mira el espacio por dentro.',
+    title: 'Mira el inmueble por dentro.',
     hint: 'Haz clic o toca para explorar el tour.',
     newTab: 'Abrir el tour en una pestaña nueva',
     exit: 'Terminar la exploración',
@@ -863,12 +863,12 @@ export const es: Dictionary = {
     title2: 'con un móvil.',
     lead: 'Arrastra para mirar alrededor. Toca los pasos para ir de una estancia a otra.',
     badge: 'Una nueva forma de visitar.',
-    tabsLabel: 'Espacios de demostración',
+    tabsLabel: 'Inmuebles de demostración',
     illustrativeAlt: 'Salón ilustrativo con sofá, luz natural y muebles de madera',
-    illustrativeName: 'Un espacio, todos los ángulos',
-    openLabel: 'Entrar en el espacio: abrir el tour en 360 grados',
+    illustrativeName: 'Un inmueble, todos los ángulos',
+    openLabel: 'Entrar en el inmueble: abrir el tour en 360 grados',
     pendingLabel: 'Ver la disponibilidad del tour de demostración',
-    open: 'Entrar en el espacio',
+    open: 'Entrar en el inmueble',
     demo: 'Tour de demostración',
     openHint: 'La visita empieza con un toque.',
     pendingHint: 'La demostración real está en preparación.',
@@ -878,19 +878,19 @@ export const es: Dictionary = {
     toBeDefined: '[por definir]',
     noTripod: 'Sin trípode',
     ready: 'Listo en ~1 min por estancia',
-    cta: 'Quiero un tour así de mi espacio',
+    cta: 'Quiero un tour así de mi inmueble',
     qrAlt: 'Código QR para abrir el tour en el móvil',
     qrLine1: 'Míralo en',
     qrLine2: 'tu móvil',
-    coverAlt: 'Vista del espacio {name}',
+    coverAlt: 'Vista del inmueble {name}',
     phone: 'Móvil: {phone}',
     photos: '{photos} fotos por estancia',
     time: 'Captura: {time} por estancia',
     failed: 'No se ha podido abrir el tour ahora. ',
     newTab: 'Abrir en una pestaña nueva',
     pending:
-      'El tour real todavía está en preparación. Esta portada es ilustrativa. Vuelve pronto para explorar un espacio capturado con ARP Vision.',
-    loading: 'Abriendo el espacio…',
+      'El tour real todavía está en preparación. Esta portada es ilustrativa. Vuelve pronto para explorar un inmueble capturado con ARP Vision.',
+    loading: 'Abriendo el inmueble…',
     frameTitle: 'Tour 360° de ejemplo: {name}',
     dialogLabel: 'Tour de {name}',
     closeDialog: 'Cerrar el tour ×',
@@ -898,7 +898,7 @@ export const es: Dictionary = {
   team: {
     eyebrow: 'UNA HERRAMIENTA. TODO EL EQUIPO.',
     title1: 'Monta tu ecosistema de tours,',
-    title2: 'pensado para empresas.',
+    title2: 'pensado para inmobiliarias.',
     benefits: {
       autonomy: {
         title: 'Más autonomía para quien captura.',
@@ -915,8 +915,8 @@ export const es: Dictionary = {
   inPerson: null,
   quote: {
     eyebrow: 'PRECIO A MEDIDA',
-    title: 'Cada negocio tiene su tamaño. Tu propuesta, también.',
-    lead: 'Responde 3 preguntas rápidas y recibe por WhatsApp una propuesta para tu volumen de espacios, sin compromiso.',
+    title: 'Cada inmobiliaria tiene su tamaño. Tu propuesta, también.',
+    lead: 'Responde 3 preguntas rápidas y recibe por WhatsApp una propuesta para tu volumen de inmuebles, sin compromiso.',
     benefits: {
       volume: {
         title: 'Propuesta para tu volumen.',
@@ -937,11 +937,16 @@ export const es: Dictionary = {
       perfil: {
         label: '¿Cómo trabajas?',
         summary: 'Cómo trabajo',
-        options: ['Tengo 1 espacio', 'Trabajo por mi cuenta', 'Tengo un equipo', 'Varias sedes'],
+        options: [
+          'Soy agente independiente',
+          'Inmobiliaria pequeña',
+          'Inmobiliaria con equipo',
+          'Red o franquicia',
+        ],
       },
       volume: {
-        label: '¿Cuántos espacios al mes?',
-        summary: 'Espacios al mes',
+        label: '¿Cuántos inmuebles al mes?',
+        summary: 'Inmuebles al mes',
         options: ['1', '2 a 5', '6 a 15', 'Más de 15'],
       },
       prazo: {
@@ -960,7 +965,7 @@ export const es: Dictionary = {
     signup: 'Crear cuenta gratis',
   },
   finalCta: {
-    title: 'Tu espacio puede tener un tour 360° hoy mismo.',
+    title: 'Tu inmueble puede tener un tour 360° hoy mismo.',
     lead: 'Ya tienes el móvil. El siguiente paso es tuyo.',
     signup: 'Crear cuenta gratis',
     whatsapp: 'Hablar por WhatsApp',
@@ -996,7 +1001,7 @@ export const es: Dictionary = {
     // tem isso) e um chão "completado" (hoje é um borrão com carimbo). Aqui fica só o que é
     // verdade; o centro do teto e a foto original guardada não são citados.
     enhancement: {
-      question: '¿La mejora cambia el espacio?',
+      question: '¿La mejora cambia el inmueble?',
       answer:
         'Iguala las uniones y la luz entre las fotos, sin crear muebles ni cambiar acabados. El suelo justo debajo del móvil, que ninguna foto alcanza, se muestra difuminado y con un sello.',
     },
@@ -1013,7 +1018,7 @@ export const es: Dictionary = {
     credit: {
       question: '¿Qué es un crédito?',
       answer:
-        'Cada estancia fotografiada con el móvil gasta 1 crédito. Los créditos son de la empresa, y todo el equipo usa el mismo saldo.',
+        'Cada estancia fotografiada con el móvil gasta 1 crédito. Los créditos son de la inmobiliaria, y todo el equipo usa el mismo saldo.',
     },
     individual: { question: '¿Cómo funciona el Individual?' },
     cost: {
@@ -1139,14 +1144,14 @@ export const es: Dictionary = {
       'Planes ARP Vision: Individual de pago único, Professional y Business mensuales y Enterprise bajo consulta. Compara créditos, tours publicados y prueba gratuita.',
     ogImage: '/images/og-planes-es.png',
     breadcrumb: 'Inicio / Planes',
-    eyebrow: 'EL PRÓXIMO PASO DE TU NEGOCIO',
-    title1: 'Planes para negocios',
+    eyebrow: 'EL PRÓXIMO PASO DE TU INMOBILIARIA',
+    title1: 'Planes para inmobiliarias',
     title2: 'de todos los tamaños',
     lead1: '1 crédito = 1 estancia fotografiada con el móvil.',
-    lead2: 'Un espacio suele tener de 6 a 10 estancias.',
+    lead2: 'Un inmueble suele tener de 6 a 10 estancias.',
     compareEyebrow: 'CADA DETALLE, LADO A LADO',
     compareTitle: 'Compara todas las funciones.',
-    compareLead: 'Compara lo que incluye cada plan para capturar y publicar tus espacios.',
+    compareLead: 'Compara lo que incluye cada plan para capturar y publicar tus inmuebles.',
     tableLabel: 'Tabla comparativa de los planes, con desplazamiento horizontal',
     features: 'Funciones',
     recommended: 'Recomendado',
@@ -1214,7 +1219,7 @@ export const es: Dictionary = {
   },
   schema: {
     appDescription:
-      'Tour virtual 360° de espacios con el móvil, con captura guiada y mejora automática.',
+      'Tour virtual 360° de inmuebles con el móvil, con captura guiada y mejora automática.',
     offerOnce: (installments: number) =>
       `Pago único por 1 tour publicado durante 1 año: al contado con Pix o en ${installments} cuotas con tarjeta. Renovación anual aparte.`,
     offerMonthly:

@@ -22,7 +22,7 @@ const onlyInPortuguese = <T>(value: T): T | null => value;
 export const pt = {
   meta: {
     defaultDescription:
-      'Faça o tour virtual 360° do seu espaço só com o celular. As emendas e a luz saem corrigidas, e o cliente abre o tour pelo WhatsApp, sem criar conta.',
+      'Faça o tour virtual 360° do seu imóvel só com o celular. As emendas e a luz saem corrigidas, e o cliente abre o tour pelo WhatsApp, sem criar conta.',
   },
   layout: { skipLink: 'Pular para o conteúdo' },
   language: { label: 'Idioma' },
@@ -739,7 +739,7 @@ export const pt = {
     },
   },
   footer: {
-    taglineLines: ['O espaço por inteiro.', 'O celular é só o começo.'],
+    taglineLines: ['O imóvel por inteiro.', 'O celular é só o começo.'],
     products: 'Produtos',
     discover: 'Conheça',
     howItWorks: 'Como funciona',
@@ -753,7 +753,7 @@ export const pt = {
     login: 'Entrar na minha conta',
     talk: 'Vamos conversar',
     whatsapp: (number: string) => `WhatsApp ${number}`,
-    note: 'Feito para quem tem espaços para mostrar.',
+    note: 'Feito para quem tem imóveis para mostrar.',
     cnpj: 'CNPJ',
     terms: 'Termos de Uso',
     privacy: 'Política de Privacidade',
@@ -771,13 +771,13 @@ export const pt = {
     title: 'Tour virtual 360° com o celular | ARP Vision',
     // Texto do resultado de busca: entre 140 e 160 caracteres para não ser cortado pelo Google.
     description:
-      'Crie o tour virtual 360° do seu espaço só com o celular. Emendas e luz corrigidas, link pronto para o WhatsApp e o cliente abre sem criar conta. Teste grátis.',
+      'Crie o tour virtual 360° do seu imóvel só com o celular. Emendas e luz corrigidas, link pronto para o WhatsApp e o cliente abre sem criar conta. Teste grátis.',
     ogImage: '/images/og-home.png',
-    eyebrow: 'TOUR VIRTUAL 360° PARA O SEU NEGÓCIO',
-    title1: 'Transforme o seu espaço em uma experiência.',
+    eyebrow: 'TOUR VIRTUAL 360° PARA IMOBILIÁRIAS',
+    title1: 'Transforme o seu imóvel em uma experiência.',
     title2: 'Só com o celular.',
     opening:
-      'Faça o tour virtual 360° do seu espaço só com o celular. E o cliente abre o tour sem criar conta.',
+      'Faça o tour virtual 360° do seu imóvel só com o celular. E o cliente abre o tour sem criar conta.',
     howTitle: 'O app tira as fotos para você',
     howSubtitle: 'Abra a câmera e siga as instruções',
     steps: [
@@ -791,7 +791,7 @@ export const pt = {
     presentationLabel: 'Tour virtual e benefícios',
     plansEyebrow: 'COMECE PEQUENO. MOSTRE POR INTEIRO.',
     plansTitle: 'Um plano para o seu próximo passo.',
-    plansLead: '1 crédito = 1 ambiente fotografado com o celular. O saldo é da sua empresa.',
+    plansLead: '1 crédito = 1 ambiente fotografado com o celular. O saldo é da sua imobiliária.',
   },
   fan: {
     label: 'Ambientes fotografados com o celular',
@@ -823,13 +823,13 @@ export const pt = {
     channels: {
       whatsapp: {
         title: 'No WhatsApp',
-        text: 'O cliente abre o link sem criar conta e vê o espaço inteiro.',
+        text: 'O cliente abre o link sem criar conta e vê o imóvel inteiro.',
       },
       site: {
         title: 'No seu site',
         text: 'Cole o código na página, nos formatos responsivo, 16:9 ou quadrado.',
       },
-      visit: { title: 'Antes da visita', text: 'Quem chega já conhece o espaço e vem decidido.' },
+      visit: { title: 'Antes da visita', text: 'Quem chega já conhece o imóvel e vem decidido.' },
     },
     // A conversa em português é uma imagem; sem ela, o componente monta a conversa em
     // HTML com o texto de `chat` (é o que o espanhol e o inglês usam).
@@ -841,7 +841,7 @@ export const pt = {
       label: 'Simulação de uma conversa no WhatsApp com o link de um tour de 9 ambientes',
       contact: 'Cliente',
       status: 'conversa no WhatsApp',
-      message: 'Oi! Segue o tour do espaço. Dá para ver tudo por dentro, ambiente por ambiente:',
+      message: 'Oi! Segue o tour do imóvel. Dá para ver tudo por dentro, ambiente por ambiente:',
       linkTitle: 'Tour 360° · 9 ambientes',
       reply:
         'Você não precisa baixar nada nem criar conta. Pode abrir no computador ou no celular.',
@@ -849,7 +849,7 @@ export const pt = {
   },
   showcase: {
     frameTitle: 'Tour 360° de demonstração da ARP Vision',
-    title: 'Olhe o espaço por dentro.',
+    title: 'Olhe o imóvel por dentro.',
     hint: 'Clique ou toque para explorar o tour.',
     newTab: 'Abrir tour em nova aba',
     exit: 'Encerrar exploração',
@@ -901,12 +901,12 @@ export const pt = {
     title2: 'com um celular.',
     lead: 'Arraste para olhar em volta. Toque nas passagens para ir de um cômodo a outro.',
     badge: 'Um novo jeito de visitar.',
-    tabsLabel: 'Espaços de demonstração',
+    tabsLabel: 'Imóveis de demonstração',
     illustrativeAlt: 'Sala de estar ilustrativa com sofá, luz natural e mobiliário de madeira',
-    illustrativeName: 'Um espaço, todos os ângulos',
-    openLabel: 'Entrar no espaço: abrir tour 360 graus',
+    illustrativeName: 'Um imóvel, todos os ângulos',
+    openLabel: 'Entrar no imóvel: abrir tour 360 graus',
     pendingLabel: 'Ver disponibilidade do tour de demonstração',
-    open: 'Entrar no espaço',
+    open: 'Entrar no imóvel',
     demo: 'Tour de demonstração',
     openHint: 'A visita começa com um toque.',
     pendingHint: 'A demonstração real está em preparação.',
@@ -916,12 +916,12 @@ export const pt = {
     toBeDefined: '[a definir]',
     noTripod: 'Sem tripé',
     ready: 'Pronto em ~1 min por ambiente',
-    cta: 'Quero um tour assim do meu espaço',
+    cta: 'Quero um tour assim do meu imóvel',
     qrAlt: 'QR code para abrir o tour no celular',
     qrLine1: 'Veja no',
     qrLine2: 'seu celular',
     // Também usados pelo script do navegador ao trocar de tour.
-    coverAlt: 'Vista do espaço {name}',
+    coverAlt: 'Vista do imóvel {name}',
     phone: 'Celular: {phone}',
     photos: '{photos} fotos por ambiente',
     time: 'Captura: {time} por ambiente',
@@ -929,8 +929,8 @@ export const pt = {
     failed: 'Não foi possível abrir o tour agora. ',
     newTab: 'Abrir em nova aba',
     pending:
-      'O tour real ainda está em preparação. Esta capa é ilustrativa. Volte em breve para explorar um espaço capturado com a ARP Vision.',
-    loading: 'Abrindo o espaço…',
+      'O tour real ainda está em preparação. Esta capa é ilustrativa. Volte em breve para explorar um imóvel capturado com a ARP Vision.',
+    loading: 'Abrindo o imóvel…',
     frameTitle: 'Tour 360° de exemplo: {name}',
     dialogLabel: 'Tour de {name}',
     closeDialog: 'Fechar tour ×',
@@ -938,7 +938,7 @@ export const pt = {
   team: {
     eyebrow: 'UMA FERRAMENTA. A EQUIPE TODA.',
     title1: 'Monte seu ecossistema de tours,',
-    title2: 'pensado para empresas.',
+    title2: 'pensado para imobiliárias.',
     benefits: {
       autonomy: {
         title: 'Mais autonomia para quem captura.',
@@ -973,8 +973,8 @@ export const pt = {
   }),
   quote: {
     eyebrow: 'PREÇO SOB MEDIDA',
-    title: 'Cada negócio tem um tamanho. A sua proposta também.',
-    lead: 'Responda 3 perguntas rápidas e receba pelo WhatsApp uma proposta para o seu volume de espaços, sem compromisso.',
+    title: 'Cada imobiliária tem um tamanho. A sua proposta também.',
+    lead: 'Responda 3 perguntas rápidas e receba pelo WhatsApp uma proposta para o seu volume de imóveis, sem compromisso.',
     benefits: {
       volume: {
         title: 'Proposta para o seu volume.',
@@ -991,11 +991,16 @@ export const pt = {
       perfil: {
         label: 'Como você trabalha?',
         summary: 'Como trabalho',
-        options: ['Tenho 1 espaço', 'Trabalho sozinho', 'Tenho uma equipe', 'Várias unidades'],
+        options: [
+          'Sou corretor autônomo',
+          'Imobiliária pequena',
+          'Imobiliária com equipe',
+          'Rede ou franquia',
+        ],
       },
       volume: {
-        label: 'Quantos espaços por mês?',
-        summary: 'Espaços por mês',
+        label: 'Quantos imóveis por mês?',
+        summary: 'Imóveis por mês',
         options: ['1', '2 a 5', '6 a 15', 'Mais de 15'],
       },
       prazo: {
@@ -1014,7 +1019,7 @@ export const pt = {
     signup: 'Criar conta grátis',
   },
   finalCta: {
-    title: 'O seu espaço pode ter tour 360° hoje.',
+    title: 'O seu imóvel pode ter tour 360° hoje.',
     lead: 'Você já tem o celular. O próximo passo é seu.',
     signup: 'Criar conta grátis',
     whatsapp: 'Falar no WhatsApp',
@@ -1047,7 +1052,7 @@ export const pt = {
         'Cada ambiente é uma volta só, com 8 fotos. O 360° fica pronto em cerca de 1 minuto, em segundo plano, e você captura o próximo cômodo enquanto isso.',
     },
     enhancement: {
-      question: 'O aprimoramento muda o espaço?',
+      question: 'O aprimoramento muda o imóvel?',
       answer:
         'Ele deixa uniformes as emendas e a luz entre as fotos, sem criar móveis nem trocar acabamentos. O único trecho completado é o que nenhuma foto alcança: o chão logo abaixo do celular e o centro do teto, seguindo o piso e o teto que aparecem ao redor. A foto original fica guardada, e você compara as duas antes de publicar.',
     },
@@ -1064,7 +1069,7 @@ export const pt = {
     credit: {
       question: 'O que é um crédito?',
       answer:
-        'Cada ambiente fotografado com o celular usa 1 crédito. Os créditos são da empresa, e toda a equipe usa o mesmo saldo.',
+        'Cada ambiente fotografado com o celular usa 1 crédito. Os créditos são da imobiliária, e toda a equipe usa o mesmo saldo.',
     },
     individual: { question: 'Como funciona o Individual?' },
     cost: {
@@ -1199,14 +1204,14 @@ export const pt = {
       'Planos ARP Vision: Individual com pagamento único, Professional e Business mensais e Enterprise sob consulta. Compare créditos, tours no ar e teste grátis.',
     ogImage: '/images/og-planos.png',
     breadcrumb: 'Início / Planos',
-    eyebrow: 'O PRÓXIMO PASSO DO SEU NEGÓCIO',
+    eyebrow: 'O PRÓXIMO PASSO DA SUA IMOBILIÁRIA',
     title1: 'Planos para todo',
-    title2: 'tamanho de negócio',
+    title2: 'tamanho de imobiliária',
     lead1: '1 crédito = 1 ambiente fotografado com o celular.',
-    lead2: 'Um espaço costuma ter de 6 a 10 ambientes.',
+    lead2: 'Um imóvel costuma ter de 6 a 10 ambientes.',
     compareEyebrow: 'CADA DETALHE, LADO A LADO',
     compareTitle: 'Compare todos os recursos.',
-    compareLead: 'Compare o que cada plano inclui para capturar e publicar seus espaços.',
+    compareLead: 'Compare o que cada plano inclui para capturar e publicar seus imóveis.',
     tableLabel: 'Tabela comparativa dos planos, com rolagem horizontal',
     features: 'Recursos',
     recommended: 'Recomendado',
@@ -1273,7 +1278,7 @@ export const pt = {
   },
   schema: {
     appDescription:
-      'Tour virtual 360° de espaços usando o celular, com captura guiada e aprimoramento automático.',
+      'Tour virtual 360° de imóveis usando o celular, com captura guiada e aprimoramento automático.',
     offerOnce: (installments: number) =>
       `Pagamento único por 1 tour no ar por 1 ano: à vista no Pix ou em ${installments}x no cartão. Renovação anual à parte.`,
     offerMonthly:

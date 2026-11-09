@@ -1650,13 +1650,13 @@ try {
     const greeting = 'Olá! Vim pelo site e quero uma cotação da ARP Vision.';
     assert.equal(await message(), greeting);
     assert.equal(await submit.getAttribute('target'), '_blank');
-    await quote.locator('input[value="Tenho uma equipe"]').check();
+    await quote.locator('input[value="Imobiliária com equipe"]').check();
     await quote.locator('input[value="6 a 15"]').check();
     await quote.locator('input[value="Este mês"]').check();
     const filled = [
       greeting,
-      '• Como trabalho: Tenho uma equipe',
-      '• Espaços por mês: 6 a 15',
+      '• Como trabalho: Imobiliária com equipe',
+      '• Imóveis por mês: 6 a 15',
       '• Para quando: Este mês',
       'Pode me mandar uma proposta?',
     ].join('\n');
@@ -1677,8 +1677,8 @@ try {
         return events;
       });
     const answers = {
-      'Como trabalho': 'Tenho uma equipe',
-      'Espaços por mês': '6 a 15',
+      'Como trabalho': 'Imobiliária com equipe',
+      'Imóveis por mês': '6 a 15',
       'Para quando': 'Este mês',
     };
     assert.deepEqual(
@@ -2113,10 +2113,10 @@ try {
     // Cotação no celular: toque numa opção atualiza a mensagem; o FAQ continua abrindo.
     const quote = phone.locator('#cotacao');
     await quote.scrollIntoViewIfNeeded();
-    await quote.locator('input[value="Trabalho sozinho"]').tap();
+    await quote.locator('input[value="Sou corretor autônomo"]').tap();
     assert.match(
       new URL(await quote.locator('.quote-submit').getAttribute('href')).searchParams.get('text'),
-      /• Como trabalho: Trabalho sozinho/,
+      /• Como trabalho: Sou corretor autônomo/,
     );
     await quote.screenshot({ path: '.artifacts/cotacao-mobile.png' });
     await phone.locator('.faq-item').first().locator('summary').click();
@@ -2171,10 +2171,10 @@ try {
       payment: '¿Cómo funciona el pago?',
       cost: /¿Cuánto cuesta\?/,
       greeting: '¡Hola! Vengo de la web y quiero un presupuesto de ARP Vision.',
-      answers: ['Tengo un equipo', '6 a 15', 'Este mes'],
+      answers: ['Inmobiliaria con equipo', '6 a 15', 'Este mes'],
       filled: [
-        '• Cómo trabajo: Tengo un equipo',
-        '• Espacios al mes: 6 a 15',
+        '• Cómo trabajo: Inmobiliaria con equipo',
+        '• Inmuebles al mes: 6 a 15',
         '• Para cuándo: Este mes',
         '¿Me puedes enviar una propuesta?',
       ],
@@ -2191,10 +2191,10 @@ try {
       payment: 'How does payment work?',
       cost: /How much does it cost\?/,
       greeting: "Hi! I came from the website and I'd like a quote from ARP Vision.",
-      answers: ['I have a team', '6 to 15', 'This month'],
+      answers: ['Agency with a team', '6 to 15', 'This month'],
       filled: [
-        '• How I work: I have a team',
-        '• Spaces per month: 6 to 15',
+        '• How I work: Agency with a team',
+        '• Properties per month: 6 to 15',
         '• When I need it: This month',
         'Could you send me a proposal?',
       ],

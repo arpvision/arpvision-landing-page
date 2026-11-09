@@ -130,6 +130,19 @@ test('nenhum idioma fala em "IA" com o cliente', () => {
       );
 });
 
+// O site voltou a falar com imobiliárias (06/11): nenhum texto chama o cliente pelo público
+// genérico de antes ("o seu espaço", "o seu negócio", "para empresas").
+const oldAudience: Record<Locale, RegExp> = {
+  pt: /\bseu espaço\b|seu negócio|para empresas/i,
+  es: /\btu espacio\b|tu negocio|para empresas/i,
+  en: /\byour space\b|your business\b|for (?:companies|businesses)\b|any business\b/i,
+};
+test('nenhum idioma fala com o público genérico de antes, só com imobiliárias', () => {
+  for (const locale of locales)
+    for (const [path, value] of texts(locale))
+      assert.doesNotMatch(value, oldAudience[locale], `${locale}.${path}: "${value}"`);
+});
+
 test('espanhol e inglês não prometem o que o app não faz (comparar a original, chão completado)', () => {
   for (const locale of translated)
     assert.doesNotMatch(translations(locale).faq.enhancement.answer, /original|compar|complet/i);

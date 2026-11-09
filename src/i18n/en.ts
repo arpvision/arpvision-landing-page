@@ -1,7 +1,7 @@
 /**
  * Inglês internacional, claro e direto, conforme a coluna Inglês do glossário de
  * docs/produto/idiomas.md e o en.json do app: room (ambiente), enhance (aprimorar), tours
- * live (tours no ar), property, company, credits, free trial, sign in, phone. Sem "AI".
+ * live (tours no ar), property, credits, free trial, sign in, phone. Sem "AI".
  *
  * Com imobiliárias, valem também os termos da seção Inglês da spec dos produtos: real estate
  * agency na primeira menção de cada página e agency depois ("real estate" só nessa expressão;
@@ -26,7 +26,7 @@ const rooms = (count: number) => `${count} ${count === 1 ? 'room' : 'rooms'}`;
 export const en: Dictionary = {
   meta: {
     defaultDescription:
-      'Create a 360° virtual tour of your space with just your phone. Seams and lighting come out corrected, and clients open it on WhatsApp with no account.',
+      'Create a 360° virtual tour of your property with just your phone. Seams and lighting come out corrected, and clients open it on WhatsApp with no account.',
   },
   layout: { skipLink: 'Skip to content' },
   language: { label: 'Language' },
@@ -825,7 +825,7 @@ export const en: Dictionary = {
     },
   },
   footer: {
-    taglineLines: ['The whole space.', 'Your phone is just the beginning.'],
+    taglineLines: ['The whole property.', 'Your phone is just the beginning.'],
     products: 'Products',
     discover: 'Discover',
     howItWorks: 'How it works',
@@ -839,7 +839,7 @@ export const en: Dictionary = {
     login: 'Sign in to my account',
     talk: "Let's talk",
     whatsapp: (number: string) => `WhatsApp ${number}`,
-    note: 'Made for anyone with spaces to show.',
+    note: 'Made for anyone with properties to show.',
     cnpj: 'CNPJ',
     terms: 'Terms of Use',
     privacy: 'Privacy Policy',
@@ -857,13 +857,13 @@ export const en: Dictionary = {
     title: '360° virtual tours with your phone | ARP Vision',
     // Entre 140 e 160 caracteres, como no português.
     description:
-      'Make a 360° virtual tour of your space with just your phone. Seams and lighting corrected, a WhatsApp-ready link that clients open with no account. Free trial.',
+      'Make a 360° virtual tour of your property with just your phone. Seams and lighting corrected, a WhatsApp-ready link clients open with no account. Free trial.',
     ogImage: '/images/og-home-en.png',
-    eyebrow: '360° VIRTUAL TOURS FOR YOUR BUSINESS',
-    title1: 'Turn your space into an experience.',
+    eyebrow: '360° VIRTUAL TOURS FOR REAL ESTATE AGENCIES',
+    title1: 'Turn your property into an experience.',
     title2: 'With just your phone.',
     opening:
-      'Create a 360° virtual tour of your space with just your phone. And clients open the tour without creating an account.',
+      'Create a 360° virtual tour of your property with just your phone. And clients open the tour without creating an account.',
     howTitle: 'The app takes the photos for you',
     howSubtitle: 'Open the camera and follow the instructions',
     steps: ['Capture with your own phone.', 'ARP Vision builds it.', 'Done. Now just share it.'],
@@ -874,7 +874,7 @@ export const en: Dictionary = {
     plansEyebrow: 'START SMALL. SHOW IT ALL.',
     plansTitle: 'A plan for your next step.',
     plansLead:
-      '1 credit = 1 room photographed with your phone. The balance belongs to your company.',
+      '1 credit = 1 room photographed with your phone. The balance belongs to your agency.',
   },
   fan: {
     label: 'Rooms photographed with a phone',
@@ -906,7 +906,7 @@ export const en: Dictionary = {
     channels: {
       whatsapp: {
         title: 'On WhatsApp',
-        text: 'Your client opens the link without creating an account and sees the whole space.',
+        text: 'Your client opens the link without creating an account and sees the whole property.',
       },
       site: {
         title: 'On your website',
@@ -914,7 +914,7 @@ export const en: Dictionary = {
       },
       visit: {
         title: 'Before the visit',
-        text: 'Visitors already know the space and arrive ready to decide.',
+        text: 'Visitors already know the property and arrive ready to decide.',
       },
     },
     // A imagem da conversa tem o texto em português: aqui ela é montada em HTML.
@@ -923,7 +923,7 @@ export const en: Dictionary = {
       label: 'Simulated WhatsApp conversation with the link to a 9-room tour',
       contact: 'Client',
       status: 'WhatsApp conversation',
-      message: "Hi! Here's the tour of the space. You can see everything inside, room by room:",
+      message: "Hi! Here's the tour of the property. You can see everything inside, room by room:",
       linkTitle: '360° tour · 9 rooms',
       reply:
         "You don't need to download anything or create an account. You can open it on a computer or on your phone.",
@@ -931,7 +931,7 @@ export const en: Dictionary = {
   },
   showcase: {
     frameTitle: 'ARP Vision 360° demo tour',
-    title: 'Look inside the space.',
+    title: 'Look inside the property.',
     hint: 'Click or tap to explore the tour.',
     newTab: 'Open the tour in a new tab',
     exit: 'Stop exploring',
@@ -983,12 +983,12 @@ export const en: Dictionary = {
     title2: 'with a phone.',
     lead: 'Drag to look around. Tap the passages to move from one room to another.',
     badge: 'A new way to visit.',
-    tabsLabel: 'Demo spaces',
+    tabsLabel: 'Demo properties',
     illustrativeAlt: 'Illustrative living room with a sofa, natural light and wooden furniture',
-    illustrativeName: 'One space, every angle',
-    openLabel: 'Enter the space: open the 360-degree tour',
+    illustrativeName: 'One property, every angle',
+    openLabel: 'Enter the property: open the 360-degree tour',
     pendingLabel: 'Check the availability of the demo tour',
-    open: 'Enter the space',
+    open: 'Enter the property',
     demo: 'Demo tour',
     openHint: 'The visit starts with a tap.',
     pendingHint: 'The real demo is being prepared.',
@@ -998,19 +998,19 @@ export const en: Dictionary = {
     toBeDefined: '[to be defined]',
     noTripod: 'No tripod',
     ready: 'Ready in ~1 min per room',
-    cta: 'I want a tour like this of my space',
+    cta: 'I want a tour like this of my property',
     qrAlt: 'QR code to open the tour on your phone',
     qrLine1: 'View it on',
     qrLine2: 'your phone',
-    coverAlt: 'View of the space {name}',
+    coverAlt: 'View of the property {name}',
     phone: 'Phone: {phone}',
     photos: '{photos} photos per room',
     time: 'Capture: {time} per room',
     failed: "Couldn't open the tour right now. ",
     newTab: 'Open in a new tab',
     pending:
-      'The real tour is still being prepared. This cover is illustrative. Come back soon to explore a space captured with ARP Vision.',
-    loading: 'Opening the space…',
+      'The real tour is still being prepared. This cover is illustrative. Come back soon to explore a property captured with ARP Vision.',
+    loading: 'Opening the property…',
     frameTitle: 'Sample 360° tour: {name}',
     dialogLabel: 'Tour of {name}',
     closeDialog: 'Close the tour ×',
@@ -1018,7 +1018,7 @@ export const en: Dictionary = {
   team: {
     eyebrow: 'ONE TOOL. THE WHOLE TEAM.',
     title1: 'Build your tour ecosystem,',
-    title2: 'designed for companies.',
+    title2: 'designed for agencies.',
     benefits: {
       autonomy: {
         title: 'More autonomy for those who capture.',
@@ -1035,8 +1035,8 @@ export const en: Dictionary = {
   inPerson: null,
   quote: {
     eyebrow: 'CUSTOM PRICING',
-    title: 'Every business has its own size. So does your proposal.',
-    lead: 'Answer 3 quick questions and get a proposal for your volume of spaces on WhatsApp, with no commitment.',
+    title: 'Every agency has its own size. So does your proposal.',
+    lead: 'Answer 3 quick questions and get a proposal for your volume of properties on WhatsApp, with no commitment.',
     benefits: {
       volume: {
         title: 'A proposal for your volume.',
@@ -1057,11 +1057,16 @@ export const en: Dictionary = {
       perfil: {
         label: 'How do you work?',
         summary: 'How I work',
-        options: ['I have 1 space', 'I work on my own', 'I have a team', 'Several locations'],
+        options: [
+          'Independent agent',
+          'Small agency',
+          'Agency with a team',
+          'Network or franchise',
+        ],
       },
       volume: {
-        label: 'How many spaces per month?',
-        summary: 'Spaces per month',
+        label: 'How many properties per month?',
+        summary: 'Properties per month',
         options: ['1', '2 to 5', '6 to 15', 'More than 15'],
       },
       prazo: {
@@ -1080,7 +1085,7 @@ export const en: Dictionary = {
     signup: 'Create a free account',
   },
   finalCta: {
-    title: 'Your space can have a 360° tour today.',
+    title: 'Your property can have a 360° tour today.',
     lead: 'You already have the phone. The next step is yours.',
     signup: 'Create a free account',
     whatsapp: 'Talk on WhatsApp',
@@ -1116,7 +1121,7 @@ export const en: Dictionary = {
     // publicar (o app não tem isso) e um chão "completado" (hoje é um borrão com carimbo).
     // Aqui fica só o que é verdade; o centro do teto e a foto original guardada não são citados.
     enhancement: {
-      question: 'Does the enhancement change the space?',
+      question: 'Does the enhancement change the property?',
       answer:
         'It evens out the seams and the lighting between the photos, without adding furniture or changing finishes. The floor right below the phone, which no photo reaches, is shown blurred, with a stamp.',
     },
@@ -1133,7 +1138,7 @@ export const en: Dictionary = {
     credit: {
       question: 'What is a credit?',
       answer:
-        'Each room photographed with your phone uses 1 credit. Credits belong to the company, and the whole team uses the same balance.',
+        'Each room photographed with your phone uses 1 credit. Credits belong to the agency, and the whole team uses the same balance.',
     },
     individual: { question: 'How does the Individual plan work?' },
     cost: {
@@ -1262,14 +1267,14 @@ export const en: Dictionary = {
       'ARP Vision plans: Individual with a one-time payment, Professional and Business monthly, and Enterprise on request. Compare credits, live tours and free trial.',
     ogImage: '/images/og-plans-en.png',
     breadcrumb: 'Home / Plans',
-    eyebrow: 'THE NEXT STEP FOR YOUR BUSINESS',
-    title1: 'Plans for businesses',
+    eyebrow: 'THE NEXT STEP FOR YOUR REAL ESTATE AGENCY',
+    title1: 'Plans for agencies',
     title2: 'of every size',
     lead1: '1 credit = 1 room photographed with your phone.',
-    lead2: 'A space usually has 6 to 10 rooms.',
+    lead2: 'A property usually has 6 to 10 rooms.',
     compareEyebrow: 'EVERY DETAIL, SIDE BY SIDE',
     compareTitle: 'Compare all features.',
-    compareLead: 'Compare what each plan includes to capture and publish your spaces.',
+    compareLead: 'Compare what each plan includes to capture and publish your properties.',
     tableLabel: 'Plan comparison table, with horizontal scrolling',
     features: 'Features',
     recommended: 'Recommended',
@@ -1335,7 +1340,7 @@ export const en: Dictionary = {
   },
   schema: {
     appDescription:
-      '360° virtual tours of spaces using a phone, with guided capture and automatic enhancement.',
+      '360° virtual tours of properties using a phone, with guided capture and automatic enhancement.',
     offerOnce: (installments: number) =>
       `One-time payment for 1 tour live for 1 year: upfront by Pix or in ${installments} installments by card. Annual renewal sold separately.`,
     offerMonthly:
