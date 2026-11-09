@@ -344,7 +344,8 @@ test('as regras de texto pegam também os equivalentes do inglês', () => {
     'As low as R$ 99',
   ])
     assert.match(text, forbidden, text);
-  // O que o texto em inglês já usa continua valendo: "from" sem preço, número sem moeda e a licença.
+  // O que o texto em inglês já usa continua valendo: "from" sem preço, número sem moeda e a
+  // licença.
   for (const text of [
     'From the first post to a client ready to visit.',
     'From your website or the photos you send',

@@ -75,9 +75,9 @@ export const en: Dictionary = {
   // usam só nomes fictícios (Example Realty, youragency, Example Neighborhood, License #00000) e
   // nenhum preço.
   // DIFERENTE: os mercados de língua inglesa não têm CRECI. No lugar dele entra o número da licença
-  // que a agência informar, com o nome dela, em toda peça (spec, seção Inglês): no apoio da galeria,
-  // no item do incluído, na dúvida e nas artes ("License #00000"). O texto nunca diz que o produto
-  // garante o cumprimento de regra de licença ou de publicidade.
+  // que a agência informar, com o nome dela, em toda peça (spec, seção Inglês): no apoio da
+  // galeria, no item do incluído, na dúvida e nas artes ("License #00000"). O texto nunca diz que o
+  // produto garante o cumprimento de regra de licença ou de publicidade.
   productPages: {
     instagram: {
       meta: {
@@ -98,14 +98,14 @@ export const en: Dictionary = {
         eyebrow: 'SOUND FAMILIAR?',
         before: 'This month you',
         // O fim do título troca sozinho entre estes trechos e para no primeiro. Cada um cabe numa
-        // linha a 360 px: o título reserva a altura do maior. No inglês, até 18 caracteres por trecho,
-        // contando o ponto.
+        // linha a 360 px: o título reserva a altura do maior. No inglês, até 18 caracteres por
+        // trecho, contando o ponto.
         phrases: [
           'sold a house.',
           'listed two homes.',
           'leased an office.',
-          // DIFERENTE: no lugar do cartório, "closed a deal.", que se lê em qualquer mercado de língua
-          // inglesa (o closing americano é só dos EUA e do Canadá) e cabe em 18 caracteres.
+          // DIFERENTE: no lugar do cartório, "closed a deal.", que se lê em qualquer mercado de
+          // língua inglesa (o closing americano é só dos EUA e do Canadá) e cabe em 18 caracteres.
           'closed a deal.',
         ],
         after: 'And none of it made it to Instagram.',
@@ -137,19 +137,20 @@ export const en: Dictionary = {
         lead: 'With photos of your properties, your logo and your license number on every post.',
         arts: [
           { id: 'sale', kind: 'For sale', title: '3-bedroom house with a pool' },
-          // DIFERENTE: só a lareira. Com a varanda, o título passa do comprimento do português e vai a
-          // três linhas a 360 px.
+          // DIFERENTE: só a lareira. Com a varanda, o título passa do comprimento do português e
+          // vai a três linhas a 360 px.
           { id: 'rent', kind: 'For rent', title: 'House with a fireplace' },
-          // DIFERENTE: sem o "mais uma" ("Another key" é decalque: em inglês se entregam "the keys"),
-          // para caber no comprimento do português. O selo "Sold" já diz que vendeu.
+          // DIFERENTE: sem o "mais uma" ("Another key" é decalque: em inglês se entregam "the
+          // keys"), para caber no comprimento do português. O selo "Sold" já diz que vendeu.
           { id: 'sold', kind: 'Sold', title: 'Keys handed over in Example Neighborhood' },
           { id: 'tour', kind: '360° tour', title: 'Look inside this house' },
-          // As artes só de texto (bairro e dica) têm a altura mais justa: a 360 px, o rodapé delas já
-          // corta no português, pelo CSS do PostArt, e não pelo texto. Com os títulos no mesmo número
-          // de linhas do português, o inglês herda o corte sem piorar; "Example Neighborhood" sozinho
-          // já ocupa duas.
+          // As artes só de texto (bairro e dica) têm a altura mais justa: a 360 px, o rodapé delas
+          // já corta no português, pelo CSS do PostArt, e não pelo texto. Com os títulos no mesmo
+          // número de linhas do português, o inglês herda o corte sem piorar; "Example
+          // Neighborhood" sozinho já ocupa duas.
           // DIFERENTE: "Around Example Neighborhood" ("o que há em volta"), e não "What's nearby in
-          // Example Neighborhood", que vai a três linhas a 360 e 390 px e corta ainda mais o rodapé.
+          // Example Neighborhood", que vai a três linhas a 360 e 390 px e corta ainda mais o
+          // rodapé.
           { id: 'neighborhood', kind: 'Your area', title: 'Around Example Neighborhood' },
           { id: 'tip', kind: 'Tip', title: 'Documents to get ready before selling' },
           // DIFERENTE: "Owners" no lugar de "Captação" (ver o cabeçalho).
@@ -183,8 +184,9 @@ export const en: Dictionary = {
       },
       comparison: {
         title: 'Three ways to manage Instagram',
-        // DIFERENTE: "Marketing agency", e não só "agency": no inglês, "agency" sozinho é a imobiliária
-        // do cliente. E não "Hire a marketing agency", que quebra em duas linhas a 1024 e 1440 px.
+        // DIFERENTE: "Marketing agency", e não só "agency": no inglês, "agency" sozinho é a
+        // imobiliária do cliente. E não "Hire a marketing agency", que quebra em duas linhas a 1024
+        // e 1440 px.
         columns: ['Do it yourself', 'Marketing agency', 'ARP Vision'],
         rows: [
           {
@@ -309,22 +311,22 @@ export const en: Dictionary = {
         // DIFERENTE: .net, e não .com: "com" está na lista de palavras do português
         // (scripts/portuguese-words.mjs).
         siteAddress: 'youragency.net',
-        // DIFERENTE: "Scan", e não "Read": ao lado de um endereço, "Read" lembra ler um artigo. O texto
-        // do passo 1 continua com "reads".
+        // DIFERENTE: "Scan", e não "Read": ao lado de um endereço, "Read" lembra ler um artigo. O
+        // texto do passo 1 continua com "reads".
         siteRead: 'Scan',
         siteFound: 'Logo, colors and properties found',
         stylesDescription:
           'Example: the same house in three post styles, with the middle one marked as your pick.',
-        // DIFERENTE: "Your pick" ("a sua escolha"), e não "Your style". O rótulo não quebra linha e,
-        // mais largo que a coluna do estilo, passa dela; medido, "Your pick" fica mais estreito que o
-        // "Seu estilo" em todas as larguras, e "Your style", mais largo.
+        // DIFERENTE: "Your pick" ("a sua escolha"), e não "Your style". O rótulo não quebra linha
+        // e, mais largo que a coluna do estilo, passa dela; medido, "Your pick" fica mais estreito
+        // que o "Seu estilo" em todas as larguras, e "Your style", mais largo.
         styleChosen: 'Your pick',
         monthDescription:
           "Example: next month's posts in a small calendar, with the Approve all and Request changes buttons.",
         month: 'Next month',
         requestChange: 'Request changes',
-        // As artes. A licença é da agência: vai em toda peça, inclusive nas que não anunciam um imóvel
-        // (bairro, dica, captação).
+        // As artes. A licença é da agência: vai em toda peça, inclusive nas que não anunciam um
+        // imóvel (bairro, dica, captação).
         agency: 'Example Realty',
         // DIFERENTE: o número da licença no lugar do CRECI.
         license: 'License #00000',
@@ -522,10 +524,10 @@ export const en: Dictionary = {
             question: 'Does it ask for documents or ID numbers?',
             answer: 'No. Documents and financial information stay with the agent.',
           },
-          // DIFERENTE: sem citar lei, como manda a seção Inglês da spec. O português usa os termos da
-          // LGPD (controladora e operadora) e o espanhol, os do RGPD; aqui fica só o que eles dizem: a
-          // agência responde pelos dados, e a ARP Vision trata as conversas só para fazer o
-          // atendimento, em nome dela e seguindo as instruções dela.
+          // DIFERENTE: sem citar lei, como manda a seção Inglês da spec. O português usa os termos
+          // da LGPD (controladora e operadora) e o espanhol, os do RGPD; aqui fica só o que eles
+          // dizem: a agência responde pelos dados, e a ARP Vision trata as conversas só para fazer
+          // o atendimento, em nome dela e seguindo as instruções dela.
           {
             question: "What about my clients' data?",
             answer:
@@ -552,8 +554,8 @@ export const en: Dictionary = {
       mock: {
         agency: 'Example Realty',
         automated: 'Automated service',
-        // A conversa, na ordem: a apresentação (um aviso no alto, sem hora), o pedido da cliente e o
-        // imóvel que combina.
+        // A conversa, na ordem: a apresentação (um aviso no alto, sem hora), o pedido da cliente e
+        // o imóvel que combina.
         intro:
           "Hi! This is Example Realty's automated service. If you'd prefer, I can bring in an agent.",
         request:
@@ -561,25 +563,28 @@ export const en: Dictionary = {
         found: "I found 3. This one's about 450 m in a straight line from a school:",
         // A hora do pedido e a da resposta, como o WhatsApp mostra. A descrição do passo 1 diz a do
         // pedido, no mesmo formato (o teste de catálogo confere).
-        // DIFERENTE: 12 horas, como o WhatsApp mostra em en_US (o português e o espanhol usam 22:04). A
-        // hora fica numa linha só dela no canto do balão, então os 3 caracteres a mais não apertam a
-        // tela.
+        // DIFERENTE: 12 horas, como o WhatsApp mostra em en_US (o português e o espanhol usam
+        // 22:04). A hora fica numa linha só dela no canto do balão, então os 3 caracteres a mais
+        // não apertam a tela.
         times: { request: '10:04 PM', found: '10:05 PM' },
         // O cartão do imóvel, na conversa e no passo 3.
         listing: 'Downtown apartment',
         listingDetails: '2 bedrooms · 68 m²',
         listingPrice: '2,400 a month',
-        // DIFERENTE: rótulo e valor, como as outras linhas do cartão e as distâncias de "Close to what
-        // matters", para caber no espaço do português ("A uns 450 m de uma escola, em linha reta").
+        // DIFERENTE: rótulo e valor, como as outras linhas do cartão e as distâncias de "Close to
+        // what matters", para caber no espaço do português ("A uns 450 m de uma escola, em linha
+        // reta").
         listingDistance: 'School: about 450 m in a straight line',
         // DIFERENTE: o número da licença no lugar do CRECI, como manda a seção Inglês da spec: os
-        // mercados de língua inglesa não têm um registro único, e muitos pedem a licença no anúncio.
+        // mercados de língua inglesa não têm um registro único, e muitos pedem a licença no
+        // anúncio.
         license: 'License #00000',
         // O botão não quebra linha e tem o espaço do português: por isso "View 360° tour", sem o
         // artigo do "See the 360° tour" do cartão final dos vídeos.
         tour: 'View 360° tour',
-        // O que a cliente procura: o negócio e o resto, nas fichas do passo 2 e no resumo. No inglês,
-        // toda ficha começa por maiúscula, como "Rental" ("Downtown" não é nome próprio como "Centro").
+        // O que a cliente procura: o negócio e o resto, nas fichas do passo 2 e no resumo. No
+        // inglês, toda ficha começa por maiúscula, como "Rental" ("Downtown" não é nome próprio
+        // como "Centro").
         wishesTitle: 'What the client wants',
         deal: 'Rental',
         wishes: ['Downtown', '2 bedrooms', 'Up to 2,500 a month', 'Near a school'],
@@ -588,8 +593,8 @@ export const en: Dictionary = {
         client: 'Laura Bennett',
         // O WhatsApp da cliente: o rótulo e o número, que vai inteiro, sem quebrar no meio.
         whatsapp: 'WhatsApp',
-        // DIFERENTE: o número fictício no formato americano, como o en_US do site (o português usa o
-        // formato do Brasil, e o espanhol, o da Espanha).
+        // DIFERENTE: o número fictício no formato americano, como o en_US do site (o português usa
+        // o formato do Brasil, e o espanhol, o da Espanha).
         clientPhone: '(000) 000-0000',
         seen: 'Saw 3 listings, liked the downtown apartment',
         visit: 'Wants to visit Saturday morning',
@@ -614,7 +619,8 @@ export const en: Dictionary = {
     videos: {
       meta: {
         title: 'Real estate videos from photos | ARP Vision',
-        // DIFERENTE: o número da licença no lugar do CRECI, que os mercados de língua inglesa não têm.
+        // DIFERENTE: o número da licença no lugar do CRECI, que os mercados de língua inglesa não
+        // têm.
         description:
           'You send the listing photos, and ARP Vision builds the video for Reels, stories and property portals, with the property details, your logo and license number.',
       },
@@ -757,8 +763,8 @@ export const en: Dictionary = {
       // O texto das telas de exemplo e o dos vídeos do topo.
       mock: {
         // Os dois vídeos do topo: a descrição para o leitor de tela e os rótulos do botão.
-        // DIFERENTE: o cartão final do vídeo em inglês traz "License #00000" no lugar do CRECI
-        // (os outros textos gravados nele: "EXAMPLE", "Example Neighborhood", "240 m²", "3 bedrooms",
+        // DIFERENTE: o cartão final do vídeo em inglês traz "License #00000" no lugar do CRECI (os
+        // outros textos gravados nele: "EXAMPLE", "Example Neighborhood", "240 m²", "3 bedrooms",
         // "Example Realty" e "See the 360° tour").
         verticalDescription:
           'Example: a vertical video for Reels and stories, made from five photos of a house, with the neighborhood, floor area and number of bedrooms on screen. It ends with Example Realty, its license number and an invitation to see the 360° tour.',
@@ -787,8 +793,8 @@ export const en: Dictionary = {
       },
     },
   },
-  // A página com todos os produtos (/en/products): os cartões seguem os grupos do menu, e a faixa azul
-  // pede a cotação pelo WhatsApp com uma mensagem geral sobre os produtos.
+  // A página com todos os produtos (/en/products): os cartões seguem os grupos do menu, e a faixa
+  // azul pede a cotação pelo WhatsApp com uma mensagem geral sobre os produtos.
   productsPage: {
     meta: {
       title: 'Products for real estate agencies | ARP Vision',
