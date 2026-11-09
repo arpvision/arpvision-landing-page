@@ -473,17 +473,18 @@ const withDeadline = async (promise, label, ms = 15000) => {
     clearTimeout(timer);
   }
 };
-// Espera o primeiro aviso, com o elemento na tela, de um IntersectionObserver novo, com o limiar
-// (`threshold`) do observador da página que ele acompanha. Os observadores avisam na ordem em que
-// foram criados: quando este avisa, o da página já tratou o elemento.
-const untilOnScreen = (locator, label, threshold = 0) =>
+// Espera o primeiro aviso, com o elemento na tela (ou fora dela, com `inside` falso), de um
+// IntersectionObserver novo, com o limiar (`threshold`) do observador da página que ele acompanha.
+// Os observadores avisam na ordem em que foram criados: quando este avisa, o da página já tratou o
+// elemento.
+const untilScreen = (locator, label, { threshold = 0, inside = true } = {}) =>
   withDeadline(
     locator.evaluate(
-      (element, limit) =>
+      (element, [limit, wanted]) =>
         new Promise((resolve) => {
           const observer = new IntersectionObserver(
             (entries) => {
-              if (!entries.some((entry) => entry.isIntersecting)) return;
+              if (!entries.some((entry) => entry.isIntersecting === wanted)) return;
               observer.disconnect();
               resolve();
             },
@@ -491,10 +492,12 @@ const untilOnScreen = (locator, label, threshold = 0) =>
           );
           observer.observe(element);
         }),
-      threshold,
+      [threshold, inside],
     ),
     label,
   );
+const untilOnScreen = (locator, label, threshold = 0) => untilScreen(locator, label, { threshold });
+const untilOffScreen = (locator, label) => untilScreen(locator, label, { inside: false });
 // Os vídeos de exemplo de uma página de produto: os arquivos, os atributos, a descrição só para o
 // leitor de tela, que vem logo antes, e os rótulos do botão de tocar e pausar de cada um.
 const exampleVideos = (target) =>
@@ -1488,9 +1491,10 @@ try {
   // No celular de 390 px, um vídeo fica embaixo do outro. O pôster de cada um é o primeiro quadro
   // (o play começa sem salto), e o selo "Exemplo" gravado nele tem pelo menos 10 px de letra.
   // Com movimento reduzido, nenhum toca sozinho, e o vertical posto para tocar à mão continua
-  // tocando quando o horizontal entra na tela (o observador avisa por causa do outro vídeo). Sem
-  // movimento reduzido, cada um toca quando aparece, e a pausa feita à mão no vertical continua
-  // quando o horizontal entra na tela.
+  // tocando quando o horizontal entra na tela (o observador avisa por causa do outro vídeo), mas só
+  // enquanto ele mesmo está na tela: quando sai e volta, fica parado. Sem movimento reduzido, cada
+  // um toca quando aparece, e a pausa feita à mão no vertical continua quando o horizontal entra na
+  // tela e quando o vertical sai e volta.
   for (const reducedMotion of ['reduce', 'no-preference']) {
     const context = await newContext({
       viewport: { width: 390, height: 800 },
@@ -1584,6 +1588,37 @@ try {
         'o horizontal toca quando aparece, e a pausa à mão do vertical continua',
       );
     }
+    // O vertical sai da tela pela borda de cima e volta à cena do começo (ele na tela, o
+    // horizontal fora). Com movimento reduzido, o play à mão não volta com ele, e o botão o põe
+    // para tocar de novo; sem movimento reduzido, a pausa à mão continua.
+    const vertical = phoneVideos.locator('video[data-autoplay]').first();
+    await scrollPage(
+      phoneVideos,
+      await vertical.evaluate((video) => video.getBoundingClientRect().bottom + scrollY + 40),
+    );
+    await untilOffScreen(vertical, `movimento ${reducedMotion}: o vertical sai da tela`);
+    await placeHorizontal(80);
+    await untilOnScreen(vertical, `movimento ${reducedMotion}: o vertical volta à tela`);
+    assert.deepEqual(
+      await onScreen(),
+      [true, false],
+      `movimento ${reducedMotion}: o vertical de volta na tela e o horizontal fora`,
+    );
+    assert.deepEqual(
+      await states(),
+      ['parado', 'parado'],
+      reducedMotion === 'reduce'
+        ? 'movimento reduzido: o play à mão do vertical não volta com ele à tela'
+        : 'a pausa à mão do vertical continua depois que ele sai da tela e volta',
+    );
+    if (reducedMotion === 'reduce') {
+      await toggle.click();
+      assert.deepEqual(
+        await states(),
+        ['tocando', 'parado'],
+        'movimento reduzido: de volta à tela, o botão põe o vertical para tocar de novo',
+      );
+    }
     await context.close();
   }
   // No desktop, o par fica lado a lado no topo, e os dois vídeos aparecem juntos. Sem movimento
@@ -1626,7 +1661,7 @@ try {
   }
   await motionDesktop.close();
   results.push(
-    'Vídeos a partir de fotos (pt, es e en): 1 h1; uma tela de exemplo em cada passo (etiqueta visível, aria-hidden, inert e a descrição "Exemplo:") e nada para fora delas a 1024, 1100 e 1440px; os dois vídeos do idioma sem som, em laço, sem pré-carga, fora do leitor de tela, com a descrição e o botão; nada do tour na cotação e na faixa; o produto nos 5 botões de WhatsApp; a mensagem ("6 a 20", "Os dois", "Este mês") e os eventos da cotação; o menu marca o produto. A 390px: o pôster é o primeiro quadro e o selo tem 10px ou mais; com movimento reduzido nada toca sozinho e o play à mão continua quando o outro vídeo entra na tela; sem ele cada vídeo toca quando aparece e a pausa à mão continua. A 1440px, sem movimento reduzido, os dois aparecem juntos e tocam OK',
+    'Vídeos a partir de fotos (pt, es e en): 1 h1; uma tela de exemplo em cada passo (etiqueta visível, aria-hidden, inert e a descrição "Exemplo:") e nada para fora delas a 1024, 1100 e 1440px; os dois vídeos do idioma sem som, em laço, sem pré-carga, fora do leitor de tela, com a descrição e o botão; nada do tour na cotação e na faixa; o produto nos 5 botões de WhatsApp; a mensagem ("6 a 20", "Os dois", "Este mês") e os eventos da cotação; o menu marca o produto. A 390px: o pôster é o primeiro quadro e o selo tem 10px ou mais; com movimento reduzido nada toca sozinho, o play à mão continua quando o outro vídeo entra na tela e acaba quando o próprio vídeo sai dela (na volta, fica parado); sem ele cada vídeo toca quando aparece e a pausa à mão continua, também depois de sair da tela e voltar. A 1440px, sem movimento reduzido, os dois aparecem juntos e tocam OK',
   );
 
   // A página do Autochat, nos três idiomas: a conversa do topo, uma tela de exemplo em cada um dos

@@ -200,11 +200,14 @@ if (floating) {
 }
 
 // Vídeos com data-autoplay tocam só enquanto estão na tela e, sozinhos, nunca com movimento
-// reduzido. O botão manda em cada vídeo: o que a pessoa pausou fica parado, e o que ela pôs para
-// tocar toca na tela mesmo com movimento reduzido, inclusive quando outro vídeo entra ou sai dela.
+// reduzido. O botão manda em cada vídeo: o que a pessoa pausou fica parado; o que ela pôs para
+// tocar toca mesmo com movimento reduzido, inclusive quando outro vídeo entra ou sai da tela, mas
+// só até ele mesmo sair dela. Na volta, vale de novo o play automático: com movimento reduzido, o
+// vídeo fica parado até outro toque no botão.
 const motion = matchMedia('(prefers-reduced-motion: reduce)');
 const onScreen = new Set<HTMLVideoElement>();
-// A escolha feita no botão, vídeo a vídeo. Sem ela, vale o play automático.
+// A escolha feita no botão, vídeo a vídeo (o play, só enquanto ele está na tela). Sem ela, vale o
+// play automático.
 const chosen = new WeakMap<HTMLVideoElement, 'play' | 'pause'>();
 const updateVideos = () =>
   document.querySelectorAll<HTMLVideoElement>('video[data-autoplay]').forEach((video) => {
@@ -216,7 +219,13 @@ const videoObserver = new IntersectionObserver((entries) => {
   entries.forEach((entry) => {
     const video = entry.target as HTMLVideoElement;
     if (entry.isIntersecting) onScreen.add(video);
-    else onScreen.delete(video);
+    else {
+      onScreen.delete(video);
+      // O play à mão acaba quando o vídeo sai da tela. Sem movimento reduzido, nada muda (sem
+      // escolha, ele também toca na tela); com ele, o vídeo volta parado, mesmo que a preferência
+      // tenha sido ligada com ele fora da tela.
+      if (chosen.get(video) === 'play') chosen.delete(video);
+    }
   });
   updateVideos();
 });
