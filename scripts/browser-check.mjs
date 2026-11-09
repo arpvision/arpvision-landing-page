@@ -1205,8 +1205,47 @@ try {
     }
     await context.close();
   }
+  // No desktop, o par fica lado a lado no topo, e os dois vídeos aparecem juntos. Sem movimento
+  // reduzido, os dois tocam quando aparecem, nos dois idiomas.
+  const motionDesktop = await browser.newContext({
+    viewport: { width: 1440, height: 1000 },
+    reducedMotion: 'no-preference',
+  });
+  const sideBySide = await motionDesktop.newPage();
+  sideBySide.on('pageerror', (error) => errors.push(error.message));
+  for (const locale of ['pt', 'es']) {
+    const route = localeRoutes[locale].pages.productVideos;
+    await sideBySide.goto(base + route);
+    const videos = sideBySide.locator('video[data-autoplay]');
+    assert.deepEqual(
+      await videos.evaluateAll((list) =>
+        list.map((video) => {
+          const { top, bottom } = video.getBoundingClientRect();
+          return top < innerHeight && bottom > 0;
+        }),
+      ),
+      [true, true],
+      `${route}, 1440px: os dois vídeos aparecem juntos no topo`,
+    );
+    await sideBySide
+      .waitForFunction(
+        () =>
+          [...document.querySelectorAll('video[data-autoplay]')].every((video) => !video.paused),
+        undefined,
+        { timeout: 15000 },
+      )
+      .catch(() => {});
+    assert.deepEqual(
+      await videos.evaluateAll((list) =>
+        list.map((video) => (video.paused ? 'parado' : 'tocando')),
+      ),
+      ['tocando', 'tocando'],
+      `${route}, 1440px, sem movimento reduzido: os dois tocam quando aparecem`,
+    );
+  }
+  await motionDesktop.close();
   results.push(
-    'Vídeos a partir de fotos (pt e es): 1 h1; uma tela de exemplo em cada passo (etiqueta visível, aria-hidden, inert e a descrição "Exemplo:") e nada para fora delas a 1024, 1100 e 1440px; os dois vídeos do idioma sem som, em laço, sem pré-carga, fora do leitor de tela, com a descrição e o botão; nada do tour na cotação e na faixa; o produto nos 5 botões de WhatsApp; a mensagem ("6 a 20", "Os dois", "Este mês") e os eventos da cotação; o menu marca o produto. A 390px: o pôster é o primeiro quadro e o selo tem 10px ou mais; com movimento reduzido nada toca sozinho e o play à mão continua quando o outro vídeo entra na tela; sem ele cada vídeo toca quando aparece e a pausa à mão continua OK',
+    'Vídeos a partir de fotos (pt e es): 1 h1; uma tela de exemplo em cada passo (etiqueta visível, aria-hidden, inert e a descrição "Exemplo:") e nada para fora delas a 1024, 1100 e 1440px; os dois vídeos do idioma sem som, em laço, sem pré-carga, fora do leitor de tela, com a descrição e o botão; nada do tour na cotação e na faixa; o produto nos 5 botões de WhatsApp; a mensagem ("6 a 20", "Os dois", "Este mês") e os eventos da cotação; o menu marca o produto. A 390px: o pôster é o primeiro quadro e o selo tem 10px ou mais; com movimento reduzido nada toca sozinho e o play à mão continua quando o outro vídeo entra na tela; sem ele cada vídeo toca quando aparece e a pausa à mão continua. A 1440px, sem movimento reduzido, os dois aparecem juntos e tocam OK',
   );
 
   for (const route of pricesShown ? ['/', '/planos'] : ['/']) {
