@@ -131,11 +131,23 @@ test('nenhum idioma fala em "IA" com o cliente', () => {
 });
 
 // O site voltou a falar com imobiliárias (06/11): nenhum texto chama o cliente pelo público
-// genérico de antes ("o seu espaço", "o seu negócio", "para empresas").
-const oldAudience: Record<Locale, RegExp> = {
-  pt: /\bseu espaço\b|seu negócio|para empresas/i,
-  es: /\btu espacio\b|tu negocio|para empresas/i,
-  en: /\byour space\b|your business\b|for (?:companies|businesses)\b|any business\b/i,
+// genérico de antes ("o seu espaço", "seus espaços", "a sua empresa", "todo tamanho de negócio").
+// A busca é pela palavra, em qualquer forma e caixa; antes dela, saem do texto os usos de hoje que
+// não falam do cliente: a marca d'água de outra empresa, a conta de empresa do Instagram e, no
+// inglês, o plano Business (com maiúscula; "BUSINESS" num rótulo em caixa alta continua pego).
+const oldAudience: Record<Locale, { words: RegExp; allowed: RegExp[] }> = {
+  pt: {
+    words: /(?<!\p{L})(?:espaços?|negócios?|empresas?)(?!\p{L})/iu,
+    allowed: [/marca d'água de outra empresa/g],
+  },
+  es: {
+    words: /(?<!\p{L})(?:espacios?|negocios?|empresas?)(?!\p{L})/iu,
+    allowed: [/\(de empresa o de creador de contenido\)/g, /marca de agua de otra empresa/g],
+  },
+  en: {
+    words: /(?<!\p{L})(?:spaces?|business(?:es)?|compan(?:y|ies))(?!\p{L})/iu,
+    allowed: [/\bBusiness\b/g, /\(business or creator\)/g, /another company's watermark/g],
+  },
 };
 // As promessas antigas da home: a volta não leva 30 segundos (medido no app, são cerca de 2 min
 // por ambiente), e as 8 fotos não são regra (são 12 na lente comum).
@@ -144,12 +156,48 @@ const oldPromises: Record<Locale, RegExp> = {
   es: /\b30 segundos\b|con 8 fotos/,
   en: /\b30 seconds\b|with 8 photos/,
 };
+/** A palavra do público antigo no texto, ou `undefined`. */
+const oldAudienceIn = (locale: Locale, text: string) => {
+  const { words, allowed } = oldAudience[locale];
+  return allowed.reduce((rest, use) => rest.replace(use, ''), text).match(words)?.[0];
+};
 test('nenhum idioma fala com o público genérico de antes nem repete as promessas antigas', () => {
   for (const locale of locales)
     for (const [path, value] of texts(locale)) {
-      assert.doesNotMatch(value, oldAudience[locale], `${locale}.${path}: "${value}"`);
+      assert.equal(oldAudienceIn(locale, value), undefined, `${locale}.${path}: "${value}"`);
       assert.doesNotMatch(value, oldPromises[locale], `${locale}.${path}: "${value}"`);
     }
+});
+// Frases do público antigo que a main tinha antes da volta às imobiliárias: o plural, o
+// possessivo, a palavra sozinha e o rótulo em caixa alta.
+test('o guarda do público antigo pega as frases de antes', () => {
+  const before: Record<Locale, string[]> = {
+    pt: [
+      'Compare o que cada plano inclui para capturar e publicar seus espaços.',
+      '1 crédito = 1 ambiente fotografado com o celular. O saldo é da sua empresa.',
+      'tamanho de negócio',
+      'Um espaço costuma ter de 6 a 10 ambientes.',
+      'O PRÓXIMO PASSO DO SEU NEGÓCIO',
+    ],
+    es: [
+      'Compara lo que incluye cada plan para capturar y publicar tus espacios.',
+      '1 crédito = 1 estancia fotografiada con el móvil. El saldo es de tu empresa.',
+      'Planes para negocios',
+      'Un espacio suele tener de 6 a 10 estancias.',
+      'EL PRÓXIMO PASO DE TU NEGOCIO',
+    ],
+    en: [
+      'Compare what each plan includes to capture and publish your spaces.',
+      '1 credit = 1 room photographed with your phone. The balance belongs to your company.',
+      'Plans for businesses',
+      'A space usually has 6 to 10 rooms.',
+      'THE NEXT STEP FOR YOUR BUSINESS',
+      'Spaces per month',
+    ],
+  };
+  for (const locale of locales)
+    for (const text of before[locale])
+      assert.ok(oldAudienceIn(locale, text), `${locale}: o guarda deixa passar "${text}"`);
 });
 
 test('o aprimoramento não promete o que o app não faz (comparar a original, chão completado, móveis)', () => {
@@ -162,7 +210,8 @@ test('o aprimoramento não promete o que o app não faz (comparar a original, ch
   assert.match(answer('pt'), /No chão, o carimbo com o nome da sua imobiliária\./);
   assert.doesNotMatch(answer('es'), /sin crear muebles|original|compar|complet/i);
   assert.match(answer('es'), /difuminado/);
-  assert.doesNotMatch(answer('en'), /without adding furniture|changing finishes|compare/i);
+  // O inglês pode dizer que a foto original fica guardada (é verdade); o "original" fica de fora.
+  assert.doesNotMatch(answer('en'), /without adding furniture|changing finishes|compar|complet/i);
   assert.match(answer('en'), /On the floor, a stamp with your agency's name\./);
 });
 
