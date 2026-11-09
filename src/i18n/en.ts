@@ -1036,6 +1036,9 @@ export const en: Dictionary = {
   // DIFERENTE: o ARP Vision Presencial só atende Porto Alegre e região; no inglês não há seção
   // nem menu.
   inPerson: null,
+  productsStrip: {
+    title: 'More for your agency.',
+  },
   quote: {
     eyebrow: 'CUSTOM PRICING',
     title: 'Every agency has its own size. So does your proposal.',

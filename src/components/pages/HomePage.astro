@@ -13,6 +13,7 @@ import TourShowcase from '../TourShowcase.astro';
 import Sharing from '../Sharing.astro';
 import TeamBenefits from '../TeamBenefits.astro';
 import InPerson from '../InPerson.astro';
+import ProductsStrip from '../product/ProductsStrip.astro';
 import { site } from '../../config/site';
 import { pageLocale } from '../../i18n';
 import { anchorId } from '../../i18n/routes';
@@ -112,6 +113,8 @@ const roomCards = site.media.fanRooms.map((room, index) => ({
   <TeamBenefits />
   {/* Só em português: o Presencial atende Porto Alegre e região. */}
   <InPerson />
+  {/* Os produtos com página própria; sem o Presencial, logo depois dos benefícios da equipe. */}
+  <ProductsStrip />
   {/* Com os preços ainda em definição, a cotação pelo WhatsApp ocupa o lugar dos planos. */}
   {site.pricing.showPrices ? (
     <section class="section plans-preview" id={anchorId(locale, 'plans')}>

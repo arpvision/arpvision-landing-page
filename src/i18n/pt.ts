@@ -974,6 +974,11 @@ export const pt = {
     button: 'Falar sobre o Presencial no WhatsApp',
     note: 'Atendimento presencial em Porto Alegre e região.',
   }),
+  // A faixa da home com os produtos que têm página própria; o nome e a linha de cada um são os do
+  // menu Produtos.
+  productsStrip: {
+    title: 'Mais para a sua imobiliária.',
+  },
   quote: {
     eyebrow: 'PREÇO SOB MEDIDA',
     title: 'Cada imobiliária tem um tamanho. A sua proposta também.',

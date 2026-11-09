@@ -916,6 +916,9 @@ export const es: Dictionary = {
   // DIFERENTE: o ARP Vision Presencial só atende Porto Alegre e região; no espanhol não há seção
   // nem menu.
   inPerson: null,
+  productsStrip: {
+    title: 'Más para tu inmobiliaria.',
+  },
   quote: {
     eyebrow: 'PRECIO A MEDIDA',
     title: 'Cada inmobiliaria tiene su tamaño. Tu propuesta, también.',

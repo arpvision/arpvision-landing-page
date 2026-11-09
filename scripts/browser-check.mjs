@@ -679,6 +679,52 @@ try {
   }
   results.push('Menu do desktop destaca a seção visível OK');
 
+  // A faixa de produtos na home de cada idioma: os produtos com página própria no ar (os três
+  // novos), cada um com o nome e a linha do menu Produtos e o link da página. O tour é a própria
+  // home, e o Presencial tem a seção dele. A faixa vem logo depois do Presencial (só no pt) ou dos
+  // benefícios da equipe, e logo antes da cotação (ou dos planos, com preços públicos).
+  for (const [locale, title, before] of [
+    ['pt', 'Mais para a sua imobiliária.', '.in-person-section'],
+    ['es', 'Más para tu inmobiliaria.', '.team-section'],
+    ['en', 'More for your agency.', '.team-section'],
+  ]) {
+    const { pages, anchors } = localeRoutes[locale];
+    await page.goto(base + pages.home);
+    const strip = page.locator(`${before} + .products-strip`);
+    assert.equal(await strip.count(), 1, `${pages.home}: a faixa logo depois de ${before}`);
+    assert.equal(
+      await page
+        .locator(`.products-strip + #${pricesShown ? anchors.plans : anchors.quote}`)
+        .count(),
+      1,
+      `${pages.home}: a cotação logo depois da faixa`,
+    );
+    assert.equal(await strip.locator('h2').innerText(), title, `${pages.home}: título da faixa`);
+    const texts = (links) =>
+      links.map((link) => ({
+        href: link.getAttribute('href'),
+        text: ['.products-name', '.products-line'].map((part) =>
+          link.querySelector(part).textContent.replace(/\s+/g, ' ').trim(),
+        ),
+      }));
+    const cards = await strip.locator('a').evaluateAll(texts);
+    assert.deepEqual(
+      cards.map(({ href }) => href).sort(),
+      productPages.map((id) => pages[id]).sort(),
+      `${pages.home}: um link por página de produto no ar`,
+    );
+    const menu = await page.locator('#products-panel a[data-product]').evaluateAll(texts);
+    for (const card of cards)
+      assert.deepEqual(
+        card.text,
+        menu.find(({ href }) => href === card.href)?.text,
+        `${pages.home}: ${card.href} com o nome e a linha do menu`,
+      );
+  }
+  results.push(
+    'Faixa de produtos na home (pt, es e en): o título no idioma, depois do Presencial ou dos benefícios da equipe e antes da cotação, um link por página de produto no ar, com o nome e a linha do menu OK',
+  );
+
   // Cabeçalho do desktop em português (de 1280px para cima, com o seletor de idioma) em uma linha
   // de 1024 a 1440px, também com "Tour real", que só entra com tour de demonstração (aqui
   // simulado logo depois do botão Produtos, com o data-long-nav que o Header.astro põe).
