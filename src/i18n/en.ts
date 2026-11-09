@@ -487,7 +487,7 @@ export const en: Dictionary = {
             id: 'contacts',
             label: 'How many inquiries come in per month?',
             summary: 'Inquiries per month',
-            options: ['Up to 100', '100 to 500', 'More than 500', 'Not sure'],
+            options: ['Up to 100', '101 to 500', 'More than 500', 'Not sure'],
           },
           {
             id: 'timing',

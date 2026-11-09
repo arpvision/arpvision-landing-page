@@ -1638,11 +1638,11 @@ try {
       example: 'Exemplo',
       straight: 'em linha reta',
       contact: 'Olá! Vim pelo site e quero saber do Autochat da ARP Vision.',
-      choices: ['4 a 10', '100 a 500', 'Este mês'],
+      choices: ['4 a 10', '101 a 500', 'Este mês'],
       message: [
         'Olá! Vim pelo site e quero uma cotação do Autochat da ARP Vision.',
         '• Corretores: 4 a 10',
-        '• Contatos por mês: 100 a 500',
+        '• Contatos por mês: 101 a 500',
         '• Para quando: Este mês',
         'Pode me mandar uma proposta?',
       ],
@@ -1651,11 +1651,11 @@ try {
       example: 'Ejemplo',
       straight: 'en línea recta',
       contact: '¡Hola! Vengo de la web y quiero saber más del Autochat de ARP Vision.',
-      choices: ['4 a 10', '100 a 500', 'Este mes'],
+      choices: ['4 a 10', '101 a 500', 'Este mes'],
       message: [
         '¡Hola! Vengo de la web y quiero un presupuesto del Autochat de ARP Vision.',
         '• Agentes: 4 a 10',
-        '• Contactos al mes: 100 a 500',
+        '• Contactos al mes: 101 a 500',
         '• Para cuándo: Este mes',
         '¿Me puedes enviar una propuesta?',
       ],
@@ -1664,11 +1664,11 @@ try {
       example: 'Example',
       straight: 'in a straight line',
       contact: "Hi! I came from the website and I'd like to know more about ARP Vision's Autochat.",
-      choices: ['4 to 10', '100 to 500', 'This month'],
+      choices: ['4 to 10', '101 to 500', 'This month'],
       message: [
         "Hi! I came from the website and I'd like a quote for ARP Vision's Autochat.",
         '• Agents: 4 to 10',
-        '• Inquiries per month: 100 to 500',
+        '• Inquiries per month: 101 to 500',
         '• When I need it: This month',
         'Could you send me a proposal?',
       ],
@@ -1721,7 +1721,7 @@ try {
     await checkProductPage(page, locale, 'autochat', expected);
   }
   results.push(
-    'Autochat (pt, es e en): 1 h1; 7 telas de exemplo (a conversa do topo, uma em cada um dos 4 passos, as distâncias e o resumo) com a etiqueta visível, aria-hidden, inert e a descrição "Exemplo:"; nada para fora das telas dos passos a 1024, 1100 e 1440px; toda distância da página "em linha reta"; nada do tour na cotação e na faixa; o produto nos 5 botões de WhatsApp; a mensagem ("4 a 10", "100 a 500", "Este mês") e os eventos da cotação; o menu marca o produto; Cotação e Dúvidas na página OK',
+    'Autochat (pt, es e en): 1 h1; 7 telas de exemplo (a conversa do topo, uma em cada um dos 4 passos, as distâncias e o resumo) com a etiqueta visível, aria-hidden, inert e a descrição "Exemplo:"; nada para fora das telas dos passos a 1024, 1100 e 1440px; toda distância da página "em linha reta"; nada do tour na cotação e na faixa; o produto nos 5 botões de WhatsApp; a mensagem ("4 a 10", "101 a 500", "Este mês") e os eventos da cotação; o menu marca o produto; Cotação e Dúvidas na página OK',
   );
 
   // A página com todos os produtos, nos três idiomas: um cartão por produto no ar (os links do

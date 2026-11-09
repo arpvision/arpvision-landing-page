@@ -418,7 +418,7 @@ export const es: Dictionary = {
             id: 'contacts',
             label: '¿Cuántos contactos llegan al mes?',
             summary: 'Contactos al mes',
-            options: ['Hasta 100', '100 a 500', 'Más de 500', 'No lo sé'],
+            options: ['Hasta 100', '101 a 500', 'Más de 500', 'No lo sé'],
           },
           {
             id: 'timing',

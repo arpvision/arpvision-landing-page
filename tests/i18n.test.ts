@@ -306,6 +306,47 @@ test('mensagens prontas do WhatsApp no idioma da página, para o mesmo número',
   assert.equal(whatsappLink('x', '#contacto').startsWith('https://wa.me/'), true);
 });
 
+// A faixa de números de uma opção da cotação: "Até 100", "101 a 500", "Mais de 500" e "3", nos
+// três idiomas. Uma opção sem número ("Não sei", "Os dois") não é faixa.
+const quoteRange = (option: string): [number, number] | null => {
+  const upTo = option.match(/^(?:Até|Hasta|Up to) (\d+)$/);
+  if (upTo) return [0, Number(upTo[1])];
+  const between = option.match(/^(\d+) (?:a|to) (\d+)$/);
+  if (between) return [Number(between[1]), Number(between[2])];
+  const over = option.match(/^(?:Mais de|Más de|More than) (\d+)$/);
+  if (over) return [Number(over[1]) + 1, Infinity];
+  const exact = option.match(/^(\d+)$/);
+  if (exact) return [Number(exact[1]), Number(exact[1])];
+  return null;
+};
+
+// A resposta escolhida vai para a mensagem do WhatsApp: com "Até 100" e "100 a 500", quem tem 100
+// contatos cabe nas duas, e a mensagem chega ambígua.
+test('as faixas de número de cada pergunta da cotação não se sobrepõem', () => {
+  const overlapping: string[] = [];
+  for (const locale of locales) {
+    const questions = new Map<string, string[]>();
+    for (const [path, text] of texts(locale)) {
+      const question = path.match(/^(.*\.options)\[\d+\]$/)?.[1];
+      if (question) questions.set(question, [...(questions.get(question) ?? []), text]);
+    }
+    assert.ok(questions.size > 0, `${locale}: as perguntas da cotação`);
+    for (const [question, options] of questions) {
+      const ranges = options
+        .filter((option) => /\d/.test(option))
+        .map((option) => {
+          const range = quoteRange(option);
+          assert.ok(range, `${locale}.${question}: "${option}" não é uma faixa que o teste lê`);
+          return range;
+        })
+        .sort((a, b) => a[0] - b[0]);
+      if (ranges.some(([start], index) => index > 0 && start <= ranges[index - 1][1]))
+        overlapping.push(`${locale}.${question}: ${options.join(' / ')}`);
+    }
+  }
+  assert.deepEqual(overlapping, []);
+});
+
 test('créditos, dias de teste e preços saem de site.ts para todos os idiomas', () => {
   const { freeTrialCredits, freeTrialDays } = site.pricing;
   const pt = translations('pt');

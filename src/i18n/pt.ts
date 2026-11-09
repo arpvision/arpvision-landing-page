@@ -439,7 +439,7 @@ export const pt = {
             id: 'contacts',
             label: 'Quantos contatos chegam por mês?',
             summary: 'Contatos por mês',
-            options: ['Até 100', '100 a 500', 'Mais de 500', 'Não sei'],
+            options: ['Até 100', '101 a 500', 'Mais de 500', 'Não sei'],
           },
           {
             id: 'timing',
