@@ -373,6 +373,20 @@ p {
 .site-header[data-header-bounded] {
   transform: translateY(var(--header-shift, 0px));
 }
+/* Na home, depois da abertura, ele entra e sai deslizando; ao sair, só some no fim do movimento. */
+.site-header[data-header-revealed] {
+  transition:
+    transform 0.25s ease,
+    visibility 0s;
+}
+.site-header[data-header-revealed][data-header-hidden='true'] {
+  transition-delay: 0s, 0.25s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-header[data-header-revealed] {
+    transition: none;
+  }
+}
 .site-header[data-header-hidden='true'] {
   visibility: hidden;
   pointer-events: none;
@@ -390,33 +404,41 @@ p {
     inset 0 -2px 4px color-mix(in srgb, var(--surface) 45%, transparent),
     0 16px 44px color-mix(in srgb, var(--ink) 10%, transparent);
 }
-/* Escrita e logo brancos sobre o fundo escuro da abertura, só com o menu fechado: aberto, o
-   cabeçalho cresce e empurra a abertura para baixo. */
-body:not(.menu-is-open) .site-header[data-header-surface='opening'] {
+/* Sobre a abertura da home, a escrita e o logo ficam brancos. "opening" é o que o Header.astro põe
+   na home antes da primeira pintura; o site.ts o mantém enquanto o cabeçalho acompanha a abertura
+   e o menu do celular está fechado. */
+.site-header[data-header-surface='opening'] {
   --header-ink: var(--white);
   --header-fallback: var(--ink);
 }
-body:not(.menu-is-open) .site-header[data-header-surface='opening'] .brand-logo-light {
+.site-header[data-header-surface='opening'] .brand-logo-light {
   display: none;
 }
-body:not(.menu-is-open) .site-header[data-header-surface='opening'] .brand-logo-dark {
+.site-header[data-header-surface='opening'] .brand-logo-dark {
   display: inline-block;
+}
+/* Ali, o azul do link sob o ponteiro ou da seção da vez sumiria: ele continua branco, marcado só
+   pelo traço embaixo. */
+.site-header[data-header-surface='opening'] .desktop-nav a:hover,
+.site-header[data-header-surface='opening'] .desktop-nav a[aria-current] {
+  color: inherit;
 }
 .site-header:not([data-header-enhanced]) .header-capsule {
   background: var(--surface);
 }
 @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  /* Fora da abertura, a cápsula fica quase opaca, na superfície do tema, com o desfoque: a escrita
+     na cor do tema não depende do que passa atrás (a faixa azul, o tour, o rodapé). */
   .site-header[data-header-enhanced] .header-capsule {
+    background: color-mix(in srgb, var(--surface) 90%, transparent);
+  }
+  /* Sobre a abertura, o vidro transparente. */
+  .site-header[data-header-surface='opening'] .header-capsule {
     background: linear-gradient(135deg, #ffffff2e, #ffffff0a);
   }
 }
 .menu-is-open .header-capsule {
   --glass-radius: 28px;
-}
-/* Atrás do menu aberto, na Home, ficam a página, o fundo escuro e as fotos da abertura: sobre o
-   vidro nenhuma cor de escrita serve, então ele vira um painel sólido nas cores do tema. */
-.menu-is-open .site-header[data-header-surface='opening'] .header-capsule {
-  background: var(--surface);
 }
 .header-capsule > .glass-refraction {
   padding: 4px;
@@ -566,8 +588,15 @@ body:not(.menu-is-open) .site-header[data-header-surface='opening'] .brand-logo-
   font-size: var(--fs-small);
   font-weight: 600;
 }
-.menu-toggle:hover {
-  background: var(--bg-section);
+/* Só com mouse: no toque, o :hover fica preso no botão depois de tocar. Sobre a abertura, o
+   círculo é branco translúcido, porque o ícone ali é branco. */
+@media (hover: hover) {
+  .menu-toggle:hover {
+    background: var(--bg-section);
+  }
+  .site-header[data-header-surface='opening'] .menu-toggle:hover {
+    background: color-mix(in srgb, var(--white) 16%, transparent);
+  }
 }
 .menu-toggle > span {
   display: inline-flex;
@@ -1169,12 +1198,14 @@ body:not(.menu-is-open) .site-header[data-header-surface='opening'] .brand-logo-
 .credit-flow .icon-tile {
   margin-bottom: 10px;
 }
+/* "Uma volta com o celular" quebra em duas linhas parecidas, e não com o "o" no fim da primeira. */
 .credit-flow strong {
   font-size: 1.6rem;
   font-weight: 650;
   letter-spacing: -0.04em;
   line-height: 1.25;
   color: var(--accent);
+  text-wrap: balance;
 }
 .credit-flow li > span:last-child {
   max-width: 240px;
@@ -1996,7 +2027,7 @@ input[type='number']::-webkit-outer-spin-button {
 }
 .footer-grid {
   display: grid;
-  grid-template-columns: 1.2fr 1fr 1fr 1.2fr;
+  grid-template-columns: 1.2fr 1fr 1fr 1fr 1.2fr;
   gap: 42px;
   padding-bottom: 46px;
 }
@@ -2012,10 +2043,14 @@ input[type='number']::-webkit-outer-spin-button {
   letter-spacing: 0;
   font-weight: 650;
 }
+/* O respiro em cima e embaixo separa os nomes de duas linhas (de 1024 a ~1075px, os longos da
+   coluna Produtos quebram): sem ele, um nome e o de baixo pareciam um item só. Os de uma linha não
+   mudam, por causa do min-height. */
 .footer-grid > div > a:not(.brand) {
   display: flex;
   align-items: center;
   min-height: 44px;
+  padding-block: 6px;
   font-size: var(--fs-small);
   color: var(--text-secondary);
 }
@@ -2116,11 +2151,13 @@ input[type='number']::-webkit-outer-spin-button {
   width: 100%;
 }
 .plans-page,
-.tutorials-page {
+.tutorials-page,
+.products-page {
   padding-top: 65px;
 }
 .plans-page .section-heading h1,
-.tutorials-page .section-heading h1 {
+.tutorials-page .section-heading h1,
+.products-page .section-heading h1 {
   font-size: 3.4rem;
   margin: 15px 0 20px;
 }
@@ -2133,7 +2170,8 @@ input[type='number']::-webkit-outer-spin-button {
   margin-bottom: 18px;
 }
 .plans-page .eyebrow,
-.tutorials-page .eyebrow {
+.tutorials-page .eyebrow,
+.products-page .eyebrow {
   margin-bottom: 0;
 }
 /* Tutoriais: o cartão inteiro é o link; a capa fica em pé, como o vídeo. */
@@ -2545,28 +2583,13 @@ input[type='number']::-webkit-outer-spin-button {
     gap: 26px;
   }
 }
-/* O menu em português tem o Presencial, que só existe em português, e de 1280px para cima o
-   cabeçalho ainda leva o seletor PT | ES: com os espaços de sempre, os itens quebrariam linha.
-   De 1024 a 1099px (menos ainda com a barra de rolagem clássica do Windows), o botão também
-   perde a seta, como nos celulares estreitos. */
+/* Com "Tour real" (data-long-nav), o menu em português tem cinco itens e, com os espaços de
+   sempre, sobrariam só 7px a 1024px (menos que a barra de rolagem clássica do Windows) e 1px com
+   o seletor de idioma, de 1280px para cima. Os espaços ficam menores no desktop todo, e de 1100px
+   para cima o botão perde a seta e o seletor fica no rodapé e no menu do celular, como no
+   espanhol. Só no português (:lang(pt)): o espanhol tem as próprias regras em language.css, e uma
+   regra sem idioma empataria com elas e valeria pela ordem dos arquivos. */
 @media (min-width: 1024px) and (max-width: 1099px) {
-  .site-header .desktop-nav:lang(pt) {
-    gap: 16px;
-  }
-  .site-header .header-actions:lang(pt) {
-    gap: 12px;
-  }
-  .site-header .header-actions:lang(pt) .button svg {
-    display: none;
-  }
-  /* Com "Tour real" no menu (data-long-nav), nem assim: logo do celular e espaços menores. */
-  .site-header[data-long-nav] .header-inner:lang(pt) {
-    gap: 12px;
-    padding-inline: 20px;
-  }
-  .site-header[data-long-nav] .brand img:lang(pt) {
-    width: 134px;
-  }
   .site-header[data-long-nav] .desktop-nav:lang(pt) {
     gap: 12px;
   }
@@ -2574,21 +2597,6 @@ input[type='number']::-webkit-outer-spin-button {
     gap: 8px;
   }
 }
-@media (min-width: 1280px) {
-  .site-header .header-inner:lang(pt) {
-    gap: 12px;
-  }
-  .site-header .desktop-nav:lang(pt) {
-    gap: 16px;
-  }
-  .site-header .header-actions:lang(pt) {
-    gap: 12px;
-  }
-}
-/* Com "Tour real", o menu em português tem seis itens e o cabeçalho fica compacto em todo o
-   desktop; o seletor PT | ES fica no rodapé e no menu do celular, como no espanhol. Só no
-   português (:lang(pt)): o espanhol tem as próprias regras em language.css, e uma regra sem
-   idioma empataria com elas e valeria pela ordem dos arquivos. */
 @media (min-width: 1100px) {
   .site-header[data-long-nav] .desktop-nav:lang(pt) {
     gap: 16px;
@@ -2823,6 +2831,11 @@ input[type='number']::-webkit-outer-spin-button {
   }
   .footer-grid > div > a:not(.brand) {
     font-size: var(--fs-small);
+  }
+  /* Em duas colunas, o contato sobra sozinho na última linha: ocupa a linha inteira, e o e-mail e o
+     WhatsApp cabem numa linha cada, até 320px. */
+  .footer-contact {
+    grid-column: 1 / -1;
   }
   .alternatives-table th,
   .alternatives-table td {
@@ -3344,11 +3357,13 @@ input[type='number']::-webkit-outer-spin-button {
     right: 15px;
   }
   .plans-page,
-  .tutorials-page {
+  .tutorials-page,
+  .products-page {
     padding-top: 40px;
   }
   .plans-page .section-heading h1,
-  .tutorials-page .section-heading h1 {
+  .tutorials-page .section-heading h1,
+  .products-page .section-heading h1 {
     font-size: 2.6rem;
   }
   .tutorial-card {

@@ -1,0 +1,24 @@
+---
+// "Perto do que importa", seção própria do Autochat: o que o cliente escreve, a distância
+// aproximada e em linha reta, e de onde ela vem (a cobertura muda de cidade para cidade). Ao lado,
+// as distâncias do imóvel de exemplo.
+import Icon from '../Icon.astro';
+import DistanceListMock from '../mocks/DistanceListMock.astro';
+import { pageLocale } from '../../i18n';
+const { t } = pageLocale(Astro);
+const { proximity } = t.productPages.autochat;
+---
+
+<section class="section product-feature product-proximity" aria-labelledby="proximity-title">
+  <div class="container product-feature-grid">
+    <div class="product-feature-copy">
+      <h2 id="proximity-title">{proximity.title}</h2>
+      <p>{proximity.text}</p>
+      <p class="product-feature-note">
+        <Icon name="info" size={18} />
+        <span>{proximity.coverage}</span>
+      </p>
+    </div>
+    <DistanceListMock />
+  </div>
+</section>

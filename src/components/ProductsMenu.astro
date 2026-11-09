@@ -1,0 +1,63 @@
+---
+// A lista do menu "Produtos", por grupo, com o "Ver todos" no fim. É a mesma no painel do desktop
+// e no grupo do menu do celular, e só mostra o que está no ar.
+import Icon from './Icon.astro';
+import { pageLocale } from '../i18n';
+import { pageAt, pagePath, publishedPageIds } from '../i18n/routes';
+import { liveProductGroups, productHref, productOfPage } from '../lib/products';
+interface Props {
+  /** A lista aparece duas vezes na página: a variante separa os ids dos títulos dos grupos. */
+  variant: 'desktop' | 'mobile';
+}
+const { variant } = Astro.props;
+const { locale, t } = pageLocale(Astro);
+const path = Astro.url.pathname;
+const page = pageAt(locale, path);
+const current = productOfPage(page);
+// Os mesmos grupos dos cartões da página /produtos.
+const groups = liveProductGroups(locale);
+const allProducts = publishedPageIds.includes('products') ? pagePath(locale, 'products') : null;
+---
+
+<div class="products-groups">
+  {groups.map(({ group, items }) => (
+    <div class="products-group">
+      <p class="products-group-title" id={`${variant}-products-${group}`}>
+        {t.products.groups[group]}
+      </p>
+      <ul aria-labelledby={`${variant}-products-${group}`}>
+        {items.map(({ product, text }) => (
+          <li>
+            <a
+              class="products-item"
+              href={productHref(locale, product, path)}
+              data-product={product.id}
+              aria-current={product.id === current?.id ? 'page' : undefined}
+            >
+              <span class="products-icon">
+                <Icon name={product.icon} size={20} />
+              </span>
+              <span class="products-text">
+                <span class="products-name">
+                  {text.name}
+                  {product.isNew && <span class="products-badge">{t.header.newBadge}</span>}
+                </span>
+                <span class="products-line">{text.line}</span>
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  ))}
+</div>
+{allProducts && (
+  <a
+    class="products-all"
+    href={allProducts}
+    aria-current={page === 'products' ? 'page' : undefined}
+  >
+    {t.header.viewAllProducts}
+    <Icon name="arrow" size={16} />
+  </a>
+)}

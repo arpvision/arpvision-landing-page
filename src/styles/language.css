@@ -101,10 +101,9 @@
   color: var(--brand-blue-dark);
   font-weight: 700;
 }
-/* No cabeçalho, o seletor aparece a partir de 1280px, onde o cabeçalho em português (com
-   "Presencial" no menu) já tem os espaços apertados para ele em global.css. Abaixo disso ele não
-   cabe sem quebrar a linha (o seletor pede uns 74px com o espaço entre os itens), e fica no
-   rodapé e na faixa de sugestão. */
+/* No cabeçalho, o seletor aparece a partir de 1280px. Abaixo disso ele não cabe sem quebrar a
+   linha (o seletor pede uns 74px com o espaço entre os itens), e fica no rodapé e na faixa de
+   sugestão. */
 @media (max-width: 1279px) {
   .desktop-language {
     display: none;

@@ -4,9 +4,31 @@ import Icon from './Icon.astro';
 import ContactLink from './ContactLink.astro';
 import { appLink } from '../lib/business';
 import { available } from '../config/site';
+import type { ProductId } from '../lib/products';
 import { pageLocale } from '../i18n';
 import { pagePath } from '../i18n/routes';
+// Sem props, é a faixa do tour: "Criar conta grátis", o WhatsApp e a nota. A página de um produto
+// troca o texto e passa `primary="whatsapp"`: a ação principal vira a cotação pelo WhatsApp, sem
+// o cadastro, e `note={null}` tira a nota. `product` vai no evento de analytics do WhatsApp.
+interface Props {
+  title?: string;
+  lead?: string;
+  primary?: 'signup' | 'whatsapp';
+  whatsappLabel?: string;
+  whatsappMessage?: string;
+  product?: ProductId;
+  note?: string | null;
+}
 const { locale, t } = pageLocale(Astro);
+const {
+  title = t.finalCta.title,
+  lead = t.finalCta.lead,
+  primary = 'signup',
+  whatsappLabel = t.finalCta.whatsapp,
+  whatsappMessage,
+  product,
+  note = t.finalCta.note,
+} = Astro.props;
 const isHome = Astro.url.pathname === pagePath(locale, 'home');
 ---
 
@@ -14,23 +36,31 @@ const isHome = Astro.url.pathname === pagePath(locale, 'home');
   <div class="container final-cta-inner">
     <div>
       <Brand white />
-      <h2>{t.finalCta.title}</h2>
-      <p>{t.finalCta.lead}</p>
+      <h2>{title}</h2>
+      <p>{lead}</p>
     </div>
     <div class="final-cta-actions">
-      <a
-        href={appLink('chamada-final', 'register', locale)}
-        class="button button-white"
-        data-cta="chamada-final"
-      >
-        {t.finalCta.signup} <Icon name="arrow" size={18} />
-      </a>
-      {available.whatsapp && (
-        <ContactLink class="button button-on-blue">
-          <Icon name="message" size={19} /> {t.finalCta.whatsapp}
+      {primary === 'whatsapp' ? (
+        <ContactLink class="button button-white" message={whatsappMessage} product={product}>
+          <Icon name="message" size={19} /> {whatsappLabel}
         </ContactLink>
+      ) : (
+        <>
+          <a
+            href={appLink('chamada-final', 'register', locale)}
+            class="button button-white"
+            data-cta="chamada-final"
+          >
+            {t.finalCta.signup} <Icon name="arrow" size={18} />
+          </a>
+          {available.whatsapp && (
+            <ContactLink class="button button-on-blue" message={whatsappMessage} product={product}>
+              <Icon name="message" size={19} /> {whatsappLabel}
+            </ContactLink>
+          )}
+        </>
       )}
-      <span>{t.finalCta.note}</span>
+      {note !== null && <span>{note}</span>}
     </div>
   </div>
 </section>

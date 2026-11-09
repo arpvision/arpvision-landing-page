@@ -6,7 +6,16 @@
  */
 import type { Locale } from './locales';
 
-export type PageId = 'home' | 'plans' | 'tutorials' | 'terms' | 'privacy';
+export type PageId =
+  | 'home'
+  | 'plans'
+  | 'tutorials'
+  | 'terms'
+  | 'privacy'
+  | 'products'
+  | 'productInstagram'
+  | 'productAutochat'
+  | 'productVideos';
 export type AnchorId =
   | 'content'
   | 'howItWorks'
@@ -31,6 +40,10 @@ export const routes: Record<Locale, LocaleRoutes> = {
       tutorials: '/tutoriais',
       terms: '/termos-de-uso',
       privacy: '/politica-de-privacidade',
+      products: '/produtos',
+      productInstagram: '/produtos/piloto-automatico-para-instagram',
+      productAutochat: '/produtos/autochat',
+      productVideos: '/produtos/videos-a-partir-de-fotos',
     },
     anchors: {
       content: 'conteudo',
@@ -51,6 +64,10 @@ export const routes: Record<Locale, LocaleRoutes> = {
       tutorials: '/es/tutoriales',
       terms: '/es/terminos-de-uso',
       privacy: '/es/politica-de-privacidad',
+      products: '/es/productos',
+      productInstagram: '/es/productos/piloto-automatico-para-instagram',
+      productAutochat: '/es/productos/autochat',
+      productVideos: '/es/productos/videos-a-partir-de-fotos',
     },
     anchors: {
       content: 'contenido',
@@ -72,6 +89,10 @@ export const routes: Record<Locale, LocaleRoutes> = {
       tutorials: '/en/tutorials',
       terms: '/en/terms-of-use',
       privacy: '/en/privacy-policy',
+      products: '/en/products',
+      productInstagram: '/en/products/autopilot-for-instagram',
+      productAutochat: '/en/products/autochat',
+      productVideos: '/en/products/videos-from-photos',
     },
     anchors: {
       content: 'content',
@@ -87,6 +108,24 @@ export const routes: Record<Locale, LocaleRoutes> = {
     },
   },
 };
+
+/**
+ * As páginas publicadas. Menu, rodapé, sitemap e checagens usam só estas: uma página nova entra
+ * aqui quando fica pronta, e não antes. `plans` está na lista, mas só aparece com preços
+ * públicos (`site.pricing.showPrices`). Este arquivo só tem `import type`, para os scripts de
+ * checagem (Node) poderem importá-lo direto.
+ */
+export const publishedPageIds: readonly PageId[] = [
+  'home',
+  'plans',
+  'tutorials',
+  'terms',
+  'privacy',
+  'productInstagram',
+  'productVideos',
+  'productAutochat',
+  'products',
+];
 
 export const pagePath = (locale: Locale, page: PageId) => routes[locale].pages[page];
 export const anchorId = (locale: Locale, anchor: AnchorId) => routes[locale].anchors[anchor];

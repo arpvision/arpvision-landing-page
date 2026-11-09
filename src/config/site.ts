@@ -77,6 +77,133 @@ export const site = {
     tutorialPoster: '/images/tutorial-720.webp',
     // Tour 360° da demonstração, protegido até a pessoa ativar.
     heroEmbed: 'https://arpvision.app/embed/511a5654-29f2-4798-87ff-5b479210dbf0',
+    // Recortes das fotos da casa de demonstração (public/images/produtos) usados nas telas de
+    // exemplo das páginas de produto, um por um e com o tamanho do arquivo. Nem todo ambiente tem
+    // as três proporções (o 2º andar não tem 16:9): nenhum nome é montado por ambiente e
+    // proporção.
+    productPhotos: {
+      'patio-fachada-4x5': {
+        src: '/images/produtos/patio-fachada-4x5.webp',
+        width: 720,
+        height: 900,
+      },
+      'patio-piscina-4x5': {
+        src: '/images/produtos/patio-piscina-4x5.webp',
+        width: 720,
+        height: 900,
+      },
+      'patio-piscina-9x16': {
+        src: '/images/produtos/patio-piscina-9x16.webp',
+        width: 540,
+        height: 960,
+      },
+      'sala-2-4x5': { src: '/images/produtos/sala-2-4x5.webp', width: 720, height: 900 },
+      'cozinha-4x5': { src: '/images/produtos/cozinha-4x5.webp', width: 720, height: 900 },
+      'quarto-com-suite-4x5': {
+        src: '/images/produtos/quarto-com-suite-4x5.webp',
+        width: 720,
+        height: 900,
+      },
+      'patio-fachada-16x9': {
+        src: '/images/produtos/patio-fachada-16x9.webp',
+        width: 960,
+        height: 540,
+      },
+      'patio-fachada-9x16': {
+        src: '/images/produtos/patio-fachada-9x16.webp',
+        width: 540,
+        height: 960,
+      },
+      'patio-piscina-16x9': {
+        src: '/images/produtos/patio-piscina-16x9.webp',
+        width: 960,
+        height: 540,
+      },
+      'sala-2-16x9': { src: '/images/produtos/sala-2-16x9.webp', width: 960, height: 540 },
+      'cozinha-16x9': { src: '/images/produtos/cozinha-16x9.webp', width: 960, height: 540 },
+      'quarto-com-suite-16x9': {
+        src: '/images/produtos/quarto-com-suite-16x9.webp',
+        width: 960,
+        height: 540,
+      },
+      'banheiro-16x9': { src: '/images/produtos/banheiro-16x9.webp', width: 960, height: 540 },
+    },
+    // As fotos do calendário do topo do Piloto (CalendarMock.astro) em miniatura: ali elas aparecem
+    // com poucas dezenas de pixels de largura, e as inteiras somavam 374 KB logo na abertura da
+    // página. Saem dos recortes acima por scripts/prepare-images.mjs (240 px no 4:5 e 180 px no
+    // 9:16), com o mesmo nome e a largura no fim.
+    calendarPhotos: {
+      'patio-fachada-4x5': {
+        src: '/images/produtos/patio-fachada-4x5-240.webp',
+        width: 240,
+        height: 300,
+      },
+      'patio-piscina-9x16': {
+        src: '/images/produtos/patio-piscina-9x16-180.webp',
+        width: 180,
+        height: 320,
+      },
+      'quarto-com-suite-4x5': {
+        src: '/images/produtos/quarto-com-suite-4x5-240.webp',
+        width: 240,
+        height: 300,
+      },
+      'sala-2-4x5': { src: '/images/produtos/sala-2-4x5-240.webp', width: 240, height: 300 },
+      'cozinha-4x5': { src: '/images/produtos/cozinha-4x5-240.webp', width: 240, height: 300 },
+    },
+    // Os vídeos de exemplo de "Vídeos a partir de fotos" (public/video), um par por idioma: o
+    // selo, os dados do imóvel e o cartão final estão gravados na imagem. O pôster de cada um
+    // (public/images/produtos) é o primeiro quadro, o mesmo em que o play começa.
+    exampleVideos: {
+      pt: {
+        vertical: {
+          src: '/video/exemplo-vertical-pt.mp4',
+          poster: '/images/produtos/exemplo-vertical-pt.webp',
+          width: 720,
+          height: 1280,
+        },
+        horizontal: {
+          src: '/video/exemplo-horizontal-pt.mp4',
+          poster: '/images/produtos/exemplo-horizontal-pt.webp',
+          width: 1280,
+          height: 720,
+        },
+      },
+      es: {
+        vertical: {
+          src: '/video/exemplo-vertical-es.mp4',
+          poster: '/images/produtos/exemplo-vertical-es.webp',
+          width: 720,
+          height: 1280,
+        },
+        horizontal: {
+          src: '/video/exemplo-horizontal-es.mp4',
+          poster: '/images/produtos/exemplo-horizontal-es.webp',
+          width: 1280,
+          height: 720,
+        },
+      },
+      en: {
+        vertical: {
+          src: '/video/exemplo-vertical-en.mp4',
+          poster: '/images/produtos/exemplo-vertical-en.webp',
+          width: 720,
+          height: 1280,
+        },
+        horizontal: {
+          src: '/video/exemplo-horizontal-en.mp4',
+          poster: '/images/produtos/exemplo-horizontal-en.webp',
+          width: 1280,
+          height: 720,
+        },
+      },
+    } satisfies Record<
+      Locale,
+      Record<
+        'vertical' | 'horizontal',
+        { src: string; poster: string; width: number; height: number }
+      >
+    >,
     // Panoramas do proprietário. O enquadramento das miniaturas é feito no layout.
     fanRooms: [
       {

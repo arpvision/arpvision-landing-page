@@ -51,11 +51,15 @@ const translated = locales.filter((locale) => locale !== 'pt');
 test('espanhol e inglês têm as mesmas chaves e funções do português, e nenhum texto vazio a mais', () => {
   const pt = shape(translations('pt')) as Record<string, unknown>;
   // As únicas diferenças: a conversa do WhatsApp, imagem em português e HTML nos outros idiomas,
-  // e o ARP Vision Presencial, que só existe em português (o teste abaixo).
+  // e o ARP Vision Presencial, que só existe em português (o teste abaixo): a seção da home e o
+  // grupo "Com a nossa equipe" do menu Produtos.
   const onlyInOne = (path: string) =>
-    path.startsWith('sharing.conversationImage') || path.startsWith('inPerson');
+    path.startsWith('sharing.conversationImage') ||
+    path.startsWith('inPerson') ||
+    path.startsWith('products.inPerson');
   delete (pt.sharing as Record<string, unknown>).conversationImage;
   delete pt.inPerson;
+  delete (pt.products as Record<string, unknown>).inPerson;
   const ptTexts = new Map(texts('pt'));
   const ptList = walk(translations('pt'))
     .map(([path]) => path)
@@ -64,6 +68,7 @@ test('espanhol e inglês têm as mesmas chaves e funções do português, e nenh
     const other = shape(translations(locale)) as Record<string, unknown>;
     delete (other.sharing as Record<string, unknown>).conversationImage;
     delete other.inPerson;
+    delete (other.products as Record<string, unknown>).inPerson;
     assert.deepEqual(other, pt, locale);
     for (const [path, value] of texts(locale)) {
       if (ptTexts.get(path) === '') continue;
@@ -81,8 +86,13 @@ test('espanhol e inglês têm as mesmas chaves e funções do português, e nenh
 });
 
 test('o ARP Vision Presencial só aparece em português (atende Porto Alegre e região)', () => {
-  assert.equal(translations('pt').inPerson?.nav, 'Presencial');
-  for (const locale of translated) assert.equal(translations(locale).inPerson, null, locale);
+  assert.equal(translations('pt').inPerson?.eyebrow, 'ARP VISION PRESENCIAL');
+  assert.equal(translations('pt').products.inPerson?.training.name, 'Treinamento da equipe');
+  assert.equal(translations('pt').products.inPerson?.readyTour.name, 'Tour Pronto');
+  for (const locale of translated) {
+    assert.equal(translations(locale).inPerson, null, locale);
+    assert.equal(translations(locale).products.inPerson, null, locale);
+  }
 });
 
 test('espanhol e inglês sem letras nem palavras do português', () => {
@@ -99,8 +109,15 @@ test('o inglês segue o glossário: room, enhance, tours live, sign in', () => {
   assert.match(en.faq.enhancement.question, /enhancement/);
   assert.match(en.quote.trial(1, 7), /photograph 1 room and keep the tour live for 7 days/);
   assert.match(en.quote.trial(2, 30), /2 rooms .* 30 days/);
+  // "Real estate" voltou com os produtos para imobiliárias, mas só em "real estate agency" (ou
+  // "agencies"), que a seção Inglês da spec dos produtos pede na primeira menção de cada página.
+  // No resto, imóvel é "property".
   for (const [path, value] of texts('en'))
-    assert.doesNotMatch(value, /\b(?:environments?|cellphones?|real estate)\b/i, `en.${path}`);
+    assert.doesNotMatch(
+      value,
+      /\b(?:environments?|cellphones?)\b|\breal estate\b(?! agenc)/i,
+      `en.${path}`,
+    );
 });
 
 test('nenhum idioma fala em "IA" com o cliente', () => {
@@ -113,13 +130,89 @@ test('nenhum idioma fala em "IA" com o cliente', () => {
       );
 });
 
-test('espanhol e inglês não prometem o que o app não faz (comparar a original, chão completado)', () => {
-  for (const locale of translated)
-    assert.doesNotMatch(translations(locale).faq.enhancement.answer, /original|compar|complet/i);
-  assert.match(translations('es').faq.enhancement.answer, /difuminado/);
-  assert.match(translations('en').faq.enhancement.answer, /blurred/);
-  // O português continua como está: a mudança é só acrescentar os idiomas.
-  assert.match(translations('pt').faq.enhancement.answer, /compara as duas antes de publicar/);
+// O site voltou a falar com imobiliárias (06/11): nenhum texto chama o cliente pelo público
+// genérico de antes ("o seu espaço", "seus espaços", "a sua empresa", "todo tamanho de negócio").
+// A busca é pela palavra, em qualquer forma e caixa; antes dela, saem do texto os usos de hoje que
+// não falam do cliente: a marca d'água de outra empresa, a conta de empresa do Instagram e, no
+// inglês, o plano Business (com maiúscula; "BUSINESS" num rótulo em caixa alta continua pego).
+const oldAudience: Record<Locale, { words: RegExp; allowed: RegExp[] }> = {
+  pt: {
+    words: /(?<!\p{L})(?:espaços?|negócios?|empresas?)(?!\p{L})/iu,
+    allowed: [/marca d'água de outra empresa/g],
+  },
+  es: {
+    words: /(?<!\p{L})(?:espacios?|negocios?|empresas?)(?!\p{L})/iu,
+    allowed: [/\(de empresa o de creador de contenido\)/g, /marca de agua de otra empresa/g],
+  },
+  en: {
+    words: /(?<!\p{L})(?:spaces?|business(?:es)?|compan(?:y|ies))(?!\p{L})/iu,
+    allowed: [/\bBusiness\b/g, /\(business or creator\)/g, /another company's watermark/g],
+  },
+};
+// As promessas antigas da home: a volta não leva 30 segundos (medido no app, são cerca de 2 min
+// por ambiente), e as 8 fotos não são regra (são 12 na lente comum).
+const oldPromises: Record<Locale, RegExp> = {
+  pt: /\b30 segundos\b|com 8 fotos/,
+  es: /\b30 segundos\b|con 8 fotos/,
+  en: /\b30 seconds\b|with 8 photos/,
+};
+/** A palavra do público antigo no texto, ou `undefined`. */
+const oldAudienceIn = (locale: Locale, text: string) => {
+  const { words, allowed } = oldAudience[locale];
+  return allowed.reduce((rest, use) => rest.replace(use, ''), text).match(words)?.[0];
+};
+test('nenhum idioma fala com o público genérico de antes nem repete as promessas antigas', () => {
+  for (const locale of locales)
+    for (const [path, value] of texts(locale)) {
+      assert.equal(oldAudienceIn(locale, value), undefined, `${locale}.${path}: "${value}"`);
+      assert.doesNotMatch(value, oldPromises[locale], `${locale}.${path}: "${value}"`);
+    }
+});
+// Frases do público antigo que a main tinha antes da volta às imobiliárias: o plural, o
+// possessivo, a palavra sozinha e o rótulo em caixa alta.
+test('o guarda do público antigo pega as frases de antes', () => {
+  const before: Record<Locale, string[]> = {
+    pt: [
+      'Compare o que cada plano inclui para capturar e publicar seus espaços.',
+      '1 crédito = 1 ambiente fotografado com o celular. O saldo é da sua empresa.',
+      'tamanho de negócio',
+      'Um espaço costuma ter de 6 a 10 ambientes.',
+      'O PRÓXIMO PASSO DO SEU NEGÓCIO',
+    ],
+    es: [
+      'Compara lo que incluye cada plan para capturar y publicar tus espacios.',
+      '1 crédito = 1 estancia fotografiada con el móvil. El saldo es de tu empresa.',
+      'Planes para negocios',
+      'Un espacio suele tener de 6 a 10 estancias.',
+      'EL PRÓXIMO PASO DE TU NEGOCIO',
+    ],
+    en: [
+      'Compare what each plan includes to capture and publish your spaces.',
+      '1 credit = 1 room photographed with your phone. The balance belongs to your company.',
+      'Plans for businesses',
+      'A space usually has 6 to 10 rooms.',
+      'THE NEXT STEP FOR YOUR BUSINESS',
+      'Spaces per month',
+    ],
+  };
+  for (const locale of locales)
+    for (const text of before[locale])
+      assert.ok(oldAudienceIn(locale, text), `${locale}: o guarda deixa passar "${text}"`);
+});
+
+test('o aprimoramento não promete o que o app não faz (comparar a original, chão completado, móveis)', () => {
+  const answer = (locale: Locale) => translations(locale).faq.enhancement.answer;
+  assert.doesNotMatch(
+    answer('pt'),
+    /compara as duas antes de publicar|completado|sem criar móveis/,
+  );
+  assert.match(answer('pt'), /A foto original fica guardada\./);
+  assert.match(answer('pt'), /No chão, o carimbo com o nome da sua imobiliária\./);
+  assert.doesNotMatch(answer('es'), /sin crear muebles|original|compar|complet/i);
+  assert.match(answer('es'), /difuminado/);
+  // O inglês pode dizer que a foto original fica guardada (é verdade); o "original" fica de fora.
+  assert.doesNotMatch(answer('en'), /without adding furniture|changing finishes|compar|complet/i);
+  assert.match(answer('en'), /On the floor, a stamp with your agency's name\./);
 });
 
 test('cada idioma tem todas as páginas e âncoras; o espanhol mora em /es e o inglês em /en', () => {
@@ -137,6 +230,10 @@ test('cada idioma tem todas as páginas e âncoras; o espanhol mora em /es e o i
     tutorials: '/es/tutoriales',
     terms: '/es/terminos-de-uso',
     privacy: '/es/politica-de-privacidad',
+    products: '/es/productos',
+    productInstagram: '/es/productos/piloto-automatico-para-instagram',
+    productAutochat: '/es/productos/autochat',
+    productVideos: '/es/productos/videos-a-partir-de-fotos',
   });
   // O app aponta para /en/terms-of-use e /en/privacy-policy: não mudar sem mudar o app.
   assert.deepEqual(routes.en.pages, {
@@ -145,15 +242,16 @@ test('cada idioma tem todas as páginas e âncoras; o espanhol mora em /es e o i
     tutorials: '/en/tutorials',
     terms: '/en/terms-of-use',
     privacy: '/en/privacy-policy',
+    products: '/en/products',
+    productInstagram: '/en/products/autopilot-for-instagram',
+    productAutochat: '/en/products/autochat',
+    productVideos: '/en/products/videos-from-photos',
   });
   assert.deepEqual(
     [routes.pt.anchors.quote, routes.es.anchors.quote, routes.en.anchors.quote],
     ['cotacao', 'cotizacion', 'quote'],
   );
-  assert.deepEqual(
-    [routes.en.anchors.howItWorks, routes.en.anchors.faq],
-    ['how-it-works', 'faq'],
-  );
+  assert.deepEqual([routes.en.anchors.howItWorks, routes.en.anchors.faq], ['how-it-works', 'faq']);
   // Cada idioma com o próprio lang, og:locale e código do seletor.
   assert.deepEqual(
     locales.map((locale) => [localeInfo[locale].lang, localeInfo[locale].ogLocale]),
@@ -208,6 +306,47 @@ test('mensagens prontas do WhatsApp no idioma da página, para o mesmo número',
   assert.equal(whatsappLink('x', '#contacto').startsWith('https://wa.me/'), true);
 });
 
+// A faixa de números de uma opção da cotação: "Até 100", "101 a 500", "Mais de 500" e "3", nos
+// três idiomas. Uma opção sem número ("Não sei", "Os dois") não é faixa.
+const quoteRange = (option: string): [number, number] | null => {
+  const upTo = option.match(/^(?:Até|Hasta|Up to) (\d+)$/);
+  if (upTo) return [0, Number(upTo[1])];
+  const between = option.match(/^(\d+) (?:a|to) (\d+)$/);
+  if (between) return [Number(between[1]), Number(between[2])];
+  const over = option.match(/^(?:Mais de|Más de|More than) (\d+)$/);
+  if (over) return [Number(over[1]) + 1, Infinity];
+  const exact = option.match(/^(\d+)$/);
+  if (exact) return [Number(exact[1]), Number(exact[1])];
+  return null;
+};
+
+// A resposta escolhida vai para a mensagem do WhatsApp: com "Até 100" e "100 a 500", quem tem 100
+// contatos cabe nas duas, e a mensagem chega ambígua.
+test('as faixas de número de cada pergunta da cotação não se sobrepõem', () => {
+  const overlapping: string[] = [];
+  for (const locale of locales) {
+    const questions = new Map<string, string[]>();
+    for (const [path, text] of texts(locale)) {
+      const question = path.match(/^(.*\.options)\[\d+\]$/)?.[1];
+      if (question) questions.set(question, [...(questions.get(question) ?? []), text]);
+    }
+    assert.ok(questions.size > 0, `${locale}: as perguntas da cotação`);
+    for (const [question, options] of questions) {
+      const ranges = options
+        .filter((option) => /\d/.test(option))
+        .map((option) => {
+          const range = quoteRange(option);
+          assert.ok(range, `${locale}.${question}: "${option}" não é uma faixa que o teste lê`);
+          return range;
+        })
+        .sort((a, b) => a[0] - b[0]);
+      if (ranges.some(([start], index) => index > 0 && start <= ranges[index - 1][1]))
+        overlapping.push(`${locale}.${question}: ${options.join(' / ')}`);
+    }
+  }
+  assert.deepEqual(overlapping, []);
+});
+
 test('créditos, dias de teste e preços saem de site.ts para todos os idiomas', () => {
   const { freeTrialCredits, freeTrialDays } = site.pricing;
   const pt = translations('pt');
@@ -256,6 +395,9 @@ test('créditos, dias de teste e preços saem de site.ts para todos os idiomas',
 test('títulos e descrições cabem no resultado de busca', () => {
   for (const locale of locales) {
     const t = translations(locale);
+    // As páginas de produto que já têm texto.
+    const productMeta = Object.values(t.productPages).map((page) => page.meta);
+    assert.ok(productMeta.length > 0, `${locale}: páginas de produto`);
     assert.ok(
       t.home.description.length >= 140 && t.home.description.length <= 160,
       `${locale}: ${t.home.description.length}`,
@@ -266,6 +408,8 @@ test('títulos e descrições cabem no resultado de busca', () => {
       t.tutorials.description,
       t.legal.terms.description,
       t.legal.privacy.description,
+      t.productsPage.meta.description,
+      ...productMeta.map((meta) => meta.description),
     ])
       assert.ok(description.length <= 160, `${locale}: ${description}`);
     for (const title of [
@@ -274,6 +418,8 @@ test('títulos e descrições cabem no resultado de busca', () => {
       t.tutorials.title,
       t.legal.terms.title,
       t.legal.privacy.title,
+      t.productsPage.meta.title,
+      ...productMeta.map((meta) => meta.title),
     ])
       assert.match(title, /ARP Vision/);
   }
@@ -392,7 +538,10 @@ test('faixa de sugestão: leva à mesma página e à âncora equivalente no outr
   assert.equal(equivalentHref('pt', 'es', 'home', '#cotacao'), '/es#cotizacion');
   assert.equal(equivalentHref('es', 'en', 'home', '#preguntas'), '/en#faq');
   assert.equal(equivalentHref('en', 'pt', 'home', '#how-it-works'), '/#como-funciona');
-  assert.equal(equivalentHref('en', 'pt', 'privacy', '#content'), '/politica-de-privacidade#conteudo');
+  assert.equal(
+    equivalentHref('en', 'pt', 'privacy', '#content'),
+    '/politica-de-privacidade#conteudo',
+  );
   // Âncora fora do mapa de rotas: sem âncora.
   assert.equal(equivalentHref('pt', 'en', 'home', '#compartilhamento'), '/en');
   assert.equal(equivalentHref('pt', 'en', 'tutorials', '#app-na-tela-de-inicio'), '/en/tutorials');

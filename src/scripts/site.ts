@@ -21,26 +21,70 @@ themeButtons.forEach((button) =>
 systemDark.addEventListener('change', syncThemeButtons);
 syncThemeButtons();
 
-// O vidro do cabeçalho deixa o fundo passar; a escrita acompanha a superfície atrás dele.
+// Na home, o cabeçalho é um vidro transparente com a escrita branca enquanto está sobre a abertura
+// (data-header-surface="opening"). Fora dela, e com o menu do celular aberto, a cápsula fica quase
+// opaca, na cor do tema (global.css). Ele sai de cena junto com a abertura; depois dela, volta
+// quando a pessoa sobe a página e sai quando ela desce.
 const header = document.querySelector<HTMLElement>('.site-header');
 const opening = document.querySelector<HTMLElement>('.opening');
+// Refeito na rolagem, no tamanho da janela e quando o menu do celular abre e fecha.
+let scheduleHeader = () => {};
 if (header && opening) {
+  // Um vai e volta menor que isso (o elástico e a barra de endereço do Safari) não mexe nele.
+  const threshold = 8;
+  // "true": voltou quando a pessoa subiu; "false": saiu de novo quando ela desceu (os dois
+  // deslizam); sem valor: acompanha a abertura.
+  let revealed: 'true' | 'false' | undefined;
+  // Onde começou o movimento atual: o ponto mais alto desde que ele voltou, ou o mais baixo
+  // desde que saiu.
+  let turn = 0;
   let pending = false;
   const updateHeader = () => {
     const top = parseFloat(getComputedStyle(header).top);
     const bottom = top + header.offsetHeight;
+    const menuOpen = document.body.classList.contains('menu-is-open');
+    // Só a rolagem da página conta, sem o elástico além das pontas.
+    const y = Math.min(Math.max(scrollY, 0), document.documentElement.scrollHeight - innerHeight);
     // A cápsula acompanha apenas a abertura, incluindo o leque de fotos.
     // A altura de layout evita realimentar o cálculo com o próprio transform.
     const boundaryBottom = opening.getBoundingClientRect().bottom;
-    const shift = Math.max(-bottom - 1, Math.min(0, boundaryBottom - bottom));
-    header.dataset.headerSurface = boundaryBottom > 0 ? 'opening' : '';
+    if (boundaryBottom >= bottom) {
+      // Ainda sobre a abertura: ele fica no lugar, como sempre.
+      revealed = undefined;
+      turn = y;
+    } else if (menuOpen) {
+      // A página está travada: quem muda o scrollY é o navegador, compensando a altura do
+      // menu, e não a pessoa.
+      turn = y;
+    } else if (revealed === 'true') {
+      turn = Math.min(turn, y);
+      if (y - turn > threshold) {
+        revealed = 'false';
+        turn = y;
+      }
+    } else {
+      turn = Math.max(turn, y);
+      if (turn - y > threshold) {
+        revealed = 'true';
+        turn = y;
+      }
+    }
+    const shift =
+      revealed === 'true' ? 0 : Math.max(-bottom - 1, Math.min(0, boundaryBottom - bottom));
+    const hidden = revealed !== 'true' && boundaryBottom <= 0;
+    // O vidro da abertura vale enquanto ele acompanha a abertura. De volta, ele pode ficar metade
+    // sobre ela e metade sobre a seção seguinte; com o menu aberto, a abertura desce e o menu
+    // fica sobre fundos misturados.
+    header.dataset.headerSurface =
+      revealed !== 'true' && boundaryBottom > 0 && !menuOpen ? 'opening' : '';
     header.dataset.headerBounded = '';
     header.style.setProperty('--header-shift', `${shift}px`);
-    const hidden = boundaryBottom <= 0;
     header.dataset.headerHidden = String(hidden);
     header.inert = hidden;
+    if (revealed) header.dataset.headerRevealed = revealed;
+    else delete header.dataset.headerRevealed;
   };
-  const scheduleHeader = () => {
+  scheduleHeader = () => {
     if (pending) return;
     pending = true;
     requestAnimationFrame(() => {
@@ -67,6 +111,8 @@ const setMenu = (open: boolean) => {
   if (menuLabel) menuLabel.textContent = open ? (menuLabel.dataset.labelClose ?? '') : menuText;
   // Com o menu aberto, a página por trás não rola.
   document.body.classList.toggle('menu-is-open', open);
+  // E a cápsula deixa o vidro da abertura, ainda antes de pintar o menu.
+  scheduleHeader();
 };
 menuButton?.addEventListener('click', () =>
   setMenu(menuButton.getAttribute('aria-expanded') !== 'true'),
@@ -95,7 +141,7 @@ document.addEventListener('click', (event) => {
     if (target.dataset.contactPending === 'true') {
       event.preventDefault();
       contactDialog?.showModal();
-    } else track('cta_whatsapp');
+    } else track('cta_whatsapp', target.dataset.product ? { produto: target.dataset.product } : {});
   }
 });
 contactDialog
@@ -153,22 +199,33 @@ if (floating) {
     .forEach((element) => observer.observe(element));
 }
 
-// Vídeos com data-autoplay tocam só enquanto estão na tela, nunca com movimento reduzido,
-// e respeitam a pausa feita pelo botão.
+// Vídeos com data-autoplay tocam só enquanto estão na tela e, sozinhos, nunca com movimento
+// reduzido. O botão manda em cada vídeo: o que a pessoa pausou fica parado; o que ela pôs para
+// tocar toca mesmo com movimento reduzido, inclusive quando outro vídeo entra ou sai da tela, mas
+// só até ele mesmo sair dela. Na volta, vale de novo o play automático: com movimento reduzido, o
+// vídeo fica parado até outro toque no botão.
 const motion = matchMedia('(prefers-reduced-motion: reduce)');
 const onScreen = new Set<HTMLVideoElement>();
-const pausedByUser = new WeakSet<HTMLVideoElement>();
+// A escolha feita no botão, vídeo a vídeo (o play, só enquanto ele está na tela). Sem ela, vale o
+// play automático.
+const chosen = new WeakMap<HTMLVideoElement, 'play' | 'pause'>();
 const updateVideos = () =>
   document.querySelectorAll<HTMLVideoElement>('video[data-autoplay]').forEach((video) => {
-    if (!motion.matches && onScreen.has(video) && !pausedByUser.has(video))
-      void video.play().catch(() => {});
+    const choice = chosen.get(video) ?? (motion.matches ? 'pause' : 'play');
+    if (onScreen.has(video) && choice === 'play') void video.play().catch(() => {});
     else video.pause();
   });
 const videoObserver = new IntersectionObserver((entries) => {
   entries.forEach((entry) => {
     const video = entry.target as HTMLVideoElement;
     if (entry.isIntersecting) onScreen.add(video);
-    else onScreen.delete(video);
+    else {
+      onScreen.delete(video);
+      // O play à mão acaba quando o vídeo sai da tela. Sem movimento reduzido, nada muda (sem
+      // escolha, ele também toca na tela); com ele, o vídeo volta parado, mesmo que a preferência
+      // tenha sido ligada com ele fora da tela.
+      if (chosen.get(video) === 'play') chosen.delete(video);
+    }
   });
   updateVideos();
 });
@@ -189,10 +246,10 @@ document.querySelectorAll<HTMLButtonElement>('[data-video-toggle]').forEach((but
   };
   button.addEventListener('click', () => {
     if (video.paused) {
-      pausedByUser.delete(video);
-      void video.play();
+      chosen.set(video, 'play');
+      void video.play().catch(() => {});
     } else {
-      pausedByUser.add(video);
+      chosen.set(video, 'pause');
       video.pause();
     }
   });

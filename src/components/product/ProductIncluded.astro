@@ -1,0 +1,35 @@
+---
+// "O que está incluído" de uma página de produto: de seis a oito itens, cada um com um ícone. Os
+// ícones (nomes de Icon.astro) seguem a ordem dos itens, e listas de tamanhos diferentes param o
+// build. No desktop, quatro por linha; seis itens ficam em duas linhas de três, sem linha pela
+// metade.
+import Icon from '../Icon.astro';
+import { pairByPosition } from '../../lib/products';
+interface Props {
+  title: string;
+  items: { title: string; text: string }[];
+  icons: string[];
+}
+const { title, items, icons } = Astro.props;
+const entries = pairByPosition('ProductIncluded', items, icons);
+const inThrees = items.length % 4 !== 0 && items.length % 3 === 0;
+---
+
+<section class="section product-included-section" aria-labelledby="included-title">
+  <div class="container">
+    <div class="section-heading center">
+      <h2 id="included-title">{title}</h2>
+    </div>
+    <ul class:list={['product-included', { 'is-in-threes': inThrees }]} role="list">
+      {entries.map(([item, icon]) => (
+        <li>
+          <span class="icon-tile">
+            <Icon name={icon} size={22} />
+          </span>
+          <h3>{item.title}</h3>
+          <p>{item.text}</p>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>

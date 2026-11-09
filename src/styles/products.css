@@ -1,0 +1,2204 @@
+/* Menu "Produtos" do cabeçalho: o botão do desktop, o painel de vidro (irmão da cápsula) e o
+   grupo dentro do menu do celular. */
+
+/* O botão tem a altura dos links ao lado, sem a borda e o padding do navegador: 24px de linha
+   e 12px em cima e embaixo dão 48px (a checagem de cabeçalho em uma linha reprova acima de 50). */
+.products-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  line-height: 1.6;
+  box-shadow: inset 0 -2px 0 transparent;
+  transition:
+    color 0.15s,
+    box-shadow 0.15s;
+}
+.products-toggle svg,
+.mobile-products-toggle svg {
+  transition: transform 0.2s;
+}
+.products-toggle[aria-expanded='true'] svg,
+.mobile-products-toggle[aria-expanded='true'] svg {
+  transform: rotate(180deg);
+}
+/* Como os links: cor da marca no hover e na página de um produto, com o traço embaixo. Aberto,
+   só o traço. */
+.products-toggle:hover,
+.products-toggle.is-current {
+  color: var(--brand-blue-dark);
+}
+.products-toggle:hover,
+.products-toggle.is-current,
+.products-toggle[aria-expanded='true'] {
+  box-shadow: inset 0 -2px 0 currentColor;
+}
+/* Sobre a abertura escura da home o azul some, e o ponteiro fica no botão enquanto o painel está
+   aberto: ali ele mantém a cor do cabeçalho. */
+.site-header[data-header-surface='opening'] .products-toggle {
+  color: inherit;
+}
+
+/* Painel do desktop: embaixo do botão (o script põe a posição em --products-left), com uma
+   coluna por grupo. */
+.products-panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: var(--products-left, 0px);
+  max-width: 100%;
+}
+.products-surface {
+  --glass-radius: 22px;
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+  color: var(--text-strong);
+}
+.products-panel .products-groups {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 256px;
+  gap: 16px;
+}
+.products-group ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.products-group-title {
+  margin: 0;
+  padding: 6px 10px;
+  color: var(--text-secondary);
+  font-size: var(--fs-label);
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+.products-item {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+  padding: 10px;
+  border-radius: 14px;
+  transition: background 0.15s;
+}
+.products-item:hover,
+.products-item[aria-current] {
+  background: color-mix(in srgb, var(--brand-blue-soft) 75%, transparent);
+}
+.products-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--brand-blue-soft);
+  color: var(--accent);
+}
+.products-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 8px;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  line-height: 1.4;
+}
+.products-line {
+  display: block;
+  margin-top: 2px;
+  color: var(--text-secondary);
+  font-size: var(--fs-note);
+  line-height: 1.45;
+}
+/* Selo "Novo": produto novo, e não "em breve". */
+.products-badge {
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--brand-blue-soft);
+  color: var(--brand-blue-dark);
+  font-size: var(--fs-label);
+  font-weight: 650;
+  line-height: 1.6;
+}
+.products-all {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: 8px;
+  min-height: 44px;
+  padding-inline: 10px;
+  color: var(--brand-blue-dark);
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+.products-all:hover,
+.products-all[aria-current] {
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+
+@media (max-width: 1023px) {
+  /* Abaixo de 1024px os produtos ficam no menu do celular. */
+  .products-panel {
+    display: none;
+  }
+  .mobile-products {
+    border-bottom: 1px solid var(--line);
+  }
+  /* O menu do celular fica dentro da cápsula: a cor vem dela (branca sobre a abertura da home). */
+  .mobile-products-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-height: 50px;
+    padding: 12px 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font-size: 1rem;
+    text-align: left;
+  }
+  .mobile-products-toggle.is-current {
+    color: var(--brand-blue-dark);
+    font-weight: 600;
+  }
+  .mobile-products-list {
+    padding-bottom: 10px;
+  }
+  .mobile-products-list .products-group-title {
+    padding-inline: 0;
+  }
+  .mobile-products-list .products-group-title,
+  .mobile-products-list .products-line {
+    color: color-mix(in srgb, currentColor 72%, transparent);
+  }
+  /* Ganha das regras dos links do menu (global.css), que são linhas com borda embaixo. */
+  .mobile-nav .mobile-products-list .products-item {
+    display: grid;
+    align-items: center;
+    min-height: 48px;
+    padding: 6px 0;
+    border-bottom: 0;
+  }
+  .mobile-nav .mobile-products-list .products-item:hover,
+  .mobile-nav .mobile-products-list .products-item[aria-current] {
+    background: none;
+  }
+  /* O item da página fica no azul dos links atuais: a linha dele vai na cor cheia, porque o azul
+     esmaecido não chega a 4,5:1. */
+  .mobile-nav .mobile-products-list .products-item[aria-current] .products-line {
+    color: inherit;
+  }
+  .mobile-nav .mobile-products-list .products-all {
+    display: inline-flex;
+    min-height: 44px;
+    padding: 0;
+    border-bottom: 0;
+    color: inherit;
+    font-size: var(--fs-small);
+  }
+}
+
+/* Páginas de produto (/produtos/<produto>): o topo com a tela de exemplo, a dor, os passos, as
+   artes, o que está incluído, a comparação e o "Conheça também". */
+
+/* Telas de exemplo: HTML e CSS com as fotos da casa de demonstração, fora do leitor de tela
+   (que ouve a descrição logo antes) e sempre com a etiqueta "Exemplo" à vista. As cores das
+   telas seguem o tema; as das artes são as do post, iguais nos dois temas. */
+.example-figure {
+  position: relative;
+  min-width: 0;
+}
+.example-screen {
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  color: var(--text-strong);
+  line-height: 1.4;
+}
+.example-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: var(--text-strong);
+  color: var(--surface);
+  font-size: var(--fs-label);
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  line-height: 1.5;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Topo: o texto à esquerda e a tela à direita; abaixo de 1024px, a tela vem depois do texto. */
+.product-hero .eyebrow {
+  flex-wrap: wrap;
+}
+.product-hero .products-badge {
+  letter-spacing: 0.02em;
+}
+.product-hero-lead {
+  max-width: 560px;
+  margin-bottom: 32px;
+  font-size: 1.125rem;
+}
+.product-hero-note {
+  margin: 16px 0 0;
+  color: var(--text-muted);
+  font-size: var(--fs-small);
+}
+
+/* O calendário de duas semanas: um post ou story por dia marcado, com a marca de aprovado ou
+   esperando, e o "Aprovar tudo". */
+.calendar-mock {
+  padding: 18px;
+}
+.calendar-head,
+.calendar-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 14px;
+}
+.calendar-head {
+  margin-bottom: 14px;
+}
+.calendar-period {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+.calendar-period svg {
+  color: var(--accent);
+}
+.calendar-weekdays,
+.calendar-week {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+.calendar-weekdays {
+  margin-bottom: 6px;
+  color: var(--text-secondary);
+  font-size: var(--fs-label);
+  font-weight: 600;
+  text-align: center;
+}
+.calendar-week + .calendar-week {
+  margin-top: 6px;
+}
+.calendar-day {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 3px;
+  aspect-ratio: 4 / 5.4;
+  padding: 4px;
+  border-radius: 10px;
+  background: var(--bg-section);
+}
+.calendar-date {
+  padding-left: 2px;
+  color: var(--text-secondary);
+  font-size: var(--fs-label);
+  font-weight: 600;
+  line-height: 1.3;
+}
+.calendar-post {
+  position: relative;
+  display: block;
+  min-height: 0;
+  border-radius: 7px;
+}
+.calendar-post > img,
+.calendar-text-post {
+  width: 100%;
+  height: 100%;
+  border-radius: 7px;
+  object-fit: cover;
+}
+.calendar-text-post {
+  display: grid;
+  place-items: center;
+  background: var(--brand-blue);
+  color: var(--white);
+}
+/* O story leva um anel, como no Instagram, e o nome por cima no desktop. */
+.calendar-post.is-story {
+  box-shadow:
+    0 0 0 2px var(--bg-section),
+    0 0 0 4px var(--accent);
+}
+.calendar-story {
+  position: absolute;
+  left: 50%;
+  bottom: 4px;
+  transform: translateX(-50%);
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--white);
+  font-size: var(--fs-label);
+  font-weight: 600;
+  line-height: 1.5;
+}
+.calendar-mark {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--status-warning);
+  color: var(--ink);
+}
+.calendar-mark.is-approved {
+  background: var(--status-success);
+  color: var(--white);
+}
+.calendar-post .calendar-mark {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  box-shadow: 0 0 0 2px var(--bg-section);
+}
+.calendar-foot {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  font-size: var(--fs-note);
+}
+.calendar-legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+.calendar-foot .calendar-legend + .calendar-legend {
+  margin-right: auto;
+}
+.calendar-approve {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: var(--brand-blue);
+  color: var(--white);
+  font-weight: 600;
+}
+
+/* A dor: o título com o fim que troca, o texto e, ao lado, o perfil parado. */
+.product-pain {
+  background: var(--bg-section);
+}
+.product-pain-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  gap: 72px;
+  align-items: center;
+}
+/* Os trechos ficam um sobre o outro: o título tem a altura do maior e não pula ao trocar. */
+.rotating-phrase {
+  display: inline-grid;
+  color: var(--accent);
+}
+.rotating-phrase > span {
+  grid-area: 1 / 1;
+  transition:
+    opacity 0.35s ease,
+    visibility 0.35s;
+}
+.rotating-phrase > span:not(.is-active) {
+  visibility: hidden;
+  opacity: 0;
+}
+.pain-after {
+  margin-bottom: 10px;
+  color: var(--text-strong);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+.product-pain-copy > p:last-child {
+  max-width: 520px;
+  margin-bottom: 0;
+  font-size: 1.0625rem;
+}
+.profile-mock {
+  justify-self: center;
+  width: min(100%, 400px);
+  padding: 22px;
+}
+.profile-head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+}
+.profile-avatar {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: var(--brand-blue-soft);
+  color: var(--accent);
+  box-shadow:
+    0 0 0 3px var(--surface),
+    0 0 0 5px var(--border);
+}
+.profile-name {
+  display: grid;
+  min-width: 0;
+}
+.profile-name strong {
+  overflow-wrap: anywhere;
+}
+.profile-name span {
+  color: var(--text-secondary);
+  font-size: var(--fs-note);
+}
+.profile-last {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: 18px 0 14px;
+  padding: 4px 11px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--status-warning) 22%, var(--surface));
+  font-size: var(--fs-note);
+  font-weight: 600;
+}
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+}
+/* A primeira linha, onde estariam os posts do mês, está vazia; os de junho ficam apagados. */
+.profile-empty,
+.profile-grid img {
+  aspect-ratio: 4 / 5;
+  border-radius: 6px;
+}
+.profile-empty {
+  border: 1.5px dashed var(--border);
+}
+.profile-grid img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  filter: grayscale(0.75);
+  opacity: 0.5;
+}
+
+/* Como funciona: os passos em ordem, cada um com a sua tela pequena. No desktop, cada cartão ocupa
+   as quatro linhas da grade (subgrid): a tela, o número, o título e o texto se alinham entre os
+   três. A tela fica em cima, embora venha depois do texto no HTML. */
+.product-steps,
+.product-included,
+.post-gallery,
+.also-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.product-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: 24px;
+}
+.product-steps > li {
+  display: grid;
+  grid-row: span 4;
+  grid-template-rows: subgrid;
+  row-gap: 0;
+}
+.product-steps .example-figure {
+  display: flex;
+  flex-direction: column;
+  grid-row: 1;
+  margin-bottom: 24px;
+}
+.product-steps .product-step-number {
+  grid-row: 2;
+}
+.product-steps h3 {
+  grid-row: 3;
+}
+.product-steps > li > p {
+  grid-row: 4;
+}
+.product-steps > li,
+.product-included > li {
+  padding: 28px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--surface);
+}
+.product-step-number {
+  display: inline-grid;
+  place-items: center;
+  width: 43px;
+  height: 43px;
+  margin-bottom: 20px;
+  border-radius: 50%;
+  background: var(--brand-blue-soft);
+  color: var(--accent);
+  font-size: 0.8125rem;
+  font-weight: 650;
+}
+.product-steps h3,
+.product-included h3 {
+  margin-bottom: 8px;
+  font-size: 1.125rem;
+}
+.product-steps > li > p,
+.product-included p {
+  margin: 0;
+  font-size: var(--fs-small);
+}
+
+/* As telas dos passos: a etiqueta no alto, à direita, e o conteúdo no meio da altura. No desktop,
+   as três têm a altura da maior. Os "botões" são span, como em toda tela de exemplo. */
+.step-mock {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 16px;
+  font-size: var(--fs-note);
+}
+.step-mock-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.step-mock-head .example-tag {
+  margin-left: auto;
+}
+.step-mock-body {
+  display: grid;
+  gap: 12px;
+  margin-block: auto;
+}
+.step-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 13px;
+  border: 1px solid var(--brand-blue);
+  border-radius: 8px;
+  background: var(--brand-blue);
+  color: var(--white);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.step-button.is-secondary {
+  border-color: var(--border);
+  background: var(--surface);
+  color: var(--text-strong);
+}
+.step-check {
+  display: inline-grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--status-success);
+  color: var(--white);
+}
+/* Passo 1: o campo com o endereço e o botão; embaixo, o que a leitura achou no site. */
+.site-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 5px 5px 12px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: var(--bg-section);
+}
+.site-address {
+  display: inline-flex;
+  flex: 1;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  color: var(--text-strong);
+  font-weight: 600;
+}
+.site-address svg {
+  color: var(--accent);
+}
+/* O endereço fica numa linha, como num campo de verdade: nunca quebra no meio. */
+.site-url {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.site-found {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-strong);
+  font-weight: 600;
+}
+.site-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.site-logo {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: var(--brand-blue);
+  color: var(--white);
+}
+.site-colors {
+  display: flex;
+  gap: 5px;
+}
+.site-colors > span {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--brand-blue);
+  box-shadow: 0 0 0 1px var(--border);
+}
+.site-colors > span:nth-child(2) {
+  background: #13233f;
+}
+.site-colors > span:nth-child(3) {
+  background: var(--status-warning);
+}
+/* As miniaturas dos imóveis encolhem quando a tela é estreita. */
+.site-listings {
+  display: flex;
+  flex: 0 1 auto;
+  gap: 5px;
+  min-width: 0;
+  margin-left: auto;
+}
+.site-listings img {
+  flex: 0 1 34px;
+  width: 34px;
+  min-width: 0;
+  height: 42px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+/* Passo 2: a mesma casa em três estilos; o escolhido leva o anel e o nome embaixo. As artes têm as
+   cores de um post, iguais nos dois temas. */
+.styles-row {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
+}
+.style-option {
+  display: grid;
+  justify-items: center;
+  gap: 9px;
+}
+.style-art {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border-radius: 9px;
+  background: var(--ink);
+}
+.style-art img {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.style-lines {
+  display: grid;
+  gap: 4px;
+  padding: 8px;
+}
+.style-lines > span {
+  width: 82%;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--white);
+}
+.style-lines > span + span {
+  width: 52%;
+  opacity: 0.75;
+}
+/* Véu: a foto inteira, escurecida embaixo. */
+.style-veil .style-art::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    to bottom,
+    transparent 40%,
+    color-mix(in srgb, var(--ink) 88%, transparent)
+  );
+}
+/* Moldura e cartão: a foto dentro da cor da marca ou do fundo claro, com o texto embaixo dela. */
+.style-frame .style-art,
+.style-card .style-art {
+  padding: 5px 5px 0;
+}
+.style-frame .style-art {
+  background: var(--brand-blue);
+}
+/* O cartão claro leva um contorno: sem ele, some sobre a tela branca do tema claro. */
+.style-card .style-art {
+  background: #eef3ff;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 14%, transparent);
+}
+.style-frame .style-art img,
+.style-card .style-art img {
+  position: static;
+  flex: 1;
+  min-height: 0;
+  border-radius: 5px;
+}
+.style-frame .style-lines,
+.style-card .style-lines {
+  padding: 7px 3px 8px;
+}
+.style-card .style-lines > span {
+  background: var(--ink);
+}
+.style-option.is-chosen .style-art {
+  box-shadow:
+    0 0 0 2px var(--surface),
+    0 0 0 4px var(--accent);
+}
+.style-chosen {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--accent);
+  font-size: var(--fs-label);
+  font-weight: 650;
+  white-space: nowrap;
+}
+/* Passo 3: o mês em miniatura e os dois botões. O título do mês é o mesmo das telas dos Vídeos. */
+.month-title,
+.step-mock-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-strong);
+  font-weight: 600;
+}
+.month-title svg,
+.step-mock-title > svg {
+  color: var(--accent);
+}
+.month-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+}
+.month-day {
+  aspect-ratio: 5 / 4;
+  overflow: hidden;
+  border-radius: 5px;
+  background: var(--bg-section);
+}
+.month-day img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.month-day.is-text {
+  background: var(--brand-blue);
+}
+.month-actions,
+.step-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.month-actions .step-button,
+.step-actions .step-button {
+  flex: 1 1 auto;
+}
+
+/* As telas dos passos dos Vídeos. Passo 1: as quatro fotos enviadas, cada uma com o visto. */
+.photos-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.photo-sent {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  border-radius: 8px;
+  background: var(--bg-section);
+}
+.photo-sent img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.photo-sent .step-check {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  box-shadow: 0 0 0 2px var(--surface);
+}
+/* Passo 2: as mesmas fotos na fila das cenas, numeradas na ordem da visita. */
+.scenes-list {
+  gap: 6px;
+}
+.scene {
+  display: grid;
+  grid-template-columns: auto 64px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+}
+.scene-number {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--brand-blue-soft);
+  color: var(--accent);
+  font-weight: 650;
+}
+.scene img {
+  width: 64px;
+  height: 36px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+.scene-name {
+  min-width: 0;
+  color: var(--text-strong);
+  font-weight: 600;
+}
+/* Passo 3: as duas versões do vídeo, com os selos da proporção e do arquivo, e os botões. As
+   miniaturas têm a mesma altura, numa coluna da largura da horizontal. */
+.delivery-files {
+  display: grid;
+  gap: 8px;
+}
+.delivery-file {
+  display: grid;
+  grid-template-columns: 78px auto auto;
+  justify-content: start;
+  align-items: center;
+  gap: 10px;
+}
+.delivery-thumb {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+.delivery-thumb img {
+  width: 78px;
+  height: 44px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+.delivery-vertical .delivery-thumb img {
+  width: 25px;
+}
+.delivery-thumb svg {
+  position: absolute;
+  color: var(--white);
+  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.6));
+}
+.delivery-badge {
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: var(--bg-section);
+  color: var(--text-strong);
+  font-weight: 650;
+  white-space: nowrap;
+}
+.delivery-badge.is-file {
+  background: var(--brand-blue-soft);
+  color: var(--accent);
+}
+
+/* As artes: posts 4:5 e o story 9:16, que fica com a altura dos posts. As linhas que não fecham
+   ficam no centro. */
+.post-gallery-section {
+  background: var(--bg-section);
+}
+.post-gallery {
+  --gallery-gap: 20px;
+  --gallery-columns: 4;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--gallery-gap);
+}
+.post-gallery > li {
+  display: flex;
+  justify-content: center;
+  flex: 0 0
+    calc((100% - (var(--gallery-columns) - 1) * var(--gallery-gap)) / var(--gallery-columns));
+  aspect-ratio: 4 / 5;
+}
+.post-art {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  padding: 12px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 16px;
+  background: var(--ink);
+  box-shadow: var(--shadow);
+  color: var(--white);
+  line-height: 1.3;
+}
+.post-art-story {
+  width: auto;
+  aspect-ratio: 9 / 16;
+}
+.post-art-image {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* Véu escuro embaixo da foto: o texto branco fica legível em qualquer recorte. */
+.post-art-photo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--ink) 30%, transparent),
+    transparent 26%,
+    transparent 38%,
+    color-mix(in srgb, var(--ink) 90%, transparent) 74%
+  );
+}
+/* No celular, o título e os dados do imóvel sobem para a parte clara do véu, e a foto atrás deles
+   pode ser clara (a 390 px, o título de "Para alugar" tinha mais da metade dos traços abaixo de
+   4,5:1). Uma sombra escura em volta das letras, justa e depois larga, os mantém legíveis sobre
+   qualquer recorte. */
+.post-art-photo :is(.post-art-title, .post-art-details, .post-art-whatsapp) {
+  text-shadow:
+    0 0 2px color-mix(in srgb, var(--ink) 70%, transparent),
+    0 1px 4px color-mix(in srgb, var(--ink) 50%, transparent),
+    0 0 14px color-mix(in srgb, var(--ink) 40%, transparent);
+}
+.post-art-blue {
+  background: var(--brand-blue);
+}
+.post-art-light {
+  background: #eef3ff;
+  color: var(--ink);
+}
+/* A etiqueta da arte segue as cores do post, e não as do tema: escura sobre qualquer fundo. */
+.post-art .example-tag {
+  align-self: flex-start;
+  background: var(--ink);
+  color: var(--white);
+}
+/* A barra de progresso do story, como no Instagram. */
+.post-art-story::before {
+  content: '';
+  height: 3px;
+  margin-bottom: 8px;
+  border-radius: 3px;
+  background: linear-gradient(
+    to right,
+    var(--white) 45%,
+    color-mix(in srgb, var(--white) 40%, transparent) 45%
+  );
+}
+.post-art-icon {
+  margin-top: 18px;
+  opacity: 0.9;
+}
+.post-art-body {
+  display: grid;
+  gap: 5px;
+  margin-top: auto;
+}
+.post-art-kind {
+  justify-self: start;
+  padding: 1px 8px;
+  border-radius: 6px;
+  background: var(--brand-blue);
+  color: var(--white);
+  font-size: var(--fs-label);
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+.post-art-blue .post-art-kind {
+  background: var(--white);
+  color: var(--brand-blue-deep);
+}
+.post-art-title {
+  font-size: clamp(0.875rem, 1.3vw, 1.125rem);
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+.post-art-details,
+.post-art-whatsapp,
+.post-art-footer {
+  font-size: var(--fs-label);
+}
+.post-art-whatsapp {
+  display: grid;
+  gap: 1px;
+  font-weight: 600;
+}
+.post-art-whatsapp-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+/* O número vai inteiro na linha de baixo: nunca quebra no hífen nem nos espaços. */
+.post-art-number {
+  font-size: var(--fs-note);
+  font-weight: 650;
+  white-space: nowrap;
+}
+.post-art-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0 8px;
+  margin-top: 10px;
+  padding-top: 7px;
+  border-top: 1px solid color-mix(in srgb, currentColor 35%, transparent);
+  line-height: 1.4;
+}
+.post-art-agency {
+  font-weight: 650;
+}
+
+/* O que está incluído. */
+.product-included {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+}
+@media (min-width: 1024px) {
+  .product-included.is-in-threes {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.product-included > li {
+  padding: 24px;
+}
+.product-included .icon-tile {
+  margin-bottom: 18px;
+}
+
+/* A comparação: a coluna da ARP Vision em destaque. No celular, cada linha vira um cartão, e
+   cada valor leva o nome da coluna. */
+.product-comparison {
+  width: 100%;
+  max-width: 980px;
+  margin-inline: auto;
+  border: 1px solid var(--line);
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 18px;
+  overflow: hidden;
+  background: var(--surface);
+  font-size: var(--fs-small);
+}
+.product-comparison th,
+.product-comparison td {
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+.product-comparison tbody tr:last-child > * {
+  border-bottom: 0;
+}
+.product-comparison th {
+  color: var(--text-strong);
+  font-weight: 650;
+}
+.product-comparison tbody th {
+  width: 25%;
+}
+.product-comparison td {
+  color: var(--text-secondary);
+}
+.product-comparison .is-ours {
+  background: var(--blue-wash);
+  color: var(--text-strong);
+  font-weight: 600;
+}
+.product-comparison thead .is-ours {
+  color: var(--brand-blue-dark);
+}
+.comparison-column {
+  display: none;
+}
+
+/* Conheça também: os outros produtos no ar. A faixa de produtos da home usa os mesmos cartões, no
+   fundo das seções vizinhas (o Presencial e a cotação). */
+.also-products,
+.products-strip {
+  padding-block: 72px;
+}
+.also-products h2,
+.products-strip h2 {
+  margin-bottom: 28px;
+  font-size: clamp(1.6rem, 2.4vw, 2rem);
+}
+.products-strip {
+  background: var(--bg-base);
+}
+.also-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+.also-card {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  height: 100%;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface);
+  transition: border-color 0.18s;
+}
+.also-card:hover {
+  border-color: var(--accent);
+}
+.also-card > svg {
+  color: var(--accent);
+}
+
+/* Vídeos a partir de fotos. O topo leva o par de vídeos, que pede mais largura que as outras
+   telas: a partir de 1200px ele fica ao lado do texto, numa coluna mais larga, e antes disso vai
+   para baixo dele. Os dois ficam lado a lado, nas larguras em que o selo "Exemplo" gravado em cada
+   um sai do mesmo tamanho (26px num quadro de 720 e 39px num de 1280: 27 para 32), com uns 10px
+   de letra ou mais; no celular, o vertical fica em cima do horizontal. Cada vídeo leva no canto o
+   botão de tocar e pausar (global.css). */
+@media (min-width: 1200px) {
+  .product-hero-wide .hero-grid {
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  }
+}
+@media (max-width: 1199px) {
+  .product-hero-wide .hero-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 44px;
+  }
+  .product-hero-wide .product-hero-mock {
+    width: min(100%, 760px);
+  }
+}
+.video-pair {
+  display: grid;
+  grid-template-columns: minmax(0, 27fr) minmax(0, 32fr);
+  align-items: center;
+  gap: 24px;
+}
+.video-example {
+  position: relative;
+  min-width: 0;
+}
+.video-example video {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 18px;
+  background: var(--ink);
+  box-shadow: var(--shadow);
+  object-fit: cover;
+}
+.video-example-vertical video {
+  aspect-ratio: 9 / 16;
+}
+.video-example-horizontal video {
+  aspect-ratio: 16 / 9;
+}
+/* Os formatos: o desenho de cada um em cima do nome. Os desenhos não mudam com o tema: o final
+   tem o fundo do cartão dos vídeos. */
+.video-formats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.video-formats > li {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 20px;
+  padding: 28px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--surface);
+  text-align: center;
+}
+.video-formats h3 {
+  margin: 0;
+  font-size: 1.125rem;
+}
+.format-stage {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 150px;
+}
+.format-frame {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 6px;
+  border-radius: 12px;
+  background: var(--brand-blue);
+  color: var(--white);
+  font-size: var(--fs-note);
+  font-weight: 650;
+}
+.format-vertical {
+  width: 84px;
+  height: 150px;
+}
+.format-horizontal,
+.format-ending {
+  width: min(100%, 240px);
+  aspect-ratio: 16 / 9;
+}
+.format-ending {
+  gap: 8px;
+  background: #071a4d;
+}
+.format-logo {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: var(--white);
+  color: var(--brand-blue);
+}
+.format-lines {
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+}
+.format-lines > span {
+  width: 92px;
+  height: 6px;
+  border-radius: 3px;
+  background: rgb(255 255 255 / 0.85);
+}
+.format-lines > span + span {
+  width: 58px;
+  background: rgb(255 255 255 / 0.5);
+}
+.format-pill {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 20px;
+  border-radius: 999px;
+  background: var(--brand-blue);
+}
+
+/* Autochat. A dor não tem tela ao lado: o texto fica sozinho, no centro. */
+.product-pain-grid.is-alone {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 860px;
+  text-align: center;
+}
+.product-pain-grid.is-alone .eyebrow {
+  justify-content: center;
+}
+.product-pain-grid.is-alone .product-pain-copy > p:last-child {
+  margin-inline: auto;
+}
+/* Quatro passos: os quatro lado a lado no desktop, como os três das outras páginas, com menos
+   respiro em volta das telas; de 1024 a 1199px, menos ainda, e um vão menor entre os cartões. */
+@media (min-width: 1024px) {
+  .product-steps.is-in-fours {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .product-steps.is-in-fours > li {
+    padding: 22px;
+  }
+  .is-in-fours .step-mock {
+    padding: 14px;
+  }
+}
+@media (min-width: 1024px) and (max-width: 1199px) {
+  .product-steps.is-in-fours {
+    column-gap: 16px;
+  }
+  .product-steps.is-in-fours > li {
+    padding: 18px;
+  }
+  .is-in-fours .step-mock {
+    padding: 12px;
+  }
+}
+
+/* O topo: a conversa, numa janela com o cabeçalho do contato, e o resumo para a corretora ao lado,
+   encostado no fim dela e um pouco por cima, com a etiqueta no canto de cima. As cores seguem o
+   tema: a mensagem da cliente vai no azul claro, e as do atendimento automático, no fundo da tela. */
+.chat-mock {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.62fr);
+  grid-template-rows: auto 1fr;
+  grid-template-areas:
+    'window tag'
+    'window summary';
+  align-items: end;
+  padding: 16px;
+  font-size: var(--fs-note);
+}
+.chat-mock > .example-tag {
+  grid-area: tag;
+  align-self: start;
+  justify-self: end;
+}
+.chat-mock-window {
+  display: grid;
+  grid-area: window;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--bg-section);
+}
+.chat-mock-header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+}
+.chat-mock-window > .chat-mock-header {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+.chat-mock-avatar {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--brand-blue);
+  color: var(--white);
+}
+.chat-mock-contact {
+  display: grid;
+  min-width: 0;
+  line-height: 1.3;
+}
+.chat-mock-contact strong {
+  color: var(--text-strong);
+}
+.chat-mock-contact span {
+  color: var(--text-secondary);
+  font-size: var(--fs-label);
+}
+.chat-mock-thread {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: 12px 10px 14px;
+}
+/* A apresentação do atendimento automático, como na tela 2 aprovada: um aviso no alto da conversa,
+   centralizado e sem hora, como os do próprio WhatsApp, com o fundo translúcido sobre o da
+   conversa. Assim a imobiliária não parece escrever antes da cliente. */
+.chat-mock-notice {
+  justify-self: center;
+  max-width: 92%;
+  padding: 5px 10px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--border) 40%, transparent);
+  color: var(--text-secondary);
+  font-size: var(--fs-label);
+  line-height: 1.4;
+  text-align: center;
+}
+.chat-mock-bubble {
+  display: grid;
+  gap: 6px;
+  justify-self: start;
+  max-width: 88%;
+  padding: 8px 10px 6px;
+  border: 1px solid var(--line);
+  border-radius: 4px 14px 14px;
+  background: var(--surface);
+  color: var(--text-strong);
+}
+.chat-mock-bubble.is-client {
+  justify-self: end;
+  border-color: transparent;
+  border-radius: 14px 4px 14px 14px;
+  background: var(--brand-blue-soft);
+}
+.chat-mock-time {
+  justify-self: end;
+  color: var(--text-secondary);
+  font-size: var(--fs-label);
+  line-height: 1.2;
+}
+.chat-mock-summary {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-area: summary;
+  gap: 6px;
+  margin: 0 0 18px -28px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  color: var(--text-strong);
+}
+.chat-mock-visit {
+  color: var(--text-secondary);
+}
+/* O título do resumo para a corretora, no topo, no passo 4 e em "O que o corretor recebe". */
+.summary-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--brand-teal-dark);
+  font-size: var(--fs-label);
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+.summary-title svg {
+  flex-shrink: 0;
+}
+/* O cartão do imóvel, na conversa e no passo 3: a foto, os dados, a licença e o botão do tour. */
+.listing-card {
+  display: grid;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--bg-section);
+}
+.listing-card img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+.listing-body {
+  display: grid;
+  justify-items: start;
+  gap: 2px;
+  padding: 10px 10px 12px;
+}
+.listing-title,
+.listing-price {
+  color: var(--text-strong);
+}
+.listing-price {
+  font-weight: 600;
+}
+.listing-details,
+.listing-license {
+  color: var(--text-secondary);
+  font-size: var(--fs-label);
+}
+.listing-distance {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 5px;
+  margin-top: 2px;
+  color: var(--text-strong);
+  font-size: var(--fs-label);
+  font-weight: 600;
+}
+.listing-distance svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--accent);
+}
+.listing-tour {
+  margin-top: 8px;
+  padding: 6px 11px;
+  font-size: var(--fs-label);
+}
+/* Passo 2: as fichas do que a cliente procura. */
+.wish-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.wish-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--brand-blue-soft);
+  color: var(--text-strong);
+  font-weight: 600;
+}
+.wish-chip svg {
+  color: var(--accent);
+}
+/* O resumo para a corretora: inteiro em "O que o corretor recebe" e só o começo no passo 4, com a
+   etiqueta em cima do título e as linhas sumindo embaixo. */
+.summary-mock:not(.step-mock) {
+  display: grid;
+  gap: 16px;
+  justify-self: center;
+  width: min(100%, 440px);
+  padding: 22px;
+  font-size: var(--fs-small);
+}
+.summary-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+}
+.summary-mock.is-start .summary-head .example-tag {
+  order: -1;
+  margin-left: auto;
+}
+.summary-mock.is-start .summary-title {
+  flex-basis: 100%;
+}
+.summary-rows {
+  display: grid;
+  gap: 10px;
+}
+.summary-mock.is-start .summary-rows {
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 44px), transparent);
+}
+.summary-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 10px;
+  color: var(--text-strong);
+}
+.summary-row:first-child .summary-text {
+  font-weight: 650;
+}
+.summary-row.is-link {
+  color: var(--accent);
+  font-weight: 600;
+}
+.summary-row.is-link > svg {
+  margin-top: 4px;
+}
+.summary-icon {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: var(--brand-blue-soft);
+  color: var(--accent);
+}
+.summary-text {
+  display: grid;
+  min-width: 0;
+  padding-top: 2px;
+}
+.summary-detail {
+  color: var(--text-secondary);
+  font-size: var(--fs-label);
+  font-weight: 400;
+}
+.summary-phone {
+  white-space: nowrap;
+}
+/* As seções próprias, com a tela ao lado do texto: "Perto do que importa" (as distâncias à direita)
+   e "O que o corretor recebe" (o resumo à esquerda, no desktop). */
+.product-proximity {
+  background: var(--bg-section);
+}
+.product-feature-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 72px;
+  align-items: center;
+}
+.product-feature-grid.is-reversed > .example-figure {
+  order: -1;
+}
+.product-feature-copy > p:not(.product-feature-note) {
+  max-width: 540px;
+  font-size: 1.0625rem;
+}
+.product-feature-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  max-width: 540px;
+  margin-bottom: 0;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  font-size: var(--fs-small);
+}
+.product-feature-note svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--accent);
+}
+.product-feature-list {
+  display: grid;
+  gap: 12px;
+  margin: 24px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.product-feature-list li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+  color: var(--text-strong);
+  font-size: 1.0625rem;
+}
+.product-feature-list svg {
+  margin-top: 4px;
+  color: var(--accent);
+}
+/* As distâncias do imóvel de exemplo: um lugar por linha, com o alfinete. */
+.distance-mock {
+  display: grid;
+  gap: 16px;
+  justify-self: center;
+  width: min(100%, 440px);
+  padding: 22px;
+}
+.distance-head {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+}
+.distance-head img {
+  width: 72px;
+  height: 48px;
+  border-radius: 10px;
+  object-fit: cover;
+}
+.distance-listing {
+  display: grid;
+  min-width: 0;
+  line-height: 1.35;
+}
+.distance-listing span {
+  color: var(--text-secondary);
+  font-size: var(--fs-note);
+}
+.distance-list {
+  display: grid;
+  gap: 8px;
+}
+.distance-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--bg-section);
+  line-height: 1.35;
+}
+.distance-icon {
+  display: grid;
+  grid-row: span 2;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--brand-blue-soft);
+  color: var(--accent);
+}
+.distance-value {
+  color: var(--text-secondary);
+  font-size: var(--fs-note);
+}
+/* Quando passa para uma pessoa: os quatro casos em cartões e o fecho embaixo. */
+.product-handoff {
+  background: var(--bg-section);
+}
+.handoff-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+}
+.handoff-list > li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 16px;
+  padding: 20px 22px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface);
+}
+.handoff-list p {
+  margin: 0;
+  color: var(--text-strong);
+}
+.handoff-closing {
+  max-width: 680px;
+  margin: 32px auto 0;
+  color: var(--text-strong);
+  font-size: 1.125rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* A página com todos os produtos (/produtos): os grupos do menu, cada produto num cartão com a foto
+   16:9, e o cartão inteiro é o link. O topo (o respiro, o título e o sobretítulo) é o de /planos e
+   de /tutoriais, nas mesmas regras do global.css. */
+.products-page-group + .products-page-group {
+  margin-top: 56px;
+}
+.products-page-group h2 {
+  margin-bottom: 20px;
+  font-size: 1.375rem;
+  letter-spacing: -0.02em;
+}
+.product-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.product-card {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  transition: border-color 0.18s;
+}
+.product-card:hover {
+  border-color: var(--accent);
+}
+.product-card img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+.product-card-body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 22px 24px 24px;
+}
+.product-card .products-name {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 620;
+  letter-spacing: -0.02em;
+}
+.product-card .products-line {
+  margin: 0;
+  font-size: var(--fs-small);
+}
+.product-card-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 12px;
+  color: var(--brand-blue-dark);
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+
+/* De 1024 a 1199px, os três passos ainda ficam lado a lado, em cartões estreitos: menos respiro em
+   volta das telas, e o campo do site sem o ícone, para o endereço caber inteiro. */
+@media (min-width: 1024px) and (max-width: 1199px) {
+  .product-steps > li {
+    padding: 22px;
+  }
+  .step-mock {
+    padding: 14px;
+  }
+  .site-address svg {
+    display: none;
+  }
+}
+
+@media (max-width: 1023px) {
+  .product-hero .hero-grid,
+  .product-pain-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 44px;
+  }
+  .product-hero-mock {
+    width: min(100%, 600px);
+  }
+  /* Os passos viram uma coluna: a tela em cima e, embaixo dela, o número à esquerda do título e do
+     texto. */
+  .product-steps {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+    max-width: 680px;
+    margin-inline: auto;
+  }
+  .product-steps > li {
+    grid-row: auto;
+    grid-template-rows: none;
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 18px;
+    padding: 22px;
+  }
+  .product-steps .example-figure {
+    grid-column: 1 / -1;
+    width: min(100%, 420px);
+    margin-bottom: 20px;
+  }
+  .product-steps .product-step-number {
+    grid-row: 2 / span 2;
+    margin-bottom: 0;
+  }
+  .product-steps h3,
+  .product-steps > li > p {
+    grid-column: 2;
+  }
+  .product-steps h3 {
+    grid-row: 2;
+  }
+  .product-steps > li > p {
+    grid-row: 3;
+  }
+  .product-included {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .post-gallery {
+    --gallery-gap: 16px;
+    --gallery-columns: 3;
+  }
+  .also-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  /* As seções próprias do Autochat viram uma coluna: o texto e, embaixo, a tela. */
+  .product-feature-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 40px;
+  }
+  .product-feature-grid.is-reversed > .example-figure {
+    order: 0;
+  }
+}
+
+@media (max-width: 767px) {
+  .product-hero-lead {
+    margin-bottom: 26px;
+    font-size: 1.0625rem;
+  }
+  /* No celular, o calendário mostra uma semana só, e o anel marca o story. */
+  .calendar-mock {
+    padding: 14px;
+  }
+  .calendar-weekdays,
+  .calendar-week {
+    gap: 4px;
+  }
+  .calendar-week + .calendar-week,
+  .calendar-story {
+    display: none;
+  }
+  .calendar-day {
+    padding: 3px;
+    border-radius: 8px;
+  }
+  .calendar-post .calendar-mark {
+    top: -4px;
+    right: -4px;
+    width: 16px;
+    height: 16px;
+  }
+  .calendar-post .calendar-mark svg {
+    width: 10px;
+    height: 10px;
+  }
+  .calendar-approve {
+    justify-content: center;
+    width: 100%;
+  }
+  .calendar-foot .calendar-legend + .calendar-legend {
+    margin-right: 0;
+  }
+  /* O que está incluído vira uma lista: o ícone à esquerda do título e do texto. */
+  .product-included {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+  .product-included > li {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 16px;
+    padding: 18px;
+  }
+  .product-included .icon-tile {
+    grid-row: span 2;
+    margin-bottom: 0;
+  }
+  .product-included h3 {
+    margin-bottom: 4px;
+  }
+  .post-gallery {
+    --gallery-gap: 12px;
+    --gallery-columns: 2;
+    align-items: stretch;
+  }
+  /* Com duas colunas, cada arte fica com a largura da coluna e cresce com o próprio texto: no
+     celular estreito, o rodapé (a imobiliária e o CRECI) não cabe no 4:5 e seria cortado pela borda.
+     O formato vira a altura mínima, pela largura do item (100cqi): o post fica com 4:5 ou mais, e o
+     story, com a largura do post, com 9:16 ou mais. Com aspect-ratio e overflow: hidden a arte não
+     cresce, e com overflow: clip o WebKit ainda corta o story do espanhol a 320 px. As artes de uma
+     linha ficam com a altura da maior; o story, mais alto, e o post ao lado dele (a última linha)
+     ficam cada um com a sua. */
+  .post-gallery > li {
+    aspect-ratio: auto;
+    container-type: inline-size;
+  }
+  .post-gallery > li:has(> .post-art-story),
+  .post-gallery > li:has(+ li > .post-art-story) {
+    align-self: flex-start;
+  }
+  .post-gallery .post-art {
+    height: auto;
+    min-height: calc(100cqi * 5 / 4);
+  }
+  .post-gallery .post-art-story {
+    width: 100%;
+    aspect-ratio: auto;
+    min-height: calc(100cqi * 16 / 9);
+  }
+  .post-art {
+    padding: 10px;
+    border-radius: 12px;
+  }
+  .product-comparison {
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+    background: none;
+  }
+  .product-comparison thead {
+    display: none;
+  }
+  .product-comparison tbody {
+    display: grid;
+    gap: 14px;
+  }
+  .product-comparison tr {
+    display: grid;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--surface);
+  }
+  .product-comparison th,
+  .product-comparison td {
+    display: block;
+    padding: 12px 16px;
+  }
+  .product-comparison tbody th {
+    width: auto;
+    background: var(--bg-section);
+  }
+  .product-comparison tbody tr:last-child > * {
+    border-bottom: 1px solid var(--line);
+  }
+  .product-comparison tr > :last-child {
+    border-bottom: 0;
+  }
+  .comparison-column {
+    display: block;
+    margin-bottom: 2px;
+    color: var(--text-secondary);
+    font-size: var(--fs-label);
+    font-weight: 600;
+  }
+  .also-products,
+  .products-strip {
+    padding-block: 56px;
+  }
+  .also-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  /* Os vídeos dos Vídeos a partir de fotos, um embaixo do outro: o vertical com até 300px, em que
+     o selo gravado nele fica com uns 11px de letra, e o horizontal na largura toda. */
+  .video-pair {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    gap: 16px;
+  }
+  .video-example-vertical {
+    width: min(100%, 300px);
+  }
+  .video-example-horizontal {
+    width: 100%;
+  }
+  /* Os formatos viram uma lista: o desenho à esquerda do nome. */
+  .video-formats {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+  .video-formats > li {
+    grid-template-columns: 112px minmax(0, 1fr);
+    justify-items: start;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    text-align: left;
+  }
+  .format-stage {
+    height: 96px;
+  }
+  .format-vertical {
+    width: 54px;
+    height: 96px;
+  }
+  .format-horizontal,
+  .format-ending {
+    width: 112px;
+  }
+  .format-ending {
+    gap: 4px;
+  }
+  .format-logo {
+    width: 18px;
+    height: 18px;
+    border-radius: 5px;
+  }
+  .format-logo svg {
+    width: 12px;
+    height: 12px;
+  }
+  .format-lines {
+    gap: 3px;
+  }
+  .format-lines > span {
+    width: 52px;
+    height: 4px;
+  }
+  .format-lines > span + span {
+    width: 32px;
+  }
+  .format-pill {
+    width: 34px;
+    height: 10px;
+  }
+  .format-pill svg {
+    display: none;
+  }
+  /* Autochat: os casos de passagem um embaixo do outro. */
+  .handoff-list {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+  .handoff-list > li {
+    padding: 16px 18px;
+  }
+  .handoff-closing {
+    margin-top: 24px;
+    font-size: 1.0625rem;
+  }
+  .summary-mock:not(.step-mock),
+  .distance-mock {
+    padding: 18px;
+  }
+  /* A página com todos os produtos: um cartão por linha. */
+  .products-page-group + .products-page-group {
+    margin-top: 40px;
+  }
+  .product-cards {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+  .product-card-body {
+    padding: 18px 20px 20px;
+  }
+}
+
+/* No celular estreito, a etiqueta fica em cima da conversa e o resumo para a corretora vai para
+   baixo dela, encostado no fim. */
+@media (max-width: 479px) {
+  .chat-mock {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+    grid-template-areas:
+      'tag'
+      'window'
+      'summary';
+    padding: 12px;
+  }
+  .chat-mock > .example-tag {
+    margin-bottom: 10px;
+  }
+  .chat-mock-summary {
+    margin: -10px 10px 0 24px;
+  }
+}

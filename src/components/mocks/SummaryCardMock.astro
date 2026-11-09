@@ -1,0 +1,62 @@
+---
+// O resumo para a corretora: o nome e o WhatsApp da cliente, o negócio, o que ela procura, os
+// imóveis que viu e de qual gostou, quando quer visitar e a conversa inteira, na ordem de
+// `broker.fields`. Inteiro em "O que o corretor recebe"; com `start`, a tela pequena do passo 4
+// ("Passa para o corretor") mostra só o começo dele, com a etiqueta em cima do título e a última
+// linha sumindo. O número do WhatsApp nunca quebra no meio. É tela de exemplo: fica fora do leitor
+// de tela, que ouve a descrição antes dela.
+import Icon from '../Icon.astro';
+import ExampleTag from './ExampleTag.astro';
+import { pageLocale } from '../../i18n';
+interface Props {
+  start?: boolean;
+}
+const { start = false } = Astro.props;
+const { t } = pageLocale(Astro);
+const { mock } = t.productPages.autochat;
+const rows: { icon: string; text: string; phone?: boolean; link?: boolean }[] = [
+  { icon: 'user', text: mock.client, phone: true },
+  { icon: 'home', text: mock.deal },
+  { icon: 'target', text: mock.wishes.join(' · ') },
+  { icon: 'star', text: mock.seen },
+  { icon: 'calendar', text: mock.visit },
+  { icon: 'message', text: mock.conversation, link: true },
+];
+const shown = start ? rows.slice(0, 4) : rows;
+---
+
+<div class="example-figure">
+  <p class="sr-only">{start ? mock.summaryStartDescription : mock.summaryDescription}</p>
+  <div
+    class:list={['example-screen summary-mock', { 'step-mock is-start': start }]}
+    aria-hidden="true"
+    inert
+  >
+    <span class="summary-head">
+      <span class="summary-title">
+        <Icon name="user" size={16} />
+        {mock.summary}
+      </span>
+      <ExampleTag />
+    </span>
+    <span class="summary-rows">
+      {shown.map((row) => (
+        <span class:list={['summary-row', { 'is-link': row.link }]}>
+          <span class="summary-icon">
+            <Icon name={row.icon} size={14} />
+          </span>
+          <span class="summary-text">
+            {row.text}
+            {row.phone && (
+              <span class="summary-detail">
+                {`${mock.whatsapp} `}
+                <span class="summary-phone">{mock.clientPhone}</span>
+              </span>
+            )}
+          </span>
+          {row.link && <Icon name="arrow" size={14} />}
+        </span>
+      ))}
+    </span>
+  </div>
+</div>

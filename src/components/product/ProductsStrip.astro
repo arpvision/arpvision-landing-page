@@ -1,0 +1,18 @@
+---
+// A faixa da home com os produtos que têm página própria no ar (os três novos), nos mesmos cartões
+// do "Conheça também" (ProductCards): o nome, com o selo "Novo", a linha e o link da página. O tour
+// é a própria home, e o Presencial tem a seção dele logo acima: nenhum dos dois entra. Sem nenhum
+// produto com página no ar, a faixa não aparece.
+import ProductCards from './ProductCards.astro';
+import { pageLocale } from '../../i18n';
+import { liveProductsWithText } from '../../lib/products';
+const { locale, t } = pageLocale(Astro);
+const items = liveProductsWithText(locale).filter(({ product }) => product.page !== null);
+---
+
+<ProductCards
+  items={items}
+  title={t.productsStrip.title}
+  titleId="products-strip-title"
+  class="products-strip"
+/>

@@ -6,6 +6,7 @@ import '../styles/tour-showcase.css';
 import '../styles/atmosphere.css';
 import '../styles/landing-polish.css';
 import '../styles/quote.css';
+import '../styles/products.css';
 import '../styles/in-person.css';
 import '../styles/language.css';
 import Header from '../components/Header.astro';
@@ -15,6 +16,7 @@ import LanguageSuggestion from '../components/LanguageSuggestion.astro';
 import { site } from '../config/site';
 import { defaultLocale, localeInfo, locales, pageLocale } from '../i18n';
 import { anchorId, pagePath, type PageId } from '../i18n/routes';
+import type { ProductId } from '../lib/products';
 import { organizationSchema, websiteSchema } from '../lib/schema';
 interface Props {
   title: string;
@@ -28,6 +30,10 @@ interface Props {
   page?: PageId;
   /** Sem cabeçalho, rodapé e faixa de sugestão de idioma (a página 404, que fala todos). */
   bare?: boolean;
+  /** A mensagem do link de WhatsApp do rodapé e do botão flutuante; sem ela, a mensagem geral. */
+  whatsappMessage?: string;
+  /** O produto da página, que vai no evento de analytics do WhatsApp do rodapé. */
+  product?: ProductId;
 }
 const { locale, t } = pageLocale(Astro);
 const {
@@ -37,6 +43,8 @@ const {
   schema = [],
   page,
   bare = false,
+  whatsappMessage,
+  product,
 } = Astro.props;
 const urlOf = (path: string) => new URL(path, site.domain).href;
 const canonical = page ? urlOf(pagePath(locale, page)) : undefined;
@@ -132,7 +140,7 @@ const contentId = anchorId(locale, 'content');
     <main id={contentId}>
       <slot />
     </main>
-    {!bare && <Footer />}
+    {!bare && <Footer whatsappMessage={whatsappMessage} product={product} />}
     {!bare && page && <LanguageSuggestion />}
     <script>
       import '../scripts/site';

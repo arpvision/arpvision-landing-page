@@ -1,0 +1,98 @@
+---
+// O calendário do topo do Piloto automático para Instagram: duas semanas de posts e stories da
+// Imobiliária Exemplo, os primeiros aprovados e os outros esperando a aprovação, e o "Aprovar
+// tudo". Abaixo de 768 px aparece só a primeira semana. É tela de exemplo: fica fora do leitor de
+// tela, que ouve a descrição antes dela.
+import Icon from '../Icon.astro';
+import ExampleTag from './ExampleTag.astro';
+import { site } from '../../config/site';
+import { pageLocale } from '../../i18n';
+const { t } = pageLocale(Astro);
+const { hero, mock } = t.productPages.instagram;
+// As fotos em miniatura: no calendário elas são pequenas, e a página abre com ele.
+const photos = site.media.calendarPhotos;
+type Photo = keyof typeof photos;
+// Os dias com publicação, de 1 a 14 a partir de uma segunda-feira. Sem foto, a arte é só de
+// texto (uma dica), na cor da marca.
+const scheduled: Partial<Record<number, { photo?: Photo; story?: boolean; approved: boolean }>> = {
+  1: { photo: 'patio-fachada-4x5', approved: true },
+  3: { photo: 'patio-piscina-9x16', story: true, approved: true },
+  5: { photo: 'quarto-com-suite-4x5', approved: false },
+  8: { photo: 'sala-2-4x5', approved: false },
+  10: { photo: 'cozinha-4x5', story: true, approved: false },
+  12: { approved: false },
+};
+const weeks = [0, 7].map((start) =>
+  mock.weekdays.map((_, index) => ({
+    day: start + index + 1,
+    item: scheduled[start + index + 1],
+  })),
+);
+---
+
+<div class="example-figure">
+  <p class="sr-only">{hero.mockDescription}</p>
+  <div class="example-screen calendar-mock" aria-hidden="true" inert>
+    <div class="calendar-head">
+      <span class="calendar-period">
+        <Icon name="calendar" size={18} />
+        {mock.period}
+      </span>
+      <ExampleTag />
+    </div>
+    <div class="calendar-weekdays">
+      {mock.weekdays.map((weekday) => (
+        <span>{weekday}</span>
+      ))}
+    </div>
+    {weeks.map((week) => (
+      <div class="calendar-week">
+        {week.map(({ day, item }) => (
+          <span class="calendar-day">
+            <span class="calendar-date">{day}</span>
+            {item && (
+              <span class:list={['calendar-post', { 'is-story': item.story }]}>
+                {item.photo ? (
+                  <img
+                    src={photos[item.photo].src}
+                    width={photos[item.photo].width}
+                    height={photos[item.photo].height}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                  />
+                ) : (
+                  <span class="calendar-text-post">
+                    <Icon name="info" size={18} />
+                  </span>
+                )}
+                {item.story && <span class="calendar-story">{mock.story}</span>}
+                <span class:list={['calendar-mark', { 'is-approved': item.approved }]}>
+                  <Icon name={item.approved ? 'check' : 'clock'} size={12} />
+                </span>
+              </span>
+            )}
+          </span>
+        ))}
+      </div>
+    ))}
+    <div class="calendar-foot">
+      <span class="calendar-legend">
+        <span class="calendar-mark is-approved">
+          <Icon name="check" size={12} />
+        </span>
+        {mock.approved}
+      </span>
+      <span class="calendar-legend">
+        <span class="calendar-mark">
+          <Icon name="clock" size={12} />
+        </span>
+        {mock.waiting}
+      </span>
+      <span class="calendar-approve">
+        <Icon name="check" size={16} />
+        {mock.approveAll}
+      </span>
+    </div>
+  </div>
+</div>

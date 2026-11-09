@@ -91,6 +91,16 @@
 /* O cabeçalho já saiu de cena aqui; a leitura fixa aproveita o espaço livre. */
 .opening ~ .faq-section .faq-layout > div:first-child {
   top: 32px;
+  transition: top 0.25s ease;
+}
+/* Quando ele volta (a pessoa subiu a página), a leitura fixa desce junto, para baixo dele. */
+.site-header[data-header-revealed='true']
+  ~ main
+  .opening
+  ~ .faq-section
+  .faq-layout
+  > div:first-child {
+  top: 104px;
 }
 @media (max-width: 767px) {
   [data-atmosphere='how'] {

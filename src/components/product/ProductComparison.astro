@@ -1,0 +1,45 @@
+---
+// A tabela que compara jeitos de resolver o problema do produto, sem preço e sem nome de
+// concorrente. A última coluna é a da ARP Vision, em destaque. No celular, cada linha vira um
+// bloco, e cada valor leva o nome da coluna (escondido no desktop, onde o cabeçalho já mostra).
+interface Props {
+  title: string;
+  columns: string[];
+  rows: { label: string; values: string[] }[];
+}
+const { title, columns, rows } = Astro.props;
+const ours = columns.length - 1;
+---
+
+<section class="section product-comparison-section" aria-labelledby="comparison-title">
+  <div class="container">
+    <div class="section-heading center">
+      <h2 id="comparison-title">{title}</h2>
+    </div>
+    <table class="product-comparison" aria-labelledby="comparison-title">
+      <thead>
+        <tr>
+          <td></td>
+          {columns.map((column, index) => (
+            <th scope="col" class:list={[{ 'is-ours': index === ours }]}>
+              {column}
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map((row) => (
+          <tr>
+            <th scope="row">{row.label}</th>
+            {row.values.map((value, index) => (
+              <td class:list={[{ 'is-ours': index === ours }]}>
+                <span class="comparison-column">{columns[index]}</span>
+                {value}
+              </td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</section>

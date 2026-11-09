@@ -1,5 +1,6 @@
 ---
 import { whatsappLink } from '../lib/business';
+import type { ProductId } from '../lib/products';
 import { site } from '../config/site';
 import { pageLocale } from '../i18n';
 import { anchorId } from '../i18n/routes';
@@ -7,8 +8,10 @@ interface Props {
   class?: string;
   message?: string;
   label?: string;
+  /** O produto da página, que vai no evento de analytics (`data-product`). */
+  product?: ProductId;
 }
-const { class: className = '', message, label } = Astro.props;
+const { class: className = '', message, label, product } = Astro.props;
 const { locale, t } = pageLocale(Astro);
 const href = whatsappLink(message ?? t.whatsappMessage, `#${anchorId(locale, 'contact')}`);
 ---
@@ -17,6 +20,7 @@ const href = whatsappLink(message ?? t.whatsappMessage, `#${anchorId(locale, 'co
   href={href}
   class={className}
   data-whatsapp
+  data-product={product}
   data-contact-pending={!site.contact.whatsapp ? 'true' : undefined}
   target={site.contact.whatsapp ? '_blank' : undefined}
   rel={site.contact.whatsapp ? 'noopener noreferrer' : undefined}

@@ -1,0 +1,45 @@
+---
+// A dor que o cliente reconhece, sem depoimento de ninguém. No Piloto, o fim do título troca
+// sozinho entre os trechos (scripts/rotating-phrase.ts) e para no primeiro: o leitor de tela ouve a
+// frase inteira, com o primeiro trecho, uma vez só, e o que se vê fica fora dele. No Autochat, o
+// título é fixo (`title`). A tela de exemplo do produto, quando há, entra pelo slot, ao lado; sem
+// ela, o texto fica sozinho, no centro.
+type Props = { eyebrow: string; text: string } & (
+  { before: string; phrases: string[]; after: string } | { title: string }
+);
+const props = Astro.props;
+const rotating = 'phrases' in props ? props : undefined;
+const title = 'title' in props ? props.title : undefined;
+const alone = !Astro.slots.has('default');
+---
+
+<section class="section product-pain" aria-labelledby="pain-title">
+  <div class:list={['container product-pain-grid', { 'is-alone': alone }]}>
+    <div class="product-pain-copy">
+      <span class="eyebrow">{props.eyebrow}</span>
+      {rotating ? (
+        <h2 class="pain-title" id="pain-title">
+          <span class="sr-only">{`${rotating.before} ${rotating.phrases[0]}`}</span>
+          <span aria-hidden="true">
+            {`${rotating.before} `}
+            <span class="rotating-phrase" data-rotating-phrase>
+              {rotating.phrases.map((phrase, index) => (
+                <span class={index === 0 ? 'is-active' : undefined}>{phrase}</span>
+              ))}
+            </span>
+          </span>
+        </h2>
+      ) : (
+        <h2 class="pain-title" id="pain-title">
+          {title}
+        </h2>
+      )}
+      {rotating && <p class="pain-after">{rotating.after}</p>}
+      <p>{props.text}</p>
+    </div>
+    <slot />
+  </div>
+</section>
+<script>
+  import '../../scripts/rotating-phrase';
+</script>

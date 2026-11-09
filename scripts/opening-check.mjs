@@ -131,13 +131,28 @@ const verifyHeaderBoundary = async (page) => {
     const rect = el.getBoundingClientRect();
     return { top: rect.top + scrollY, bottom: rect.bottom + scrollY };
   });
+  // Cada rolagem espera o evento e dois quadros, como o scrollPage do browser-check. Sem ter para
+  // onde rolar (o alvo é a posição de agora, ou passa do fim da página e ela já está lá), não há
+  // evento a esperar; e um evento que não vem reprova em 5 s, em vez de travar a checagem.
   const scroll = async (top) => {
     await page.evaluate(
       (y) =>
-        new Promise((resolve) => {
+        new Promise((resolve, reject) => {
+          const end = document.documentElement.scrollHeight - innerHeight;
+          if (Math.abs(Math.min(Math.max(y, 0), end) - scrollY) < 1) return resolve();
+          const timer = setTimeout(
+            () => reject(new Error(`rolagem até ${y}px: nenhum evento de scroll em 5 s`)),
+            5000,
+          );
           window.addEventListener(
             'scroll',
-            () => requestAnimationFrame(() => requestAnimationFrame(resolve)),
+            () =>
+              requestAnimationFrame(() =>
+                requestAnimationFrame(() => {
+                  clearTimeout(timer);
+                  resolve();
+                }),
+              ),
             { once: true },
           );
           scrollTo({ top: y, behavior: 'instant' });
@@ -165,6 +180,54 @@ const verifyHeaderBoundary = async (page) => {
   );
   assert.equal(await header.isVisible(), false, 'cabeçalho ausente nas próximas seções');
   assert.equal(await header.evaluate((el) => el.inert), true, 'controles ocultos fora do teclado');
+  // Depois da abertura, ele volta quando a pessoa sobe a página e sai quando ela desce de novo.
+  await scroll(boundary.bottom + 600);
+  await scroll(boundary.bottom + 400);
+  await page.waitForFunction(
+    () => {
+      const element = document.querySelector('.site-header');
+      return (
+        getComputedStyle(element).visibility === 'visible' && element.getBoundingClientRect().y >= 0
+      );
+    },
+    null,
+    { timeout: 5000 },
+  );
+  assert.equal(await header.isVisible(), true, 'cabeçalho volta ao subir');
+  assert.equal(await header.evaluate((el) => el.inert), false, 'controles de volta ao teclado');
+  assert.ok((await header.boundingBox()).y >= 0, 'cabeçalho inteiro na tela');
+  const motion = await header.evaluate((el) => ({
+    reduced: matchMedia('(prefers-reduced-motion: reduce)').matches,
+    transition: getComputedStyle(el).transitionProperty,
+  }));
+  assert.ok(
+    motion.reduced ? motion.transition === 'none' : motion.transition.includes('transform'),
+    `volta deslizando, e sem animação com movimento reduzido: ${JSON.stringify(motion)}`,
+  );
+  await scroll(boundary.bottom + 600);
+  await page.waitForFunction(
+    () => getComputedStyle(document.querySelector('.site-header')).visibility === 'hidden',
+    null,
+    { timeout: 5000 },
+  );
+  assert.equal(await header.isVisible(), false, 'cabeçalho sai ao descer de novo');
+  assert.equal(await header.evaluate((el) => el.inert), true, 'controles ocultos de novo');
+  // O limiar de 8 px: subir 6 px (o vai e volta do Safari) não traz o cabeçalho; subir mais 10, sim.
+  const lowest = await page.evaluate(() => scrollY);
+  await scroll(lowest - 6);
+  assert.equal(
+    await header.getAttribute('data-header-hidden'),
+    'true',
+    'subir 6 px não traz o cabeçalho de volta',
+  );
+  assert.equal(await header.evaluate((el) => el.inert), true);
+  await scroll(lowest - 16);
+  assert.equal(
+    await header.getAttribute('data-header-hidden'),
+    'false',
+    'subir mais 10 px traz o cabeçalho de volta',
+  );
+  assert.equal(await header.evaluate((el) => el.inert), false);
   await scroll(0);
   await page.waitForFunction(
     () => getComputedStyle(document.querySelector('.site-header')).visibility === 'visible',
@@ -337,7 +400,7 @@ try {
     'navegação das páginas internas preservada',
   );
   results.push(
-    'Cabeçalho até o fim do primeiro slide, saída com a abertura, controles ocultos sem foco e retorno ao início; páginas internas preservadas.',
+    'Cabeçalho até o fim do primeiro slide, saída com a abertura, controles ocultos sem foco, volta ao subir, saída ao descer de novo, limiar de 8 px (6 px não trazem de volta, 16 px trazem) e retorno ao início; páginas internas preservadas.',
   );
   await context.close();
 

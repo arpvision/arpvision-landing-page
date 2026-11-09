@@ -1,0 +1,50 @@
+---
+// O perfil parado, ao lado da dor do Piloto automático para Instagram: a Imobiliária Exemplo sem
+// post desde junho. A primeira linha da grade está vazia; embaixo, os posts antigos, apagados. É
+// tela de exemplo: fica fora do leitor de tela, que ouve a descrição antes dela.
+import Icon from '../Icon.astro';
+import ExampleTag from './ExampleTag.astro';
+import { site } from '../../config/site';
+import { pageLocale } from '../../i18n';
+const { t } = pageLocale(Astro);
+const { mock } = t.productPages.instagram;
+const photos = site.media.productPhotos;
+const oldPosts = (['patio-piscina-4x5', 'sala-2-4x5', 'cozinha-4x5'] as const).map(
+  (name) => photos[name],
+);
+---
+
+<div class="example-figure">
+  <p class="sr-only">{mock.profileDescription}</p>
+  <div class="example-screen profile-mock" aria-hidden="true" inert>
+    <div class="profile-head">
+      <span class="profile-avatar">
+        <Icon name="home" size={26} />
+      </span>
+      <span class="profile-name">
+        <strong>{mock.handle}</strong>
+        <span>{mock.agency}</span>
+      </span>
+      <ExampleTag />
+    </div>
+    <span class="profile-last">
+      <Icon name="clock" size={16} />
+      {mock.lastPost}
+    </span>
+    <span class="profile-grid">
+      {oldPosts.map(() => (
+        <span class="profile-empty" />
+      ))}
+      {oldPosts.map((photo) => (
+        <img
+          src={photo.src}
+          width={photo.width}
+          height={photo.height}
+          alt=""
+          loading="lazy"
+          decoding="async"
+        />
+      ))}
+    </span>
+  </div>
+</div>

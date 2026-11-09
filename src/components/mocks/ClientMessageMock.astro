@@ -1,0 +1,34 @@
+---
+// Passo 1 do Autochat, "O cliente chama no WhatsApp": o cabeçalho da conversa com a Imobiliária
+// Exemplo e a mensagem da cliente, com a hora do dicionário (a mesma da conversa do topo). É tela
+// de exemplo: fica fora do leitor de tela, que ouve a descrição antes dela.
+import Icon from '../Icon.astro';
+import ExampleTag from './ExampleTag.astro';
+import { pageLocale } from '../../i18n';
+const { t } = pageLocale(Astro);
+const { mock } = t.productPages.autochat;
+---
+
+<div class="example-figure">
+  <p class="sr-only">{mock.requestDescription}</p>
+  <div class="example-screen step-mock request-mock" aria-hidden="true" inert>
+    <span class="step-mock-head">
+      <ExampleTag />
+    </span>
+    <span class="step-mock-body">
+      <span class="chat-mock-header">
+        <span class="chat-mock-avatar">
+          <Icon name="home" size={16} />
+        </span>
+        <span class="chat-mock-contact">
+          <strong>{mock.agency}</strong>
+          <span>{mock.automated}</span>
+        </span>
+      </span>
+      <span class="chat-mock-bubble is-client">
+        {mock.request}
+        <span class="chat-mock-time">{mock.times.request}</span>
+      </span>
+    </span>
+  </div>
+</div>

@@ -2,53 +2,42 @@ import { readFile, readdir, stat } from 'node:fs/promises';
 import path from 'node:path';
 import assert from 'node:assert/strict';
 import { portugueseWordsIn } from './portuguese-words.mjs';
+import { pricePattern } from './lib/prices.mjs';
+// As regras de texto do inglês, as mesmas do teste do catálogo (as do português e do espanhol
+// estão só nele, e a moeda com número fica no pricePattern).
+import { englishRules } from './lib/english-rules.mjs';
+import { publishedPageIds, routes as localeRoutes } from '../src/i18n/routes.ts';
 // Sem preços públicos (site.pricing.showPrices), /planos é só um redirecionamento.
 const pricesShown = !(await readFile('dist/planos/index.html', 'utf8')).includes(
   'http-equiv="refresh"',
 );
-// Cada página existe em cada idioma; o português mora na raiz, o espanhol em /es e o inglês
-// em /en.
+// O arquivo de cada endereço no build: "/" é index.html, "/es/planes" é es/planes/index.html.
+const fileOf = (route) => `${route.slice(1)}/index.html`.replace(/^\//, '');
+// Os títulos (h1 a h6) abertos dentro de um <span>, que só aceita texto e elementos de frase (HTML
+// inválido). Os scripts ficam de fora: um "<span" num texto do script não abre nada.
+const headingsInSpan = (html) => {
+  let depth = 0;
+  const found = [];
+  const markup = html.replace(/<script\b[\s\S]*?<\/script>/gi, '');
+  for (const [tag, closing, name] of markup.matchAll(/<(\/?)(span|h[1-6])\b[^>]*>/gi))
+    if (name.toLowerCase() === 'span') depth += closing ? -1 : 1;
+    else if (!closing && depth > 0) found.push(tag);
+  return found;
+};
+// Cada página existe em cada idioma, com os endereços de src/i18n/routes.ts; o português mora
+// na raiz, o espanhol em /es e o inglês em /en. A imagem de compartilhamento das páginas de
+// produto (e da com todos eles) é a da home do idioma.
 const locales = [
-  {
-    code: 'pt',
-    lang: 'pt-BR',
-    ogLocale: 'pt_BR',
-    quote: 'cotacao',
-    pages: {
-      home: 'index.html',
-      plans: 'planos/index.html',
-      tutorials: 'tutoriais/index.html',
-      terms: 'termos-de-uso/index.html',
-      privacy: 'politica-de-privacidade/index.html',
-    },
-  },
-  {
-    code: 'es',
-    lang: 'es-ES',
-    ogLocale: 'es_ES',
-    quote: 'cotizacion',
-    pages: {
-      home: 'es/index.html',
-      plans: 'es/planes/index.html',
-      tutorials: 'es/tutoriales/index.html',
-      terms: 'es/terminos-de-uso/index.html',
-      privacy: 'es/politica-de-privacidad/index.html',
-    },
-  },
-  {
-    code: 'en',
-    lang: 'en',
-    ogLocale: 'en_US',
-    quote: 'quote',
-    pages: {
-      home: 'en/index.html',
-      plans: 'en/plans/index.html',
-      tutorials: 'en/tutorials/index.html',
-      terms: 'en/terms-of-use/index.html',
-      privacy: 'en/privacy-policy/index.html',
-    },
-  },
-];
+  { code: 'pt', lang: 'pt-BR', ogLocale: 'pt_BR', ogImage: 'og-home.png' },
+  { code: 'es', lang: 'es-ES', ogLocale: 'es_ES', ogImage: 'og-home-es.png' },
+  { code: 'en', lang: 'en', ogLocale: 'en_US', ogImage: 'og-home-en.png' },
+].map((locale) => ({
+  ...locale,
+  quote: localeRoutes[locale.code].anchors.quote,
+  pages: Object.fromEntries(
+    Object.entries(localeRoutes[locale.code].pages).map(([page, route]) => [page, fileOf(route)]),
+  ),
+}));
 // O texto da faixa de sugestão de idioma só entra na página pelo navegador: nenhum HTML que o
 // servidor entrega pode tê-lo (src/i18n/suggestion.ts).
 const suggestionTexts = [
@@ -59,7 +48,13 @@ const suggestionTexts = [
   'This page is also available in English.',
   'View in English',
 ];
-const pageIds = ['home', ...(pricesShown ? ['plans'] : []), 'tutorials', 'terms', 'privacy'];
+// Só as páginas publicadas, na ordem de routes.ts; /planos só com preços públicos.
+const pageIds = Object.keys(localeRoutes.pt.pages).filter(
+  (page) => publishedPageIds.includes(page) && (pricesShown || page !== 'plans'),
+);
+// As páginas de produto moram em /produtos/<produto>; /produtos é a lista com todos.
+const isProductPage = (page) =>
+  localeRoutes.pt.pages[page].startsWith(`${localeRoutes.pt.pages.products}/`);
 const pathOf = (file) => `/${file.replace(/\/?index\.html$/, '')}`;
 const routes = locales.flatMap((locale) =>
   pageIds.map((page) => ({ locale, page, file: locale.pages[page] })),
@@ -125,6 +120,7 @@ for (const { locale, page, file } of routes) {
   const html = await readFile(path.join('dist', file), 'utf8');
   assert.match(html, new RegExp(`<html[^>]+lang="${locale.lang}"`), `${route}: lang`);
   assert.equal((html.match(/<h1[ >]/g) || []).length, 1, `${route}: exatamente um h1`);
+  assert.deepEqual(headingsInSpan(html), [], `${route}: nenhum título dentro de <span>`);
   for (const meta of ['description', 'og:title', 'og:description', 'og:image', 'twitter:card'])
     assert.ok(html.includes(`="${meta}"`), `${route}: ${meta}`);
   const canonical = html.match(/<link rel="canonical" href="([^"]+)"/)?.[1];
@@ -219,15 +215,41 @@ for (const { locale, page, file } of routes) {
       item['@type'] === 'VideoObject' ? 'pt-BR' : locale.lang,
       `${route}: JSON-LD ${item['@type']} no idioma`,
     );
-  if (page === 'home') {
-    // O FAQPage é o FAQ que aparece na página, no idioma dela.
+  if (page === 'home' || isProductPage(page)) {
+    // O FAQPage é o FAQ que aparece na página, no idioma dela: cada pergunta e cada resposta no
+    // HTML sem os <script>, porque o próprio JSON-LD já traz o texto.
+    const visible = decode(html.replace(/<script[\s\S]*?<\/script>/g, ''));
     const questions = schemas.find((item) => item['@type'] === 'FAQPage')?.mainEntity ?? [];
     assert.ok(questions.length > 0, `${route}: FAQPage`);
-    for (const question of questions)
+    for (const question of questions) {
       assert.ok(
-        decode(html).includes(question.name),
+        visible.includes(question.name),
         `${route}: pergunta do FAQPage na página: ${question.name}`,
       );
+      assert.ok(
+        visible.includes(question.acceptedAnswer.text),
+        `${route}: resposta do FAQPage na página: ${question.acceptedAnswer.text}`,
+      );
+    }
+  }
+  // Cada produto é um Service; a página com todos os produtos é uma ItemList.
+  const types = schemas.map((item) => item['@type']);
+  if (isProductPage(page)) assert.ok(types.includes('Service'), `${route}: JSON-LD Service`);
+  if (page === 'products') assert.ok(types.includes('ItemList'), `${route}: JSON-LD ItemList`);
+  // Em /produtos, cada cartão tem a sua foto: no português, o Treinamento e o Tour Pronto ficam
+  // lado a lado.
+  if (page === 'products') {
+    const photos = [...html.matchAll(/<a class="product-card"[^>]*>\s*<img src="([^"]+)"/g)].map(
+      (match) => match[1],
+    );
+    assert.ok(photos.length > 0, `${route}: as fotos dos cartões`);
+    assert.equal(new Set(photos).size, photos.length, `${route}: foto repetida: ${photos}`);
+  }
+  // Nas páginas de produto, a cotação e a faixa azul não falam do tour: sem a linha do teste
+  // grátis e sem o "Criar conta grátis" da faixa.
+  if (isProductPage(page)) {
+    assert.ok(!html.includes('quote-trial'), `${route}: sem a linha do teste grátis`);
+    assert.ok(!html.includes('data-cta="chamada-final"'), `${route}: faixa sem o cadastro`);
   }
   if (page === 'tutorials') {
     // Um VideoObject por cartão, com o título que o cartão mostra, no idioma da página.
@@ -255,6 +277,16 @@ for (const { locale, page, file } of routes) {
         portugueseWordsIn(locale.code),
         `${route}: português na página: "${text}"`,
       );
+  if (locale.code === 'en')
+    for (const text of readableText(html))
+      assert.doesNotMatch(text, englishRules, `${route}: regra de texto do inglês: "${text}"`);
+  if (isProductPage(page) || page === 'products')
+    assert.ok(
+      html
+        .match(/property="og:image" content="([^"]+)"/)?.[1]
+        .endsWith(`/images/${locale.ogImage}`),
+      `${route}: imagem de compartilhamento do idioma (${locale.ogImage})`,
+    );
   // Seletor de idioma: leva à mesma página em cada idioma, cada opção com o lang dela, no
   // cabeçalho (compacto), no menu do celular e no rodapé.
   for (const other of locales)
@@ -275,7 +307,7 @@ for (const { locale, page, file } of routes) {
     assert.ok(!html.includes(text), `${route}: texto da faixa de sugestão no HTML: ${text}`);
   assert.ok(html.includes('<template id="language-suggestion">'), `${route}: molde da faixa`);
   if (!pricesShown) {
-    assert.doesNotMatch(html, /R\$(?:\s|&nbsp;)*\d/, `${route}: nenhum valor em reais`);
+    assert.doesNotMatch(html, pricePattern, `${route}: nenhum preço com moeda`);
     assert.ok(!html.includes('"offers"'), `${route}: JSON-LD sem ofertas com preço`);
     assert.ok(
       !html.includes(`href="${pathOf(locale.pages.plans)}"`),
@@ -300,29 +332,63 @@ if (!pricesShown)
       `${home}: botão da cotação abre o WhatsApp com mensagem pronta`,
     );
   }
-// ARP Vision Presencial, só em português (atende Porto Alegre e região): seção na Home, item no
-// menu (com destaque pela rolagem) e WhatsApp com a mensagem do serviço. Vale com ou sem preços.
+// O build tem só as páginas publicadas: fora os redirecionamentos (/planos sem preços), cada
+// index.html de dist é uma das rotas verificadas acima, e nenhuma falta.
+const built = [];
+for (const file of await allFiles('dist'))
+  if (
+    path.basename(file) === 'index.html' &&
+    !(await readFile(file, 'utf8')).includes('http-equiv="refresh"')
+  )
+    built.push(path.relative('dist', file).split(path.sep).join('/'));
+assert.deepEqual(
+  built.sort(),
+  routes.map(({ file }) => file).sort(),
+  'as páginas do build são as publicadas em src/i18n/routes.ts',
+);
+// ARP Vision Presencial, só em português (atende Porto Alegre e região). Em toda página, o
+// treinamento e o Tour Pronto ficam no grupo "Com a nossa equipe" do menu Produtos (no painel do
+// desktop e no grupo do celular) e levam à seção dele na Home; o item "Presencial" saiu do topo.
+// Nos outros idiomas, nada dele. Vale com ou sem preços.
+for (const { locale, page, file } of routes) {
+  const html = await readFile(path.join('dist', file), 'utf8');
+  const inPersonItems = [
+    ...html.matchAll(
+      /<a class="products-item" href="([^"]*)" data-product="(training|readyTour)"/g,
+    ),
+  ].map((match) => `${match[2]} ${match[1]}`);
+  if (locale.code === 'pt') {
+    const section = page === 'home' ? '#presencial' : `${pathOf(locale.pages.home)}#presencial`;
+    assert.deepEqual(
+      inPersonItems,
+      ['training', 'readyTour', 'training', 'readyTour'].map((id) => `${id} ${section}`),
+      `${file}: o Presencial no menu Produtos leva à seção dele`,
+    );
+  } else
+    assert.ok(
+      !inPersonItems.length && !html.includes('#presencial') && !html.includes('id="presencial"'),
+      `${file}: sem o Presencial`,
+    );
+  assert.ok(!html.includes('data-spy="presencial"'), `${file}: o Presencial fora do topo`);
+}
+// A seção na Home, com o WhatsApp levando a mensagem do serviço.
 for (const locale of locales) {
   const home = pathOf(locale.pages.home);
   const html = await readFile(path.join('dist', locale.pages.home), 'utf8');
   const inPerson = html.match(/<section[^>]+id="presencial"[\s\S]*?<\/section>/)?.[0];
   if (locale.code === 'pt') {
     assert.ok(inPerson, `${home}: seção Presencial`);
-    assert.match(
-      html,
-      /<a href="#presencial" data-spy="presencial">/,
-      `${home}: menu leva ao Presencial`,
-    );
     assert.equal(
       decodeURIComponent(inPerson.match(/href="https:\/\/wa\.me\/\d+\?text=([^"]+)"/)?.[1] ?? ''),
       'Olá! Vim pelo site e quero saber do ARP Vision Presencial.',
       `${home}: botão do Presencial abre o WhatsApp com a mensagem do serviço`,
     );
-  } else assert.ok(!inPerson && !html.includes('#presencial'), `${home}: sem o Presencial`);
-  // Com "Tour real" o menu só cabe no cabeçalho compacto, ligado por data-long-nav.
+  } else assert.ok(!inPerson, `${home}: sem a seção do Presencial`);
+  // Com "Tour real" o menu só cabe no cabeçalho compacto, ligado por data-long-nav. O link leva a
+  // âncora do idioma (tour-real no português e no espanhol, real-tour no inglês).
   assert.equal(
     /<header[^>]+data-long-nav/.test(html),
-    html.includes('data-spy="tour-real"'),
+    html.includes(`data-spy="${localeRoutes[locale.code].anchors.realTour}"`),
     `${home}: cabeçalho compacto exatamente quando o menu tem "Tour real"`,
   );
 }
@@ -383,5 +449,5 @@ assert.ok(
   'robots aponta o sitemap do domínio canônico',
 );
 console.log(
-  `${routes.length} rotas HTML verificadas em ${locales.length} idiomas${pricesShown ? '' : ` (preços ocultos: cotação na Home, ${locales.map((locale) => pathOf(locale.pages.plans)).join(', ')} redirecionam)`}; ${verifiedLinks} referências locais válidas; ${(jsBytes / 1024).toFixed(1)} KB de JavaScript total (sem gzip). Sitemap, hreflang, robots, 404, metadados, schemas, UTMs, seletor, faixa de sugestão só no navegador e idioma das páginas válidos.`,
+  `${routes.length} rotas HTML verificadas em ${locales.length} idiomas (as publicadas em src/i18n/routes.ts, ${pageIds.filter(isProductPage).length} de produto)${pricesShown ? '' : ` (preços ocultos: cotação na Home, ${locales.map((locale) => pathOf(locale.pages.plans)).join(', ')} redirecionam)`}; ${verifiedLinks} referências locais válidas; ${(jsBytes / 1024).toFixed(1)} KB de JavaScript total (sem gzip). Sitemap, hreflang, robots, 404, metadados, schemas (FAQPage com perguntas e respostas na página, Service nos produtos), UTMs, seletor, faixa de sugestão só no navegador e idioma das páginas válidos.`,
 );

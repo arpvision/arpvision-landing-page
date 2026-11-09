@@ -1,0 +1,50 @@
+---
+// Passo 2 dos Vídeos a partir de fotos, "A ARP Vision monta o vídeo": as fotos do passo 1 na fila
+// das cenas, na ordem de uma visita, da fachada à área externa. O nome de cada cena vem do
+// dicionário, na mesma ordem das fotos daqui, e listas de tamanhos diferentes param o build. É tela
+// de exemplo: fica fora do leitor de tela, que ouve a descrição antes dela.
+import Icon from '../Icon.astro';
+import ExampleTag from './ExampleTag.astro';
+import { site } from '../../config/site';
+import { pageLocale } from '../../i18n';
+import { pairByPosition } from '../../lib/products';
+const { t } = pageLocale(Astro);
+const { mock } = t.productPages.videos;
+const photos = site.media.productPhotos;
+const scenes = pairByPosition(
+  'VisitOrderMock',
+  mock.scenes,
+  (['patio-fachada-16x9', 'sala-2-16x9', 'cozinha-16x9', 'patio-piscina-16x9'] as const).map(
+    (name) => photos[name],
+  ),
+);
+---
+
+<div class="example-figure">
+  <p class="sr-only">{mock.scenesDescription}</p>
+  <div class="example-screen step-mock scenes-mock" aria-hidden="true" inert>
+    <span class="step-mock-head">
+      <span class="step-mock-title">
+        <Icon name="video" size={16} />
+        {mock.scenesTitle}
+      </span>
+      <ExampleTag />
+    </span>
+    <span class="step-mock-body scenes-list">
+      {scenes.map(([name, photo], index) => (
+        <span class="scene">
+          <span class="scene-number">{index + 1}</span>
+          <img
+            src={photo.src}
+            width={photo.width}
+            height={photo.height}
+            alt=""
+            loading="lazy"
+            decoding="async"
+          />
+          <span class="scene-name">{name}</span>
+        </span>
+      ))}
+    </span>
+  </div>
+</div>

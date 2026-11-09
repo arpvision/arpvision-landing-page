@@ -4,6 +4,7 @@
  */
 import { site, price, planById, type Plan } from '../config/site';
 import { translations, type Dictionary, type Locale } from '../i18n';
+import { faqPageSchema } from './schema';
 
 export type FeatureValue = boolean | string;
 export type FeatureGroupId = keyof Dictionary['features']['groups'];
@@ -183,12 +184,4 @@ export function faqGroups(locale: Locale) {
 export const faq = (locale: Locale) => faqGroups(locale).flatMap((group) => group.items);
 
 /** FAQPage do Google com as perguntas do idioma da página. */
-export const faqSchema = (locale: Locale) => ({
-  '@context': 'https://schema.org',
-  '@type': 'FAQPage',
-  mainEntity: faq(locale).map((item) => ({
-    '@type': 'Question',
-    name: item.question,
-    acceptedAnswer: { '@type': 'Answer', text: item.answer },
-  })),
-});
+export const faqSchema = (locale: Locale) => faqPageSchema(faq(locale));

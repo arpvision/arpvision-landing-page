@@ -1,0 +1,22 @@
+---
+// Passo 3 do Autochat, "Mostra os imóveis que combinam": o cartão do imóvel, com a distância até a
+// escola em linha reta e o "Ver o tour 360°". É tela de exemplo: fica fora do leitor de tela, que
+// ouve a descrição antes dela.
+import ExampleTag from './ExampleTag.astro';
+import ListingCard from './ListingCard.astro';
+import { pageLocale } from '../../i18n';
+const { t } = pageLocale(Astro);
+const { mock } = t.productPages.autochat;
+---
+
+<div class="example-figure">
+  <p class="sr-only">{mock.listingDescription}</p>
+  <div class="example-screen step-mock listing-mock" aria-hidden="true" inert>
+    <span class="step-mock-head">
+      <ExampleTag />
+    </span>
+    <span class="step-mock-body">
+      <ListingCard distance />
+    </span>
+  </div>
+</div>

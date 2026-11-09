@@ -1,0 +1,158 @@
+---
+// A página de um produto novo (/produtos/<produto>, /es/productos/<produto> e
+// /en/products/<produto>), com o texto de `productPages` do dicionário, no roteiro da spec: topo,
+// as seções do produto (a dor, como funciona, o que sai pronto, o que está incluído e a seção
+// própria dele), cotação, dúvidas e fechamento. A cotação e a faixa azul não levam nada do tour: a
+// ação é a cotação pelo WhatsApp do produto.
+import Layout from '../../layouts/Layout.astro';
+import Quote from '../Quote.astro';
+import Faq from '../Faq.astro';
+import FinalCta from '../FinalCta.astro';
+import ProductHero from '../product/ProductHero.astro';
+import ProductPain from '../product/ProductPain.astro';
+import ProductSteps from '../product/ProductSteps.astro';
+import PostGallery from '../product/PostGallery.astro';
+import ProductIncluded from '../product/ProductIncluded.astro';
+import ProductComparison from '../product/ProductComparison.astro';
+import VideoFormats from '../product/VideoFormats.astro';
+import ProximitySection from '../product/ProximitySection.astro';
+import BrokerSummary from '../product/BrokerSummary.astro';
+import HandoffList from '../product/HandoffList.astro';
+import AlsoProducts from '../product/AlsoProducts.astro';
+import CalendarMock from '../mocks/CalendarMock.astro';
+import StaleProfileMock from '../mocks/StaleProfileMock.astro';
+import SiteReadMock from '../mocks/SiteReadMock.astro';
+import StyleChoiceMock from '../mocks/StyleChoiceMock.astro';
+import MonthApprovalMock from '../mocks/MonthApprovalMock.astro';
+import VideoPair from '../mocks/VideoPair.astro';
+import PhotosSentMock from '../mocks/PhotosSentMock.astro';
+import VisitOrderMock from '../mocks/VisitOrderMock.astro';
+import VideoDeliveryMock from '../mocks/VideoDeliveryMock.astro';
+import ChatMock from '../mocks/ChatMock.astro';
+import ClientMessageMock from '../mocks/ClientMessageMock.astro';
+import WishesMock from '../mocks/WishesMock.astro';
+import ListingMock from '../mocks/ListingMock.astro';
+import SummaryCardMock from '../mocks/SummaryCardMock.astro';
+import { pageLocale } from '../../i18n';
+import { productOfPage, type ProductPageId } from '../../lib/products';
+import { faqPageSchema, serviceSchema } from '../../lib/schema';
+interface Props {
+  page: ProductPageId;
+}
+const { page } = Astro.props;
+const { locale, t } = pageLocale(Astro);
+const product = productOfPage(page);
+// O texto de cada página. Uma página nova sem texto no dicionário para o build com o nome dela.
+const instagram = page === 'productInstagram' ? t.productPages.instagram : undefined;
+const videos = page === 'productVideos' ? t.productPages.videos : undefined;
+const autochat = page === 'productAutochat' ? t.productPages.autochat : undefined;
+const text = instagram ?? videos ?? autochat;
+if (!product || !text) throw new Error(`Página de produto sem texto: ${page}`);
+---
+
+<Layout
+  title={text.meta.title}
+  description={text.meta.description}
+  page={page}
+  schema={[serviceSchema(product.id, locale), faqPageSchema(text.faq.items)]}
+  whatsappMessage={text.whatsappMessage}
+  product={product.id}
+>
+  <ProductHero
+    eyebrow={text.hero.eyebrow}
+    title={text.hero.title}
+    lead={text.hero.lead}
+    button={text.hero.button}
+    note={text.hero.note}
+    isNew={product.isNew}
+    message={text.quote.greeting}
+    product={product.id}
+    wide={videos !== undefined}
+  >
+    {instagram && <CalendarMock />}
+    {videos && <VideoPair />}
+    {autochat && <ChatMock />}
+  </ProductHero>
+  {instagram && (
+    <>
+      <ProductPain {...instagram.pain}>
+        <StaleProfileMock />
+      </ProductPain>
+      <ProductSteps title={instagram.steps.title} items={instagram.steps.items}>
+        <SiteReadMock slot="step-1" />
+        <StyleChoiceMock slot="step-2" />
+        <MonthApprovalMock slot="step-3" />
+      </ProductSteps>
+      <PostGallery />
+      <ProductIncluded
+        title={instagram.included.title}
+        items={instagram.included.items}
+        icons={['calendar', 'home', 'globe', 'target', 'star', 'shield', 'camera', 'check']}
+      />
+      <ProductComparison {...instagram.comparison} />
+    </>
+  )}
+  {videos && (
+    <>
+      <VideoFormats />
+      <ProductSteps title={videos.steps.title} items={videos.steps.items}>
+        <PhotosSentMock slot="step-1" />
+        <VisitOrderMock slot="step-2" />
+        <VideoDeliveryMock slot="step-3" />
+      </ProductSteps>
+      <ProductIncluded
+        title={videos.included.title}
+        items={videos.included.items}
+        icons={['move', 'music', 'home', 'shield', 'link', 'video']}
+      />
+    </>
+  )}
+  {autochat && (
+    <>
+      <ProductPain {...autochat.pain} />
+      <ProductSteps title={autochat.steps.title} items={autochat.steps.items}>
+        <ClientMessageMock slot="step-1" />
+        <WishesMock slot="step-2" />
+        <ListingMock slot="step-3" />
+        <SummaryCardMock slot="step-4" start />
+      </ProductSteps>
+      <ProximitySection />
+      <BrokerSummary />
+      <HandoffList />
+      <ProductIncluded
+        title={autochat.included.title}
+        items={autochat.included.items}
+        icons={['clock', 'info', 'message', 'home', 'camera', 'pin', 'user', 'shield']}
+      />
+    </>
+  )}
+  <Quote
+    eyebrow={text.quote.eyebrow}
+    title={text.quote.title}
+    lead={text.quote.lead}
+    benefits={[]}
+    questions={text.quote.questions}
+    greeting={text.quote.greeting}
+    closing={text.quote.closing}
+    trial={false}
+    product={product.id}
+  />
+  <Faq
+    groups={[{ items: text.faq.items }]}
+    eyebrow={text.faq.eyebrow}
+    title1={text.faq.title1}
+    title2={text.faq.title2}
+    lead1={text.faq.lead1}
+    lead2={text.faq.lead2}
+  />
+  <FinalCta
+    title={text.finalCta.title}
+    lead={text.finalCta.lead}
+    primary="whatsapp"
+    whatsappLabel={text.finalCta.button}
+    whatsappMessage={text.quote.greeting}
+    product={product.id}
+    note={null}
+  />
+  <AlsoProducts current={product.id} />
+</Layout>

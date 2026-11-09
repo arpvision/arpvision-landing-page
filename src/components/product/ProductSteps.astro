@@ -1,0 +1,36 @@
+---
+// "Como funciona" de uma página de produto: os passos, em ordem, cada um com o número, o título, o
+// texto e uma tela de exemplo pequena. A página passa a tela de cada passo pelo slot dele (`step-1`,
+// `step-2`...), e um passo sem tela para o build. No HTML, a tela vem depois do texto (o leitor de
+// tela ouve o passo antes da descrição da tela); na página, ela aparece em cima. Com quatro passos
+// (o Autochat), o desktop mostra os quatro lado a lado, em cartões mais estreitos.
+interface Props {
+  title: string;
+  items: { title: string; text: string }[];
+}
+const { title, items } = Astro.props;
+const slots = items.map((_, index) => `step-${index + 1}`);
+const missing = slots.filter((name) => !Astro.slots.has(name));
+if (missing.length)
+  throw new Error(`ProductSteps: passo sem tela de exemplo: ${missing.join(', ')}`);
+---
+
+<section class="section product-steps-section" aria-labelledby="steps-title">
+  <div class="container">
+    <div class="section-heading center">
+      <h2 id="steps-title">{title}</h2>
+    </div>
+    <ol class:list={['product-steps', { 'is-in-fours': items.length === 4 }]} role="list">
+      {items.map((item, index) => (
+        <li>
+          <span class="product-step-number" aria-hidden="true">
+            {String(index + 1).padStart(2, '0')}
+          </span>
+          <h3>{item.title}</h3>
+          <p>{item.text}</p>
+          <slot name={slots[index]} />
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>

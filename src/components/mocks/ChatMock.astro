@@ -1,0 +1,52 @@
+---
+// O topo do Autochat: a conversa no WhatsApp da Imobiliária Exemplo. Como na tela 2 aprovada, o
+// atendimento automático se apresenta num aviso no alto da conversa, centralizado e sem hora, e não
+// numa mensagem da imobiliária antes da cliente. Depois, a cliente diz o que procura e recebe o
+// cartão de um imóvel, a uns 450 m de uma escola em linha reta, com o "Ver o tour 360°". Ao lado, o
+// resumo para a corretora, e a etiqueta em cima dele, fora do cabeçalho da conversa, que assim cabe
+// numa coluna estreita. É tela de exemplo: fica fora do leitor de tela, que ouve a descrição antes.
+import Icon from '../Icon.astro';
+import ExampleTag from './ExampleTag.astro';
+import ListingCard from './ListingCard.astro';
+import { pageLocale } from '../../i18n';
+const { t } = pageLocale(Astro);
+const { hero, mock } = t.productPages.autochat;
+---
+
+<div class="example-figure">
+  <p class="sr-only">{hero.mockDescription}</p>
+  <div class="example-screen chat-mock" aria-hidden="true" inert>
+    <ExampleTag />
+    <span class="chat-mock-window">
+      <span class="chat-mock-header">
+        <span class="chat-mock-avatar">
+          <Icon name="home" size={18} />
+        </span>
+        <span class="chat-mock-contact">
+          <strong>{mock.agency}</strong>
+          <span>{mock.automated}</span>
+        </span>
+      </span>
+      <span class="chat-mock-thread">
+        <span class="chat-mock-notice">{mock.intro}</span>
+        <span class="chat-mock-bubble is-client">
+          {mock.request}
+          <span class="chat-mock-time">{mock.times.request}</span>
+        </span>
+        <span class="chat-mock-bubble">
+          {mock.found}
+          <ListingCard />
+          <span class="chat-mock-time">{mock.times.found}</span>
+        </span>
+      </span>
+    </span>
+    <span class="chat-mock-summary">
+      <span class="summary-title">
+        <Icon name="user" size={16} />
+        {mock.summary}
+      </span>
+      <span>{[mock.deal, ...mock.wishes].join(' · ')}</span>
+      <span class="chat-mock-visit">{mock.visit}</span>
+    </span>
+  </div>
+</div>

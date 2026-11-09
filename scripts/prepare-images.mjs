@@ -2,8 +2,7 @@
 // Uso: node scripts/prepare-images.mjs [nome ...]
 //   Sem nomes, gera tudo. Com nomes, só os arquivos citados (sem extensão), por exemplo
 //   `node scripts/prepare-images.mjs og-home-en og-plans-en`. Os PNGs em português no ar
-//   (og-home, og-planos) foram preservados de uma redação anterior: regenerá-los troca o
-//   texto deles pelo daqui.
+//   (og-home, og-planos) já têm o texto daqui.
 import sharp from 'sharp';
 import { readFile, readdir, mkdir } from 'node:fs/promises';
 
@@ -42,16 +41,34 @@ await Promise.all([
         .webp({ quality: 80 })
         .toFile(`public/images/tutorial-${width}.webp`),
     ),
+  // Miniaturas das fotos do calendário do topo do Piloto (CalendarMock.astro), que aparecem com
+  // poucas dezenas de pixels de largura: 240 px no 4:5 e 180 px no 9:16, em <recorte>-<largura>.webp.
+  // Saem dos recortes WebP do site, e não da panorâmica: depois de refazer os recortes
+  // (scripts/product-crops.mjs), refaça estas também.
+  ...[
+    ['patio-fachada-4x5', 240],
+    ['quarto-com-suite-4x5', 240],
+    ['sala-2-4x5', 240],
+    ['cozinha-4x5', 240],
+    ['patio-piscina-9x16', 180],
+  ]
+    .filter(([name, width]) => wanted(`${name}-${width}`))
+    .map(([name, width]) =>
+      sharp(`public/images/produtos/${name}.webp`)
+        .resize(width)
+        .webp({ quality: 80 })
+        .toFile(`public/images/produtos/${name}-${width}.webp`),
+    ),
 ]);
 
 // Cartões tipográficos com a identidade oficial: imagens de compartilhamento,
 // distintas das fotografias e das provas reais de produto ainda pendentes.
-// Um por página e idioma; o público é qualquer negócio, não só imobiliárias.
+// Um por página e idioma; o público é a imobiliária.
 const cards = [
   {
     name: 'og-home',
-    lines: ['Seu celular.', 'Seu espaço.', 'Em 360°.'],
-    subtitle: 'Tour virtual para o seu negócio.',
+    lines: ['Seu celular.', 'Seus imóveis.', 'Em 360°.'],
+    subtitle: 'Tour virtual para imobiliárias.',
     note: 'Sem baixar app. Sem equipamento extra.',
   },
   {
@@ -62,8 +79,8 @@ const cards = [
   },
   {
     name: 'og-home-es',
-    lines: ['Tu móvil.', 'Tu espacio.', 'En 360°.'],
-    subtitle: 'Tour virtual para tu negocio.',
+    lines: ['Tu móvil.', 'Tus inmuebles.', 'En 360°.'],
+    subtitle: 'Tour virtual para inmobiliarias.',
     note: 'Sin descargar apps. Sin equipo extra.',
   },
   {
@@ -74,8 +91,8 @@ const cards = [
   },
   {
     name: 'og-home-en',
-    lines: ['Your phone.', 'Your space.', 'In 360°.'],
-    subtitle: 'Virtual tours for your business.',
+    lines: ['Your phone.', 'Your properties.', 'In 360°.'],
+    subtitle: 'Virtual tours for real estate agencies.',
     note: 'No app to download. No extra gear.',
   },
   {
