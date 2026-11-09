@@ -30,10 +30,13 @@ document.addEventListener('click', (event) => {
   if (isOpen() && !(event.target as Element).closest('#products-panel, [data-products-toggle]'))
     setPanel(false);
 });
+// O foco que volta do painel à cápsula do cabeçalho (no Esc, aqui, e no Tab, abaixo) não rola a
+// página: com o `scroll-padding-top` do html, o navegador acharia o botão encoberto pelo cabeçalho
+// fixo e subiria a página (uns 500 px no Chrome).
 document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape' && isOpen()) {
     setPanel(false);
-    toggle?.focus();
+    toggle?.focus({ preventScroll: true });
   }
 });
 // Com o painel aberto, o Tab segue a ordem da tela: do botão ao primeiro item e do último item ao
@@ -49,11 +52,11 @@ panel?.addEventListener('keydown', (event) => {
   const links = [...panel.querySelectorAll('a')];
   if (event.shiftKey && event.target === links[0]) {
     event.preventDefault();
-    toggle?.focus();
+    toggle?.focus({ preventScroll: true });
   } else if (!event.shiftKey && event.target === links.at(-1)) {
     event.preventDefault();
     setPanel(false);
-    (toggle?.nextElementSibling as HTMLElement | null)?.focus();
+    (toggle?.nextElementSibling as HTMLElement | null)?.focus({ preventScroll: true });
   }
 });
 window.addEventListener('resize', () => isOpen() && place(), { passive: true });

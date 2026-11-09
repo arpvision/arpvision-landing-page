@@ -1209,6 +1209,77 @@ try {
   results.push(
     'Menu Produtos no desktop (pt, es e en): o topo Produtos · Cotação · Dúvidas · Tutoriais no idioma, primeiro item, clique, Esc com o foco de volta, Enter, Tab até o painel, Shift+Tab do primeiro item de volta ao botão, Tab do último item fecha e segue para o topo, Espaço abre e fecha, fecha na largura do celular, clique fora, os produtos no ar e o selo Novo/Nuevo/New nos três novos; no pt, o grupo "Com a nossa equipe" com o treinamento e o Tour Pronto levando à seção do Presencial, e nada dele no es e no en OK',
   );
+  // Com a página rolada, fechar o painel Produtos pelo teclado devolve o foco ao cabeçalho sem
+  // rolar a página: o Esc e o Shift+Tab do primeiro item levam ao botão, e o Tab do último item, ao
+  // item do topo depois dele. Sem o `preventScroll`, o `scroll-padding-top` do html faz o navegador
+  // achar o foco encoberto pelo cabeçalho, e a página sobe (503 px a 1440 px). O painel abre pelo
+  // mouse, nas coordenadas do botão: o clique do Playwright num item do cabeçalho rola a página
+  // antes de clicar. O foco que o teste põe num item não rola a página, e cada tecla é medida
+  // sozinha, a partir do meio da página.
+  for (const locale of Object.keys(localeRoutes)) {
+    const route = localeRoutes[locale].pages.productAutochat;
+    await page.goto(base + route);
+    const toggle = page.locator('.products-toggle');
+    const panel = page.locator('#products-panel');
+    const links = panel.locator('a');
+    const middle = await page.evaluate(() =>
+      Math.round((document.documentElement.scrollHeight - innerHeight) / 2),
+    );
+    const scrolled = () =>
+      page.evaluate(
+        () =>
+          new Promise((done) =>
+            requestAnimationFrame(() => requestAnimationFrame(() => done(Math.round(scrollY)))),
+          ),
+      );
+    const focusWithoutScroll = (locator) =>
+      locator.evaluate((element) => element.focus({ preventScroll: true }));
+    const isFocused = (locator) =>
+      locator.evaluate((element) => element === document.activeElement);
+    // O quanto a página rola com uma tecla.
+    const jump = async (key) => {
+      const before = await scrolled();
+      await page.keyboard.press(key);
+      return (await scrolled()) - before;
+    };
+    const jumps = {};
+    await scrollPage(page, middle);
+    const box = await toggle.boundingBox();
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+    assert.equal(await panel.isVisible(), true, `${route}, rolada: o clique abre o painel`);
+    await focusWithoutScroll(links.nth(1));
+    jumps.escape = await jump('Escape');
+    assert.equal(await panel.isVisible(), false, `${route}, rolada: Esc fecha`);
+    assert.equal(await isFocused(toggle), true, `${route}, rolada: Esc leva o foco ao botão`);
+    await scrollPage(page, middle);
+    jumps.enter = await jump('Enter');
+    jumps.tab = await jump('Tab');
+    assert.equal(await isFocused(links.first()), true, `${route}, rolada: Tab vai ao painel`);
+    jumps.shiftTab = await jump('Shift+Tab');
+    assert.equal(await isFocused(toggle), true, `${route}, rolada: Shift+Tab volta ao botão`);
+    assert.equal(await panel.isVisible(), true, `${route}, rolada: o painel segue aberto`);
+    await scrollPage(page, middle);
+    await focusWithoutScroll(links.last());
+    jumps.lastTab = await jump('Tab');
+    assert.equal(await panel.isVisible(), false, `${route}, rolada: Tab do último item fecha`);
+    assert.equal(
+      await page.evaluate(() =>
+        [...document.querySelectorAll('.desktop-nav > :is(a, button)')].indexOf(
+          document.activeElement,
+        ),
+      ),
+      1,
+      `${route}, rolada: Tab do último item vai ao item do topo depois do botão`,
+    );
+    assert.deepEqual(
+      jumps,
+      { escape: 0, enter: 0, tab: 0, shiftTab: 0, lastTab: 0 },
+      `${route}, rolada: o teclado leva o foco do painel ao cabeçalho sem rolar a página`,
+    );
+  }
+  results.push(
+    'Menu Produtos com a página rolada (Autochat em pt, es e en, a 1440px): Esc, Enter, Tab até o painel, Shift+Tab do primeiro item e Tab do último item não rolam a página OK',
+  );
 
   // A página do Piloto automático para Instagram, nos três idiomas: as telas de exemplo marcadas,
   // nada do tour na cotação e na faixa azul, o produto em todo botão de WhatsApp, a mensagem da
