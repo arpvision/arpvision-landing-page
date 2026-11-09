@@ -2561,6 +2561,10 @@ try {
     for (const route of ptRoutes) {
       const dimensions = await measure(route);
       ptDimensions.set(route, dimensions);
+      assert.ok(
+        dimensions.scroll <= dimensions.width && dimensions.layout <= dimensions.width,
+        `${route} ${width}px: sem overflow ${JSON.stringify(dimensions)}`,
+      );
       assert.deepEqual(dimensions.wrapped, [], `${route} ${width}px: cabeçalho em uma linha`);
       assert.equal(dimensions.products, width >= 1024, `${route} ${width}px: Produtos no desktop`);
       assert.ok(
