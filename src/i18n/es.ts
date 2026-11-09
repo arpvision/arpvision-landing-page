@@ -299,7 +299,7 @@ export const es: Dictionary = {
       meta: {
         title: 'Autochat: atención por WhatsApp para inmobiliarias | ARP Vision',
         description:
-          'El Autochat atiende en el WhatsApp de tu inmobiliaria, busca inmuebles por zona, precio, dormitorios y lo que hay cerca, y lo deriva al agente con un resumen.',
+          'El Autochat atiende en el WhatsApp de tu inmobiliaria, busca inmuebles por zona, precio, dormitorios y lo que hay cerca, y deriva al agente con un resumen.',
       },
       hero: {
         eyebrow: 'AUTOCHAT',
@@ -487,7 +487,7 @@ export const es: Dictionary = {
         agency: 'Inmobiliaria Ejemplo',
         automated: 'Atención automática',
         intro:
-          '¡Hola! Soy la atención automática de la Inmobiliaria Ejemplo. Si lo prefieres, llamo a un agente.',
+          '¡Hola! Te atiende el servicio automático de la Inmobiliaria Ejemplo. Si lo prefieres, llamo a un agente.',
         request:
           'Busco un piso de 2 dormitorios de alquiler en el Centro, cerca de un colegio, hasta 1.200 al mes.',
         found: 'He encontrado 3 opciones. Este está a unos 450 m de un colegio, en línea recta:',
