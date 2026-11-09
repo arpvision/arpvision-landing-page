@@ -275,27 +275,29 @@ const storyNumber = (target) =>
   });
 // As artes de "Assim ficam os seus posts" cortam o que passa da borda delas. No celular, cada uma
 // cresce com o próprio texto: o rodapé (a imobiliária e o CRECI, a calificación energética ou a
-// licença) fica inteiro dentro dela, e nenhuma fica mais baixa que o formato (o post 4:5 e o story
-// 9:16). Devolve o que falha.
+// licença) aparece e fica inteiro dentro dela, e nenhuma fica mais baixa que o formato (o post 4:5
+// e o story 9:16). Esconder o rodapé não vale como caber. Devolve o que falha.
 const postArtsOut = (target) =>
   target.locator('.post-gallery .post-art').evaluateAll((arts) =>
     arts.flatMap((art) => {
       const box = art.getBoundingClientRect();
       const kind = art.querySelector('.post-art-kind').textContent.trim();
-      const out = [...art.querySelectorAll('.post-art-footer > span')]
-        .filter((line) => {
-          const range = document.createRange();
-          range.selectNodeContents(line);
-          return [...range.getClientRects()].some(
-            (rect) =>
-              rect.width > 0 &&
-              (rect.top < box.top - 0.5 ||
-                rect.bottom > box.bottom + 0.5 ||
-                rect.left < box.left - 0.5 ||
-                rect.right > box.right + 0.5),
-          );
-        })
-        .map((line) => `${kind}: "${line.textContent.trim()}" fora da arte`);
+      const out = [...art.querySelectorAll('.post-art-footer > span')].flatMap((line) => {
+        const range = document.createRange();
+        range.selectNodeContents(line);
+        const rects = [...range.getClientRects()].filter((rect) => rect.width > 0);
+        const text = line.textContent.trim();
+        if (!rects.length || !line.checkVisibility({ visibilityProperty: true }))
+          return [`${kind}: "${text}" escondido`];
+        const outside = rects.some(
+          (rect) =>
+            rect.top < box.top - 0.5 ||
+            rect.bottom > box.bottom + 0.5 ||
+            rect.left < box.left - 0.5 ||
+            rect.right > box.right + 0.5,
+        );
+        return outside ? [`${kind}: "${text}" fora da arte`] : [];
+      });
       const format = art.classList.contains('post-art-story') ? 16 / 9 : 5 / 4;
       if (box.height / box.width < format - 0.01)
         out.push(`${kind}: ${Math.round(box.width)}x${Math.round(box.height)}, abaixo do formato`);
