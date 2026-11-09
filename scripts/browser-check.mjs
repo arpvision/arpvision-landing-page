@@ -1227,7 +1227,7 @@ try {
     },
     es: {
       example: 'Ejemplo',
-      whatsappNumber: '600 000 000',
+      whatsappNumber: '000 000 000',
       contact:
         '¡Hola! Vengo de la web y quiero saber más del Piloto automático para Instagram de ARP Vision.',
       choices: ['21 a 100', '3', 'Este mes'],

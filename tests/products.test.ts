@@ -464,6 +464,22 @@ test('no inglês, o número da licença no lugar do CRECI e os nomes fictícios 
   );
 });
 
+// Os telefones das telas de exemplo só têm zeros, como o "(00) 00000-0000" do português: um número
+// que pode existir (o "600 000 000" do espanhol era um celular de formato válido) cairia em alguém.
+test('os telefones das telas de exemplo só têm zeros, nos três idiomas', () => {
+  const phones = locales.flatMap((locale) => {
+    const { instagram, autochat } = translations(locale).productPages;
+    return [
+      [`${locale}.instagram.mock.whatsappNumber`, instagram.mock.whatsappNumber],
+      [`${locale}.autochat.mock.clientPhone`, autochat.mock.clientPhone],
+    ];
+  });
+  assert.deepEqual(
+    phones.filter(([, phone]) => !/0/.test(phone) || /[1-9]/.test(phone)),
+    [],
+  );
+});
+
 test('o Autochat tem 4 passos, 3 distâncias, 6 campos no resumo, 4 casos, 8 itens e 8 dúvidas', () => {
   for (const locale of locales) {
     const page = translations(locale).productPages.autochat;

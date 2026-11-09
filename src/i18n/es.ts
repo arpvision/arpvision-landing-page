@@ -288,7 +288,8 @@ export const es: Dictionary = {
         licenseOnEveryPost: false,
         details: '3 dormitorios · 240 m²',
         whatsapp: 'WhatsApp',
-        whatsappNumber: '600 000 000',
+        // DIFERENTE: o formato de telefone da Espanha, só com zeros, que não pode ser de ninguém.
+        whatsappNumber: '000 000 000',
       },
     },
     // DIFERENTE: no cartão do imóvel da conversa, a calificación energética no lugar do CRECI; o
@@ -504,7 +505,8 @@ export const es: Dictionary = {
         summary: 'Resumen para la agente',
         client: 'Lucía Martín',
         whatsapp: 'WhatsApp',
-        clientPhone: '600 000 000',
+        // Só com zeros, como no story do Piloto.
+        clientPhone: '000 000 000',
         seen: 'Ha visto 3 inmuebles y le ha gustado el piso del Centro',
         visit: 'Quiere visitarlo el sábado por la mañana',
         conversation: 'Conversación completa',
