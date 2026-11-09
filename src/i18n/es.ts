@@ -282,8 +282,9 @@ export const es: Dictionary = {
         month: 'Próximo mes',
         requestChange: 'Pedir un cambio',
         agency: 'Inmobiliaria Ejemplo',
-        // A calificación energética é do imóvel: só vai nas artes que anunciam um.
-        license: 'Calificación energética: E',
+        // A calificación energética é do imóvel: só vai nas artes que anunciam um. O espaço antes
+        // da letra não quebra: o "E" nunca fica sozinho na linha de baixo.
+        license: 'Calificación energética:\u00a0E',
         licenseOnEveryPost: false,
         details: '3 dormitorios · 240 m²',
         whatsapp: 'WhatsApp',
@@ -494,7 +495,8 @@ export const es: Dictionary = {
         listingDetails: '2 dormitorios · 68 m²',
         listingPrice: '1.150 al mes',
         listingDistance: 'A unos 450 m de un colegio, en línea recta',
-        license: 'Calificación energética: E',
+        // O espaço antes da letra não quebra, como nas artes do Piloto.
+        license: 'Calificación energética:\u00a0E',
         tour: 'Ver el tour 360°',
         wishesTitle: 'Lo que busca la clienta',
         deal: 'Alquiler',
