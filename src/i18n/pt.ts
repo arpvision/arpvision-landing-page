@@ -272,8 +272,9 @@ export const pt = {
         'Olá! Vim pelo site e quero saber do Piloto automático para Instagram da ARP Vision.',
       // O texto fictício das telas de exemplo.
       mock: {
-        // O calendário do topo.
-        period: 'Próximas duas semanas',
+        // O calendário do topo. O título vale nas duas larguras: no desktop são duas semanas, e
+        // abaixo de 768 px, uma.
+        period: 'Próximos posts',
         weekdays: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
         story: 'Story',
         approved: 'Aprovado',

@@ -259,7 +259,7 @@ export const es: Dictionary = {
       whatsappMessage:
         '¡Hola! Vengo de la web y quiero saber más del Piloto automático para Instagram de ARP Vision.',
       mock: {
-        period: 'Próximas dos semanas',
+        period: 'Próximas publicaciones',
         weekdays: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
         story: 'Story',
         approved: 'Aprobado',

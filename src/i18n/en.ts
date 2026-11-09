@@ -303,8 +303,9 @@ export const en: Dictionary = {
         "Hi! I came from the website and I'd like to know more about ARP Vision's Autopilot for Instagram.",
       // O texto fictício das telas de exemplo.
       mock: {
-        // O calendário do topo.
-        period: 'Next two weeks',
+        // O calendário do topo. O título vale nas duas larguras: no desktop são duas semanas, e
+        // abaixo de 768 px, uma.
+        period: 'Upcoming posts',
         weekdays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
         story: 'Story',
         approved: 'Approved',
