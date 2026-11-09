@@ -1011,6 +1011,16 @@
     color-mix(in srgb, var(--ink) 90%, transparent) 74%
   );
 }
+/* No celular, o título e os dados do imóvel sobem para a parte clara do véu, e a foto atrás deles
+   pode ser clara (a 390 px, o título de "Para alugar" tinha mais da metade dos traços abaixo de
+   4,5:1). Uma sombra escura em volta das letras, justa e depois larga, os mantém legíveis sobre
+   qualquer recorte. */
+.post-art-photo :is(.post-art-title, .post-art-details, .post-art-whatsapp) {
+  text-shadow:
+    0 0 2px color-mix(in srgb, var(--ink) 70%, transparent),
+    0 1px 4px color-mix(in srgb, var(--ink) 50%, transparent),
+    0 0 14px color-mix(in srgb, var(--ink) 40%, transparent);
+}
 .post-art-blue {
   background: var(--brand-blue);
 }
