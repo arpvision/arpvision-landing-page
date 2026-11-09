@@ -1,6 +1,6 @@
 # ARP Vision — site de marketing
 
-Landing page para imobiliárias, em português do Brasil, espanhol da Espanha e inglês: o tour virtual 360° e os produtos que vêm com ele (vídeos a partir de fotos, Piloto automático para Instagram e Autochat). Astro gera HTML estático para as páginas da tabela de [Páginas](#páginas), nos três idiomas, e uma página 404 em cada um. Sem framework JavaScript no cliente: interações pequenas em TypeScript e CSS com os tokens da marca.
+Landing page para imobiliárias, em português do Brasil, espanhol da Espanha e inglês: o tour virtual 360° e os produtos que vêm com ele (vídeos a partir de fotos, Piloto automático para Instagram e Autochat). Astro gera HTML estático para as páginas da tabela de [Páginas](#páginas), em cada idioma, e uma página 404 nos três idiomas. Sem framework JavaScript no cliente: interações pequenas em TypeScript e CSS com os tokens da marca.
 
 ## Executar
 
@@ -24,19 +24,19 @@ Hospede o conteúdo de `dist/` em um servidor estático que resolva `/planos` pa
 
 Os endereços de cada idioma moram em `src/i18n/routes.ts`; o espanhol e o inglês têm endereços no próprio idioma.
 
-| Página | pt | es | en |
-| --- | --- | --- | --- |
-| Home | `/` | `/es` | `/en` |
-| Planos | `/planos` | `/es/planes` | `/en/plans` |
-| Tutoriais | `/tutoriais` | `/es/tutoriales` | `/en/tutorials` |
-| Termos de uso | `/termos-de-uso` | `/es/terminos-de-uso` | `/en/terms-of-use` |
-| Privacidade | `/politica-de-privacidade` | `/es/politica-de-privacidad` | `/en/privacy-policy` |
-| Todos os produtos | `/produtos` | `/es/productos` | `/en/products` |
+| Página                           | pt                                           | es                                               | en                                     |
+| -------------------------------- | -------------------------------------------- | ------------------------------------------------ | -------------------------------------- |
+| Home                             | `/`                                          | `/es`                                            | `/en`                                  |
+| Planos                           | `/planos`                                    | `/es/planes`                                     | `/en/plans`                            |
+| Tutoriais                        | `/tutoriais`                                 | `/es/tutoriales`                                 | `/en/tutorials`                        |
+| Termos de uso                    | `/termos-de-uso`                             | `/es/terminos-de-uso`                            | `/en/terms-of-use`                     |
+| Privacidade                      | `/politica-de-privacidade`                   | `/es/politica-de-privacidad`                     | `/en/privacy-policy`                   |
+| Todos os produtos                | `/produtos`                                  | `/es/productos`                                  | `/en/products`                         |
 | Piloto automático para Instagram | `/produtos/piloto-automatico-para-instagram` | `/es/productos/piloto-automatico-para-instagram` | `/en/products/autopilot-for-instagram` |
-| Autochat | `/produtos/autochat` | `/es/productos/autochat` | `/en/products/autochat` |
-| Vídeos a partir de fotos | `/produtos/videos-a-partir-de-fotos` | `/es/productos/videos-a-partir-de-fotos` | `/en/products/videos-from-photos` |
+| Autochat                         | `/produtos/autochat`                         | `/es/productos/autochat`                         | `/en/products/autochat`                |
+| Vídeos a partir de fotos         | `/produtos/videos-a-partir-de-fotos`         | `/es/productos/videos-a-partir-de-fotos`         | `/en/products/videos-from-photos`      |
 
-- Os preços estão ocultos: `/planos`, `/es/planes` e `/en/plans` só redirecionam para a cotação da Home e ficam fora do sitemap e das checagens (`site.pricing.showPrices` liga a página de volta). São 24 páginas HTML, mais os três redirecionamentos e a 404.
+- Os preços estão ocultos: `/planos`, `/es/planes` e `/en/plans` só redirecionam para a cotação da Home, com `noindex`, e ficam fora do sitemap e da lista de páginas que as checagens percorrem (`site.pricing.showPrices` liga a página de volta). Neles, o `check:site` confere o redirecionamento e o `noindex`, e o `browser-check`, que cada endereço leva à cotação. São 24 páginas HTML, mais os três redirecionamentos e a 404.
 - O tour 360° e o ARP Vision Presencial não têm página: levam à Home (o Presencial, à seção `#presencial`, só no português).
 - Uma página de produto só existe no site depois de entrar em `publishedPageIds`; veja [Produtos](#produtos).
 
@@ -58,7 +58,7 @@ Os **dados** ficam em **`src/config/site.ts`**: links, contatos, mídias, tours,
 
 Logos e tutorial são oficiais e estão hospedados localmente. Fontes Inter e imagens WebP também são locais. Consulte `public/ASSETS.md` para fontes e licença da fotografia ilustrativa.
 
-A fotografia de interior **não é uma captura ARP Vision**. As fotos e os seis vídeos de exemplo das páginas de produto vêm do tour de demonstração, e a página os mostra sempre com a etiqueta "Exemplo" (veja [Produtos](#produtos)).
+A fotografia de interior **não é uma captura ARP Vision**. As fotos e os seis vídeos de exemplo das páginas de produto vêm do tour de demonstração, e essas páginas os mostram sempre com a etiqueta "Exemplo" (veja [Produtos](#produtos)); em `/produtos`, as fotos são só a capa de cada cartão.
 
 Exemplo de configuração de um tour real (substitua todos os dados antes de usar):
 
@@ -116,26 +116,26 @@ Hreflang (com `x-default` em português), canonical, `og:locale`, sitemap e JSON
 
 ## Produtos
 
-- **Catálogo:** `src/lib/products.ts` tem a lista `products` (id, grupo, ícone, selo "Novo", página própria e destino) e as funções que o resto do site usa. O menu Produtos, a página de todos os produtos, a coluna do rodapé, o "Conheça também" das páginas, a faixa "Mais para a sua imobiliária." da Home, o `ItemList` dos dados estruturados, o sitemap e as checagens leem a mesma lista, e assim nenhum esquece um produto. Três grupos:
+- **Catálogo:** `src/lib/products.ts` tem a lista `products` (id, grupo, ícone, selo "Novo", página própria e destino) e as funções que o resto do site usa. O menu Produtos, a página de todos os produtos, a coluna do rodapé, o "Conheça também" das páginas, a faixa "Mais para a sua imobiliária." da Home e o `ItemList` dos dados estruturados leem essa lista, e assim nenhum esquece um produto. O sitemap e os scripts de checagem não leem o catálogo, e sim `publishedPageIds` e `routes`, de `src/i18n/routes.ts` (veja "O que está no ar"); o catálogo tem os testes de `tests/products.test.ts`. Três grupos:
   - "Mostrar o imóvel": Tour virtual 360° (leva à Home) e Vídeos a partir de fotos;
   - "Divulgar e atender": Piloto automático para Instagram e Autochat;
   - "Com a nossa equipe": Treinamento da equipe e Tour Pronto, o ARP Vision Presencial. Entram onde o dicionário tem a seção `inPerson` (hoje só o português) e levam a `#presencial` na Home (`/#presencial` nas outras páginas).
 - **O que está no ar:** `publishedPageIds`, em `src/i18n/routes.ts`. Uma página entra nessa lista quando fica pronta, e só então o menu, o rodapé, a faixa da Home, o sitemap, `getStaticPaths` e as checagens passam a mostrá-la (`isLive` e `liveProductsFor`, em `products.ts`). O link "Ver todos os produtos" só aparece com `products` publicada. Os scripts `.mjs` importam essa lista direto: `routes.ts` só tem `import type`, e o Node tira os tipos sozinho.
-- **Páginas:** `src/components/pages/ProductPage.astro` monta as três páginas de produto, e `ProductsPage.astro`, a lista (`/produtos`, com um cartão por produto, nos grupos do menu). As seções ficam em `src/components/product/` e as telas de exemplo, em `src/components/mocks/`. Cada página tem o topo (nome com o selo "Novo", promessa, botão de cotação pelo WhatsApp e uma tela de exemplo), como funciona (uma tela pequena em cada passo), o que está incluído, as seções próprias do produto (a dor, as artes e a comparação no Piloto; a dor, a distância, o resumo para o corretor e os casos em que a conversa passa para uma pessoa no Autochat; os formatos nos Vídeos), a cotação, as dúvidas e a faixa azul com o "Conheça também". Nada do tour entra nelas: nem os benefícios, nem a linha do teste grátis, nem o "Criar conta grátis" da faixa. Sem preço, sem "a partir de" e sem número de resultado.
-- **Texto:** só nos dicionários, nos três idiomas: o menu em `products`, cada página em `productPages.<produto>`, a lista em `productsPage` e a faixa da Home em `productsStrip`. As regras de texto (nada de "IA"/"AI", "gerado", "algoritmo", "100% real" ou "sem edição", moeda com número, "a partir de"/"from" com preço) valem para os três idiomas e são conferidas por `tests/products.test.ts` e pelo `check:site`. O espanhol e o inglês não levam palavra em português nem CRECI: o espanhol usa a "calificación energética" e o inglês, o número da licença ("License #00000").
+- **Páginas:** `src/components/pages/ProductPage.astro` monta as três páginas de produto, e `ProductsPage.astro`, a lista (`/produtos`, com um cartão por produto, nos grupos do menu). As seções ficam em `src/components/product/` e as telas de exemplo, em `src/components/mocks/`. Cada página tem o topo (nome com o selo "Novo", promessa, botão de cotação pelo WhatsApp e uma tela de exemplo), como funciona (uma tela pequena em cada passo), o que está incluído, as seções próprias do produto (a dor, as artes e a comparação no Piloto; a dor, a distância, o resumo para o corretor e os casos em que a conversa passa para uma pessoa no Autochat; os formatos nos Vídeos), a cotação, as dúvidas, a faixa azul e, depois dela, o "Conheça também" com os outros produtos. Nada do tour entra nelas: nem os benefícios, nem a linha do teste grátis, nem o "Criar conta grátis" da faixa. Sem preço, sem "a partir de" e sem número de resultado.
+- **Texto:** só nos dicionários, nos três idiomas: o menu em `products`, cada página em `productPages.<produto>`, a lista em `productsPage` e a faixa da Home em `productsStrip`. As regras de texto (nada de "IA"/"AI", "gerado", "algoritmo", "100% real" ou "sem edição", moeda com número, "a partir de"/"from" com preço) valem para os três idiomas, e cada uma tem quem a confere: `tests/products.test.ts` as aplica ao texto das páginas de produto e de `/produtos` nos três idiomas (as do inglês vêm de `scripts/lib/english-rules.mjs`), `tests/i18n.test.ts` reprova "IA"/"AI" em todo o texto do site, e o `check:site` aplica as regras do inglês às páginas `/en` e, com os preços ocultos, reprova moeda com número no HTML dos três idiomas (`scripts/lib/prices.mjs`). O espanhol e o inglês não levam palavra em português nem CRECI: o espanhol usa a "calificación energética" e o inglês, o número da licença ("License #00000").
 - **Telas de exemplo:** HTML e CSS com as fotos dos recortes, sem imagem gerada. Cada uma leva a etiqueta visível "Exemplo" ("Ejemplo", "Example"), com nomes fictícios no idioma (Imobiliária Exemplo, Inmobiliaria Ejemplo, Example Realty). Ficam fora do leitor de tela (`aria-hidden` e `inert`), que ouve antes uma descrição curta que começa por "Exemplo:" ("Ejemplo:", "Example:"). Os "botões" delas são `span`, sem foco.
 - **Fotos de exemplo:** 20 recortes de 7 ambientes do tour de demonstração, em `public/images/produtos/`. `scripts/product-crops.mjs` os gera de panorâmicas 2:1, com os ângulos de `scripts/product-crops.json`, a projeção de `scripts/lib/gnomonic.mjs` e o retoque do reflexo no vidro da cabeceira da suíte, de `scripts/lib/retouch.mjs`. Para refazer: `node scripts/product-crops.mjs --source "<pasta do tour com <ambiente>/tratada.jpg>"`; `--video-out <pasta>` grava também os JPG em resolução cheia para os vídeos e `--site-out <pasta>` muda o destino dos WebP. A origem e o formato de cada arquivo estão em `public/ASSETS.md`.
 - **Vídeos de exemplo:** seis MP4, `public/video/exemplo-{vertical,horizontal}-{pt,es,en}.mp4`, com o pôster de cada um em `public/images/produtos/`. São feitos no projeto Remotion da ARP Vision, fora deste repositório (parâmetros e origem em `public/ASSETS.md`), com o selo "Exemplo", os dados do imóvel e o cartão final gravados na imagem, e por isso há um par por idioma. Na página: `muted`, `loop`, `playsinline`, `preload="none"`, pôster e `data-autoplay`; tocam só enquanto estão na tela, cada um tem o botão de tocar e pausar, e com movimento reduzido nada toca sozinho. Ficam em `site.media.exampleVideos`.
 - **Cotação e WhatsApp:** cada página de produto leva o próprio texto para o componente da cotação e a própria mensagem do WhatsApp (`whatsappMessage`, que o Layout leva ao rodapé e ao botão flutuante). Os eventos da cotação levam o produto (`produto`), e a da Home continua sendo a do tour. Os preços seguem ocultos.
-- **Dados estruturados:** as páginas de produto levam `Service` (sem `offers`) e `FAQPage` com as dúvidas que aparecem nelas; a página de todos os produtos leva `ItemList` e `CollectionPage`, sem `FAQPage`.
+- **Dados estruturados:** as páginas de produto levam `Service` (sem `offers`) e `FAQPage` com as dúvidas que aparecem nelas; a página de todos os produtos leva o `ItemList`, sem `FAQPage`. Todas levam também a `Organization` e o `WebSite`, que vêm do Layout.
 
 Para acrescentar um produto:
 
-1. Acrescente o id e a entrada em `products` (`src/lib/products.ts`), e o texto do menu em `products.items` nos três dicionários.
-2. Crie o `PageId` e o endereço nos três idiomas em `src/i18n/routes.ts`, e os arquivos de rota em `src/pages/produtos/`, `src/pages/es/productos/` e `src/pages/en/products/`.
+1. Em `src/lib/products.ts`, acrescente o id em `ProductId` e a entrada em `products` (grupo, ícone, selo, página e destino). Se o produto tem página própria, acrescente também o id dela em `ProductPageId` e em `productPageIds`, a lista que as rotas `[slug].astro` percorrem. O texto do menu vai em `products.items.<produto>` nos três dicionários, e a foto do cartão de `/produtos`, em `photoOf`, no `ProductsPage.astro`.
+2. Em `src/i18n/routes.ts`, acrescente o `PageId` e o endereço nos três idiomas (o do português, sob `/produtos/`: é assim que as checagens reconhecem uma página de produto) e, em `src/pages/sitemap.xml.ts`, a frequência dele em `frequency`. Não há arquivo de rota para criar: `src/pages/produtos/[slug].astro`, `src/pages/es/productos/[slug].astro` e `src/pages/en/products/[slug].astro` já geram a página de todo id de `productPageIds` que estiver em `publishedPageIds`.
 3. Escreva `productPages.<produto>` nos três dicionários (o tipo `Dictionary` e `tests/i18n.test.ts` exigem as mesmas chaves e listas do mesmo tamanho) e monte a página em `ProductPage.astro`.
-4. Rode as checagens: o teste do catálogo, o `check:site` e o `browser-check` já leem as páginas publicadas; acrescente a elas o que a página tem de próprio.
-5. Só então ponha a página em `publishedPageIds`, e inclua-a na lista do `scripts/lighthouse.mjs`.
+4. Ponha o `PageId` em `publishedPageIds`. É essa linha que publica a página: fora da lista ela não é gerada, e o menu, o rodapé, a faixa da Home, o sitemap e as checagens não a enxergam. Por isso as checagens rodam só depois dela: `npm test`, `npm run build`, `npm run check:site` e, com a prévia no ar, `npm run test:browser`. Acrescente a elas o que a página tem de próprio.
+5. Inclua a página na lista de `scripts/lighthouse.mjs` (`npm run audit`), que tem as páginas de produto nomeadas à mão.
 
 ## Cabeçalho
 
@@ -166,7 +166,7 @@ Os testes (`tests/*.test.ts`) verificam:
 A checagem de saída (`check:site`) verifica:
 
 - as páginas do `dist` contra as publicadas em `src/i18n/routes.ts`, e o sitemap contra as mesmas rotas, sem tirar as esperadas do próprio sitemap;
-- `lang`, arquivos locais, metadados, canonical apontando para a própria página, hreflang com `x-default`, `og:locale`, a imagem de compartilhamento do idioma nas páginas de produto, sitemap com as três versões e robots no mesmo domínio;
+- `lang`, arquivos locais, metadados, canonical apontando para a própria página, hreflang com `x-default`, `og:locale`, a imagem de compartilhamento do idioma nas páginas de produto e na de todos os produtos, sitemap com as três versões e robots no mesmo domínio;
 - JSON-LD no idioma da página: o `FAQPage` igual às dúvidas dela (também nas páginas de produto), o `Service` nelas, o `ItemList` de `/produtos` e o `VideoObject` dos tutoriais com o idioma da narração (pt-BR);
 - com os preços ocultos, nenhum `offers` e nenhuma moeda com número no HTML (`scripts/lib/prices.mjs`: R$, US$, $, € e £, antes ou depois do número, com espaço comum ou `&nbsp;`);
 - nas páginas `/en`, as regras de texto do inglês (`scripts/lib/english-rules.mjs`) e, nas `/es` e `/en`, nenhum texto em português;
