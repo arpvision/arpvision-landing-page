@@ -41,6 +41,24 @@ await Promise.all([
         .webp({ quality: 80 })
         .toFile(`public/images/tutorial-${width}.webp`),
     ),
+  // Miniaturas das fotos do calendário do topo do Piloto (CalendarMock.astro), que aparecem com
+  // poucas dezenas de pixels de largura: 240 px no 4:5 e 180 px no 9:16, em <recorte>-<largura>.webp.
+  // Saem dos recortes WebP do site, e não da panorâmica: depois de refazer os recortes
+  // (scripts/product-crops.mjs), refaça estas também.
+  ...[
+    ['patio-fachada-4x5', 240],
+    ['quarto-com-suite-4x5', 240],
+    ['sala-2-4x5', 240],
+    ['cozinha-4x5', 240],
+    ['patio-piscina-9x16', 180],
+  ]
+    .filter(([name, width]) => wanted(`${name}-${width}`))
+    .map(([name, width]) =>
+      sharp(`public/images/produtos/${name}.webp`)
+        .resize(width)
+        .webp({ quality: 80 })
+        .toFile(`public/images/produtos/${name}-${width}.webp`),
+    ),
 ]);
 
 // Cartões tipográficos com a identidade oficial: imagens de compartilhamento,

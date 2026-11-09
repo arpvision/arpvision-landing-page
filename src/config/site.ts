@@ -127,6 +127,29 @@ export const site = {
         height: 540,
       },
     },
+    // As fotos do calendário do topo do Piloto (CalendarMock.astro) em miniatura: ali elas aparecem
+    // com poucas dezenas de pixels de largura, e as inteiras somavam 374 KB logo na abertura da
+    // página. Saem dos recortes acima por scripts/prepare-images.mjs (240 px no 4:5 e 180 px no
+    // 9:16), com o mesmo nome e a largura no fim.
+    calendarPhotos: {
+      'patio-fachada-4x5': {
+        src: '/images/produtos/patio-fachada-4x5-240.webp',
+        width: 240,
+        height: 300,
+      },
+      'patio-piscina-9x16': {
+        src: '/images/produtos/patio-piscina-9x16-180.webp',
+        width: 180,
+        height: 320,
+      },
+      'quarto-com-suite-4x5': {
+        src: '/images/produtos/quarto-com-suite-4x5-240.webp',
+        width: 240,
+        height: 300,
+      },
+      'sala-2-4x5': { src: '/images/produtos/sala-2-4x5-240.webp', width: 240, height: 300 },
+      'cozinha-4x5': { src: '/images/produtos/cozinha-4x5-240.webp', width: 240, height: 300 },
+    },
     // Os vídeos de exemplo de "Vídeos a partir de fotos" (public/video), um par por idioma: o
     // selo, os dados do imóvel e o cartão final estão gravados na imagem. O pôster de cada um
     // (public/images/produtos) é o primeiro quadro, o mesmo em que o play começa.

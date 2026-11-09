@@ -9,7 +9,8 @@ import { site } from '../../config/site';
 import { pageLocale } from '../../i18n';
 const { t } = pageLocale(Astro);
 const { hero, mock } = t.productPages.instagram;
-const photos = site.media.productPhotos;
+// As fotos em miniatura: no calendário elas são pequenas, e a página abre com ele.
+const photos = site.media.calendarPhotos;
 type Photo = keyof typeof photos;
 // Os dias com publicação, de 1 a 14 a partir de uma segunda-feira. Sem foto, a arte é só de
 // texto (uma dica), na cor da marca.
