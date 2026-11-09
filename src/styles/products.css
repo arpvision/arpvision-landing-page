@@ -1806,17 +1806,8 @@
 }
 
 /* A página com todos os produtos (/produtos): os grupos do menu, cada produto num cartão com a foto
-   16:9, e o cartão inteiro é o link. */
-.products-page {
-  padding-top: 65px;
-}
-.products-page .section-heading h1 {
-  margin: 15px 0 20px;
-  font-size: 3.4rem;
-}
-.products-page .eyebrow {
-  margin-bottom: 0;
-}
+   16:9, e o cartão inteiro é o link. O topo (o respiro, o título e o sobretítulo) é o de /planos e
+   de /tutoriais, nas mesmas regras do global.css. */
 .products-page-group + .products-page-group {
   margin-top: 56px;
 }
@@ -2180,12 +2171,6 @@
     padding: 18px;
   }
   /* A página com todos os produtos: um cartão por linha. */
-  .products-page {
-    padding-top: 40px;
-  }
-  .products-page .section-heading h1 {
-    font-size: 2.6rem;
-  }
   .products-page-group + .products-page-group {
     margin-top: 40px;
   }

@@ -2151,11 +2151,13 @@ input[type='number']::-webkit-outer-spin-button {
   width: 100%;
 }
 .plans-page,
-.tutorials-page {
+.tutorials-page,
+.products-page {
   padding-top: 65px;
 }
 .plans-page .section-heading h1,
-.tutorials-page .section-heading h1 {
+.tutorials-page .section-heading h1,
+.products-page .section-heading h1 {
   font-size: 3.4rem;
   margin: 15px 0 20px;
 }
@@ -2168,7 +2170,8 @@ input[type='number']::-webkit-outer-spin-button {
   margin-bottom: 18px;
 }
 .plans-page .eyebrow,
-.tutorials-page .eyebrow {
+.tutorials-page .eyebrow,
+.products-page .eyebrow {
   margin-bottom: 0;
 }
 /* Tutoriais: o cartão inteiro é o link; a capa fica em pé, como o vídeo. */
@@ -3354,11 +3357,13 @@ input[type='number']::-webkit-outer-spin-button {
     right: 15px;
   }
   .plans-page,
-  .tutorials-page {
+  .tutorials-page,
+  .products-page {
     padding-top: 40px;
   }
   .plans-page .section-heading h1,
-  .tutorials-page .section-heading h1 {
+  .tutorials-page .section-heading h1,
+  .products-page .section-heading h1 {
     font-size: 2.6rem;
   }
   .tutorial-card {
