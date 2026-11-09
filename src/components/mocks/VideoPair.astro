@@ -1,0 +1,65 @@
+---
+// O topo dos Vídeos a partir de fotos: os dois vídeos de exemplo do idioma, o vertical e o
+// horizontal, com o selo "Exemplo", os dados do imóvel e o cartão final gravados na imagem. Eles
+// tocam sem som e só enquanto estão na tela (src/scripts/site.ts), e o botão de cada um toca e
+// pausa. O vídeo fica fora do leitor de tela, que ouve a descrição logo antes dele; o botão, não.
+import Icon from '../Icon.astro';
+import { site } from '../../config/site';
+import { pageLocale } from '../../i18n';
+const { locale, t } = pageLocale(Astro);
+const { mock } = t.productPages.videos;
+const files = site.media.exampleVideos[locale];
+const videos = [
+  {
+    format: 'vertical',
+    ...files.vertical,
+    description: mock.verticalDescription,
+    play: mock.verticalPlay,
+    pause: mock.verticalPause,
+  },
+  {
+    format: 'horizontal',
+    ...files.horizontal,
+    description: mock.horizontalDescription,
+    play: mock.horizontalPlay,
+    pause: mock.horizontalPause,
+  },
+];
+---
+
+<div class="video-pair">
+  {videos.map((video) => (
+    <div class:list={['video-example', `video-example-${video.format}`]}>
+      <p class="sr-only">{video.description}</p>
+      <video
+        id={`exemplo-${video.format}`}
+        src={video.src}
+        poster={video.poster}
+        width={video.width}
+        height={video.height}
+        muted
+        loop
+        playsinline
+        preload="none"
+        data-autoplay
+        aria-hidden="true"
+        inert
+      ></video>
+      <button
+        type="button"
+        class="video-toggle"
+        data-video-toggle={`exemplo-${video.format}`}
+        data-label-play={video.play}
+        data-label-pause={video.pause}
+        aria-label={video.play}
+      >
+        <span class="video-toggle-play">
+          <Icon name="play" size={18} />
+        </span>
+        <span class="video-toggle-pause">
+          <Icon name="pause" size={18} />
+        </span>
+      </button>
+    </div>
+  ))}
+</div>

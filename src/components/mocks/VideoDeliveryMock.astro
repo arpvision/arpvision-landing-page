@@ -1,0 +1,53 @@
+---
+// Passo 3 dos Vídeos a partir de fotos, "Aprove e receba": as duas versões do vídeo, com os selos
+// 9:16 e 16:9 e o MP4, e os botões Aprovar e Pedir ajuste, que são `span`. É tela de exemplo: fica
+// fora do leitor de tela, que ouve a descrição antes dela.
+import Icon from '../Icon.astro';
+import ExampleTag from './ExampleTag.astro';
+import { site } from '../../config/site';
+import { pageLocale } from '../../i18n';
+const { t } = pageLocale(Astro);
+const { mock } = t.productPages.videos;
+const photos = site.media.productPhotos;
+const versions = [
+  { format: 'vertical', ratio: mock.vertical, photo: photos['patio-fachada-9x16'] },
+  { format: 'horizontal', ratio: mock.horizontal, photo: photos['patio-fachada-16x9'] },
+];
+---
+
+<div class="example-figure">
+  <p class="sr-only">{mock.deliveryDescription}</p>
+  <div class="example-screen step-mock delivery-mock" aria-hidden="true" inert>
+    <span class="step-mock-head">
+      <ExampleTag />
+    </span>
+    <span class="step-mock-body">
+      <span class="delivery-files">
+        {versions.map((version) => (
+          <span class:list={['delivery-file', `delivery-${version.format}`]}>
+            <span class="delivery-thumb">
+              <img
+                src={version.photo.src}
+                width={version.photo.width}
+                height={version.photo.height}
+                alt=""
+                loading="lazy"
+                decoding="async"
+              />
+              <Icon name="play" size={14} />
+            </span>
+            <span class="delivery-badge">{version.ratio}</span>
+            <span class="delivery-badge is-file">{mock.file}</span>
+          </span>
+        ))}
+      </span>
+      <span class="step-actions">
+        <span class="step-button">
+          <Icon name="check" size={14} />
+          {mock.approve}
+        </span>
+        <span class="step-button is-secondary">{mock.requestAdjustment}</span>
+      </span>
+    </span>
+  </div>
+</div>

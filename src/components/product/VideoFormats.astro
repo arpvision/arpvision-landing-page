@@ -1,0 +1,55 @@
+---
+// "Formatos", a seção própria dos Vídeos a partir de fotos: o mesmo conjunto de fotos dá o vídeo
+// vertical, o horizontal e o final com a marca da imobiliária e o tour. O desenho de cada formato é
+// decorativo (fora do leitor de tela, sem dado fictício) e fica aqui, pelo `id` do cartão; um id
+// sem par para o build.
+import Icon from '../Icon.astro';
+import { pageLocale } from '../../i18n';
+import { pairById } from '../../lib/products';
+const { t } = pageLocale(Astro);
+const { formats, mock } = t.productPages.videos;
+// A proporção que o desenho mostra; o final não tem, porque fecha os dois formatos.
+const cards = pairById('VideoFormats', formats.cards, {
+  vertical: mock.vertical,
+  horizontal: mock.horizontal,
+  ending: null,
+});
+---
+
+<section class="section video-formats-section" aria-labelledby="formats-title">
+  <div class="container">
+    <div class="section-heading center">
+      <h2 id="formats-title">{formats.title}</h2>
+    </div>
+    <ul class="video-formats" role="list">
+      {cards.map(([card, ratio]) => (
+        <li>
+          <span class="format-stage" aria-hidden="true">
+            <span class:list={['format-frame', `format-${card.id}`]}>
+              {ratio ? (
+                <>
+                  <Icon name="play" size={18} />
+                  <span class="format-ratio">{ratio}</span>
+                </>
+              ) : (
+                <>
+                  <span class="format-logo">
+                    <Icon name="home" size={16} />
+                  </span>
+                  <span class="format-lines">
+                    <span></span>
+                    <span></span>
+                  </span>
+                  <span class="format-pill">
+                    <Icon name="arrow" size={14} />
+                  </span>
+                </>
+              )}
+            </span>
+          </span>
+          <h3>{card.title}</h3>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>

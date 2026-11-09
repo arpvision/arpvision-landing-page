@@ -303,6 +303,166 @@ export const pt = {
         whatsappNumber: '(00) 00000-0000',
       },
     },
+    // Os dois vídeos de exemplo do topo são arquivos (`site.media.exampleVideos`), um par por
+    // idioma, com o selo, os dados do imóvel e o cartão final gravados na imagem.
+    videos: {
+      meta: {
+        title: 'Vídeos de imóveis a partir de fotos | ARP Vision',
+        description:
+          'Você manda as fotos do imóvel e a ARP Vision monta o vídeo para Reels, stories e portais, com os dados do imóvel, seu logo e o CRECI.',
+      },
+      hero: {
+        eyebrow: 'VÍDEOS A PARTIR DE FOTOS',
+        title: 'As fotos do anúncio viram vídeo para Reels e portais.',
+        lead: 'Você manda as fotos do imóvel. A ARP Vision monta o vídeo com movimento suave, música, os dados do imóvel na tela e o seu logo com o CRECI no final, na vertical e na horizontal.',
+        button: 'Quero uma cotação no WhatsApp',
+        note: 'Quando o imóvel tem tour 360°, o vídeo termina com o link do tour.',
+      },
+      // VideoFormats.astro desenha o formato de cada cartão pelo `id`, o mesmo nos dois idiomas.
+      formats: {
+        title: 'Um conjunto de fotos, os formatos de que você precisa.',
+        cards: [
+          { id: 'vertical', title: 'Vertical, para Reels e stories' },
+          { id: 'horizontal', title: 'Horizontal, para portais e YouTube' },
+          { id: 'ending', title: 'Final com a sua marca e o tour' },
+        ],
+      },
+      steps: {
+        title: 'Das fotos ao vídeo, em três passos.',
+        items: [
+          {
+            title: 'Mande as fotos',
+            text: "As fotos do anúncio, desde que a imobiliária possa usá-las e elas não tenham marca d'água de outra empresa.",
+          },
+          {
+            title: 'A ARP Vision monta o vídeo',
+            text: 'Na ordem de uma visita, da fachada à área externa, com movimento suave em cada foto.',
+          },
+          {
+            title: 'Aprove e receba',
+            text: 'Você pede ajuste se quiser e recebe as duas versões em MP4.',
+          },
+        ],
+      },
+      included: {
+        title: 'O que entra no vídeo',
+        items: [
+          { title: 'Movimento suave', text: 'Sobre as próprias fotos do imóvel.' },
+          { title: 'Música', text: 'Uma trilha de fundo acompanha as fotos.' },
+          { title: 'Os dados do imóvel', text: 'Quartos, área e bairro, na tela.' },
+          { title: 'Seu logo e o CRECI', text: 'No final do vídeo, com o seu contato.' },
+          {
+            title: 'O link do tour 360°',
+            text: 'Quando o imóvel tem tour, o vídeo termina com ele.',
+          },
+          { title: 'Vertical e horizontal', text: 'As duas versões, em MP4.' },
+        ],
+      },
+      // A resposta escolhida entra na mensagem do WhatsApp como está escrita aqui; o `id` só
+      // nomeia o campo do formulário.
+      quote: {
+        eyebrow: 'PREÇO SOB MEDIDA',
+        title: 'Uma proposta para o ritmo dos seus anúncios.',
+        lead: 'Responda 3 perguntas rápidas e receba pelo WhatsApp uma proposta para os seus imóveis e os formatos que você quer, sem compromisso.',
+        questions: [
+          {
+            id: 'listings',
+            label: 'Quantos imóveis por mês?',
+            summary: 'Imóveis por mês',
+            options: ['1 a 5', '6 a 20', 'Mais de 20'],
+          },
+          {
+            id: 'formats',
+            label: 'Quais formatos?',
+            summary: 'Formatos',
+            options: ['Vertical', 'Horizontal', 'Os dois'],
+          },
+          {
+            id: 'timing',
+            label: 'Para quando?',
+            summary: 'Para quando',
+            options: ['Este mês', 'Próximo mês', 'Ainda pesquisando'],
+          },
+        ],
+        greeting:
+          'Olá! Vim pelo site e quero uma cotação de vídeos a partir de fotos da ARP Vision.',
+        closing: 'Pode me mandar uma proposta?',
+      },
+      faq: {
+        eyebrow: 'DÚVIDAS FREQUENTES',
+        title1: 'Você pergunta.',
+        title2: 'A gente explica.',
+        lead1: 'Sem letras miúdas.',
+        lead2: 'Entenda cada parte dos vídeos.',
+        items: [
+          {
+            question: 'Quantas fotos preciso mandar?',
+            answer:
+              'As fotos do anúncio já servem. Quanto mais ambientes, mais completo fica o vídeo.',
+          },
+          { question: 'Em quanto tempo recebo?', answer: 'O prazo vem na proposta.' },
+          {
+            question: 'Quais formatos recebo?',
+            answer:
+              'Vertical (9:16), para Reels e stories, e horizontal (16:9), para portais e YouTube, em MP4.',
+          },
+          {
+            question: 'Dá para pôr logo, contato e CRECI?',
+            answer: 'Sim. O final do vídeo leva o seu logo, o contato e o CRECI.',
+          },
+          {
+            question: 'Preciso fotografar de novo?',
+            answer: 'Não. O vídeo é feito com as fotos que você já tem.',
+          },
+          {
+            question: 'Posso usar nos portais e no Instagram?',
+            answer: 'Sim, nos portais que aceitam vídeo e nas suas redes.',
+          },
+          {
+            question: 'E se eu quiser mudar algo?',
+            answer: 'Você pede o ajuste antes de receber a versão final.',
+          },
+          {
+            question: 'Quanto custa?',
+            answer: 'Depende de quantos imóveis por mês. A proposta vem pelo WhatsApp.',
+          },
+        ],
+      },
+      finalCta: {
+        title: 'O seu próximo anúncio já com vídeo.',
+        lead: 'Fale com a ARP Vision e receba uma proposta para os seus imóveis.',
+        button: 'Quero uma cotação no WhatsApp',
+      },
+      // A mensagem do rodapé e do botão flutuante; os botões de cotação usam a saudação da cotação.
+      whatsappMessage:
+        'Olá! Vim pelo site e quero saber dos vídeos a partir de fotos da ARP Vision.',
+      // O texto das telas de exemplo e o dos vídeos do topo.
+      mock: {
+        // Os dois vídeos do topo: a descrição para o leitor de tela e os rótulos do botão.
+        verticalDescription:
+          'Exemplo: vídeo vertical, para Reels e stories, feito com cinco fotos de uma casa, com o bairro, a área e os quartos na tela e, no final, a Imobiliária Exemplo com o CRECI e o convite para o tour 360°.',
+        verticalPlay: 'Reproduzir o vídeo vertical',
+        verticalPause: 'Pausar o vídeo vertical',
+        horizontalDescription: 'Exemplo: o mesmo vídeo na horizontal, para portais e YouTube.',
+        horizontalPlay: 'Reproduzir o vídeo horizontal',
+        horizontalPause: 'Pausar o vídeo horizontal',
+        // As telas dos passos de "Como funciona": as fotos enviadas, na ordem em que chegaram; as
+        // mesmas fotos na ordem da visita; e as duas versões para aprovar.
+        photosDescription: 'Exemplo: quatro fotos de uma casa, cada uma com o visto de enviada.',
+        photosSent: '4 fotos enviadas',
+        scenesDescription:
+          'Exemplo: as quatro fotos na ordem de uma visita: fachada, sala, cozinha e área externa.',
+        scenesTitle: 'Ordem da visita',
+        scenes: ['Fachada', 'Sala', 'Cozinha', 'Área externa'],
+        deliveryDescription:
+          'Exemplo: as duas versões do vídeo, 9:16 e 16:9, em MP4, com os botões Aprovar e Pedir ajuste.',
+        vertical: '9:16',
+        horizontal: '16:9',
+        file: 'MP4',
+        approve: 'Aprovar',
+        requestAdjustment: 'Pedir ajuste',
+      },
+    },
   },
   footer: {
     taglineLines: ['O espaço por inteiro.', 'O celular é só o começo.'],

@@ -216,6 +216,8 @@ test('as regras de texto pegam também os equivalentes do espanhol', () => {
 });
 
 test('páginas de produto: título com a marca, descrição de até 160 e as mensagens com o nome do produto', () => {
+  // O nome pode vir no meio da frase, com minúscula: "uma cotação de vídeos a partir de fotos".
+  const cites = (text: string, name: string) => text.toLowerCase().includes(name.toLowerCase());
   for (const locale of locales) {
     const { items } = translations(locale).products;
     for (const [id, page] of productPagesOf(locale)) {
@@ -225,10 +227,10 @@ test('páginas de produto: título com a marca, descrição de até 160 e as men
         page.meta.description.length <= 160,
         `${locale}/${id}: descrição com ${page.meta.description.length} caracteres`,
       );
-      assert.ok(page.quote.greeting.includes(name), `${locale}/${id}: a saudação cita "${name}"`);
+      assert.ok(cites(page.quote.greeting, name), `${locale}/${id}: a saudação cita "${name}"`);
       // A mensagem do rodapé e do botão flutuante é a do produto, e não a de outra página.
       assert.ok(
-        page.whatsappMessage.includes(name),
+        cites(page.whatsappMessage, name),
         `${locale}/${id}: a mensagem do WhatsApp cita "${name}"`,
       );
     }
@@ -308,6 +310,15 @@ test('as artes do Piloto têm ids únicos, os mesmos e na mesma ordem nos dois i
   assert.deepEqual(ids('es'), ids('pt'));
 });
 
+test('os formatos dos Vídeos são vertical, horizontal e o final, nessa ordem, nos dois idiomas', () => {
+  for (const locale of locales)
+    assert.deepEqual(
+      translations(locale).productPages.videos.formats.cards.map((card) => card.id),
+      ['vertical', 'horizontal', 'ending'],
+      locale,
+    );
+});
+
 test('a tabela de comparação tem um valor por coluna em cada linha', () => {
   for (const locale of locales) {
     const { comparison } = translations(locale).productPages.instagram;
@@ -319,6 +330,7 @@ test('a tabela de comparação tem um valor por coluna em cada linha', () => {
 test('cada página de produto publicada tem texto nos dois idiomas', () => {
   const published = productPageIds.filter((page) => publishedPageIds.includes(page));
   assert.ok(published.includes('productInstagram'), 'o Piloto está publicado');
+  assert.ok(published.includes('productVideos'), 'os Vídeos estão publicados');
   for (const locale of locales)
     for (const page of published)
       assert.ok(productPageText(locale, productOfPage(page)!.id), `${locale}: ${page}`);

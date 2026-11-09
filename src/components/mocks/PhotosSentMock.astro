@@ -1,0 +1,48 @@
+---
+// Passo 1 dos Vídeos a partir de fotos, "Mande as fotos": quatro fotos do anúncio, na ordem em que
+// chegaram, cada uma com o visto de enviada. É tela de exemplo: fica fora do leitor de tela, que
+// ouve a descrição antes dela.
+import Icon from '../Icon.astro';
+import ExampleTag from './ExampleTag.astro';
+import { site } from '../../config/site';
+import { pageLocale } from '../../i18n';
+const { t } = pageLocale(Astro);
+const { mock } = t.productPages.videos;
+const photos = site.media.productPhotos;
+// Fora da ordem da visita: o passo 2 (VisitOrderMock) põe as mesmas fotos nela.
+const sent = (
+  ['cozinha-16x9', 'patio-piscina-16x9', 'sala-2-16x9', 'patio-fachada-16x9'] as const
+).map((name) => photos[name]);
+---
+
+<div class="example-figure">
+  <p class="sr-only">{mock.photosDescription}</p>
+  <div class="example-screen step-mock photos-mock" aria-hidden="true" inert>
+    <span class="step-mock-head">
+      <span class="step-mock-title">
+        <span class="step-check">
+          <Icon name="check" size={12} />
+        </span>
+        {mock.photosSent}
+      </span>
+      <ExampleTag />
+    </span>
+    <span class="step-mock-body photos-grid">
+      {sent.map((photo) => (
+        <span class="photo-sent">
+          <img
+            src={photo.src}
+            width={photo.width}
+            height={photo.height}
+            alt=""
+            loading="lazy"
+            decoding="async"
+          />
+          <span class="step-check">
+            <Icon name="check" size={12} />
+          </span>
+        </span>
+      ))}
+    </span>
+  </div>
+</div>

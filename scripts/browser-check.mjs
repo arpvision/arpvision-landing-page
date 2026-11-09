@@ -226,6 +226,238 @@ const checkExampleScreens = (screens, example, scene) => {
     );
   }
 };
+// O que toda página de produto novo confere, em cada idioma: nada do tour na cotação nem na faixa
+// azul, as dúvidas sem título de grupo, o produto e a mensagem dele nos 5 botões de WhatsApp, a
+// mensagem e os eventos da cotação, o menu marcando o produto, e Cotação e Dúvidas na própria página.
+const checkProductPage = async (target, locale, product, expected) => {
+  const { anchors } = localeRoutes[locale];
+  const route = new URL(target.url()).pathname;
+  assert.equal(
+    await target
+      .locator(
+        '.quote-trial, .quote-benefits, [data-cta="chamada-final"], .final-cta-actions > span',
+      )
+      .count(),
+    0,
+    `${route}: nada do tour na cotação nem na faixa azul`,
+  );
+  // As dúvidas do produto são um grupo só: vão sem título de grupo, nem vazio nem inventado.
+  assert.equal(
+    await target.locator('.faq-section h3').count(),
+    0,
+    `${route}: dúvidas sem título de grupo`,
+  );
+  // O topo, a cotação e a faixa pedem a cotação do produto; o rodapé e o botão flutuante falam
+  // dele. Todos levam o produto ao evento de analytics.
+  const whatsapp = await target
+    .locator('[data-whatsapp]')
+    .evaluateAll((links) =>
+      links.map((link) => [
+        ['product-hero', 'quote-section', 'final-cta', 'site-footer', 'floating-whatsapp'].find(
+          (place) => link.closest(`.${place}`),
+        ),
+        link.dataset.product,
+        new URL(link.href).searchParams.get('text'),
+      ]),
+    );
+  assert.deepEqual(
+    whatsapp,
+    [
+      ['product-hero', product, expected.message[0]],
+      ['quote-section', product, expected.message[0]],
+      ['final-cta', product, expected.message[0]],
+      ['site-footer', product, expected.contact],
+      ['floating-whatsapp', product, expected.contact],
+    ],
+    `${route}: botões de WhatsApp com o produto e a mensagem dele`,
+  );
+  // A cotação monta a mensagem do produto com as três respostas.
+  const quote = target.locator(`#${anchors.quote}`);
+  const submit = quote.locator('.quote-submit');
+  assert.equal(await quote.locator('.quote-card').getAttribute('data-product'), product);
+  for (const choice of expected.choices) await quote.locator(`input[value="${choice}"]`).check();
+  const filled = expected.message.join('\n');
+  assert.equal(
+    new URL(await submit.getAttribute('href')).searchParams.get('text'),
+    filled,
+    `${route}: a mensagem da cotação`,
+  );
+  assert.equal(await quote.locator('[data-quote-preview]').textContent(), filled);
+  // Os eventos levam as respostas e o produto (o clique não segue o link).
+  const events = await submit.evaluate((link) => {
+    const list = [];
+    window.plausible = (name, options) => list.push([name, options?.props]);
+    const stay = (event) => event.preventDefault();
+    document.addEventListener('click', stay, true);
+    link.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    document.removeEventListener('click', stay, true);
+    return list;
+  });
+  assert.deepEqual(
+    events,
+    [
+      [
+        'cotacao_whatsapp',
+        {
+          ...Object.fromEntries(
+            expected.message.slice(1, -1).map((line) => line.slice(2).split(': ')),
+          ),
+          produto: product,
+        },
+      ],
+      ['cta_whatsapp', { produto: product }],
+    ],
+    `${route}: eventos da cotação com o produto`,
+  );
+  // O menu marca o produto da página; Cotação e Dúvidas ficam na própria página.
+  for (const list of ['#products-panel', '#mobile-products-list'])
+    assert.equal(
+      await target.locator(`${list} a[data-product="${product}"]`).getAttribute('aria-current'),
+      'page',
+      `${route}: ${list} marca o produto`,
+    );
+  assert.equal(
+    await target.locator('.products-toggle').evaluate((button) => button.matches('.is-current')),
+    true,
+    `${route}: o botão Produtos com a marca da página`,
+  );
+  for (const anchor of pricesShown ? ['faq'] : ['quote', 'faq'])
+    assert.equal(
+      await target.locator(`.desktop-nav a[data-spy="${anchors[anchor]}"]`).getAttribute('href'),
+      `#${anchors[anchor]}`,
+      `${route}: ${anchor} na própria página`,
+    );
+};
+// Uma espera na página com prazo: sem ele, uma promessa que nunca se resolve travaria a checagem.
+const withDeadline = async (promise, label, ms = 15000) => {
+  let timer;
+  try {
+    return await Promise.race([
+      promise,
+      new Promise((_, reject) => {
+        timer = setTimeout(() => reject(new Error(`${label}: sem resposta em ${ms} ms`)), ms);
+      }),
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
+};
+// Espera o primeiro aviso, com o elemento na tela, de um IntersectionObserver novo. Os observadores
+// avisam na ordem em que foram criados: quando este avisa, o da página já tratou o elemento.
+const untilOnScreen = (locator, label) =>
+  withDeadline(
+    locator.evaluate(
+      (element) =>
+        new Promise((resolve) => {
+          const observer = new IntersectionObserver((entries) => {
+            if (!entries.some((entry) => entry.isIntersecting)) return;
+            observer.disconnect();
+            resolve();
+          });
+          observer.observe(element);
+        }),
+    ),
+    label,
+  );
+// Os vídeos de exemplo de uma página de produto: os arquivos, os atributos, a descrição só para o
+// leitor de tela, que vem logo antes, e os rótulos do botão de tocar e pausar de cada um.
+const exampleVideos = (target) =>
+  target.locator('video[data-autoplay]').evaluateAll((videos) =>
+    videos.map((video) => {
+      const description = video.previousElementSibling;
+      const toggle = document.querySelector(`[data-video-toggle="${video.id}"]`);
+      return {
+        src: video.getAttribute('src'),
+        poster: video.getAttribute('poster'),
+        size: `${video.getAttribute('width')}x${video.getAttribute('height')}`,
+        muted: video.muted,
+        loop: video.loop,
+        playsInline: video.playsInline,
+        preload: video.getAttribute('preload'),
+        hidden: video.getAttribute('aria-hidden'),
+        inert: video.inert,
+        description: description?.matches('.sr-only') ? description.textContent.trim() : null,
+        toggle: toggle ? [toggle.dataset.labelPlay, toggle.dataset.labelPause] : null,
+      };
+    }),
+  );
+// A diferença entre o pôster e o primeiro quadro do vídeo, os dois no tamanho do arquivo: a média,
+// por canal, de 0 a 255. Um vídeo à parte carrega o arquivo, sem mexer no da página. Se o pôster
+// for outro quadro, o play começa com um salto (o quadro 40 dava de 43 a 59). No mesmo quadro sobram
+// uns 8: o Chrome desenha o H.264 com um pouco mais de contraste que o pôster.
+const posterVersusFirstFrame = (video) =>
+  withDeadline(
+    video.evaluate(async (element) => {
+      const { width, height } = element;
+      const pixels = (source) => {
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const context = canvas.getContext('2d', { willReadFrequently: true });
+        context.drawImage(source, 0, 0, width, height);
+        return context.getImageData(0, 0, width, height).data;
+      };
+      const poster = new Image();
+      poster.src = element.poster;
+      await poster.decode();
+      const first = document.createElement('video');
+      first.muted = true;
+      first.preload = 'auto';
+      await new Promise((resolve, reject) => {
+        first.addEventListener('loadeddata', resolve, { once: true });
+        first.addEventListener('error', () => reject(new Error(`sem ${first.src}`)), {
+          once: true,
+        });
+        first.src = element.getAttribute('src');
+      });
+      const [a, b] = [pixels(poster), pixels(first)];
+      let sum = 0;
+      for (let index = 0; index < a.length; index += 4)
+        for (let channel = 0; channel < 3; channel++)
+          sum += Math.abs(a[index + channel] - b[index + channel]);
+      return Math.round((sum / ((a.length / 4) * 3)) * 10) / 10;
+    }),
+    'pôster e primeiro quadro',
+  );
+// O tamanho da letra do selo "Exemplo" gravado no vídeo, como ele aparece na página: a altura das
+// letras brancas dentro da pílula azul do canto de cima, medida no pôster (o primeiro quadro, com o
+// selo) em linhas que a pílula fecha dos dois lados, e levada à largura do vídeo na página. As
+// maiúsculas da Inter têm 0,73 da altura do corpo da letra.
+const burnedTagFontSize = (video) =>
+  withDeadline(
+    video.evaluate(async (element) => {
+      const poster = new Image();
+      poster.src = element.poster;
+      await poster.decode();
+      const width = Math.round(poster.naturalWidth / 2);
+      const height = Math.round(poster.naturalHeight / 4);
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const context = canvas.getContext('2d', { willReadFrequently: true });
+      context.drawImage(poster, 0, 0);
+      const { data } = context.getImageData(0, 0, width, height);
+      const rgb = (x, y) => data.subarray((y * width + x) * 4, (y * width + x) * 4 + 3);
+      const isBrandBlue = ([r, g, b]) => r < 40 && g > 60 && g < 110 && b > 210;
+      const isWhite = ([r, g, b]) => r > 215 && g > 215 && b > 215;
+      const rows = [];
+      for (let y = 0; y < height; y++) {
+        const blue = [];
+        for (let x = 0; x < width; x++) if (isBrandBlue(rgb(x, y))) blue.push(x);
+        if (blue.length < 2) continue;
+        for (let x = blue[0]; x <= blue[blue.length - 1]; x++)
+          if (isWhite(rgb(x, y))) {
+            rows.push(y);
+            break;
+          }
+      }
+      if (!rows.length) return 0;
+      const capHeight = rows[rows.length - 1] - rows[0] + 1;
+      const scale = element.getBoundingClientRect().width / poster.naturalWidth;
+      return Math.round((capHeight / 0.73) * scale * 10) / 10;
+    }),
+    'selo do vídeo',
+  );
 try {
   const desktop = await browser.newContext({
     viewport: { width: 1440, height: 1000 },
@@ -651,8 +883,7 @@ try {
     },
   };
   for (const [locale, expected] of Object.entries(instagram)) {
-    const { pages, anchors } = localeRoutes[locale];
-    const route = pages.productInstagram;
+    const route = localeRoutes[locale].pages.productInstagram;
     await page.goto(base + route);
     await page.evaluate(() => document.fonts.ready);
     assert.equal(await page.locator('h1').count(), 1, `${route}: um h1`);
@@ -687,101 +918,7 @@ try {
       );
     }
     await page.screenshot({ path: `.artifacts/produto-instagram-${locale}-desktop.png` });
-    assert.equal(
-      await page
-        .locator(
-          '.quote-trial, .quote-benefits, [data-cta="chamada-final"], .final-cta-actions > span',
-        )
-        .count(),
-      0,
-      `${route}: nada do tour na cotação nem na faixa azul`,
-    );
-    // As dúvidas do produto são um grupo só: vão sem título de grupo, nem vazio nem inventado.
-    assert.equal(
-      await page.locator('.faq-section h3').count(),
-      0,
-      `${route}: dúvidas sem título de grupo`,
-    );
-    // O topo, a cotação e a faixa pedem a cotação do produto; o rodapé e o botão flutuante falam
-    // dele. Todos levam o produto ao evento de analytics.
-    const whatsapp = await page
-      .locator('[data-whatsapp]')
-      .evaluateAll((links) =>
-        links.map((link) => [
-          ['product-hero', 'quote-section', 'final-cta', 'site-footer', 'floating-whatsapp'].find(
-            (place) => link.closest(`.${place}`),
-          ),
-          link.dataset.product,
-          new URL(link.href).searchParams.get('text'),
-        ]),
-      );
-    assert.deepEqual(
-      whatsapp,
-      [
-        ['product-hero', 'instagram', expected.message[0]],
-        ['quote-section', 'instagram', expected.message[0]],
-        ['final-cta', 'instagram', expected.message[0]],
-        ['site-footer', 'instagram', expected.contact],
-        ['floating-whatsapp', 'instagram', expected.contact],
-      ],
-      `${route}: botões de WhatsApp com o produto e a mensagem dele`,
-    );
-    // A cotação monta a mensagem do produto com as três respostas.
-    const quote = page.locator(`#${anchors.quote}`);
-    const submit = quote.locator('.quote-submit');
-    assert.equal(await quote.locator('.quote-card').getAttribute('data-product'), 'instagram');
-    for (const choice of expected.choices) await quote.locator(`input[value="${choice}"]`).check();
-    const filled = expected.message.join('\n');
-    assert.equal(
-      new URL(await submit.getAttribute('href')).searchParams.get('text'),
-      filled,
-      `${route}: a mensagem da cotação`,
-    );
-    assert.equal(await quote.locator('[data-quote-preview]').textContent(), filled);
-    // Os eventos levam as respostas e o produto (o clique não segue o link).
-    const events = await submit.evaluate((link) => {
-      const list = [];
-      window.plausible = (name, options) => list.push([name, options?.props]);
-      const stay = (event) => event.preventDefault();
-      document.addEventListener('click', stay, true);
-      link.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
-      document.removeEventListener('click', stay, true);
-      return list;
-    });
-    assert.deepEqual(
-      events,
-      [
-        [
-          'cotacao_whatsapp',
-          {
-            ...Object.fromEntries(
-              expected.message.slice(1, -1).map((line) => line.slice(2).split(': ')),
-            ),
-            produto: 'instagram',
-          },
-        ],
-        ['cta_whatsapp', { produto: 'instagram' }],
-      ],
-      `${route}: eventos da cotação com o produto`,
-    );
-    // O menu marca o produto da página; Cotação e Dúvidas ficam na própria página.
-    for (const list of ['#products-panel', '#mobile-products-list'])
-      assert.equal(
-        await page.locator(`${list} a[data-product="instagram"]`).getAttribute('aria-current'),
-        'page',
-        `${route}: ${list} marca o produto`,
-      );
-    assert.equal(
-      await page.locator('.products-toggle').evaluate((button) => button.matches('.is-current')),
-      true,
-      `${route}: o botão Produtos com a marca da página`,
-    );
-    for (const anchor of pricesShown ? ['faq'] : ['quote', 'faq'])
-      assert.equal(
-        await page.locator(`.desktop-nav a[data-spy="${anchors[anchor]}"]`).getAttribute('href'),
-        `#${anchors[anchor]}`,
-        `${route}: ${anchor} na própria página`,
-      );
+    await checkProductPage(page, locale, 'instagram', expected);
   }
   // O título da dor troca o fim da frase a cada 2,5 s, por 2 voltas, e para no primeiro trecho;
   // com movimento reduzido, nem começa. O relógio da página é o do teste.
@@ -869,6 +1006,207 @@ try {
   }
   results.push(
     'Piloto automático para Instagram (pt e es): 1 h1; 13 telas de exemplo (uma em cada passo) com a etiqueta visível, aria-hidden, inert e a descrição "Exemplo:"; a lista dos passos com role="list" e nada para fora das telas dos passos a 1024, 1100 e 1440px; o número de WhatsApp do story numa linha só nessas larguras; nada do tour na cotação e na faixa; dúvidas sem título de grupo; o produto nos 5 botões de WhatsApp; a mensagem e os eventos da cotação; o menu marca o produto; Cotação e Dúvidas na página; a frase da dor troca 2 voltas e para no primeiro trecho, e não troca com movimento reduzido OK',
+  );
+
+  // A página dos Vídeos a partir de fotos, nos dois idiomas: o par de vídeos do topo (os arquivos do
+  // idioma, sem som, em laço, sem pré-carga, fora do leitor de tela, com a descrição "Exemplo:" e o
+  // botão de cada um), uma tela de exemplo em cada passo e o que toda página de produto confere.
+  // Com movimento reduzido (o contexto desta página), nenhum dos dois toca sozinho.
+  const videoPage = {
+    pt: {
+      example: 'Exemplo',
+      contact: 'Olá! Vim pelo site e quero saber dos vídeos a partir de fotos da ARP Vision.',
+      toggles: [
+        ['Reproduzir o vídeo vertical', 'Pausar o vídeo vertical'],
+        ['Reproduzir o vídeo horizontal', 'Pausar o vídeo horizontal'],
+      ],
+      choices: ['6 a 20', 'Os dois', 'Este mês'],
+      message: [
+        'Olá! Vim pelo site e quero uma cotação de vídeos a partir de fotos da ARP Vision.',
+        '• Imóveis por mês: 6 a 20',
+        '• Formatos: Os dois',
+        '• Para quando: Este mês',
+        'Pode me mandar uma proposta?',
+      ],
+    },
+    es: {
+      example: 'Ejemplo',
+      contact:
+        '¡Hola! Vengo de la web y quiero saber más de los vídeos a partir de fotos de ARP Vision.',
+      toggles: [
+        ['Reproducir el vídeo vertical', 'Pausar el vídeo vertical'],
+        ['Reproducir el vídeo horizontal', 'Pausar el vídeo horizontal'],
+      ],
+      choices: ['6 a 20', 'Los dos', 'Este mes'],
+      message: [
+        '¡Hola! Vengo de la web y quiero un presupuesto de vídeos a partir de fotos de ARP Vision.',
+        '• Inmuebles al mes: 6 a 20',
+        '• Formatos: Los dos',
+        '• Para cuándo: Este mes',
+        '¿Me puedes enviar una propuesta?',
+      ],
+    },
+  };
+  for (const [locale, expected] of Object.entries(videoPage)) {
+    const route = localeRoutes[locale].pages.productVideos;
+    await page.goto(base + route);
+    await page.evaluate(() => document.fonts.ready);
+    assert.equal(await page.locator('h1').count(), 1, `${route}: um h1`);
+    // Uma tela em cada um dos três passos; os vídeos levam o selo "Exemplo" gravado na imagem.
+    const screens = await exampleScreens(page);
+    assert.equal(screens.length, 3, `${route}: três telas de exemplo`);
+    checkExampleScreens(screens, expected.example, route);
+    assert.deepEqual(
+      await page.locator('.product-steps').evaluate((list) => ({
+        role: list.getAttribute('role'),
+        screens: [...list.children].map((step) => step.querySelectorAll('.example-screen').length),
+      })),
+      { role: 'list', screens: [1, 1, 1] },
+      `${route}: uma tela em cada passo`,
+    );
+    const videos = await exampleVideos(page);
+    assert.deepEqual(
+      videos.map(({ description, ...video }) => video),
+      ['vertical', 'horizontal'].map((format, index) => ({
+        src: `/video/exemplo-${format}-${locale}.mp4`,
+        poster: `/images/produtos/exemplo-${format}-${locale}.webp`,
+        size: format === 'vertical' ? '720x1280' : '1280x720',
+        muted: true,
+        loop: true,
+        playsInline: true,
+        preload: 'none',
+        hidden: 'true',
+        inert: true,
+        toggle: expected.toggles[index],
+      })),
+      `${route}: os dois vídeos de exemplo do idioma`,
+    );
+    for (const { description } of videos)
+      assert.ok(
+        description?.startsWith(`${expected.example}: `),
+        `${route}: descrição do vídeo: ${description}`,
+      );
+    assert.deepEqual(
+      await page
+        .locator('video[data-autoplay]')
+        .evaluateAll((list) => list.map((video) => video.paused)),
+      [true, true],
+      `${route}: com movimento reduzido, os vídeos não tocam sozinhos`,
+    );
+    for (const width of [1024, 1100, 1440]) {
+      await page.setViewportSize({ width, height: 1000 });
+      assert.deepEqual(
+        await stepScreensOverflow(page),
+        [],
+        `${route}, ${width}px: telas dos passos`,
+      );
+    }
+    await page.screenshot({ path: `.artifacts/produto-videos-${locale}-desktop.png` });
+    await checkProductPage(page, locale, 'videos', expected);
+  }
+  // No celular de 390 px, um vídeo fica embaixo do outro. O pôster de cada um é o primeiro quadro
+  // (o play começa sem salto), e o selo "Exemplo" gravado nele tem pelo menos 10 px de letra.
+  // Com movimento reduzido, nenhum toca sozinho, e o vertical posto para tocar à mão continua
+  // tocando quando o horizontal entra na tela (o observador avisa por causa do outro vídeo). Sem
+  // movimento reduzido, cada um toca quando aparece, e a pausa feita à mão no vertical continua
+  // quando o horizontal entra na tela.
+  for (const reducedMotion of ['reduce', 'no-preference']) {
+    const context = await browser.newContext({
+      viewport: { width: 390, height: 800 },
+      reducedMotion,
+      isMobile: true,
+      hasTouch: true,
+    });
+    const phoneVideos = await context.newPage();
+    phoneVideos.on('pageerror', (error) => errors.push(error.message));
+    if (reducedMotion === 'reduce') {
+      const problems = [];
+      for (const locale of ['pt', 'es']) {
+        await phoneVideos.goto(base + localeRoutes[locale].pages.productVideos);
+        for (const [index, format] of ['vertical', 'horizontal'].entries()) {
+          const video = phoneVideos.locator('video[data-autoplay]').nth(index);
+          const difference = await posterVersusFirstFrame(video);
+          if (difference > 20)
+            problems.push(
+              `${locale} ${format}: o pôster difere do primeiro quadro (${difference})`,
+            );
+          const size = await burnedTagFontSize(video);
+          if (size < 10) problems.push(`${locale} ${format}: selo com ${size} px de letra`);
+        }
+      }
+      assert.deepEqual(problems, [], '390px: pôster e selo dos vídeos de exemplo');
+    }
+    await phoneVideos.goto(base + localeRoutes.pt.pages.productVideos);
+    const horizontal = phoneVideos.locator('video[data-autoplay]').nth(1);
+    const states = () =>
+      phoneVideos
+        .locator('video[data-autoplay]')
+        .evaluateAll((list) => list.map((video) => (video.paused ? 'parado' : 'tocando')));
+    const onScreen = () =>
+      phoneVideos.locator('video[data-autoplay]').evaluateAll((list) =>
+        list.map((video) => {
+          const { top, bottom } = video.getBoundingClientRect();
+          return top < innerHeight && bottom > 0;
+        }),
+      );
+    // Rola até o topo do horizontal ficar `below` px abaixo da borda de baixo da tela (negativo:
+    // acima dela, já na tela).
+    const placeHorizontal = async (below) =>
+      scrollPage(
+        phoneVideos,
+        await horizontal.evaluate(
+          (video, offset) => video.getBoundingClientRect().top + scrollY - innerHeight - offset,
+          below,
+        ),
+      );
+    // O vertical na tela e o horizontal logo abaixo dela, ainda fora.
+    await placeHorizontal(80);
+    assert.deepEqual(
+      await onScreen(),
+      [true, false],
+      `movimento ${reducedMotion}: o vertical na tela e o horizontal fora`,
+    );
+    const toggle = phoneVideos.locator('[data-video-toggle="exemplo-vertical"]');
+    if (reducedMotion === 'reduce') {
+      assert.deepEqual(await states(), ['parado', 'parado'], 'movimento reduzido: nada toca');
+      await toggle.click();
+      assert.deepEqual(await states(), ['tocando', 'parado'], 'movimento reduzido: play à mão');
+    } else {
+      await phoneVideos.waitForFunction(
+        () => !document.querySelector('video[data-autoplay]').paused,
+      );
+      assert.deepEqual(await states(), ['tocando', 'parado'], 'o vertical toca quando aparece');
+      await toggle.click();
+      assert.deepEqual(await states(), ['parado', 'parado'], 'pausa à mão');
+    }
+    // O horizontal entra na tela, e o vertical continua nela.
+    await placeHorizontal(-120);
+    await untilOnScreen(horizontal, `movimento ${reducedMotion}: o horizontal na tela`);
+    assert.deepEqual(
+      await onScreen(),
+      [true, true],
+      `movimento ${reducedMotion}: o horizontal entra na tela, e o vertical continua nela`,
+    );
+    if (reducedMotion === 'reduce')
+      assert.deepEqual(
+        await states(),
+        ['tocando', 'parado'],
+        'movimento reduzido: o play à mão do vertical continua quando o horizontal entra na tela',
+      );
+    else {
+      await phoneVideos.waitForFunction(
+        () => !document.querySelectorAll('video[data-autoplay]')[1].paused,
+      );
+      assert.deepEqual(
+        await states(),
+        ['parado', 'tocando'],
+        'o horizontal toca quando aparece, e a pausa à mão do vertical continua',
+      );
+    }
+    await context.close();
+  }
+  results.push(
+    'Vídeos a partir de fotos (pt e es): 1 h1; uma tela de exemplo em cada passo (etiqueta visível, aria-hidden, inert e a descrição "Exemplo:") e nada para fora delas a 1024, 1100 e 1440px; os dois vídeos do idioma sem som, em laço, sem pré-carga, fora do leitor de tela, com a descrição e o botão; nada do tour na cotação e na faixa; o produto nos 5 botões de WhatsApp; a mensagem ("6 a 20", "Os dois", "Este mês") e os eventos da cotação; o menu marca o produto. A 390px: o pôster é o primeiro quadro e o selo tem 10px ou mais; com movimento reduzido nada toca sozinho e o play à mão continua quando o outro vídeo entra na tela; sem ele cada vídeo toca quando aparece e a pausa à mão continua OK',
   );
 
   for (const route of pricesShown ? ['/', '/planos'] : ['/']) {
@@ -1072,6 +1410,7 @@ try {
     for (const route of [
       '/',
       localeRoutes.pt.pages.productInstagram,
+      localeRoutes.pt.pages.productVideos,
       pricesShown ? '/planos' : '/termos-de-uso',
     ]) {
       await themed.goto(base + route);
@@ -1192,6 +1531,20 @@ try {
     [true, false],
     '360px: o calendário do Piloto mostra uma semana só',
   );
+  // A 390 e a 360 px, nos dois idiomas, as telas dos passos dos Vídeos continuam marcadas, e nada
+  // sai delas.
+  for (const [locale, expected] of Object.entries(videoPage)) {
+    await phone.goto(base + localeRoutes[locale].pages.productVideos);
+    await phone.evaluate(() => document.fonts.ready);
+    for (const width of [390, 360]) {
+      await phone.setViewportSize({ width, height: 800 });
+      const scene = `${width}px, Vídeos em ${locale}`;
+      const screens = await exampleScreens(phone);
+      assert.equal(screens.length, 3, `${scene}: três telas de exemplo`);
+      checkExampleScreens(screens, expected.example, scene);
+      assert.deepEqual(await stepScreensOverflow(phone), [], `${scene}: telas dos passos`);
+    }
+  }
   // Aberto, o menu do celular fica numa cápsula opaca, na cor do tema: as linhas dele passam por
   // fundos misturados. Fora da home, ele pode ficar sobre a faixa azul, o título dela desfocado e
   // o rodapé. A página não rola pelo toque com o menu aberto, mas rola pelo script: a faixa vai
@@ -1285,7 +1638,7 @@ try {
     'sem círculo de hover no botão do menu depois do toque',
   );
   results.push(
-    '360px: as 13 telas do Piloto marcadas e o calendário com uma semana só; a 390 e 360px, em pt e es, nada para fora das telas dos passos, cada trecho da frase da dor numa linha e o número do story numa linha só; menu aberto numa cápsula opaca com contraste AA (topo da home e faixa azul de /tutoriais e do Piloto, com o produto marcado, nos dois temas); fechado, volta ao vidro da abertura, sem o círculo de hover preso no botão OK',
+    '360px: as 13 telas do Piloto marcadas e o calendário com uma semana só; a 390 e 360px, em pt e es, nada para fora das telas dos passos, cada trecho da frase da dor numa linha e o número do story numa linha só; as 3 telas dos Vídeos marcadas e nada para fora delas; menu aberto numa cápsula opaca com contraste AA (topo da home e faixa azul de /tutoriais e do Piloto, com o produto marcado, nos dois temas); fechado, volta ao vidro da abertura, sem o círculo de hover preso no botão OK',
   );
   // Toque fora do menu num ponto sem link (o título da hero), para não navegar.
   await phone.locator('.menu-toggle').click();
@@ -1505,6 +1858,7 @@ try {
     for (const route of [
       '/es',
       localeRoutes.es.pages.productInstagram,
+      localeRoutes.es.pages.productVideos,
       '/es/terminos-de-uso',
       '/pagina-que-nao-existe',
     ]) {

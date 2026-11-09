@@ -17,12 +17,18 @@ interface Props {
   /** A mensagem pronta do botão de WhatsApp. */
   message: string;
   product: ProductId;
+  /** A tela de exemplo pede mais largura (o par de vídeos): no desktop largo ela ganha mais
+   * espaço, e abaixo de 1200 px vai para baixo do texto. */
+  wide?: boolean;
 }
-const { eyebrow, title, lead, button, note, isNew, message, product } = Astro.props;
+const { eyebrow, title, lead, button, note, isNew, message, product, wide = false } = Astro.props;
 const { t } = pageLocale(Astro);
 ---
 
-<section class="hero product-hero" aria-labelledby="product-title">
+<section
+  class:list={['hero product-hero', { 'product-hero-wide': wide }]}
+  aria-labelledby="product-title"
+>
   <div class="container hero-grid">
     <div class="hero-copy">
       <span class="eyebrow">

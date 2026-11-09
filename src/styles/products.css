@@ -807,15 +807,17 @@
   font-weight: 650;
   white-space: nowrap;
 }
-/* Passo 3: o mês em miniatura e os dois botões. */
-.month-title {
+/* Passo 3: o mês em miniatura e os dois botões. O título do mês é o mesmo das telas dos Vídeos. */
+.month-title,
+.step-mock-title {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   color: var(--text-strong);
   font-weight: 600;
 }
-.month-title svg {
+.month-title svg,
+.step-mock-title > svg {
   color: var(--accent);
 }
 .month-grid {
@@ -837,13 +839,114 @@
 .month-day.is-text {
   background: var(--brand-blue);
 }
-.month-actions {
+.month-actions,
+.step-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
-.month-actions .step-button {
+.month-actions .step-button,
+.step-actions .step-button {
   flex: 1 1 auto;
+}
+
+/* As telas dos passos dos Vídeos. Passo 1: as quatro fotos enviadas, cada uma com o visto. */
+.photos-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.photo-sent {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  border-radius: 8px;
+  background: var(--bg-section);
+}
+.photo-sent img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.photo-sent .step-check {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  box-shadow: 0 0 0 2px var(--surface);
+}
+/* Passo 2: as mesmas fotos na fila das cenas, numeradas na ordem da visita. */
+.scenes-list {
+  gap: 6px;
+}
+.scene {
+  display: grid;
+  grid-template-columns: auto 64px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+}
+.scene-number {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--brand-blue-soft);
+  color: var(--accent);
+  font-weight: 650;
+}
+.scene img {
+  width: 64px;
+  height: 36px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+.scene-name {
+  min-width: 0;
+  color: var(--text-strong);
+  font-weight: 600;
+}
+/* Passo 3: as duas versões do vídeo, com os selos da proporção e do arquivo, e os botões. As
+   miniaturas têm a mesma altura, numa coluna da largura da horizontal. */
+.delivery-files {
+  display: grid;
+  gap: 8px;
+}
+.delivery-file {
+  display: grid;
+  grid-template-columns: 78px auto auto;
+  justify-content: start;
+  align-items: center;
+  gap: 10px;
+}
+.delivery-thumb {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+.delivery-thumb img {
+  width: 78px;
+  height: 44px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+.delivery-vertical .delivery-thumb img {
+  width: 25px;
+}
+.delivery-thumb svg {
+  position: absolute;
+  color: var(--white);
+  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.6));
+}
+.delivery-badge {
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: var(--bg-section);
+  color: var(--text-strong);
+  font-weight: 650;
+  white-space: nowrap;
+}
+.delivery-badge.is-file {
+  background: var(--brand-blue-soft);
+  color: var(--accent);
 }
 
 /* As artes: posts 4:5 e o story 9:16, que fica com a altura dos posts. As linhas que não fecham
@@ -1005,6 +1108,11 @@
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 20px;
 }
+@media (min-width: 1024px) {
+  .product-included.is-in-threes {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
 .product-included > li {
   padding: 24px;
 }
@@ -1088,6 +1196,139 @@
 }
 .also-card > svg {
   color: var(--accent);
+}
+
+/* Vídeos a partir de fotos. O topo leva o par de vídeos, que pede mais largura que as outras
+   telas: a partir de 1200px ele fica ao lado do texto, numa coluna mais larga, e antes disso vai
+   para baixo dele. Os dois ficam lado a lado, nas larguras em que o selo "Exemplo" gravado em cada
+   um sai do mesmo tamanho (26px num quadro de 720 e 39px num de 1280: 27 para 32), com uns 10px
+   de letra ou mais; no celular, o vertical fica em cima do horizontal. Cada vídeo leva no canto o
+   botão de tocar e pausar (global.css). */
+@media (min-width: 1200px) {
+  .product-hero-wide .hero-grid {
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  }
+}
+@media (max-width: 1199px) {
+  .product-hero-wide .hero-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 44px;
+  }
+  .product-hero-wide .product-hero-mock {
+    width: min(100%, 760px);
+  }
+}
+.video-pair {
+  display: grid;
+  grid-template-columns: minmax(0, 27fr) minmax(0, 32fr);
+  align-items: center;
+  gap: 24px;
+}
+.video-example {
+  position: relative;
+  min-width: 0;
+}
+.video-example video {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 18px;
+  background: var(--ink);
+  box-shadow: var(--shadow);
+  object-fit: cover;
+}
+.video-example-vertical video {
+  aspect-ratio: 9 / 16;
+}
+.video-example-horizontal video {
+  aspect-ratio: 16 / 9;
+}
+/* Os formatos: o desenho de cada um em cima do nome. Os desenhos não mudam com o tema: o final
+   tem o fundo do cartão dos vídeos. */
+.video-formats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.video-formats > li {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 20px;
+  padding: 28px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--surface);
+  text-align: center;
+}
+.video-formats h3 {
+  margin: 0;
+  font-size: 1.125rem;
+}
+.format-stage {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 150px;
+}
+.format-frame {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 6px;
+  border-radius: 12px;
+  background: var(--brand-blue);
+  color: var(--white);
+  font-size: var(--fs-note);
+  font-weight: 650;
+}
+.format-vertical {
+  width: 84px;
+  height: 150px;
+}
+.format-horizontal,
+.format-ending {
+  width: min(100%, 240px);
+  aspect-ratio: 16 / 9;
+}
+.format-ending {
+  gap: 8px;
+  background: #071a4d;
+}
+.format-logo {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: var(--white);
+  color: var(--brand-blue);
+}
+.format-lines {
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+}
+.format-lines > span {
+  width: 92px;
+  height: 6px;
+  border-radius: 3px;
+  background: rgb(255 255 255 / 0.85);
+}
+.format-lines > span + span {
+  width: 58px;
+  background: rgb(255 255 255 / 0.5);
+}
+.format-pill {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 20px;
+  border-radius: 999px;
+  background: var(--brand-blue);
 }
 
 /* De 1024 a 1199px, os três passos ainda ficam lado a lado, em cartões estreitos: menos respiro em
@@ -1279,5 +1520,71 @@
   }
   .also-list {
     grid-template-columns: minmax(0, 1fr);
+  }
+  /* Os vídeos dos Vídeos a partir de fotos, um embaixo do outro: o vertical com até 300px, em que
+     o selo gravado nele fica com uns 11px de letra, e o horizontal na largura toda. */
+  .video-pair {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    gap: 16px;
+  }
+  .video-example-vertical {
+    width: min(100%, 300px);
+  }
+  .video-example-horizontal {
+    width: 100%;
+  }
+  /* Os formatos viram uma lista: o desenho à esquerda do nome. */
+  .video-formats {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+  .video-formats > li {
+    grid-template-columns: 112px minmax(0, 1fr);
+    justify-items: start;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    text-align: left;
+  }
+  .format-stage {
+    height: 96px;
+  }
+  .format-vertical {
+    width: 54px;
+    height: 96px;
+  }
+  .format-horizontal,
+  .format-ending {
+    width: 112px;
+  }
+  .format-ending {
+    gap: 4px;
+  }
+  .format-logo {
+    width: 18px;
+    height: 18px;
+    border-radius: 5px;
+  }
+  .format-logo svg {
+    width: 12px;
+    height: 12px;
+  }
+  .format-lines {
+    gap: 3px;
+  }
+  .format-lines > span {
+    width: 52px;
+    height: 4px;
+  }
+  .format-lines > span + span {
+    width: 32px;
+  }
+  .format-pill {
+    width: 34px;
+    height: 10px;
+  }
+  .format-pill svg {
+    display: none;
   }
 }

@@ -288,6 +288,165 @@ export const es: Dictionary = {
         whatsappNumber: '600 000 000',
       },
     },
+    // DIFERENTE: a calificación energética no lugar do CRECI, no topo, no incluído, na dúvida e no
+    // cartão final dos vídeos.
+    videos: {
+      meta: {
+        title: 'Vídeos de inmuebles a partir de fotos | ARP Vision',
+        description:
+          'Tú mandas las fotos del inmueble y ARP Vision monta el vídeo para Reels, stories y portales, con los datos del inmueble, tu logo y la calificación energética.',
+      },
+      hero: {
+        eyebrow: 'VÍDEOS A PARTIR DE FOTOS',
+        title: 'Las fotos del anuncio se convierten en vídeo para Reels y portales.',
+        lead: 'Tú mandas las fotos del inmueble. ARP Vision monta el vídeo con un movimiento suave, música, los datos del inmueble en pantalla y, al final, tu logo con la calificación energética, en vertical y en horizontal.',
+        button: 'Quiero un presupuesto por WhatsApp',
+        note: 'Cuando el inmueble tiene tour 360°, el vídeo termina con el enlace del tour.',
+      },
+      formats: {
+        title: 'Un mismo conjunto de fotos, los formatos que necesitas.',
+        cards: [
+          { id: 'vertical', title: 'Vertical, para Reels y stories' },
+          { id: 'horizontal', title: 'Horizontal, para portales y YouTube' },
+          { id: 'ending', title: 'Final con tu marca y el tour' },
+        ],
+      },
+      steps: {
+        title: 'De las fotos al vídeo, en tres pasos.',
+        items: [
+          {
+            title: 'Manda las fotos',
+            text: 'Las fotos del anuncio, siempre que la inmobiliaria pueda usarlas y no tengan marca de agua de otra empresa.',
+          },
+          {
+            title: 'ARP Vision monta el vídeo',
+            text: 'En el orden de una visita, de la fachada al exterior, con un movimiento suave en cada foto.',
+          },
+          {
+            title: 'Aprueba y recibe',
+            text: 'Pides un ajuste si quieres y recibes las dos versiones en MP4.',
+          },
+        ],
+      },
+      included: {
+        title: 'Qué lleva el vídeo',
+        items: [
+          { title: 'Movimiento suave', text: 'Sobre las propias fotos del inmueble.' },
+          { title: 'Música', text: 'Una pista de fondo acompaña las fotos.' },
+          {
+            title: 'Los datos del inmueble',
+            text: 'Dormitorios, superficie y barrio, en pantalla.',
+          },
+          {
+            title: 'Tu logo y la calificación energética',
+            text: 'Al final del vídeo, con tu contacto.',
+          },
+          {
+            title: 'El enlace del tour 360°',
+            text: 'Cuando el inmueble tiene tour, el vídeo termina con él.',
+          },
+          { title: 'Vertical y horizontal', text: 'Las dos versiones, en MP4.' },
+        ],
+      },
+      quote: {
+        eyebrow: 'PRECIO A MEDIDA',
+        title: 'Una propuesta para el ritmo de tus anuncios.',
+        lead: 'Responde 3 preguntas rápidas y recibe por WhatsApp una propuesta para tus inmuebles y los formatos que quieres, sin compromiso.',
+        questions: [
+          {
+            id: 'listings',
+            label: '¿Cuántos inmuebles al mes?',
+            summary: 'Inmuebles al mes',
+            options: ['1 a 5', '6 a 20', 'Más de 20'],
+          },
+          {
+            id: 'formats',
+            label: '¿Qué formatos?',
+            summary: 'Formatos',
+            options: ['Vertical', 'Horizontal', 'Los dos'],
+          },
+          {
+            id: 'timing',
+            label: '¿Para cuándo?',
+            summary: 'Para cuándo',
+            options: ['Este mes', 'El mes que viene', 'Aún me estoy informando'],
+          },
+        ],
+        greeting:
+          '¡Hola! Vengo de la web y quiero un presupuesto de vídeos a partir de fotos de ARP Vision.',
+        closing: '¿Me puedes enviar una propuesta?',
+      },
+      faq: {
+        eyebrow: 'PREGUNTAS FRECUENTES',
+        title1: 'Tú preguntas.',
+        title2: 'Nosotros te lo explicamos.',
+        lead1: 'Sin letra pequeña.',
+        lead2: 'Entiende cada parte de los vídeos.',
+        items: [
+          {
+            question: '¿Cuántas fotos tengo que mandar?',
+            answer:
+              'Las fotos del anuncio ya sirven. Cuantas más estancias, más completo queda el vídeo.',
+          },
+          { question: '¿En cuánto tiempo lo recibo?', answer: 'El plazo viene en la propuesta.' },
+          {
+            question: '¿Qué formatos recibo?',
+            answer:
+              'Vertical (9:16), para Reels y stories, y horizontal (16:9), para portales y YouTube, en MP4.',
+          },
+          {
+            question: '¿Se puede poner el logo, el contacto y la calificación energética?',
+            answer:
+              'Sí. El final del vídeo lleva tu logo, el contacto y la calificación energética que nos indiques.',
+          },
+          {
+            question: '¿Tengo que volver a hacer fotos?',
+            answer: 'No. El vídeo se hace con las fotos que ya tienes.',
+          },
+          {
+            question: '¿Puedo usarlo en los portales y en Instagram?',
+            answer: 'Sí, en los portales que aceptan vídeo y en tus redes.',
+          },
+          {
+            question: '¿Y si quiero cambiar algo?',
+            answer: 'Pides el ajuste antes de recibir la versión final.',
+          },
+          {
+            question: '¿Cuánto cuesta?',
+            answer: 'Depende de cuántos inmuebles al mes. La propuesta llega por WhatsApp.',
+          },
+        ],
+      },
+      finalCta: {
+        title: 'Tu próximo anuncio, ya con vídeo.',
+        lead: 'Habla con ARP Vision y recibe una propuesta para tus inmuebles.',
+        button: 'Quiero un presupuesto por WhatsApp',
+      },
+      whatsappMessage:
+        '¡Hola! Vengo de la web y quiero saber más de los vídeos a partir de fotos de ARP Vision.',
+      mock: {
+        verticalDescription:
+          'Ejemplo: vídeo vertical, para Reels y stories, hecho con cinco fotos de una casa, con el barrio, la superficie y los dormitorios en pantalla y, al final, la Inmobiliaria Ejemplo con la calificación energética y la invitación al tour 360°.',
+        verticalPlay: 'Reproducir el vídeo vertical',
+        verticalPause: 'Pausar el vídeo vertical',
+        horizontalDescription: 'Ejemplo: el mismo vídeo en horizontal, para portales y YouTube.',
+        horizontalPlay: 'Reproducir el vídeo horizontal',
+        horizontalPause: 'Pausar el vídeo horizontal',
+        photosDescription: 'Ejemplo: cuatro fotos de una casa, cada una marcada como enviada.',
+        photosSent: '4 fotos enviadas',
+        scenesDescription:
+          'Ejemplo: las cuatro fotos en el orden de una visita: fachada, salón, cocina y exterior.',
+        scenesTitle: 'Orden de la visita',
+        scenes: ['Fachada', 'Salón', 'Cocina', 'Exterior'],
+        deliveryDescription:
+          'Ejemplo: las dos versiones del vídeo, 9:16 y 16:9, en MP4, con los botones Aprobar y Pedir un ajuste.',
+        vertical: '9:16',
+        horizontal: '16:9',
+        file: 'MP4',
+        approve: 'Aprobar',
+        requestAdjustment: 'Pedir un ajuste',
+      },
+    },
   },
   footer: {
     taglineLines: ['Todo el espacio, por dentro.', 'El móvil es solo el principio.'],

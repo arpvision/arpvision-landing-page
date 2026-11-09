@@ -199,15 +199,17 @@ if (floating) {
     .forEach((element) => observer.observe(element));
 }
 
-// Vídeos com data-autoplay tocam só enquanto estão na tela, nunca com movimento reduzido,
-// e respeitam a pausa feita pelo botão.
+// Vídeos com data-autoplay tocam só enquanto estão na tela e, sozinhos, nunca com movimento
+// reduzido. O botão manda em cada vídeo: o que a pessoa pausou fica parado, e o que ela pôs para
+// tocar toca na tela mesmo com movimento reduzido, inclusive quando outro vídeo entra ou sai dela.
 const motion = matchMedia('(prefers-reduced-motion: reduce)');
 const onScreen = new Set<HTMLVideoElement>();
-const pausedByUser = new WeakSet<HTMLVideoElement>();
+// A escolha feita no botão, vídeo a vídeo. Sem ela, vale o play automático.
+const chosen = new WeakMap<HTMLVideoElement, 'play' | 'pause'>();
 const updateVideos = () =>
   document.querySelectorAll<HTMLVideoElement>('video[data-autoplay]').forEach((video) => {
-    if (!motion.matches && onScreen.has(video) && !pausedByUser.has(video))
-      void video.play().catch(() => {});
+    const choice = chosen.get(video) ?? (motion.matches ? 'pause' : 'play');
+    if (onScreen.has(video) && choice === 'play') void video.play().catch(() => {});
     else video.pause();
   });
 const videoObserver = new IntersectionObserver((entries) => {
@@ -235,10 +237,10 @@ document.querySelectorAll<HTMLButtonElement>('[data-video-toggle]').forEach((but
   };
   button.addEventListener('click', () => {
     if (video.paused) {
-      pausedByUser.delete(video);
-      void video.play();
+      chosen.set(video, 'play');
+      void video.play().catch(() => {});
     } else {
-      pausedByUser.add(video);
+      chosen.set(video, 'pause');
       video.pause();
     }
   });

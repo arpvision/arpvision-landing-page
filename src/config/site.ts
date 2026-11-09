@@ -104,7 +104,63 @@ export const site = {
         width: 720,
         height: 900,
       },
+      'patio-fachada-16x9': {
+        src: '/images/produtos/patio-fachada-16x9.webp',
+        width: 960,
+        height: 540,
+      },
+      'patio-fachada-9x16': {
+        src: '/images/produtos/patio-fachada-9x16.webp',
+        width: 540,
+        height: 960,
+      },
+      'patio-piscina-16x9': {
+        src: '/images/produtos/patio-piscina-16x9.webp',
+        width: 960,
+        height: 540,
+      },
+      'sala-2-16x9': { src: '/images/produtos/sala-2-16x9.webp', width: 960, height: 540 },
+      'cozinha-16x9': { src: '/images/produtos/cozinha-16x9.webp', width: 960, height: 540 },
     },
+    // Os vídeos de exemplo de "Vídeos a partir de fotos" (public/video), um par por idioma: o
+    // selo, os dados do imóvel e o cartão final estão gravados na imagem. O pôster de cada um
+    // (public/images/produtos) é o primeiro quadro, o mesmo em que o play começa.
+    exampleVideos: {
+      pt: {
+        vertical: {
+          src: '/video/exemplo-vertical-pt.mp4',
+          poster: '/images/produtos/exemplo-vertical-pt.webp',
+          width: 720,
+          height: 1280,
+        },
+        horizontal: {
+          src: '/video/exemplo-horizontal-pt.mp4',
+          poster: '/images/produtos/exemplo-horizontal-pt.webp',
+          width: 1280,
+          height: 720,
+        },
+      },
+      es: {
+        vertical: {
+          src: '/video/exemplo-vertical-es.mp4',
+          poster: '/images/produtos/exemplo-vertical-es.webp',
+          width: 720,
+          height: 1280,
+        },
+        horizontal: {
+          src: '/video/exemplo-horizontal-es.mp4',
+          poster: '/images/produtos/exemplo-horizontal-es.webp',
+          width: 1280,
+          height: 720,
+        },
+      },
+    } satisfies Record<
+      Locale,
+      Record<
+        'vertical' | 'horizontal',
+        { src: string; poster: string; width: number; height: number }
+      >
+    >,
     // Panoramas do proprietário. O enquadramento das miniaturas é feito no layout.
     fanRooms: [
       {
