@@ -126,6 +126,7 @@ export const site = {
         width: 960,
         height: 540,
       },
+      'banheiro-16x9': { src: '/images/produtos/banheiro-16x9.webp', width: 960, height: 540 },
     },
     // As fotos do calendário do topo do Piloto (CalendarMock.astro) em miniatura: ali elas aparecem
     // com poucas dezenas de pixels de largura, e as inteiras somavam 374 KB logo na abertura da

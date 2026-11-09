@@ -236,6 +236,15 @@ for (const { locale, page, file } of routes) {
   const types = schemas.map((item) => item['@type']);
   if (isProductPage(page)) assert.ok(types.includes('Service'), `${route}: JSON-LD Service`);
   if (page === 'products') assert.ok(types.includes('ItemList'), `${route}: JSON-LD ItemList`);
+  // Em /produtos, cada cartão tem a sua foto: no português, o Treinamento e o Tour Pronto ficam
+  // lado a lado.
+  if (page === 'products') {
+    const photos = [...html.matchAll(/<a class="product-card"[^>]*>\s*<img src="([^"]+)"/g)].map(
+      (match) => match[1],
+    );
+    assert.ok(photos.length > 0, `${route}: as fotos dos cartões`);
+    assert.equal(new Set(photos).size, photos.length, `${route}: foto repetida: ${photos}`);
+  }
   // Nas páginas de produto, a cotação e a faixa azul não falam do tour: sem a linha do teste
   // grátis e sem o "Criar conta grátis" da faixa.
   if (isProductPage(page)) {

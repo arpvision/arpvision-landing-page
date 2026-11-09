@@ -170,7 +170,7 @@ A checagem de saída (`check:site`) verifica:
 - JSON-LD no idioma da página: o `FAQPage` igual às dúvidas dela (também nas páginas de produto), o `Service` nelas, o `ItemList` de `/produtos` e o `VideoObject` dos tutoriais com o idioma da narração (pt-BR);
 - com os preços ocultos, nenhum `offers` e nenhuma moeda com número no HTML (`scripts/lib/prices.mjs`: R$, US$, $, € e £, antes ou depois do número, com espaço comum ou `&nbsp;`);
 - nas páginas `/en`, as regras de texto do inglês (`scripts/lib/english-rules.mjs`) e, nas `/es` e `/en`, nenhum texto em português;
-- o ARP Vision Presencial só em português: o treinamento e o Tour Pronto no menu Produtos, levando à seção da Home, e nada dele no espanhol e no inglês;
+- o ARP Vision Presencial só em português: o treinamento e o Tour Pronto no menu Produtos, levando à seção da Home, e nada dele no espanhol e no inglês; em `/produtos`, cada cartão com a sua foto (o Treinamento e o Tour Pronto ficam lado a lado);
 - os links dos tutoriais no idioma da página, a 404, o seletor, a faixa de sugestão só no navegador, nenhum iframe inicial além do tour da hero e orçamento de JavaScript abaixo de 100 KB.
 
 Para ler o site como o Googlebot (robots → sitemap → cada página, sem seguir redirecionamentos), com a prévia no ar ou contra a produção depois do deploy:

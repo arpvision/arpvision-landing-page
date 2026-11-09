@@ -15,15 +15,16 @@ const { locale, t } = pageLocale(Astro);
 const text = t.productsPage;
 const photos = site.media.productPhotos;
 // A foto de cada produto: a sala no tour, a do exemplo da página nos produtos novos (a fachada que
-// abre o vídeo, a piscina da arte "À venda" e a cozinha do imóvel da conversa) e a suíte no
-// Presencial, que só existe em português.
+// abre o vídeo, a piscina da arte "À venda" e a cozinha do imóvel da conversa) e, no Presencial,
+// que só existe em português, a suíte no Treinamento e o banheiro no Tour Pronto: os dois cartões
+// ficam lado a lado, e cada um tem a sua foto.
 const photoOf = {
   tour: 'sala-2-16x9',
   videos: 'patio-fachada-16x9',
   instagram: 'patio-piscina-16x9',
   autochat: 'cozinha-16x9',
   training: 'quarto-com-suite-16x9',
-  readyTour: 'quarto-com-suite-16x9',
+  readyTour: 'banheiro-16x9',
 } satisfies Record<ProductId, keyof typeof photos>;
 const path = Astro.url.pathname;
 // Os grupos do menu Produtos (`liveProductGroups`, a mesma lista do menu), com a foto de cada um.
