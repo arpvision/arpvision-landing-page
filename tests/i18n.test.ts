@@ -133,20 +133,30 @@ test('nenhum idioma fala em "IA" com o cliente', () => {
 // O site voltou a falar com imobiliárias (06/11): nenhum texto chama o cliente pelo público
 // genérico de antes ("o seu espaço", "seus espaços", "a sua empresa", "todo tamanho de negócio").
 // A busca é pela palavra, em qualquer forma e caixa; antes dela, saem do texto os usos de hoje que
-// não falam do cliente: a marca d'água de outra empresa, a conta de empresa do Instagram e, no
-// inglês, o plano Business (com maiúscula; "BUSINESS" num rótulo em caixa alta continua pego).
+// não falam do cliente: a marca d'água de outra empresa, a conta de empresa do Instagram, a sede da
+// própria ARP Vision e, no inglês, o plano Business (com maiúscula; "BUSINESS" num rótulo em caixa
+// alta continua pego).
 const oldAudience: Record<Locale, { words: RegExp; allowed: RegExp[] }> = {
   pt: {
     words: /(?<!\p{L})(?:espaços?|negócios?|empresas?)(?!\p{L})/iu,
-    allowed: [/marca d'água de outra empresa/g],
+    allowed: [/marca d'água de outra empresa/g, /^Empresa internacional com sede/g],
   },
   es: {
     words: /(?<!\p{L})(?:espacios?|negocios?|empresas?)(?!\p{L})/iu,
-    allowed: [/\(de empresa o de creador de contenido\)/g, /marca de agua de otra empresa/g],
+    allowed: [
+      /\(de empresa o de creador de contenido\)/g,
+      /marca de agua de otra empresa/g,
+      /^Empresa internacional con sede/g,
+    ],
   },
   en: {
     words: /(?<!\p{L})(?:spaces?|business(?:es)?|compan(?:y|ies))(?!\p{L})/iu,
-    allowed: [/\bBusiness\b/g, /\(business or creator\)/g, /another company's watermark/g],
+    allowed: [
+      /\bBusiness\b/g,
+      /\(business or creator\)/g,
+      /another company's watermark/g,
+      /^An international company headquartered/g,
+    ],
   },
 };
 // As promessas antigas da home: a volta não leva 30 segundos (medido no app, são cerca de 2 min
