@@ -827,6 +827,7 @@ export const en: Dictionary = {
   },
   footer: {
     taglineLines: ['The whole property.', 'Your phone is just the beginning.'],
+    headquarters: 'An international company headquartered in Barcelona, Spain.',
     products: 'Products',
     discover: 'Discover',
     howItWorks: 'How it works',

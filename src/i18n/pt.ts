@@ -741,6 +741,7 @@ export const pt = {
   },
   footer: {
     taglineLines: ['O imóvel por inteiro.', 'O celular é só o começo.'],
+    headquarters: 'Empresa internacional com sede em Barcelona, Espanha.',
     products: 'Produtos',
     discover: 'Conheça',
     howItWorks: 'Como funciona',

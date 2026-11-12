@@ -703,6 +703,7 @@ export const es: Dictionary = {
   },
   footer: {
     taglineLines: ['Todo el inmueble, por dentro.', 'El móvil es solo el principio.'],
+    headquarters: 'Empresa internacional con sede en Barcelona, España.',
     products: 'Productos',
     discover: 'Descubre',
     howItWorks: 'Cómo funciona',
