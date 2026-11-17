@@ -1,12 +1,13 @@
 ---
 import Icon from './Icon.astro';
+import { site } from '../config/site';
 import { pageLocale } from '../i18n';
-// Conversa de WhatsApp em HTML, no lugar da imagem de conversa-whatsapp.webp (que tem o
-// texto em português gravado). Reproduz a imagem: o contato, a mensagem com a prévia do
-// link do tour e a resposta. O estilo está em landing-polish.css, junto da imagem, para
-// não virar mais um arquivo de CSS na Home em português.
+// Conversa de WhatsApp em HTML: o contato, a mensagem com a prévia do link do tour (a fachada
+// do tour de vitrine) e a resposta. O estilo está em landing-polish.css, junto da regra de uma
+// conversa em imagem (`conversationImage`), que nenhum idioma usa hoje.
 const { t } = pageLocale(Astro);
 const chat = t.sharing.chat;
+const photo = site.media.productPhotos['fachada-16x9'];
 ---
 
 <figure class="sharing-conversation chat-preview" aria-label={chat.label}>
@@ -24,10 +25,10 @@ const chat = t.sharing.chat;
       <p>{chat.message}</p>
       <div class="chat-link">
         <img
-          src="/images/tours/patio.webp"
+          src={photo.src}
           alt=""
-          width="1600"
-          height="800"
+          width={photo.width}
+          height={photo.height}
           loading="lazy"
           decoding="async"
         />

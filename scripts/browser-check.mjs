@@ -723,7 +723,7 @@ try {
   await page.screenshot({ path: '.artifacts/home-desktop.png' });
   assert.equal(
     await page.locator('.hero-embed').getAttribute('src'),
-    'https://arpvision.app/embed/511a5654-29f2-4798-87ff-5b479210dbf0',
+    'https://arpvision.app/embed/dca3fb6c-aca5-420f-909d-4dad795704ef',
   );
   // Com movimento reduzido, o vídeo da captura não toca sozinho.
   assert.equal(await page.locator('#tutorial-video').evaluate((video) => video.paused), true);
@@ -744,9 +744,10 @@ try {
     await page.locator('.credit-example').innerText(),
     /5 ambientes, ou seja, 5 créditos/,
   );
+  // A conversa do WhatsApp é HTML nos três idiomas, com a fachada do tour de vitrine na prévia.
   assert.equal(
-    await page.locator('#compartilhamento img').getAttribute('src'),
-    '/images/conversa-whatsapp.webp',
+    await page.locator('#compartilhamento .chat-preview .chat-link img').getAttribute('src'),
+    '/images/produtos/fachada-16x9.webp',
   );
   // Sem tour configurado, a seção e os links para ela ficam fora da página.
   assert.equal(await page.locator('#tour-real').isVisible(), false);
@@ -2601,14 +2602,13 @@ try {
     await localized.goto(base + home);
     assert.equal(
       await localized.locator('.hero-embed').getAttribute('src'),
-      `https://arpvision.app/embed/511a5654-29f2-4798-87ff-5b479210dbf0?idioma=${code}`,
+      `https://arpvision.app/embed/dca3fb6c-aca5-420f-909d-4dad795704ef?idioma=${code}`,
     );
     assert.equal(
       await localized.locator('#compartilhamento .chat-preview').count(),
       1,
-      `${home}: conversa do WhatsApp em HTML, sem a imagem em português`,
+      `${home}: conversa do WhatsApp em HTML`,
     );
-    assert.equal(await localized.locator('img[src*="conversa-whatsapp"]').count(), 0);
     const schema = JSON.parse(
       await localized.locator('script[type="application/ld+json"]').textContent(),
     );

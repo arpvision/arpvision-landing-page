@@ -166,13 +166,12 @@
   border-radius: 10px;
   background: #ffffff;
 }
-/* Mais específico que `.sharing-conversation img`, a regra da imagem do português. */
+/* Mais específico que `.sharing-conversation img`, a regra da conversa em imagem. */
 .chat-preview .chat-link img {
   width: 100%;
   height: auto;
   aspect-ratio: 16 / 10;
   object-fit: cover;
-  object-position: 84% 50%;
   border-radius: 0;
   box-shadow: none;
 }

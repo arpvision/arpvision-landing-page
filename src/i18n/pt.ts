@@ -139,7 +139,7 @@ export const pt = {
         title: 'Assim ficam os seus posts',
         lead: 'Com as fotos dos seus imóveis, o seu logo e o CRECI em todas as peças.',
         arts: [
-          { id: 'sale', kind: 'À venda', title: 'Casa com 3 quartos e piscina' },
+          { id: 'sale', kind: 'À venda', title: 'Casa com 3 quartos e sacada' },
           { id: 'rent', kind: 'Para alugar', title: 'Casa com lareira e varanda' },
           { id: 'sold', kind: 'Vendido', title: 'Mais uma chave entregue no Bairro Exemplo' },
           { id: 'tour', kind: 'Tour 360°', title: 'Veja esta casa por dentro' },
@@ -804,17 +804,23 @@ export const pt = {
     rooms: {
       suite: {
         title: 'Suíte',
-        alt: 'Box de vidro e banheira em um banheiro fotografado em 360 graus',
+        alt: 'Cama de casal com cabeceira capitonê e porta para a sacada na suíte fotografada em 360 graus',
       },
-      quarto: { title: 'Quarto', alt: 'Duas poltronas junto a uma mesa no quarto com suíte' },
+      cozinha: {
+        title: 'Cozinha',
+        alt: 'Ilha com cooktop, televisão e a mesa de jantar ao fundo na cozinha fotografada em 360 graus',
+      },
       sala: {
         title: 'Sala',
-        alt: 'Escada de madeira e mesa de vidro na sala fotografada em 360 graus',
+        alt: 'Escada, sofá e lareira embaixo da televisão na sala fotografada em 360 graus',
       },
-      quartoVisita: { title: 'Quarto Visita', alt: 'Televisão junto à janela e à cortina' },
-      patio: {
-        title: 'Pátio',
-        alt: 'Piscina, cascata e área coberta de churrasqueira no pátio',
+      banheiro: {
+        title: 'Banheiro',
+        alt: 'Box de vidro com paredes de mármore e bancada com duas cubas no banheiro da suíte',
+      },
+      sacada: {
+        title: 'Sacada',
+        alt: 'Cadeira suspensa e vista para as araucárias na sacada da suíte',
       },
     } satisfies Record<FanRoomId, { title: string; alt: string }>,
   },
@@ -833,18 +839,15 @@ export const pt = {
       },
       visit: { title: 'Antes da visita', text: 'Quem chega já conhece o imóvel e vem decidido.' },
     },
-    // A conversa em português é uma imagem; sem ela, o componente monta a conversa em
-    // HTML com o texto de `chat` (é o que o espanhol e o inglês usam).
-    conversationImage: {
-      src: '/images/conversa-whatsapp.webp',
-      alt: 'Simulação de um corretor enviando um tour de 9 ambientes no WhatsApp. A mensagem explica que o cliente pode abrir no computador ou no celular, sem baixar nada nem criar conta.',
-    } as { src: string; alt: string } | null,
+    // Sem imagem, o componente monta a conversa em HTML com o texto de `chat`, com a miniatura
+    // do tour de vitrine. A imagem antiga trazia a foto de outro tour gravada.
+    conversationImage: null as { src: string; alt: string } | null,
     chat: {
-      label: 'Simulação de uma conversa no WhatsApp com o link de um tour de 9 ambientes',
+      label: 'Simulação de uma conversa no WhatsApp com o link de um tour de 19 ambientes',
       contact: 'Cliente',
       status: 'conversa no WhatsApp',
       message: 'Oi! Segue o tour do imóvel. Dá para ver tudo por dentro, ambiente por ambiente:',
-      linkTitle: 'Tour 360° · 9 ambientes',
+      linkTitle: 'Tour 360° · 19 ambientes',
       reply:
         'Você não precisa baixar nada nem criar conta. Pode abrir no computador ou no celular.',
     },

@@ -1,15 +1,17 @@
-// Recortes retilíneos da casa de demonstração (o tour 511a5654, "Casa corretor"): as fotos das
+// Recortes retilíneos do tour de vitrine (o dca3fb6c, o mesmo do topo do site): as fotos das
 // telas de exemplo do site e dos vídeos de exemplo. Os ângulos de cada recorte estão em
 // scripts/product-crops.json. Cada recorte vira um WebP do site e, com --video-out, um JPG em
 // resolução cheia para os vídeos.
 //
-// O `retouch` do mesmo JSON lista, por panorâmica, as manchas retocadas antes de recortar (o
-// reflexo de quem fotografou no vidro da cabeceira da suíte, que nenhum enquadramento evita sem
-// perder a cama). O retoque é o de scripts/lib/retouch.mjs.
+// O `retouch` do mesmo JSON lista, por panorâmica, as manchas retocadas antes de recortar (a
+// sombra de quem fotografou no calçamento da frente, que o 9:16 da fachada não evita sem pegar
+// o topo borrado da panorâmica). O retoque é o de scripts/lib/retouch.mjs.
 //
 // Uso:
 //   node scripts/product-crops.mjs --source <pasta> [--site-out <pasta>] [--video-out <pasta>]
 //   --source     a pasta do tour, com a panorâmica 2:1 de cada ambiente em <ambiente>/tratada.jpg
+//                (a `tratada.jpg` que a API devolve em GET /virtual-tours/<id>, com o nome do
+//                ambiente no tour, como `suite-master`)
 //   --site-out   padrão: public/images/produtos
 //   --video-out  sem ela, só os WebP do site são gravados
 //

@@ -15,10 +15,10 @@ type Photo = keyof typeof photos;
 // Os dias com publicação, de 1 a 14 a partir de uma segunda-feira. Sem foto, a arte é só de
 // texto (uma dica), na cor da marca.
 const scheduled: Partial<Record<number, { photo?: Photo; story?: boolean; approved: boolean }>> = {
-  1: { photo: 'patio-fachada-4x5', approved: true },
-  3: { photo: 'patio-piscina-9x16', story: true, approved: true },
-  5: { photo: 'quarto-com-suite-4x5', approved: false },
-  8: { photo: 'sala-2-4x5', approved: false },
+  1: { photo: 'fachada-4x5', approved: true },
+  3: { photo: 'sacada-9x16', story: true, approved: true },
+  5: { photo: 'suite-4x5', approved: false },
+  8: { photo: 'sala-4x5', approved: false },
   10: { photo: 'cozinha-4x5', story: true, approved: false },
   12: { approved: false },
 };

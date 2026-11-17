@@ -6,74 +6,64 @@
   },
   "rooms": [
     {
-      "name": "patio-fachada",
-      "source": "patio",
+      "name": "fachada",
+      "source": "frente",
       "views": {
-        "16x9": { "yaw": 20, "pitch": 8, "hfov": 90 },
-        "9x16": { "yaw": 25, "pitch": 5, "hfov": 56 },
-        "4x5": { "yaw": 20, "pitch": 6, "hfov": 76 }
+        "16x9": { "yaw": 18, "pitch": 6, "hfov": 86 },
+        "9x16": { "yaw": 6, "pitch": -6.5, "hfov": 53 },
+        "4x5": { "yaw": 9, "pitch": -5, "hfov": 67 }
       }
     },
     {
-      "name": "sala-2",
-      "source": "sala-2",
+      "name": "sala",
+      "source": "sala",
       "views": {
-        "16x9": { "yaw": 30, "pitch": 0, "hfov": 100 },
-        "9x16": { "yaw": 20, "pitch": 0, "hfov": 56 },
-        "4x5": { "yaw": 30, "pitch": 0, "hfov": 80 }
+        "16x9": { "yaw": 270, "pitch": 0, "hfov": 100 },
+        "9x16": { "yaw": 285, "pitch": 0, "hfov": 56 },
+        "4x5": { "yaw": 280, "pitch": 0, "hfov": 80 }
       }
     },
     {
       "name": "cozinha",
-      "source": "cozinha",
+      "source": "sala-de-estar",
       "views": {
-        "16x9": { "yaw": 168, "pitch": 0, "hfov": 92 },
-        "9x16": { "yaw": 175, "pitch": 0, "hfov": 56 },
-        "4x5": { "yaw": 180, "pitch": 0, "hfov": 68 }
+        "16x9": { "yaw": 60, "pitch": 0, "hfov": 100 },
+        "9x16": { "yaw": 75, "pitch": 0, "hfov": 56 },
+        "4x5": { "yaw": 70, "pitch": 0, "hfov": 80 }
       }
     },
     {
-      "name": "quarto-com-suite",
-      "source": "quarto-com-suite",
+      "name": "suite",
+      "source": "suite-master",
       "views": {
-        "16x9": { "yaw": 0, "pitch": 0, "hfov": 100 },
-        "9x16": { "yaw": 0, "pitch": 0, "hfov": 56 },
-        "4x5": { "yaw": 0, "pitch": 0, "hfov": 80 }
+        "16x9": { "yaw": 62, "pitch": -2, "hfov": 100 },
+        "9x16": { "yaw": 52, "pitch": -2, "hfov": 56 },
+        "4x5": { "yaw": 55, "pitch": -2, "hfov": 80 }
       }
     },
     {
       "name": "banheiro",
-      "source": "banheiro",
+      "source": "banheiro-suite-master",
       "views": {
-        "16x9": { "yaw": 185, "pitch": -8, "hfov": 95 },
-        "9x16": { "yaw": 182, "pitch": -5, "hfov": 56 },
-        "4x5": { "yaw": 182, "pitch": -5, "hfov": 76 }
+        "16x9": { "yaw": 290, "pitch": -4, "hfov": 100 }
       }
     },
     {
-      "name": "2-andar",
-      "source": "2-andar",
+      "name": "sacada",
+      "source": "sacada-suite-master",
       "views": {
-        "9x16": { "yaw": 75, "pitch": 0, "hfov": 56 },
-        "4x5": { "yaw": 76, "pitch": 0, "hfov": 76 }
-      }
-    },
-    {
-      "name": "patio-piscina",
-      "source": "patio",
-      "views": {
-        "16x9": { "yaw": 222, "pitch": -6, "hfov": 105 },
-        "9x16": { "yaw": 215, "pitch": 2, "hfov": 60 },
-        "4x5": { "yaw": 215, "pitch": -3, "hfov": 80 }
+        "16x9": { "yaw": 170, "pitch": 2, "hfov": 100 },
+        "9x16": { "yaw": 170, "pitch": -2, "hfov": 56 },
+        "4x5": { "yaw": 165, "pitch": 0, "hfov": 80 }
       }
     }
   ],
   "retouch": {
-    "quarto-com-suite": [
+    "frente": [
       {
-        "yaw": [353.5, 359.2],
-        "pitch": [-2.5, 2.8],
-        "reason": "reflexo de quem fotografou no vidro da cabeceira"
+        "yaw": [-12, 1.5],
+        "pitch": [-49.5, -43.5],
+        "reason": "sombra de quem fotografou no calçamento, embaixo do 9:16 da fachada"
       }
     ]
   }

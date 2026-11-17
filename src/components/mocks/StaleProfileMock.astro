@@ -9,9 +9,7 @@ import { pageLocale } from '../../i18n';
 const { t } = pageLocale(Astro);
 const { mock } = t.productPages.instagram;
 const photos = site.media.productPhotos;
-const oldPosts = (['patio-piscina-4x5', 'sala-2-4x5', 'cozinha-4x5'] as const).map(
-  (name) => photos[name],
-);
+const oldPosts = (['sacada-4x5', 'sala-4x5', 'cozinha-4x5'] as const).map((name) => photos[name]);
 ---
 
 <div class="example-figure">

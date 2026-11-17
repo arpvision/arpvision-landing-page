@@ -10,9 +10,9 @@ const { t } = pageLocale(Astro);
 const { mock } = t.productPages.videos;
 const photos = site.media.productPhotos;
 // Fora da ordem da visita: o passo 2 (VisitOrderMock) põe as mesmas fotos nela.
-const sent = (
-  ['cozinha-16x9', 'patio-piscina-16x9', 'sala-2-16x9', 'patio-fachada-16x9'] as const
-).map((name) => photos[name]);
+const sent = (['cozinha-16x9', 'sacada-16x9', 'sala-16x9', 'fachada-16x9'] as const).map(
+  (name) => photos[name],
+);
 ---
 
 <div class="example-figure">
