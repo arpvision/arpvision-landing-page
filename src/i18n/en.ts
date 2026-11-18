@@ -146,7 +146,7 @@ export const en: Dictionary = {
         // DIFERENTE: o número da licença no lugar do CRECI.
         lead: 'With photos of your properties, your logo and your license number on every post.',
         arts: [
-          { id: 'sale', kind: 'For sale', title: '3-bedroom house with a pool' },
+          { id: 'sale', kind: 'For sale', title: '3-bedroom house with a balcony' },
           // DIFERENTE: só a lareira. Com a varanda, o título passa do comprimento do português e
           // vai a três linhas a 360 px.
           { id: 'rent', kind: 'For rent', title: 'House with a fireplace' },
@@ -887,17 +887,23 @@ export const en: Dictionary = {
     rooms: {
       suite: {
         title: 'Suite',
-        alt: 'Glass shower and bathtub in a bathroom photographed in 360 degrees',
+        alt: 'Double bed with a tufted headboard and a door to the balcony in the suite photographed in 360 degrees',
       },
-      quarto: { title: 'Bedroom', alt: 'Two armchairs by a table in the en suite bedroom' },
+      cozinha: {
+        title: 'Kitchen',
+        alt: 'Island with a cooktop, a TV and the dining table behind it in the kitchen photographed in 360 degrees',
+      },
       sala: {
         title: 'Living room',
-        alt: 'Wooden staircase and glass table in the living room photographed in 360 degrees',
+        alt: 'Staircase, sofa and a fireplace under the TV in the living room photographed in 360 degrees',
       },
-      quartoVisita: { title: 'Guest room', alt: 'Television next to the window and the curtain' },
-      patio: {
-        title: 'Backyard',
-        alt: 'Pool, waterfall and covered barbecue area in the backyard',
+      banheiro: {
+        title: 'Bathroom',
+        alt: 'Glass shower with marble walls and a double-sink vanity in the suite bathroom',
+      },
+      sacada: {
+        title: 'Balcony',
+        alt: 'Hanging chair and a view of the araucaria trees from the suite balcony',
       },
     },
   },
@@ -922,11 +928,11 @@ export const en: Dictionary = {
     // A imagem da conversa tem o texto em português: aqui ela é montada em HTML.
     conversationImage: null,
     chat: {
-      label: 'Simulated WhatsApp conversation with the link to a 9-room tour',
+      label: 'Simulated WhatsApp conversation with the link to a 19-room tour',
       contact: 'Client',
       status: 'WhatsApp conversation',
       message: "Hi! Here's the tour of the property. You can see everything inside, room by room:",
-      linkTitle: '360° tour · 9 rooms',
+      linkTitle: '360° tour · 19 rooms',
       reply:
         "You don't need to download anything or create an account. You can open it on a computer or on your phone.",
     },

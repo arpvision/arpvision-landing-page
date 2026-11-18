@@ -10,14 +10,14 @@ import { pairById } from '../../lib/products';
 const { t } = pageLocale(Astro);
 const { gallery } = t.productPages.instagram;
 const layout: Record<string, Omit<ComponentProps<typeof PostArt>, 'art'>> = {
-  sale: { photo: 'patio-piscina-4x5', listing: true },
-  rent: { photo: 'sala-2-4x5', listing: true },
-  sold: { photo: 'patio-fachada-4x5' },
-  tour: { photo: 'quarto-com-suite-4x5', listing: true },
+  sale: { photo: 'sacada-4x5', listing: true },
+  rent: { photo: 'sala-4x5', listing: true },
+  sold: { photo: 'fachada-4x5' },
+  tour: { photo: 'suite-4x5', listing: true },
   neighborhood: { tone: 'blue', icon: 'globe' },
   tip: { tone: 'light', icon: 'audit' },
   valuation: { photo: 'cozinha-4x5' },
-  story: { photo: 'patio-piscina-9x16', story: true, listing: true, whatsapp: true },
+  story: { photo: 'sacada-9x16', story: true, listing: true, whatsapp: true },
 };
 const arts = pairById('PostGallery', gallery.arts, layout);
 ---

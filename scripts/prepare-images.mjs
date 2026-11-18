@@ -46,11 +46,11 @@ await Promise.all([
   // Saem dos recortes WebP do site, e não da panorâmica: depois de refazer os recortes
   // (scripts/product-crops.mjs), refaça estas também.
   ...[
-    ['patio-fachada-4x5', 240],
-    ['quarto-com-suite-4x5', 240],
-    ['sala-2-4x5', 240],
+    ['fachada-4x5', 240],
+    ['suite-4x5', 240],
+    ['sala-4x5', 240],
     ['cozinha-4x5', 240],
-    ['patio-piscina-9x16', 180],
+    ['sacada-9x16', 180],
   ]
     .filter(([name, width]) => wanted(`${name}-${width}`))
     .map(([name, width]) =>

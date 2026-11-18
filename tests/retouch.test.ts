@@ -133,23 +133,24 @@ test('a região dá a volta na emenda da panorâmica', () => {
   assert.equal(changedOutside(before, data, seam, 1), 0);
 });
 
-// O retoque dos recortes (scripts/product-crops.json): o reflexo de quem fotografou no vidro da
-// cabeceira da suíte fica em yaw 354,0 a 358,7 (−6,0 a −1,3) e pitch −2,0 a +2,3, medido pela cor.
-test('o reflexo no vidro da cabeceira da suíte fica dentro do retoque, com folga', () => {
+// O retoque dos recortes (scripts/product-crops.json): a sombra da cabeça de quem fotografou, no
+// calçamento da frente, fica em yaw 349,5 a 359,6 (−10,5 a −0,4) e começa no pitch −44,3, medida
+// pela cor. Os recortes da fachada não descem além de −48,1 (a borda de baixo do 9:16).
+test('a sombra de quem fotografou na frente fica dentro do retoque, com folga', () => {
   const { rooms, retouch } = JSON.parse(
     readFileSync(new URL('../scripts/product-crops.json', import.meta.url), 'utf8'),
   ) as { rooms: { source: string }[]; retouch: Record<string, Box[]> };
   const sources = new Set(rooms.map((room) => room.source));
   for (const source of Object.keys(retouch)) assert.ok(sources.has(source), source);
-  const reflection: Box = { yaw: [354.0, 358.7], pitch: [-2.0, 2.3] };
-  const covers = retouch['quarto-com-suite'].some(({ yaw, pitch }) => {
+  const shadow: Box = { yaw: [349.5, 359.6], pitch: [-48.1, -44.3] };
+  const covers = retouch['frente'].some(({ yaw, pitch }) => {
     const shift = Math.floor(yaw[0] / 360) * 360; // o começo da região em [0, 360)
     return (
-      yaw[0] - shift <= reflection.yaw[0] - 0.4 &&
-      yaw[1] - shift >= reflection.yaw[1] + 0.4 &&
-      pitch[0] <= reflection.pitch[0] - 0.4 &&
-      pitch[1] >= reflection.pitch[1] + 0.4
+      yaw[0] - shift <= shadow.yaw[0] - 0.4 &&
+      yaw[1] - shift >= shadow.yaw[1] + 0.4 &&
+      pitch[0] <= shadow.pitch[0] - 0.4 &&
+      pitch[1] >= shadow.pitch[1] + 0.4
     );
   });
-  assert.ok(covers, JSON.stringify(retouch['quarto-com-suite']));
+  assert.ok(covers, JSON.stringify(retouch['frente']));
 });

@@ -38,7 +38,7 @@ test('o campo de visão horizontal vai de uma borda do quadro à outra', () => {
   assert.ok(Math.abs(c[row + (width - 1) * 2] - ((225 / 360) * 3840 - 0.5)) < 1);
 });
 
-// Os recortes da casa de demonstração (scripts/product-crops.json).
+// Os recortes do tour de vitrine (scripts/product-crops.json).
 type Format = { site: [number, number]; video: [number, number] };
 type View = { yaw: number; pitch: number; hfov: number };
 const { formats, rooms } = JSON.parse(
@@ -52,24 +52,24 @@ const crops = rooms.flatMap(({ name, source, views }) =>
 );
 const stem = (crop: (typeof crops)[number]) => `${crop.name}-${crop.ratio}`;
 
-test('são 20 recortes: 7 ambientes em 3 proporções, sem o 16:9 do 2º andar, que sairia mole', () => {
-  const ambientes = [
-    'patio-fachada',
-    'sala-2',
-    'cozinha',
-    'quarto-com-suite',
-    'banheiro',
-    '2-andar',
-    'patio-piscina',
+test('são 16 recortes: 5 ambientes em 3 proporções e o banheiro, que só aparece em 16:9', () => {
+  const ambientes = ['fachada', 'sala', 'cozinha', 'suite', 'sacada'];
+  const esperados = [
+    ...ambientes.flatMap((name) => ['16x9', '9x16', '4x5'].map((ratio) => `${name}-${ratio}`)),
+    'banheiro-16x9',
   ];
-  const esperados = ambientes
-    .flatMap((name) => ['16x9', '9x16', '4x5'].map((ratio) => `${name}-${ratio}`))
-    .filter((nome) => nome !== '2-andar-16x9');
   assert.deepEqual(crops.map(stem).sort(), esperados.sort());
-  // O pátio serve aos dois recortes dele; os demais ambientes leem a própria pasta.
-  for (const crop of crops) {
-    assert.equal(crop.source, crop.name.startsWith('patio-') ? 'patio' : crop.name, stem(crop));
-  }
+  // A pasta de cada panorâmica tem o nome do ambiente no tour. A cozinha com a mesa de jantar é
+  // vista da sala de estar.
+  const pastas: Record<string, string> = {
+    fachada: 'frente',
+    sala: 'sala',
+    cozinha: 'sala-de-estar',
+    suite: 'suite-master',
+    banheiro: 'banheiro-suite-master',
+    sacada: 'sacada-suite-master',
+  };
+  for (const crop of crops) assert.equal(crop.source, pastas[crop.name], stem(crop));
   assert.deepEqual(formats, {
     '16x9': { site: [960, 540], video: [1440, 810] },
     '9x16': { site: [540, 960], video: [810, 1440] },
@@ -101,15 +101,23 @@ test('nenhum recorte amplia a panorâmica além de 1,35 vez (a 1,5 vez a foto j�
   }
 });
 
-test('os recortes do quarto não pegam a TV nem os espelhos dos lados, que refletem quem fotografou', () => {
-  const tv = [122, 225]; // a TV (160–197) e um espelho de cada lado (122–156 e 200–225)
-  const quarto = crops.filter((crop) => crop.name === 'quarto-com-suite');
-  assert.equal(quarto.length, 3);
-  for (const crop of quarto) {
-    for (const volta of [-360, 0, 360]) {
-      const from = crop.yaw - crop.hfov / 2 + volta;
-      const to = crop.yaw + crop.hfov / 2 + volta;
-      assert.ok(to < tv[0] || from > tv[1], `${stem(crop)}: yaw ${from} a ${to}`);
+test('os recortes da sacada não pegam o reflexo de quem fotografou no vidro do guarda-corpo', () => {
+  // As pernas e os tênis no vidro, de yaw 226 a 239 e pitch −27 a −11, com folga.
+  const reflexo = { yaw: [226, 239], pitch: [-27, -11] };
+  const sacada = crops.filter((crop) => crop.name === 'sacada');
+  assert.equal(sacada.length, 3);
+  for (const crop of sacada) {
+    const [width, height] = formats[crop.ratio].video;
+    const c = sampleCoords(width, height, crop, 3840, 1920);
+    for (let k = 0; k < c.length; k += 2) {
+      const yaw = ((c[k] + 0.5) / 3840) * 360;
+      const pitch = 90 - ((c[k + 1] + 0.5) / 1920) * 180;
+      const dentro =
+        yaw >= reflexo.yaw[0] &&
+        yaw <= reflexo.yaw[1] &&
+        pitch >= reflexo.pitch[0] &&
+        pitch <= reflexo.pitch[1];
+      assert.ok(!dentro, `${stem(crop)}: yaw ${yaw.toFixed(1)}, pitch ${pitch.toFixed(1)}`);
     }
   }
 });

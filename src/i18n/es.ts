@@ -119,7 +119,7 @@ export const es: Dictionary = {
         title: 'Así quedan tus posts',
         lead: 'Con las fotos de tus inmuebles, tu logo y la calificación energética en los anuncios de venta o alquiler.',
         arts: [
-          { id: 'sale', kind: 'En venta', title: 'Casa con 3 dormitorios y piscina' },
+          { id: 'sale', kind: 'En venta', title: 'Casa con 3 dormitorios y terraza' },
           { id: 'rent', kind: 'En alquiler', title: 'Casa con chimenea y porche' },
           { id: 'sold', kind: 'Vendido', title: 'Otra llave entregada en el Barrio Ejemplo' },
           { id: 'tour', kind: 'Tour 360°', title: 'Mira esta casa por dentro' },
@@ -766,20 +766,23 @@ export const es: Dictionary = {
     rooms: {
       suite: {
         title: 'Suite',
-        alt: 'Mampara de cristal y bañera en un baño fotografiado en 360 grados',
+        alt: 'Cama de matrimonio con cabecero capitoné y puerta a la terraza en la suite fotografiada en 360 grados',
       },
-      quarto: {
-        title: 'Dormitorio',
-        alt: 'Dos butacas junto a una mesa en el dormitorio con baño',
+      cozinha: {
+        title: 'Cocina',
+        alt: 'Isla con placa de cocción, televisión y el comedor al fondo en la cocina fotografiada en 360 grados',
       },
       sala: {
         title: 'Salón',
-        alt: 'Escalera de madera y mesa de cristal en el salón fotografiado en 360 grados',
+        alt: 'Escalera, sofá y chimenea bajo la televisión en el salón fotografiado en 360 grados',
       },
-      quartoVisita: { title: 'Invitados', alt: 'Televisión junto a la ventana y la cortina' },
-      patio: {
-        title: 'Patio',
-        alt: 'Piscina, cascada y zona cubierta con barbacoa en el patio',
+      banheiro: {
+        title: 'Baño',
+        alt: 'Mampara de cristal con paredes de mármol y encimera con dos lavabos en el baño de la suite',
+      },
+      sacada: {
+        title: 'Terraza',
+        alt: 'Silla colgante y vistas a las araucarias en la terraza de la suite',
       },
     },
   },
@@ -804,12 +807,12 @@ export const es: Dictionary = {
     // A imagem da conversa tem o texto em português: aqui ela é montada em HTML.
     conversationImage: null,
     chat: {
-      label: 'Simulación de una conversación de WhatsApp con el enlace de un tour de 9 estancias',
+      label: 'Simulación de una conversación de WhatsApp con el enlace de un tour de 19 estancias',
       contact: 'Cliente',
       status: 'conversación de WhatsApp',
       message:
         '¡Hola! Te paso el tour del inmueble. Puedes verlo todo por dentro, estancia por estancia:',
-      linkTitle: 'Tour 360° · 9 estancias',
+      linkTitle: 'Tour 360° · 19 estancias',
       reply:
         'No tienes que descargar nada ni crear una cuenta. Puedes abrirlo en el ordenador o en el móvil.',
     },

@@ -53,7 +53,7 @@ export type PageTour = Omit<DemoTour, 'label' | 'captureTime'> & {
 };
 
 /** Ambientes do leque da abertura; o nome e a descrição de cada um ficam no dicionário. */
-export type FanRoomId = 'suite' | 'quarto' | 'sala' | 'quartoVisita' | 'patio';
+export type FanRoomId = 'suite' | 'cozinha' | 'sala' | 'banheiro' | 'sacada';
 
 export const site = {
   name: 'ARP Vision',
@@ -75,54 +75,54 @@ export const site = {
     // uma versão em cada um.
     tutorial: '/video/tutorial-captura-360-v3.mp4',
     tutorialPoster: '/images/tutorial-720.webp',
-    // Tour 360° da demonstração, protegido até a pessoa ativar.
-    heroEmbed: 'https://arpvision.app/embed/511a5654-29f2-4798-87ff-5b479210dbf0',
-    // Recortes das fotos da casa de demonstração (public/images/produtos) usados nas telas de
-    // exemplo das páginas de produto, um por um e com o tamanho do arquivo. Nem todo ambiente tem
-    // as três proporções (o 2º andar não tem 16:9): nenhum nome é montado por ambiente e
-    // proporção.
+    // Tour 360° de vitrine, protegido até a pessoa ativar. As fotos do site (leque da abertura,
+    // telas de exemplo, conversa e vídeos de exemplo) saem deste mesmo tour.
+    heroEmbed: 'https://arpvision.app/embed/dca3fb6c-aca5-420f-909d-4dad795704ef',
+    // Recortes das fotos do tour de vitrine (public/images/produtos) usados nas telas de exemplo
+    // das páginas de produto, um por um e com o tamanho do arquivo. Nem todo ambiente tem as três
+    // proporções (o banheiro só tem 16:9): nenhum nome é montado por ambiente e proporção.
     productPhotos: {
-      'patio-fachada-4x5': {
-        src: '/images/produtos/patio-fachada-4x5.webp',
+      'fachada-4x5': {
+        src: '/images/produtos/fachada-4x5.webp',
         width: 720,
         height: 900,
       },
-      'patio-piscina-4x5': {
-        src: '/images/produtos/patio-piscina-4x5.webp',
+      'sacada-4x5': {
+        src: '/images/produtos/sacada-4x5.webp',
         width: 720,
         height: 900,
       },
-      'patio-piscina-9x16': {
-        src: '/images/produtos/patio-piscina-9x16.webp',
+      'sacada-9x16': {
+        src: '/images/produtos/sacada-9x16.webp',
         width: 540,
         height: 960,
       },
-      'sala-2-4x5': { src: '/images/produtos/sala-2-4x5.webp', width: 720, height: 900 },
+      'sala-4x5': { src: '/images/produtos/sala-4x5.webp', width: 720, height: 900 },
       'cozinha-4x5': { src: '/images/produtos/cozinha-4x5.webp', width: 720, height: 900 },
-      'quarto-com-suite-4x5': {
-        src: '/images/produtos/quarto-com-suite-4x5.webp',
+      'suite-4x5': {
+        src: '/images/produtos/suite-4x5.webp',
         width: 720,
         height: 900,
       },
-      'patio-fachada-16x9': {
-        src: '/images/produtos/patio-fachada-16x9.webp',
+      'fachada-16x9': {
+        src: '/images/produtos/fachada-16x9.webp',
         width: 960,
         height: 540,
       },
-      'patio-fachada-9x16': {
-        src: '/images/produtos/patio-fachada-9x16.webp',
+      'fachada-9x16': {
+        src: '/images/produtos/fachada-9x16.webp',
         width: 540,
         height: 960,
       },
-      'patio-piscina-16x9': {
-        src: '/images/produtos/patio-piscina-16x9.webp',
+      'sacada-16x9': {
+        src: '/images/produtos/sacada-16x9.webp',
         width: 960,
         height: 540,
       },
-      'sala-2-16x9': { src: '/images/produtos/sala-2-16x9.webp', width: 960, height: 540 },
+      'sala-16x9': { src: '/images/produtos/sala-16x9.webp', width: 960, height: 540 },
       'cozinha-16x9': { src: '/images/produtos/cozinha-16x9.webp', width: 960, height: 540 },
-      'quarto-com-suite-16x9': {
-        src: '/images/produtos/quarto-com-suite-16x9.webp',
+      'suite-16x9': {
+        src: '/images/produtos/suite-16x9.webp',
         width: 960,
         height: 540,
       },
@@ -133,22 +133,22 @@ export const site = {
     // página. Saem dos recortes acima por scripts/prepare-images.mjs (240 px no 4:5 e 180 px no
     // 9:16), com o mesmo nome e a largura no fim.
     calendarPhotos: {
-      'patio-fachada-4x5': {
-        src: '/images/produtos/patio-fachada-4x5-240.webp',
+      'fachada-4x5': {
+        src: '/images/produtos/fachada-4x5-240.webp',
         width: 240,
         height: 300,
       },
-      'patio-piscina-9x16': {
-        src: '/images/produtos/patio-piscina-9x16-180.webp',
+      'sacada-9x16': {
+        src: '/images/produtos/sacada-9x16-180.webp',
         width: 180,
         height: 320,
       },
-      'quarto-com-suite-4x5': {
-        src: '/images/produtos/quarto-com-suite-4x5-240.webp',
+      'suite-4x5': {
+        src: '/images/produtos/suite-4x5-240.webp',
         width: 240,
         height: 300,
       },
-      'sala-2-4x5': { src: '/images/produtos/sala-2-4x5-240.webp', width: 240, height: 300 },
+      'sala-4x5': { src: '/images/produtos/sala-4x5-240.webp', width: 240, height: 300 },
       'cozinha-4x5': { src: '/images/produtos/cozinha-4x5-240.webp', width: 240, height: 300 },
     },
     // Os vídeos de exemplo de "Vídeos a partir de fotos" (public/video), um par por idioma: o
@@ -204,40 +204,40 @@ export const site = {
         { src: string; poster: string; width: number; height: number }
       >
     >,
-    // Panoramas do proprietário. O enquadramento das miniaturas é feito no layout.
+    // Panorâmicas do tour de vitrine. O enquadramento das miniaturas é feito no layout.
     fanRooms: [
       {
         id: 'suite',
-        image: '/images/tours/banheiro.webp',
-        position: '28% 50%',
+        image: '/images/tours/suite.webp',
+        position: '0% 50%',
         labelTone: 'dark',
         arrowTone: 'dark',
       },
       {
-        id: 'quarto',
-        image: '/images/tours/suite.webp',
-        position: '92% 50%',
+        id: 'cozinha',
+        image: '/images/tours/cozinha.webp',
+        position: '100% 50%',
         labelTone: 'dark',
         arrowTone: 'dark',
       },
       {
         id: 'sala',
         image: '/images/tours/sala.webp',
-        position: '100% 50%',
-        labelTone: 'light',
-        arrowTone: 'light',
-      },
-      {
-        id: 'quartoVisita',
-        image: '/images/tours/tv-janela.webp',
-        position: '0% 50%',
-        labelTone: 'light',
+        position: '85% 50%',
+        labelTone: 'dark',
         arrowTone: 'dark',
       },
       {
-        id: 'patio',
-        image: '/images/tours/patio.webp',
-        position: '84% 50%',
+        id: 'banheiro',
+        image: '/images/tours/banheiro.webp',
+        position: '100% 50%',
+        labelTone: 'dark',
+        arrowTone: 'dark',
+      },
+      {
+        id: 'sacada',
+        image: '/images/tours/sacada.webp',
+        position: '30% 50%',
         labelTone: 'dark',
         arrowTone: 'dark',
       },

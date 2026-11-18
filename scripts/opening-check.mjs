@@ -316,10 +316,10 @@ try {
   assert.equal(await page.locator('.fan-room-link[data-liquid]').count(), 5);
   assert.deepEqual(await page.locator('.fan-room-link').allTextContents(), [
     'Suíte',
-    'Quarto',
+    'Cozinha',
     'Sala',
-    'Quarto Visita',
-    'Pátio',
+    'Banheiro',
+    'Sacada',
   ]);
   assert.equal(await page.locator('.header-capsule[data-liquid]').count(), 1);
   assert.ok((await page.locator('.site-header').boundingBox()).width <= 1060, 'cabeçalho estreito');
@@ -408,12 +408,12 @@ try {
   for (const [code, rooms, ids] of [
     [
       'es',
-      ['Suite', 'Dormitorio', 'Salón', 'Invitados', 'Patio'],
+      ['Suite', 'Cocina', 'Salón', 'Baño', 'Terraza'],
       '.opening + #compartilhamento + #como-funciona + .presentation + #creditos',
     ],
     [
       'en',
-      ['Suite', 'Bedroom', 'Living room', 'Guest room', 'Backyard'],
+      ['Suite', 'Kitchen', 'Living room', 'Bathroom', 'Balcony'],
       '.opening + #compartilhamento + #how-it-works + .presentation + #creditos',
     ],
   ]) {

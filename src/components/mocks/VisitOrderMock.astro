@@ -14,7 +14,7 @@ const photos = site.media.productPhotos;
 const scenes = pairByPosition(
   'VisitOrderMock',
   mock.scenes,
-  (['patio-fachada-16x9', 'sala-2-16x9', 'cozinha-16x9', 'patio-piscina-16x9'] as const).map(
+  (['fachada-16x9', 'sala-16x9', 'cozinha-16x9', 'sacada-16x9'] as const).map(
     (name) => photos[name],
   ),
 );

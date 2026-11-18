@@ -13,18 +13,18 @@ const photos = site.media.productPhotos;
 type Post = keyof typeof photos | 'text';
 // Quatro semanas a partir de uma segunda-feira, dia a dia.
 const posts: Partial<Record<number, Post>> = {
-  1: 'patio-fachada-4x5',
-  3: 'sala-2-4x5',
+  1: 'fachada-4x5',
+  3: 'sala-4x5',
   5: 'text',
   8: 'cozinha-4x5',
   10: 'text',
-  12: 'quarto-com-suite-4x5',
-  15: 'patio-piscina-4x5',
-  17: 'sala-2-4x5',
+  12: 'suite-4x5',
+  15: 'sacada-4x5',
+  17: 'sala-4x5',
   19: 'text',
   22: 'text',
   24: 'cozinha-4x5',
-  26: 'patio-fachada-4x5',
+  26: 'fachada-4x5',
 };
 const days = Array.from({ length: 28 }, (_, index) => posts[index + 1]);
 ---
