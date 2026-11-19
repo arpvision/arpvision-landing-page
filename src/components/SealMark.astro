@@ -1,0 +1,123 @@
+---
+// Um selo do canto do tour, num dos três modelos do app, com a marca da ARP Vision como exemplo.
+// Os de anel são SVG, nas proporções do app (lib/seal.ts): nítidos em qualquer tela, com o texto
+// do idioma da página. O discreto é o logo e o nome numa linha. Só figura: `aria-hidden`.
+import { site } from '../config/site';
+import { pageLocale } from '../i18n';
+import { sealName, sealRing, sealShape } from '../lib/seal';
+
+export type SealModel = 'ring' | 'contact' | 'discreet';
+interface Props {
+  model: SealModel;
+  /** Prefixo dos ids dos caminhos do texto: cada selo da página precisa do seu. */
+  uid: string;
+  class?: string;
+}
+const { model, uid, class: className } = Astro.props;
+const { t } = pageLocale(Astro);
+const name = site.name;
+const { size, outerRing, innerRing, textRadius, letter, capHeight } = sealShape;
+const center = size / 2;
+// O texto fica centrado na faixa pela altura da maiúscula. Virado para fora (em cima e na volta
+// inteira), a linha de base é o raio de dentro; de pé embaixo, o de fora.
+const outward = textRadius - (letter * capHeight) / 2;
+const upright = textRadius + (letter * capHeight) / 2;
+const ring = sealRing(t.seal.capturedBy, name);
+const discreetName = sealName(name);
+const nameWidth = discreetName.width.toFixed(1);
+// A volta inteira, do topo, no sentido horário.
+const lap = `M ${center},${center - outward} A ${outward} ${outward} 0 1 1 ${center},${center + outward} A ${outward} ${outward} 0 1 1 ${center},${center - outward}`;
+// Meia volta por cima, da esquerda para a direita, e meia volta por baixo, também da esquerda
+// para a direita: nas duas o texto se lê sem virar a cabeça.
+const over = `M ${center - outward},${center} A ${outward} ${outward} 0 0 1 ${center + outward},${center}`;
+const under = `M ${center - upright},${center} A ${upright} ${upright} 0 0 0 ${center + upright},${center}`;
+---
+
+{model === 'discreet' ? (
+  <span
+    class:list={['seal-mark', 'seal-mark-discreet', className]}
+    data-seal-model={model}
+    aria-hidden="true"
+  >
+    <img
+      class="seal-logo"
+      src={site.brand.symbol}
+      alt=""
+      width="189"
+      height="400"
+      loading="lazy"
+      decoding="async"
+    />
+    {/* O nome é desenho, como o texto dos anéis: em SVG, encolhe com a figura sem virar texto
+        miúdo da página. */}
+    <svg class="seal-name" viewBox={`0 0 ${nameWidth} ${discreetName.height}`} focusable="false">
+      <text
+        class="seal-text seal-text-name"
+        y={discreetName.baseline}
+        font-size={discreetName.letter}
+        textLength={nameWidth}
+        lengthAdjust="spacing"
+      >
+        {discreetName.text}
+      </text>
+    </svg>
+  </span>
+) : (
+  <span
+    class:list={['seal-mark', 'seal-mark-ring', className]}
+    data-seal-model={model}
+    aria-hidden="true"
+  >
+    <svg viewBox={`0 0 ${size} ${size}`} focusable="false">
+      <defs>
+        {model === 'ring' ? (
+          <path id={`${uid}-lap`} d={lap} />
+        ) : (
+          <>
+            <path id={`${uid}-over`} d={over} />
+            <path id={`${uid}-under`} d={under} />
+          </>
+        )}
+      </defs>
+      <circle class="seal-ring" cx={center} cy={center} r={outerRing} />
+      <circle class="seal-ring" cx={center} cy={center} r={innerRing} />
+      {model === 'ring' ? (
+        <text
+          class="seal-text"
+          font-size={letter}
+          transform={`rotate(${ring.rotation} ${center} ${center})`}
+        >
+          <textPath
+            href={`#${uid}-lap`}
+            textLength={(2 * Math.PI * outward).toFixed(2)}
+            lengthAdjust="spacing"
+          >
+            {ring.text}
+          </textPath>
+        </text>
+      ) : (
+        <>
+          <text class="seal-text seal-text-arc" font-size={letter}>
+            <textPath href={`#${uid}-over`} startOffset="50%" text-anchor="middle">
+              {name.toUpperCase()}
+            </textPath>
+          </text>
+          <text class="seal-text seal-text-arc" font-size={letter}>
+            <textPath href={`#${uid}-under`} startOffset="50%" text-anchor="middle">
+              {t.seal.contactSample.toUpperCase()}
+            </textPath>
+          </text>
+        </>
+      )}
+    </svg>
+    <img
+      class="seal-logo"
+      src={site.brand.symbol}
+      alt=""
+      width="189"
+      height="400"
+      loading="lazy"
+      decoding="async"
+    />
+  </span>
+)}

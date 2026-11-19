@@ -951,7 +951,7 @@ export const en: Dictionary = {
     models: {
       ring: 'Logo in the middle, text around it',
       contact: 'Name on top, contact below',
-      discreet: 'Logo and name, low-key',
+      discreet: 'Logo and name, subtle',
     },
     capturedBy: 'Captured by',
     contactSample: 'Get in touch',

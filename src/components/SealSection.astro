@@ -1,0 +1,76 @@
+---
+// "Seu tour, sua identidade": o selo da imobiliária no canto do tour, como o app o desenha
+// (Configurações → Tours). A figura é um exemplo com a marca da ARP Vision sobre fotos do tour de
+// vitrine; as três miniaturas são um grupo de rádio, e o CSS mostra na figura o selo do modelo
+// marcado (seal.css), sem script. O texto promete só o que o app faz: veja o dicionário.
+import Icon from './Icon.astro';
+import SealMark, { type SealModel } from './SealMark.astro';
+import { site } from '../config/site';
+import { pageLocale } from '../i18n';
+const { t } = pageLocale(Astro);
+const text = t.seal;
+const models: SealModel[] = ['ring', 'contact', 'discreet'];
+const stagePhoto = site.media.productPhotos['suite-16x9'];
+const thumbPhoto = site.media.productPhotos['sala-16x9'];
+---
+
+<section class="section seal-section" data-atmosphere="seal" aria-labelledby="seal-title">
+  <div class="container seal-grid">
+    <div class="seal-copy">
+      <span class="eyebrow">
+        <span class="sharing-dot"></span>
+        {text.eyebrow}
+      </span>
+      {/* O espaço depois da quebra é do celular, onde ela some: sem ele, "tour,sua". */}
+      <h2 id="seal-title">
+        {text.title1}
+        <br class="desktop-break" /> {text.title2}
+      </h2>
+      <p class="seal-lead">{text.lead}</p>
+      <ul class="seal-items">
+        {text.items.map((item) => (
+          <li>
+            <Icon name="check" size={20} />
+            <span>{item}</span>
+          </li>
+        ))}
+      </ul>
+      <fieldset class="seal-models">
+        <legend class="sr-only">{text.modelsLabel}</legend>
+        {models.map((model, index) => (
+          <label class="seal-model">
+            <input type="radio" name="seal-model" value={model} checked={index === 0} />
+            <span class="seal-thumb">
+              <img
+                src={thumbPhoto.src}
+                width={thumbPhoto.width}
+                height={thumbPhoto.height}
+                alt=""
+                loading="lazy"
+                decoding="async"
+              />
+              <SealMark model={model} uid={`seal-thumb-${model}`} />
+            </span>
+            <span class="seal-model-name">{text.models[model]}</span>
+          </label>
+        ))}
+      </fieldset>
+    </div>
+    <figure class="seal-figure">
+      <div class="seal-stage" role="img" aria-label={text.figureLabel}>
+        <img
+          src={stagePhoto.src}
+          width={stagePhoto.width}
+          height={stagePhoto.height}
+          alt=""
+          loading="lazy"
+          decoding="async"
+        />
+        {models.map((model) => (
+          <SealMark model={model} uid={`seal-stage-${model}`} />
+        ))}
+      </div>
+      <figcaption>{text.caption}</figcaption>
+    </figure>
+  </div>
+</section>

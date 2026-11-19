@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { locales, translations } from '../src/i18n';
-import { sealRing } from '../src/lib/seal';
+import { sealName, sealRing } from '../src/lib/seal';
 
 // O selo do canto do tour, na seção "Seu tour, sua identidade" da home. O desenho repete o do
 // app: a frase "Capturado por · Nome" dá a volta inteira no anel, duas vezes.
@@ -24,7 +24,10 @@ test('o giro centra a primeira frase no topo: metade do arco que ela ocupa, para
 });
 
 test('nome com acento fica em maiúsculas, sem perder o acento', () => {
-  assert.match(sealRing('Capturado por', 'São José Imóveis').text, /^CAPTURADO POR · SÃO JOSÉ IMÓVEIS · /);
+  assert.match(
+    sealRing('Capturado por', 'São José Imóveis').text,
+    /^CAPTURADO POR · SÃO JOSÉ IMÓVEIS · /,
+  );
 });
 
 test('espaços sobrando na frase e no nome não entram no anel', () => {
@@ -51,11 +54,29 @@ test('a seção do selo promete só o que o app faz', () => {
     const seal = translations(locale).seal;
     const all = JSON.stringify(seal);
     // O selo some ou sobe em alguns estados do tour: nada de "o tempo todo".
-    assert.doesNotMatch(all, /o tempo todo|todo el tiempo|all the time|always|siempre|sempre/i, locale);
+    assert.doesNotMatch(
+      all,
+      /o tempo todo|todo el tiempo|all the time|always|siempre|sempre/i,
+      locale,
+    );
     // Três modelos, três tamanhos e três cantos: é o que a tela de Configurações oferece.
     assert.equal(seal.items.length, 3, locale);
     assert.equal(Object.keys(seal.models).length, 3, locale);
     // O texto de contato do exemplo cabe no limite do app.
     assert.ok([...seal.contactSample].length <= 24, `${locale}: ${seal.contactSample}`);
   }
+});
+
+test('o nome do modelo discreto: em maiúsculas, com a largura que o desenho reserva', () => {
+  const name = sealName(' ARP Vision ');
+  assert.equal(name.text, 'ARP VISION');
+  // Nove letras e um espaço: a letra larga conta mais que o espaço.
+  assert.equal(name.width, 9 * name.letterWidth + name.spaceWidth);
+  assert.ok(name.letterWidth > name.spaceWidth);
+  // Um nome mais comprido reserva mais largura, na mesma altura.
+  const longer = sealName('Imobiliária Exemplo');
+  assert.ok(longer.width > name.width);
+  assert.equal(longer.height, name.height);
+  // A linha de base centra a maiúscula na altura do desenho.
+  assert.ok(name.baseline > name.height / 2 && name.baseline < name.height);
 });

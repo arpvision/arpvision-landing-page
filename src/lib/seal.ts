@@ -35,3 +35,33 @@ export function sealRing(phrase: string, name: string): { text: string; rotation
   const text = `${first}${SEPARATOR}`.repeat(2);
   return { text, rotation: -([...first].length / [...text].length) * 180 };
 }
+
+/**
+ * O nome do modelo discreto, ao lado do logo: em maiúsculas, numa linha, num desenho de 40 de
+ * altura. É SVG como o texto dos anéis, para encolher com a figura sem virar texto miúdo da
+ * página (a checagem do site não aceita texto abaixo de 12px).
+ *
+ * A largura de cada letra só o navegador sabe; o desenho reserva uma largura média por letra e
+ * por espaço (Inter em peso 700, com o respiro do selo) e estica o texto até ela (`textLength`),
+ * então a caixa e o texto sempre fecham.
+ */
+export function sealName(name: string) {
+  const letter = 22;
+  const text = name.trim().toUpperCase();
+  const letterWidth = letter * 0.66;
+  const spaceWidth = letter * 0.3;
+  const width = [...text].reduce(
+    (total, glyph) => total + (glyph.trim() ? letterWidth : spaceWidth),
+    0,
+  );
+  const height = 40;
+  return {
+    text,
+    letter,
+    letterWidth,
+    spaceWidth,
+    width,
+    height,
+    baseline: height / 2 + (letter * sealShape.capHeight) / 2,
+  };
+}

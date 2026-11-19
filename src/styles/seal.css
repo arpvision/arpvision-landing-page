@@ -1,0 +1,275 @@
+/*
+ * A seção "Seu tour, sua identidade" da home (SealSection.astro): o texto à esquerda, com as três
+ * miniaturas dos modelos, e a figura do tour com o selo no canto, à direita. A estrutura é a da
+ * seção de compartilhamento (landing-polish.css).
+ */
+.seal-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  gap: 72px;
+  align-items: center;
+}
+.seal-copy > .eyebrow {
+  color: var(--brand-teal-dark);
+}
+.seal-copy h2 {
+  max-width: 560px;
+  margin-top: 18px;
+}
+.seal-lead {
+  max-width: 520px;
+  margin: 18px 0 0;
+  font-size: 1.125rem;
+  color: var(--text-secondary);
+}
+.seal-items {
+  display: grid;
+  gap: 14px;
+  margin: 28px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.seal-items li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 1.0625rem;
+}
+.seal-items svg {
+  flex-shrink: 0;
+  margin-top: 3px;
+  color: var(--brand-teal-dark);
+}
+
+/* ---- as três miniaturas: um grupo de rádio ---------------------------------------------- */
+.seal-models {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  min-width: 0;
+  margin: 36px 0 0;
+  padding: 0;
+  border: 0;
+}
+.seal-model {
+  position: relative;
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  cursor: pointer;
+}
+/* O rádio cobre a miniatura, invisível: é ele que recebe o toque e o foco. */
+.seal-model input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.seal-thumb,
+.seal-stage {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  /* As medidas do selo saem da largura da figura (`cqw`). */
+  container-type: inline-size;
+  /* A foto escurece embaixo, como no tour, para o branco do selo se ler. */
+  background: #101826;
+}
+.seal-thumb {
+  aspect-ratio: 4 / 3;
+  border: 2px solid transparent;
+  border-radius: 14px;
+  /* O fundo não entra debaixo da borda: sem marca, ela não aparece. */
+  background-clip: padding-box;
+  transition: border-color 0.16s ease;
+}
+.seal-thumb > img,
+.seal-stage > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+/* Nas miniaturas a foto fica mais escura: o selo está no meio dela, sem o canto para ajudar. */
+.seal-thumb > img {
+  filter: brightness(0.62);
+}
+.seal-model input:checked + .seal-thumb {
+  border-color: var(--brand-teal-dark);
+}
+.seal-model input:focus-visible + .seal-thumb {
+  outline: 2px solid var(--brand-blue-dark);
+  outline-offset: 3px;
+}
+.seal-model-name {
+  font-size: var(--fs-small);
+  line-height: 1.35;
+  text-align: center;
+  color: var(--text-secondary);
+}
+.seal-model input:checked ~ .seal-model-name {
+  color: var(--text-strong);
+  font-weight: 600;
+}
+
+/* ---- a figura ---------------------------------------------------------------------------- */
+.seal-figure {
+  margin: 0;
+}
+.seal-stage {
+  aspect-ratio: 16 / 9;
+  border-radius: 24px;
+  box-shadow: var(--shadow);
+}
+.seal-stage::after {
+  content: '';
+  position: absolute;
+  inset: 45% 0 0;
+  background: linear-gradient(to bottom, transparent, rgb(6 12 22 / 0.5));
+  pointer-events: none;
+}
+.seal-figure figcaption {
+  margin-top: 16px;
+  font-size: var(--fs-small);
+  color: var(--text-secondary);
+}
+
+/* ---- o selo ------------------------------------------------------------------------------
+ * Branco, com o acabamento do app: 85% de opacidade e a mesma sombra leve. Nada atrás.
+ */
+.seal-mark {
+  position: absolute;
+  z-index: 1;
+  opacity: 0.85;
+  filter: drop-shadow(0 1px 3px rgb(0 0 0 / 0.45));
+  pointer-events: none;
+}
+.seal-mark-ring {
+  aspect-ratio: 1;
+}
+.seal-mark-ring svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.seal-ring {
+  fill: none;
+  stroke: rgb(255 255 255 / 0.75);
+  stroke-width: 1;
+}
+.seal-text {
+  fill: #fff;
+  font-family: inherit;
+  font-weight: 600;
+  /* O separador do fim da volta termina num espaço, que conta. */
+  white-space: pre;
+}
+.seal-text-arc {
+  letter-spacing: 0.12em;
+}
+/* O logo no centro, dentro do anel de dentro, na proporção dele. O símbolo da ARP é azul; no
+ * selo do exemplo ele vai em branco, como a marca do canto de cima do tour. */
+.seal-logo {
+  filter: brightness(0) invert(1);
+}
+.seal-mark-ring .seal-logo {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: auto;
+  height: 50%;
+  transform: translate(-50%, -50%);
+}
+.seal-mark-discreet {
+  display: flex;
+  align-items: center;
+  gap: 1.1cqw;
+  /* A altura da linha: o logo e o nome a preenchem, cada um na proporção dele. */
+  height: 5.6cqw;
+}
+.seal-mark-discreet .seal-logo,
+.seal-mark-discreet .seal-name {
+  display: block;
+  flex: none;
+  width: auto;
+  height: 100%;
+}
+.seal-mark-discreet .seal-name {
+  overflow: visible;
+}
+.seal-text-name {
+  font-weight: 700;
+}
+
+/* Na miniatura, o selo fica no meio. */
+.seal-thumb .seal-mark {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+.seal-thumb .seal-mark-ring {
+  width: 62%;
+}
+.seal-thumb .seal-mark-discreet {
+  gap: 2.4cqw;
+  height: 13cqw;
+}
+
+/* Na figura, no canto de baixo à direita, o padrão do app, com um quarto da largura.
+ *
+ * Só o selo do modelo marcado aparece. O anel é o que vale sem `:has()`: um navegador que não o
+ * conhece descarta as regras de baixo inteiras e fica com o primeiro modelo, e não com nenhum
+ * nem com os três. */
+.seal-stage .seal-mark {
+  right: 3.2%;
+  bottom: 5.6%;
+  display: none;
+}
+.seal-stage .seal-mark-ring {
+  width: 25%;
+}
+.seal-stage .seal-mark[data-seal-model='ring'] {
+  display: block;
+}
+.seal-section:has(input[value='contact']:checked) .seal-stage .seal-mark[data-seal-model='ring'],
+.seal-section:has(input[value='discreet']:checked) .seal-stage .seal-mark[data-seal-model='ring'] {
+  display: none;
+}
+.seal-section:has(input[value='contact']:checked)
+  .seal-stage
+  .seal-mark[data-seal-model='contact'] {
+  display: block;
+}
+.seal-section:has(input[value='discreet']:checked)
+  .seal-stage
+  .seal-mark[data-seal-model='discreet'] {
+  display: flex;
+}
+
+@media (max-width: 1023px) {
+  .seal-grid {
+    gap: 36px;
+  }
+}
+@media (max-width: 767px) {
+  .seal-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  .seal-models {
+    gap: 10px;
+    margin-top: 28px;
+  }
+  .seal-stage {
+    border-radius: 18px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .seal-thumb {
+    transition: none;
+  }
+}

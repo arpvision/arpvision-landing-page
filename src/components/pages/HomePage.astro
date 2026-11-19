@@ -11,6 +11,7 @@ import FinalCta from '../FinalCta.astro';
 import FanCards from '../FanCards.astro';
 import TourShowcase from '../TourShowcase.astro';
 import Sharing from '../Sharing.astro';
+import SealSection from '../SealSection.astro';
 import TeamBenefits from '../TeamBenefits.astro';
 import InPerson from '../InPerson.astro';
 import ProductsStrip from '../product/ProductsStrip.astro';
@@ -110,6 +111,8 @@ const roomCards = site.media.fanRooms.map((room, index) => ({
   </section>
   <Credits />
   <Tour />
+  {/* O selo da imobiliária no canto do tour, logo depois de o visitante ver o tour. */}
+  <SealSection />
   <TeamBenefits />
   {/* Só em português: o Presencial atende Porto Alegre e região. */}
   <InPerson />
