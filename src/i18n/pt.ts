@@ -852,6 +852,32 @@ export const pt = {
         'Você não precisa baixar nada nem criar conta. Pode abrir no computador ou no celular.',
     },
   },
+  // O selo da imobiliária no canto do tour, como o app o desenha (Configurações → Tours). Só o
+  // que o app faz: três modelos, três tamanhos, três cantos, fundo transparente. Sem "o tempo
+  // todo": com a interface do tour aberta, o selo sobe ou some.
+  seal: {
+    eyebrow: 'TOUR 360° · SUA MARCA',
+    title1: 'Seu tour,',
+    title2: 'sua identidade.',
+    lead: 'A marca da sua imobiliária fica no canto do tour, no link e no seu site.',
+    items: [
+      'O logotipo da sua imobiliária, em três modelos.',
+      'Três tamanhos e três cantos para escolher.',
+      'Fundo transparente.',
+    ],
+    modelsLabel: 'Modelo do selo no exemplo',
+    models: {
+      ring: 'Logo no meio, texto em volta',
+      contact: 'Nome em cima, contato embaixo',
+      discreet: 'Logo e nome, discretos',
+    },
+    // A frase que o tour escreve no anel, a mesma do app em cada idioma.
+    capturedBy: 'Capturado por',
+    contactSample: 'Entre em contato',
+    figureLabel:
+      'Exemplo de um ambiente do tour com o selo da ARP Vision no canto de baixo, à direita',
+    caption: 'Exemplo com a marca da ARP Vision. No seu tour, vai a marca da sua imobiliária.',
+  },
   showcase: {
     frameTitle: 'Tour 360° de demonstração da ARP Vision',
     title: 'Olhe o imóvel por dentro.',
