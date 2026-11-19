@@ -92,34 +92,74 @@ try {
     assert.equal(await radios.nth(0).isChecked(), true, `${locale}: o anel nasce marcado`);
     assert.deepEqual(await shown(page), ['ring'], `${locale}: só o anel à vista`);
 
-    // O texto de cada modelo, no idioma da página.
-    const ringText = await section
-      .locator('.seal-stage [data-seal-model="ring"] text')
-      .evaluate((text) => text.textContent);
-    assert.ok(ringText.includes(expected[locale].ring), `${locale}: anel "${ringText}"`);
-    const contactText = await section
-      .locator('.seal-stage [data-seal-model="contact"]')
-      .evaluate((mark) =>
-        [...mark.querySelectorAll('text')].map((text) => text.textContent.trim()),
-      );
-    assert.deepEqual(contactText, ['ARP VISION', expected[locale].contact], `${locale}: contato`);
+    // O texto de cada modelo, no idioma da página. Cada letra é um <text> no lugar dela, e os
+    // espaços não são desenhados: a comparação é sem eles.
+    const tight = (text) => text.replaceAll(' ', '');
+    const lettersOf = (selector) =>
+      section
+        .locator(`.seal-stage ${selector} text`)
+        .evaluateAll((texts) => texts.map((text) => text.textContent.trim()).join(''));
+    assert.equal(
+      await lettersOf('[data-seal-model="ring"] .seal-lap'),
+      tight(`${expected[locale].ring} · `).repeat(2),
+      `${locale}: texto do anel`,
+    );
+    assert.equal(
+      await lettersOf('[data-seal-model="contact"] .seal-arc-top'),
+      'ARPVISION',
+      `${locale}: nome no arco de cima`,
+    );
+    assert.equal(
+      await lettersOf('[data-seal-model="contact"] .seal-arc-bottom'),
+      tight(expected[locale].contact),
+      `${locale}: contato no arco de baixo`,
+    );
 
-    // O anel fecha a volta: o fim da última letra (o espaço do separador) encosta no começo da
-    // primeira, sem buraco e sem passar por cima dela. Em unidades do desenho (o quadro tem 200,
-    // e a letra, 13,2). O `getComputedTextLength` não serve: ele não conta o `textLength`.
+    // O anel fecha a volta, medido na tela: vistos do centro do selo, os meios das letras dão a
+    // volta inteira sem buraco (o maior passo entre vizinhas é o de uma letra larga depois de um
+    // espaço, uns 14°) e sem uma letra em cima da outra. Não depende de o navegador esticar
+    // texto em curva: no WebKit o `textLength` num `textPath` não vale, e o anel abria.
     const lap = await section.locator('.seal-stage [data-seal-model="ring"]').evaluate((mark) => {
-      const text = mark.querySelector('textPath');
-      const letters = text.getNumberOfChars();
-      const start = text.getStartPositionOfChar(0);
-      const end = text.getEndPositionOfChar(letters - 1);
+      const box = mark.getBoundingClientRect();
+      const cx = box.left + box.width / 2;
+      const cy = box.top + box.height / 2;
+      const angles = [...mark.querySelectorAll('.seal-lap text')]
+        .map((text) => {
+          const glyph = text.getBoundingClientRect();
+          const x = glyph.left + glyph.width / 2 - cx;
+          const y = cy - (glyph.top + glyph.height / 2);
+          return ((Math.atan2(x, y) * 180) / Math.PI + 360) % 360;
+        })
+        .sort((a, b) => a - b);
+      const steps = angles.map(
+        (angle, index) => (angles[(index + 1) % angles.length] - angle + 360) % 360,
+      );
       return {
-        letters,
-        written: text.textContent.length,
-        gap: Math.hypot(end.x - start.x, end.y - start.y),
+        letters: angles.length,
+        widest: Math.round(Math.max(...steps) * 10) / 10,
+        narrowest: Math.round(Math.min(...steps) * 10) / 10,
       };
     });
-    assert.equal(lap.letters, lap.written, `${locale}: todas as letras do anel desenhadas`);
-    assert.ok(lap.gap < 4, `${locale}: volta do anel ${JSON.stringify(lap)}`);
+    assert.ok(
+      lap.letters > 30 && lap.widest < 20 && lap.narrowest > 2,
+      `${locale}: volta do anel ${JSON.stringify(lap)}`,
+    );
+    // A conta dos lugares usa a largura de cada letra da fonte do site (a tabela de lib/seal.ts):
+    // a página tem de desenhar com essa fonte, e a tabela, bater com ela.
+    const drawn = await section
+      .locator('.seal-stage [data-seal-model="ring"] .seal-lap')
+      .evaluate((group) => {
+        const size = parseFloat(getComputedStyle(group).fontSize);
+        const widthOf = (glyph) =>
+          [...group.querySelectorAll('text')]
+            .find((text) => text.textContent.trim() === glyph)
+            .getComputedTextLength() / size;
+        return { A: widthOf('A'), I: widthOf('I'), size };
+      });
+    assert.ok(
+      Math.abs(drawn.A - 0.728) < 0.03 && Math.abs(drawn.I - 0.277) < 0.03,
+      `${locale}: largura das letras na tela ${JSON.stringify(drawn)}`,
+    );
 
     // Tocar numa miniatura troca o selo da figura.
     await group.locator('label', { has: page.locator('input[value="contact"]') }).click();
@@ -131,40 +171,52 @@ try {
     assert.deepEqual(await shown(page), ['contact'], `${locale}: seta para trás`);
     await page.keyboard.press('ArrowLeft');
     assert.deepEqual(await shown(page), ['ring'], `${locale}: de volta ao anel`);
-    assert.equal(
-      await page.evaluate(
-        () =>
-          getComputedStyle(document.activeElement).outlineStyle !== 'none' ||
-          getComputedStyle(document.activeElement.closest('label')).outlineStyle !== 'none',
-      ),
-      true,
-      `${locale}: o foco do teclado aparece`,
-    );
-
-    // O selo fica no canto de baixo, à direita, dentro da figura.
-    const corner = await section.locator('.seal-stage').evaluate((stage) => {
-      const box = stage.getBoundingClientRect();
-      const mark = stage.querySelector('[data-seal-model="ring"]').getBoundingClientRect();
+    // O rádio é invisível (cobre a miniatura): o anel de foco que se vê é o da miniatura.
+    const focus = await page.evaluate(() => {
+      const thumb = document.activeElement.nextElementSibling;
+      const style = getComputedStyle(thumb);
       return {
-        inside:
-          mark.left >= box.left &&
-          mark.right <= box.right &&
-          mark.top >= box.top &&
-          mark.bottom <= box.bottom,
-        right: (box.right - mark.right) / box.width,
-        bottom: (box.bottom - mark.bottom) / box.height,
-        share: mark.width / box.width,
-        square: Math.abs(mark.width - mark.height) < 1,
+        thumb: thumb.classList.contains('seal-thumb'),
+        outline: style.outlineStyle,
+        width: parseFloat(style.outlineWidth),
       };
     });
     assert.ok(
-      corner.inside && corner.square,
-      `${locale}: selo dentro da figura ${JSON.stringify(corner)}`,
+      focus.thumb && focus.outline !== 'none' && focus.width >= 2,
+      `${locale}: o foco do teclado aparece na miniatura ${JSON.stringify(focus)}`,
     );
-    assert.ok(
-      corner.right < 0.08 && corner.bottom < 0.12,
-      `${locale}: no canto ${JSON.stringify(corner)}`,
-    );
+
+    // O selo fica no canto de baixo, à direita, dentro da figura.
+    const cornerOf = (model) =>
+      section.locator('.seal-stage').evaluate((stage, name) => {
+        const box = stage.getBoundingClientRect();
+        const mark = stage.querySelector(`[data-seal-model="${name}"]`).getBoundingClientRect();
+        return {
+          inside:
+            mark.width > 0 &&
+            mark.left >= box.left &&
+            mark.right <= box.right &&
+            mark.top >= box.top &&
+            mark.bottom <= box.bottom,
+          right: (box.right - mark.right) / box.width,
+          bottom: (box.bottom - mark.bottom) / box.height,
+          share: mark.width / box.width,
+          width: mark.width,
+          square: Math.abs(mark.width - mark.height) < 1,
+        };
+      }, model);
+    for (const model of [...models].reverse()) {
+      await group.locator(`input[value="${model}"]`).check({ force: true });
+      const corner = await cornerOf(model);
+      assert.ok(corner.inside, `${locale}, ${model}: dentro da figura ${JSON.stringify(corner)}`);
+      assert.ok(
+        corner.right < 0.08 && corner.bottom < 0.12,
+        `${locale}, ${model}: no canto ${JSON.stringify(corner)}`,
+      );
+    }
+    // O laço termina no anel: quadrado, com um quarto da largura da figura.
+    const corner = await cornerOf('ring');
+    assert.ok(corner.square, `${locale}: anel quadrado ${JSON.stringify(corner)}`);
     assert.ok(
       corner.share > 0.18 && corner.share < 0.34,
       `${locale}: tamanho ${JSON.stringify(corner)}`,
@@ -173,6 +225,15 @@ try {
     // Nenhuma largura rola de lado, e as três miniaturas cabem na tela.
     for (const width of [320, 360, 390, 768, 1024, 1440]) {
       await resize(page, width, 900);
+      // No app, abaixo de 96 px de diâmetro a letra do anel não se lê. Na figura estreita do
+      // celular o anel ocupa mais da largura para chegar perto disso, e segue dentro dela.
+      if (width <= 390) {
+        const small = await cornerOf('ring');
+        assert.ok(
+          small.inside && small.width >= 96,
+          `${locale}, ${width} px: anel legível no celular ${JSON.stringify(small)}`,
+        );
+      }
       // No celular a quebra do título some, e as duas metades não podem grudar ("tour,sua").
       assert.match(
         await page.locator('#seal-title').innerText(),

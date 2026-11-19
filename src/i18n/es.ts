@@ -821,7 +821,7 @@ export const es: Dictionary = {
     eyebrow: 'TOUR 360° · TU MARCA',
     title1: 'Tu tour,',
     title2: 'tu identidad.',
-    lead: 'La marca de tu inmobiliaria se queda en la esquina del tour, en el enlace y en tu web.',
+    lead: 'La marca de tu inmobiliaria va en la esquina del tour, en el enlace y en tu web.',
     items: [
       'El logotipo de tu inmobiliaria, en tres modelos.',
       'Tres tamaños y tres esquinas para elegir.',

@@ -941,7 +941,7 @@ export const en: Dictionary = {
     eyebrow: '360° TOUR · YOUR BRAND',
     title1: 'Your tour,',
     title2: 'your identity.',
-    lead: "Your agency's brand stays in the corner of the tour, on the link and on your website.",
+    lead: "Your agency's brand sits in the corner of the tour, on the link and on your website.",
     items: [
       "Your agency's logo, in three styles.",
       'Three sizes and three corners to choose from.',

@@ -165,11 +165,6 @@
   fill: #fff;
   font-family: inherit;
   font-weight: 600;
-  /* O separador do fim da volta termina num espaço, que conta. */
-  white-space: pre;
-}
-.seal-text-arc {
-  letter-spacing: 0.12em;
 }
 /* O logo no centro, dentro do anel de dentro, na proporção dele. O símbolo da ARP é azul; no
  * selo do exemplo ele vai em branco, como a marca do canto de cima do tour. */
@@ -187,9 +182,11 @@
 .seal-mark-discreet {
   display: flex;
   align-items: center;
+  gap: 6px;
   gap: 1.1cqw;
-  /* A altura da linha: o logo e o nome a preenchem, cada um na proporção dele. */
-  height: 5.6cqw;
+  /* A altura da linha, em fração da altura da figura (16:9): o logo e o nome a preenchem,
+     cada um na proporção dele. */
+  height: 10%;
 }
 .seal-mark-discreet .seal-logo,
 .seal-mark-discreet .seal-name {
@@ -215,8 +212,10 @@
   width: 62%;
 }
 .seal-thumb .seal-mark-discreet {
+  gap: 3px;
   gap: 2.4cqw;
-  height: 13cqw;
+  /* A miniatura é 4:3. */
+  height: 17.3%;
 }
 
 /* Na figura, no canto de baixo à direita, o padrão do app, com um quarto da largura.
@@ -266,6 +265,11 @@
   }
   .seal-stage {
     border-radius: 18px;
+  }
+  /* Com um quarto da figura o anel teria uns 70 px, e a letra dele não se leria: no app, o
+     menor selo tem 96 px. */
+  .seal-stage .seal-mark-ring {
+    width: 35%;
   }
 }
 @media (prefers-reduced-motion: reduce) {

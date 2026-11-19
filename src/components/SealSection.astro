@@ -49,7 +49,7 @@ const thumbPhoto = site.media.productPhotos['sala-16x9'];
                 loading="lazy"
                 decoding="async"
               />
-              <SealMark model={model} uid={`seal-thumb-${model}`} />
+              <SealMark model={model} />
             </span>
             <span class="seal-model-name">{text.models[model]}</span>
           </label>
@@ -67,7 +67,7 @@ const thumbPhoto = site.media.productPhotos['sala-16x9'];
           decoding="async"
         />
         {models.map((model) => (
-          <SealMark model={model} uid={`seal-stage-${model}`} />
+          <SealMark model={model} />
         ))}
       </div>
       <figcaption>{text.caption}</figcaption>
