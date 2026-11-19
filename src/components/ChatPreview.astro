@@ -1,45 +1,63 @@
 ---
 import Icon from './Icon.astro';
+import IPhoneMockup from './IPhoneMockup.astro';
 import { site } from '../config/site';
 import { pageLocale } from '../i18n';
-// Conversa de WhatsApp em HTML: o contato, a mensagem com a prévia do link do tour (a fachada
-// do tour de vitrine) e a resposta. O estilo está em landing-polish.css, junto da regra de uma
-// conversa em imagem (`conversationImage`), que nenhum idioma usa hoje.
+// Conversa de WhatsApp em HTML dentro da moldura do iPhone: o contato, a mensagem com a prévia do
+// link do tour (a fachada do tour de vitrine), a resposta e a barra de digitar. O estilo está em
+// landing-polish.css, junto da regra de uma conversa em imagem (`conversationImage`), que nenhum
+// idioma usa hoje. A hora da barra de status é a das mensagens.
 const { t } = pageLocale(Astro);
 const chat = t.sharing.chat;
 const photo = site.media.productPhotos['fachada-16x9'];
 ---
 
-<figure class="sharing-conversation chat-preview" aria-label={chat.label}>
-  <div class="chat-contact">
-    <span class="chat-avatar" aria-hidden="true">
-      <Icon name="user" size={20} />
-    </span>
-    <span>
-      <strong>{chat.contact}</strong>
-      <span>{chat.status}</span>
-    </span>
-  </div>
-  <div class="chat-thread">
-    <div class="chat-bubble">
-      <p>{chat.message}</p>
-      <div class="chat-link">
-        <img
-          src={photo.src}
-          alt=""
-          width={photo.width}
-          height={photo.height}
-          loading="lazy"
-          decoding="async"
-        />
-        <strong>{chat.linkTitle}</strong>
-        <span>arpvision.app</span>
+<IPhoneMockup
+  as="figure"
+  class="sharing-conversation chat-phone"
+  aria-label={chat.label}
+  time="10:24"
+>
+  <div class="chat-preview">
+    <div class="chat-contact">
+      <span class="chat-back" aria-hidden="true">
+        <Icon name="chevron" size={18} />
+      </span>
+      <span class="chat-avatar" aria-hidden="true">
+        <Icon name="user" size={20} />
+      </span>
+      <span>
+        <strong>{chat.contact}</strong>
+        <span>{chat.status}</span>
+      </span>
+    </div>
+    <div class="chat-thread">
+      <div class="chat-bubble">
+        <p>{chat.message}</p>
+        <div class="chat-link">
+          <img
+            src={photo.src}
+            alt=""
+            width={photo.width}
+            height={photo.height}
+            loading="lazy"
+            decoding="async"
+          />
+          <strong>{chat.linkTitle}</strong>
+          <span>arpvision.app</span>
+        </div>
+        <time>10:24</time>
       </div>
-      <time>10:24</time>
+      <div class="chat-bubble">
+        <p>{chat.reply}</p>
+        <time>10:24</time>
+      </div>
     </div>
-    <div class="chat-bubble">
-      <p>{chat.reply}</p>
-      <time>10:24</time>
+    <div class="chat-compose" aria-hidden="true">
+      <span class="chat-compose-field">{chat.compose}</span>
+      <span class="chat-compose-send">
+        <Icon name="arrow" size={16} />
+      </span>
     </div>
   </div>
-</figure>
+</IPhoneMockup>

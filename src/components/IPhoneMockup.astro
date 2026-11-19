@@ -1,0 +1,249 @@
+---
+/**
+ * Moldura de iPhone 15 Pro, com a Dynamic Island, a barra de status e o indicador de início, para
+ * mostrar uma tela do site como se estivesse no celular. É o IPhoneMockup em React do 21st.dev
+ * passado para Astro e CSS: o site não usa React nem Tailwind, e a moldura não precisa de
+ * JavaScript.
+ *
+ * Tudo se mede pela largura do componente (unidades cqw do contêiner `.iphone`), então quem usa
+ * dá só o `width` pela classe e a moldura acompanha, sem `transform: scale`. Sem largura definida,
+ * o contêiner fica com largura zero. A tela tem a proporção do 15 Pro (393 × 852) como altura
+ * mínima: se o conteúdo não couber, ela cresce em vez de cortar o texto.
+ *
+ * A cor do fundo da tela, atrás da barra de status, vem de `--iphone-screen` na classe de quem usa.
+ */
+import type { HTMLAttributes } from 'astro/types';
+
+/** As cores do 15 Pro e as do componente original que ainda servem; ou um hex qualquer. */
+const PRESET_COLORS = {
+  'natural-titanium': '#a69a8a',
+  'black-titanium': '#3b3b3d',
+  'white-titanium': '#e3e1dc',
+  'blue-titanium': '#3f4a58',
+  titanium: '#837a72',
+  'space-black': '#1c1e22',
+  silver: '#d7d8dc',
+} as const;
+
+type Preset = keyof typeof PRESET_COLORS;
+
+interface Props extends HTMLAttributes<'div'> {
+  as?: 'div' | 'figure';
+  color?: Preset | `#${string}`;
+  /** Conteúdo claro atrás da barra de status pede ícones escuros, e o escuro, ícones brancos. */
+  tone?: 'light' | 'dark';
+  /** A hora da barra de status. */
+  time?: string;
+}
+
+const {
+  as: Tag = 'div',
+  class: className,
+  color = 'natural-titanium',
+  tone = 'light',
+  time = '9:41',
+  ...rest
+} = Astro.props;
+
+/** Clareia (pct > 0) ou escurece (pct < 0) um hex de 6 dígitos, como o `shade` do original. */
+function shade(hex: string, pct: number): string {
+  const match = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex.trim());
+  if (!match) return hex;
+  const factor = (100 + pct) / 100;
+  return `#${match
+    .slice(1)
+    .map((channel) =>
+      Math.max(0, Math.min(255, Math.round(parseInt(channel, 16) * factor)))
+        .toString(16)
+        .padStart(2, '0'),
+    )
+    .join('')}`;
+}
+
+const metal = color in PRESET_COLORS ? PRESET_COLORS[color as Preset] : color;
+const metalStyle = {
+  '--iphone-metal': metal,
+  '--iphone-metal-light': shade(metal, 22),
+  '--iphone-metal-dark': shade(metal, -30),
+};
+---
+
+<Tag class:list={['iphone', `iphone-${tone}`, className]} {...rest}>
+  <div class="iphone-frame" style={metalStyle}>
+    <div class="iphone-screen">
+      <div class="iphone-status" aria-hidden="true">
+        <span class="iphone-time">{time}</span>
+        <span class="iphone-island"></span>
+        <span class="iphone-indicators">
+          <svg class="iphone-signal" viewBox="0 0 18 12">
+            <rect x="0" y="8" width="3" height="4" rx="0.8"></rect>
+            <rect x="5" y="5.5" width="3" height="6.5" rx="0.8"></rect>
+            <rect x="10" y="3" width="3" height="9" rx="0.8"></rect>
+            <rect x="15" y="0" width="3" height="12" rx="0.8"></rect>
+          </svg>
+          <svg class="iphone-wifi" viewBox="0 0 16 12">
+            <path d="M8 11.6 5.6 9.2a3.4 3.4 0 0 1 4.8 0L8 11.6ZM3.4 7a6.5 6.5 0 0 1 9.2 0l-1.4 1.4a4.5 4.5 0 0 0-6.4 0L3.4 7ZM1.1 4.7a9.8 9.8 0 0 1 13.8 0l-1.4 1.4a7.8 7.8 0 0 0-11 0L1.1 4.7Z"></path>
+          </svg>
+          <svg class="iphone-battery" viewBox="0 0 27 13">
+            <rect
+              class="iphone-battery-case"
+              x="0.5"
+              y="0.5"
+              width="23"
+              height="12"
+              rx="3.6"
+            ></rect>
+            <rect x="2.2" y="2.2" width="17" height="8.6" rx="2"></rect>
+            <path class="iphone-battery-cap" d="M25 4.5a2 2 0 0 1 0 4Z"></path>
+          </svg>
+        </span>
+      </div>
+      <div class="iphone-content">
+        <slot />
+      </div>
+      <span class="iphone-home" aria-hidden="true"></span>
+    </div>
+  </div>
+</Tag>
+
+<style>
+  .iphone {
+    container-type: inline-size;
+    margin: 0;
+    --iphone-ink: #0f172a;
+  }
+  .iphone-dark {
+    --iphone-ink: #ffffff;
+  }
+  /* A borda de metal, com o brilho na diagonal, e os botões de fora como pseudoelementos. */
+  .iphone-frame {
+    position: relative;
+    padding: 1cqw;
+    border-radius: 17cqw;
+    background: linear-gradient(
+      135deg,
+      var(--iphone-metal-light) 0%,
+      var(--iphone-metal) 28%,
+      var(--iphone-metal-dark) 52%,
+      var(--iphone-metal) 78%,
+      var(--iphone-metal-light) 100%
+    );
+    box-shadow:
+      inset 0 0 0 0.3cqw rgb(255 255 255 / 0.22),
+      inset 0 0 0 0.65cqw rgb(0 0 0 / 0.18),
+      var(--shadow);
+  }
+  /* Esquerda: botão de ação e volume, recortados num gradiente só. Direita: o lateral. */
+  .iphone-frame::before,
+  .iphone-frame::after {
+    content: '';
+    position: absolute;
+    width: 0.7cqw;
+    background: var(--iphone-metal-dark);
+  }
+  .iphone-frame::before {
+    left: -0.7cqw;
+    top: 26cqw;
+    height: 37cqw;
+    border-radius: 0.5cqw 0 0 0.5cqw;
+    background: linear-gradient(
+      var(--iphone-metal-dark) 0 7.5cqw,
+      transparent 7.5cqw 13cqw,
+      var(--iphone-metal-dark) 13cqw 24cqw,
+      transparent 24cqw 26cqw,
+      var(--iphone-metal-dark) 26cqw 37cqw
+    );
+  }
+  .iphone-frame::after {
+    right: -0.7cqw;
+    top: 41cqw;
+    height: 18cqw;
+    border-radius: 0 0.5cqw 0.5cqw 0;
+  }
+  /* A borda preta do vidro é a própria borda da tela; o conteúdo é cortado no canto arredondado. */
+  .iphone-screen {
+    position: relative;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    /* 393 × 852 na largura de dentro (100 - 2 - 4,6 = 93,4cqw), mais as bordas. */
+    min-height: 207.1cqw;
+    border: 2.3cqw solid #050505;
+    border-radius: 16cqw;
+    /* clip, e não hidden: se o conteúdo não couber, a tela cresce em vez de cortar. */
+    overflow: clip;
+    background: var(--iphone-screen, #000000);
+  }
+  .iphone-status {
+    position: relative;
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 13.6cqw;
+    padding: 0 7cqw 0 9.5cqw;
+    color: var(--iphone-ink);
+    /* 17pt do iOS na tela de 393; nunca abaixo dos 12px de texto visível do site. */
+    font-size: max(12px, 4.1cqw);
+    font-weight: 650;
+    line-height: 1;
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
+  }
+  .iphone-island {
+    position: absolute;
+    top: 2.6cqw;
+    left: 50%;
+    width: 29.5cqw;
+    height: 8.6cqw;
+    border-radius: 999px;
+    background: #000000;
+    transform: translateX(-50%);
+  }
+  .iphone-indicators {
+    display: flex;
+    align-items: center;
+    gap: 1.3cqw;
+  }
+  .iphone-indicators svg {
+    display: block;
+    height: auto;
+    fill: currentColor;
+  }
+  .iphone-signal {
+    width: 4.4cqw;
+  }
+  .iphone-wifi {
+    width: 4cqw;
+  }
+  .iphone-battery {
+    width: 6.4cqw;
+  }
+  .iphone-battery .iphone-battery-case {
+    fill: none;
+    stroke: currentColor;
+    stroke-opacity: 0.4;
+  }
+  .iphone-battery-cap {
+    opacity: 0.45;
+  }
+  .iphone-content {
+    position: relative;
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
+  }
+  .iphone-home {
+    position: absolute;
+    bottom: 2cqw;
+    left: 50%;
+    z-index: 2;
+    width: 33cqw;
+    height: 1.25cqw;
+    border-radius: 999px;
+    background: var(--iphone-ink);
+    opacity: 0.85;
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+</style>

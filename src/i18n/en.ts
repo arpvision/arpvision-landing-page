@@ -935,6 +935,7 @@ export const en: Dictionary = {
       linkTitle: '360° tour · 19 rooms',
       reply:
         "You don't need to download anything or create an account. You can open it on a computer or on your phone.",
+      compose: 'Message',
     },
   },
   seal: {

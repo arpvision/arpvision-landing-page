@@ -1,5 +1,6 @@
+/* A largura dos dois celulares da Home (IPhoneMockup), com a moldura: a tela fica com uns 280px. */
 :root {
-  --landing-phone-width: 280px;
+  --landing-phone-width: 300px;
   --landing-phone-radius: 20px;
 }
 .how-grid {
@@ -16,10 +17,6 @@
 .sharing-conversation {
   width: min(100%, var(--landing-phone-width));
   justify-self: center;
-}
-.tutorial-video video,
-.sharing-conversation img {
-  border-radius: var(--landing-phone-radius);
 }
 .how-grid .capture-heading {
   margin: 0;
@@ -94,23 +91,25 @@
 .sharing-conversation {
   margin: 0;
 }
-.sharing-conversation img {
+/* A conversa em imagem (`conversationImage`), sem a moldura do iPhone. */
+.sharing-conversation > img {
   width: 100%;
   height: auto;
   aspect-ratio: 9 / 16;
   display: block;
+  border-radius: var(--landing-phone-radius);
   box-shadow: var(--shadow);
 }
-/* Conversa de WhatsApp em HTML (ChatPreview), com cores fixas como numa captura de tela. */
+/* Conversa de WhatsApp em HTML (ChatPreview) na tela do iPhone, com cores fixas como numa captura
+   de tela. A barra de status fica no branco do cabeçalho da conversa. */
+.chat-phone {
+  --iphone-screen: #ffffff;
+}
 .chat-preview {
+  flex: 1 0 auto;
   display: flex;
   flex-direction: column;
-  aspect-ratio: 9 / 16;
-  /* clip, e não hidden: se o texto não couber, a caixa cresce em vez de cortar. */
-  overflow: clip;
-  border-radius: var(--landing-phone-radius);
   background: #edf2f9;
-  box-shadow: var(--shadow);
   color: #0f172a;
   font-size: 0.8125rem;
   line-height: 1.4;
@@ -119,9 +118,15 @@
 .chat-contact {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 16px 18px 14px;
+  gap: 10px;
+  padding: 4px 16px 12px 8px;
+  border-bottom: 1px solid #e2e8f0;
   background: #ffffff;
+}
+.chat-back {
+  display: inline-flex;
+  color: #0454ed;
+  transform: scaleX(-1);
 }
 .chat-contact > span:last-child {
   display: grid;
@@ -143,6 +148,7 @@
   color: #0454ed;
 }
 .chat-thread {
+  flex: 1 0 auto;
   display: grid;
   align-content: start;
   gap: 10px;
@@ -166,14 +172,12 @@
   border-radius: 10px;
   background: #ffffff;
 }
-/* Mais específico que `.sharing-conversation img`, a regra da conversa em imagem. */
-.chat-preview .chat-link img {
+.chat-link img {
+  display: block;
   width: 100%;
   height: auto;
   aspect-ratio: 16 / 10;
   object-fit: cover;
-  border-radius: 0;
-  box-shadow: none;
 }
 .chat-link strong {
   padding: 8px 10px 0;
@@ -187,6 +191,31 @@
   justify-self: end;
   font-size: 0.75rem;
   color: #475569;
+}
+/* A barra de digitar, como no WhatsApp; embaixo, o espaço do indicador de início do iPhone. */
+.chat-compose {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px 7cqw;
+  border-top: 1px solid #e2e8f0;
+  background: #ffffff;
+}
+.chat-compose-field {
+  flex: 1;
+  padding: 6px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  color: #475569;
+}
+.chat-compose-send {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #0454ed;
+  color: #ffffff;
 }
 .benefits-heading {
   margin-bottom: 48px;

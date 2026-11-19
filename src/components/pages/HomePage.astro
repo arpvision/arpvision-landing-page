@@ -2,6 +2,7 @@
 // A Home de cada idioma (/, /es e /en): o mesmo conteúdo, com o texto do dicionário da página.
 import Layout from '../../layouts/Layout.astro';
 import Icon from '../Icon.astro';
+import IPhoneMockup from '../IPhoneMockup.astro';
 import Tour from '../Tour.astro';
 import Credits from '../Credits.astro';
 import Pricing from '../Pricing.astro';
@@ -74,36 +75,38 @@ const roomCards = site.media.fanRooms.map((room, index) => ({
           ))}
         </div>
       </div>
-      <!-- Vídeo sem moldura: toca sozinho quando aparece na tela; o botão pausa. -->
-      <div class="tutorial-video">
-        <video
-          id="tutorial-video"
-          src={site.media.tutorial}
-          poster={site.media.tutorialPoster}
-          width="720"
-          height="1280"
-          muted
-          loop
-          playsinline
-          preload="none"
-          data-autoplay
-          aria-label={text.videoLabel}
-        ></video>
-        <button
-          class="video-toggle"
-          data-video-toggle="tutorial-video"
-          data-label-play={text.videoPlay}
-          data-label-pause={text.videoPause}
-          aria-label={text.videoPlay}
-        >
-          <span class="video-toggle-play">
-            <Icon name="play" size={18} />
-          </span>
-          <span class="video-toggle-pause">
-            <Icon name="pause" size={18} />
-          </span>
-        </button>
-      </div>
+      <!-- Vídeo na moldura do iPhone: toca sozinho quando aparece na tela; o botão pausa. -->
+      <IPhoneMockup class="tutorial-video" tone="dark">
+        <div class="tutorial-video-screen">
+          <video
+            id="tutorial-video"
+            src={site.media.tutorial}
+            poster={site.media.tutorialPoster}
+            width="720"
+            height="1280"
+            muted
+            loop
+            playsinline
+            preload="none"
+            data-autoplay
+            aria-label={text.videoLabel}
+          ></video>
+          <button
+            class="video-toggle"
+            data-video-toggle="tutorial-video"
+            data-label-play={text.videoPlay}
+            data-label-pause={text.videoPause}
+            aria-label={text.videoPlay}
+          >
+            <span class="video-toggle-play">
+              <Icon name="play" size={18} />
+            </span>
+            <span class="video-toggle-pause">
+              <Icon name="pause" size={18} />
+            </span>
+          </button>
+        </div>
+      </IPhoneMockup>
     </div>
   </section>
   <section class="hero presentation" aria-label={text.presentationLabel} data-atmosphere="demo">

@@ -815,6 +815,7 @@ export const es: Dictionary = {
       linkTitle: 'Tour 360° · 19 estancias',
       reply:
         'No tienes que descargar nada ni crear una cuenta. Puedes abrirlo en el ordenador o en el móvil.',
+      compose: 'Mensaje',
     },
   },
   seal: {

@@ -850,6 +850,8 @@ export const pt = {
       linkTitle: 'Tour 360° · 19 ambientes',
       reply:
         'Você não precisa baixar nada nem criar conta. Pode abrir no computador ou no celular.',
+      // O campo de digitar, embaixo da conversa, como no WhatsApp.
+      compose: 'Mensagem',
     },
   },
   // O selo da imobiliária no canto do tour, como o app o desenha (Configurações → Tours). Só o
