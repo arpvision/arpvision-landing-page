@@ -817,6 +817,28 @@ export const es: Dictionary = {
         'No tienes que descargar nada ni crear una cuenta. Puedes abrirlo en el ordenador o en el móvil.',
     },
   },
+  seal: {
+    eyebrow: 'TOUR 360° · TU MARCA',
+    title1: 'Tu tour,',
+    title2: 'tu identidad.',
+    lead: 'La marca de tu inmobiliaria va en la esquina del tour, en el enlace y en tu web.',
+    items: [
+      'El logotipo de tu inmobiliaria, en tres modelos.',
+      'Tres tamaños y tres esquinas para elegir.',
+      'Fondo transparente.',
+    ],
+    modelsLabel: 'Modelo del distintivo en el ejemplo',
+    models: {
+      ring: 'Logo en el centro, texto alrededor',
+      contact: 'Nombre arriba, contacto abajo',
+      discreet: 'Logo y nombre, discretos',
+    },
+    capturedBy: 'Capturado por',
+    contactSample: 'Contáctanos',
+    figureLabel:
+      'Ejemplo de una estancia del tour con el distintivo de ARP Vision en la esquina inferior derecha',
+    caption: 'Ejemplo con la marca de ARP Vision. En tu tour, va la marca de tu inmobiliaria.',
+  },
   showcase: {
     frameTitle: 'Tour 360° de demostración de ARP Vision',
     title: 'Mira el inmueble por dentro.',

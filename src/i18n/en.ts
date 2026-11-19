@@ -937,6 +937,27 @@ export const en: Dictionary = {
         "You don't need to download anything or create an account. You can open it on a computer or on your phone.",
     },
   },
+  seal: {
+    eyebrow: '360° TOUR · YOUR BRAND',
+    title1: 'Your tour,',
+    title2: 'your identity.',
+    lead: "Your agency's brand sits in the corner of the tour, on the link and on your website.",
+    items: [
+      "Your agency's logo, in three styles.",
+      'Three sizes and three corners to choose from.',
+      'Transparent background.',
+    ],
+    modelsLabel: 'Badge style in the example',
+    models: {
+      ring: 'Logo in the middle, text around it',
+      contact: 'Name on top, contact below',
+      discreet: 'Logo and name, subtle',
+    },
+    capturedBy: 'Captured by',
+    contactSample: 'Get in touch',
+    figureLabel: 'Example of a room in the tour with the ARP Vision badge in the bottom right corner',
+    caption: "Example with the ARP Vision brand. On your tour, it's your agency's brand.",
+  },
   showcase: {
     frameTitle: 'ARP Vision 360° demo tour',
     title: 'Look inside the property.',

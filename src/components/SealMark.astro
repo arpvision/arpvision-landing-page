@@ -1,0 +1,124 @@
+---
+// Um selo do canto do tour, num dos três modelos do app, com a marca da ARP Vision como exemplo.
+// Os de anel são SVG, nas proporções do app (lib/seal.ts): nítidos em qualquer tela, com o texto
+// do idioma da página e cada letra posta no lugar dela (o Safari não estica texto em curva). O
+// discreto é o logo e o nome numa linha. Só figura: `aria-hidden`.
+import { site } from '../config/site';
+import { pageLocale } from '../i18n';
+import { sealArcs, sealName, sealRing, sealShape, type SealLetter } from '../lib/seal';
+
+export type SealModel = 'ring' | 'contact' | 'discreet';
+interface Props {
+  model: SealModel;
+  class?: string;
+}
+const { model, class: className } = Astro.props;
+const { t } = pageLocale(Astro);
+const name = site.name;
+const { size, outerRing, innerRing, textRadius, capHeight } = sealShape;
+const center = size / 2;
+const round = (value: number) => Number(value.toFixed(2));
+// Os espaços têm lugar na conta, mas não são desenhados.
+const drawn = (letters: SealLetter[]) => letters.filter((letter) => letter.glyph.trim());
+const ring = sealRing(t.seal.capturedBy, name);
+const arcs = sealArcs(name, t.seal.contactSample);
+const discreetName = sealName(name);
+// Cada letra nasce no topo (ou na base) do anel e é girada até o ângulo dela. A linha de base
+// centra a maiúscula na faixa do texto: virada para fora, ela fica no raio de dentro; de pé
+// embaixo, no de fora.
+const outward = (letter: number) => round(center - textRadius + (letter * capHeight) / 2);
+const upright = (letter: number) => round(center + textRadius + (letter * capHeight) / 2);
+---
+
+{model === 'discreet' ? (
+  <span
+    class:list={['seal-mark', 'seal-mark-discreet', className]}
+    data-seal-model={model}
+    aria-hidden="true"
+  >
+    <img
+      class="seal-logo"
+      src={site.brand.symbol}
+      alt=""
+      width="189"
+      height="400"
+      loading="lazy"
+      decoding="async"
+    />
+    {/* O nome é desenho, como o texto dos anéis: em SVG, encolhe com a figura sem virar texto
+          miúdo da página. */}
+    <svg
+      class="seal-name"
+      viewBox={`0 0 ${round(discreetName.width)} ${discreetName.height}`}
+      focusable="false"
+    >
+      <text
+        class="seal-text seal-text-name"
+        y={round(discreetName.baseline)}
+        font-size={discreetName.letter}
+        letter-spacing={round(discreetName.tracking)}
+      >
+        {discreetName.text}
+      </text>
+    </svg>
+  </span>
+) : (
+  <span
+    class:list={['seal-mark', 'seal-mark-ring', className]}
+    data-seal-model={model}
+    aria-hidden="true"
+  >
+    <svg viewBox={`0 0 ${size} ${size}`} focusable="false">
+      <circle class="seal-ring" cx={center} cy={center} r={outerRing} />
+      <circle class="seal-ring" cx={center} cy={center} r={innerRing} />
+      {model === 'ring' ? (
+        <g class="seal-text seal-lap" font-size={round(ring.letter)} text-anchor="middle">
+          {drawn(ring.letters).map((letter) => (
+            <text
+              x={center}
+              y={outward(ring.letter)}
+              transform={`rotate(${round(letter.angle)} ${center} ${center})`}
+            >
+              {letter.glyph}
+            </text>
+          ))}
+        </g>
+      ) : (
+        <>
+          <g class="seal-text seal-arc-top" font-size={round(arcs.letter)} text-anchor="middle">
+            {drawn(arcs.top).map((letter) => (
+              <text
+                x={center}
+                y={outward(arcs.letter)}
+                transform={`rotate(${round(letter.angle)} ${center} ${center})`}
+              >
+                {letter.glyph}
+              </text>
+            ))}
+          </g>
+          {/* Embaixo a letra nasce na base, de pé, e gira o que falta para o ângulo dela. */}
+          <g class="seal-text seal-arc-bottom" font-size={round(arcs.letter)} text-anchor="middle">
+            {drawn(arcs.bottom).map((letter) => (
+              <text
+                x={center}
+                y={upright(arcs.letter)}
+                transform={`rotate(${round(letter.angle - 180)} ${center} ${center})`}
+              >
+                {letter.glyph}
+              </text>
+            ))}
+          </g>
+        </>
+      )}
+    </svg>
+    <img
+      class="seal-logo"
+      src={site.brand.symbol}
+      alt=""
+      width="189"
+      height="400"
+      loading="lazy"
+      decoding="async"
+    />
+  </span>
+)}

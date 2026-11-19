@@ -10,7 +10,7 @@
     "test": "tsx --test tests/*.test.ts",
     "check:site": "node scripts/check-site.mjs",
     "check:seo": "node scripts/seo-check.mjs",
-    "test:browser": "node scripts/browser-check.mjs && node scripts/tour-check.mjs",
+    "test:browser": "node scripts/browser-check.mjs && node scripts/tour-check.mjs && node scripts/seal-check.mjs",
     "test:opening": "node scripts/opening-check.mjs",
     "test:showcase": "node scripts/showcase-check.mjs",
     "audit": "node scripts/lighthouse.mjs",
